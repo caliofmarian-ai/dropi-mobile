@@ -92,3 +92,28 @@
 - [x] Show delivery route (pickup → delivery) with polyline
 - [x] Different markers for drone vs auto vs van vs ebike
 - [x] Show DronePort transfer points on map
+
+## Sprint 1-2: Auth Real + Audit Core (Blueprint v2 — Faza 2.1 + 6.1)
+- [x] Extend DB schema: users (passwordHash, resetToken, isAIAgent, agentMode, humanPairId, etc.)
+- [x] Extend DB schema: auditLogs (channel, isAIAction, isPhantomMode, phantomAdminId, ipAddress, etc.)
+- [x] Create DB table: sessions (userId, token, deviceInfo, isPhantom, expiresAt)
+- [x] Run migrations (drizzle-kit generate + migrate)
+- [x] Implement tRPC router: dropiAuth (register, login, logout, me, forgotPassword, resetPassword)
+- [x] Implement tRPC router: adminAuth (listUsers, phantomLogin, exitPhantom, toggleUserActive, changeUserRole)
+- [x] Implement tRPC router: audit (list, getByUser, getByResource, getStats)
+- [x] Implement audit middleware (auto-log all tRPC procedures)
+- [x] Password hashing with bcryptjs
+- [x] JWT session creation for DROPi-native auth (separate from Manus OAuth)
+- [x] Rate limiting on login (5 attempts / 15 min)
+- [x] Account lockout after 10 failed attempts
+- [x] Seed data: 29 human test accounts with password
+- [x] Seed data: 29 AI agent accounts (paired with human accounts)
+- [x] Seed data: superadmin account
+- [x] Redesign login screen (email+password + demo mode button)
+- [x] Create register screen
+- [x] Create forgot-password screen
+- [x] Update auth-context.tsx to use real API calls
+- [x] Keep Demo Mode functional (separate button)
+- [x] Admin phantom mode (login as any user from dashboard)
+- [x] Password recovery via Gmail (email link)
+- [ ] qa-debugger validation for Sprint 1-2 (pending)

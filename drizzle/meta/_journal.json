@@ -15,6 +15,13 @@
       "when": 1782545342360,
       "tag": "0001_brief_wallop",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1782578704769,
+      "tag": "0002_colossal_boom_boom",
+      "breakpoints": true
     }
   ]
 }

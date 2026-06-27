@@ -1,22 +1,45 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 import type { DropiRole, Channel, DropiUser } from "@/shared/types";
 
+// ===== AUTH CONTEXT TYPE =====
 interface AuthContextType {
   user: DropiUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  isDemo: boolean;
+  token: string | null;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (data: RegisterData) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   switchRole: (role: DropiRole, channel: Channel) => Promise<void>;
+  enterDemoMode: (email: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<{ success: boolean; message?: string; resetToken?: string }>;
+  resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+}
+
+interface RegisterData {
+  email: string;
+  password: string;
+  name: string;
+  dropiRole?: string;
+  channel?: Channel;
+  zone?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = "@dropi_user";
+const TOKEN_KEY = "@dropi_token";
+const DEMO_KEY = "@dropi_demo";
 
-// Demo accounts for ALL 29 agent types + auxiliary
+// API base URL
+const API_BASE = Platform.OS === "web"
+  ? "/api/trpc"
+  : `${process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000"}/api/trpc`;
+
+// ===== DEMO ACCOUNTS (kept for demo mode) =====
 const DEMO_USERS: Record<string, DropiUser> = {
-  // C1 Marketplace (9)
   "customer@dropi.app": { id: 1, name: "Maria Santos", email: "customer@dropi.app", dropiRole: "customer", channel: "C1", zone: "Manila-Central", isAuthenticated: true },
   "merchant@dropi.app": { id: 2, name: "Juan's Kitchen", email: "merchant@dropi.app", dropiRole: "merchant", channel: "C1", zone: "Manila-Central", isAuthenticated: true },
   "pilot@dropi.app": { id: 3, name: "Carlos Reyes", email: "pilot@dropi.app", dropiRole: "delivery_partner", channel: "C1", zone: "Manila-Central", isAuthenticated: true },
@@ -26,7 +49,6 @@ const DEMO_USERS: Record<string, DropiUser> = {
   "fraud@dropi.app": { id: 7, name: "Marco Fraud Det.", email: "fraud@dropi.app", dropiRole: "fraud_detection", channel: "C1", zone: "Manila-Central", isAuthenticated: true },
   "performance@dropi.app": { id: 8, name: "Lisa Performance", email: "performance@dropi.app", dropiRole: "performance_monitor", channel: "C1", zone: "Manila-Central", isAuthenticated: true },
   "incident@dropi.app": { id: 9, name: "David Incident", email: "incident@dropi.app", dropiRole: "incident_responder", channel: "C1", zone: "Manila-Central", isAuthenticated: true },
-  // C2 COS (8)
   "ops.manager@dropi.app": { id: 10, name: "Pedro Operations", email: "ops.manager@dropi.app", dropiRole: "operations_manager", channel: "C2", zone: "Manila-Central", isAuthenticated: true },
   "logistics@dropi.app": { id: 11, name: "Sofia Logistics", email: "logistics@dropi.app", dropiRole: "logistics_coordinator", channel: "C2", zone: "Manila-Central", isAuthenticated: true },
   "fleet@dropi.app": { id: 12, name: "Miguel Fleet", email: "fleet@dropi.app", dropiRole: "fleet_manager", channel: "C2", zone: "Manila-Central", isAuthenticated: true },
@@ -35,14 +57,12 @@ const DEMO_USERS: Record<string, DropiUser> = {
   "c2.incident@dropi.app": { id: 15, name: "Carmen Incident", email: "c2.incident@dropi.app", dropiRole: "c2_incident_responder", channel: "C2", zone: "Manila-Central", isAuthenticated: true },
   "data.analyst@dropi.app": { id: 16, name: "Jorge Data", email: "data.analyst@dropi.app", dropiRole: "data_analyst", channel: "C2", zone: "Manila-Central", isAuthenticated: true },
   "qa@dropi.app": { id: 17, name: "Isabel QA", email: "qa@dropi.app", dropiRole: "quality_assurance", channel: "C2", zone: "Manila-Central", isAuthenticated: true },
-  // C3 EOC (6)
   "emergency@dropi.app": { id: 18, name: "Rafael Emergency", email: "emergency@dropi.app", dropiRole: "emergency_coordinator", channel: "C3", zone: "Manila-Central", isAuthenticated: true },
   "dispatch@dropi.app": { id: 19, name: "Teresa Dispatch", email: "dispatch@dropi.app", dropiRole: "dispatch_manager", channel: "C3", zone: "Manila-Central", isAuthenticated: true },
   "resources@dropi.app": { id: 20, name: "Antonio Resources", email: "resources@dropi.app", dropiRole: "resource_allocator", channel: "C3", zone: "Manila-Central", isAuthenticated: true },
   "comms@dropi.app": { id: 21, name: "Patricia Comms", email: "comms@dropi.app", dropiRole: "communication_officer", channel: "C3", zone: "Manila-Central", isAuthenticated: true },
   "c3.analyst@dropi.app": { id: 22, name: "Fernando Analyst", email: "c3.analyst@dropi.app", dropiRole: "c3_data_analyst", channel: "C3", zone: "Manila-Central", isAuthenticated: true },
   "commander@dropi.app": { id: 23, name: "Gen. Santos", email: "commander@dropi.app", dropiRole: "incident_commander", channel: "C3", zone: "Manila-Central", isAuthenticated: true },
-  // Admin (6)
   "admin@dropi.app": { id: 24, name: "Super Admin", email: "admin@dropi.app", dropiRole: "system_administrator", channel: "ADMIN", zone: null, isAuthenticated: true },
   "security@dropi.app": { id: 25, name: "Security Officer", email: "security@dropi.app", dropiRole: "security_officer", channel: "ADMIN", zone: null, isAuthenticated: true },
   "audit@dropi.app": { id: 26, name: "Audit Manager", email: "audit@dropi.app", dropiRole: "audit_manager", channel: "ADMIN", zone: null, isAuthenticated: true },
@@ -51,48 +71,135 @@ const DEMO_USERS: Record<string, DropiUser> = {
   "support.coord@dropi.app": { id: 29, name: "Support Coordinator", email: "support.coord@dropi.app", dropiRole: "support_coordinator", channel: "ADMIN", zone: null, isAuthenticated: true },
 };
 
+// ===== API HELPER =====
+async function apiCall(path: string, input: any, token?: string | null) {
+  const url = `${API_BASE}/${path}`;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(input),
+    credentials: "include",
+  });
+
+  const data = await response.json();
+  if (data.error) {
+    throw new Error(data.error.message || "API error");
+  }
+  return data.result?.data;
+}
+
+// ===== AUTH PROVIDER =====
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<DropiUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
+  // Restore session on mount
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((stored) => {
-        if (stored) setUser(JSON.parse(stored));
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    (async () => {
+      try {
+        const [storedUser, storedToken, storedDemo] = await Promise.all([
+          AsyncStorage.getItem(STORAGE_KEY),
+          AsyncStorage.getItem(TOKEN_KEY),
+          AsyncStorage.getItem(DEMO_KEY),
+        ]);
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+          setIsDemo(storedDemo === "true");
+          setToken(storedToken);
+        }
+      } catch {}
+      setLoading(false);
+    })();
   }, []);
 
-  const login = useCallback(async (email: string, _password: string): Promise<boolean> => {
+  // Real login via API
+  const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const result = await apiCall("dropiAuth.login", { email: email.toLowerCase().trim(), password });
+      const dbUser = result.user;
+      const dropiUser: DropiUser = {
+        id: dbUser.id,
+        name: dbUser.name || email.split("@")[0],
+        email: dbUser.email,
+        dropiRole: dbUser.dropiRole,
+        channel: dbUser.channel,
+        zone: dbUser.zone,
+        isAuthenticated: true,
+      };
+      setUser(dropiUser);
+      setToken(result.token);
+      setIsDemo(false);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dropiUser));
+      await AsyncStorage.setItem(TOKEN_KEY, result.token);
+      await AsyncStorage.setItem(DEMO_KEY, "false");
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message || "Login failed" };
+    }
+  }, []);
+
+  // Real register via API
+  const register = useCallback(async (data: RegisterData): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const result = await apiCall("dropiAuth.register", {
+        email: data.email.toLowerCase().trim(),
+        password: data.password,
+        name: data.name,
+        dropiRole: data.dropiRole || "customer",
+        channel: data.channel || "C1",
+        zone: data.zone,
+      });
+      const dbUser = result.user;
+      const dropiUser: DropiUser = {
+        id: dbUser.id,
+        name: dbUser.name || data.name,
+        email: dbUser.email,
+        dropiRole: dbUser.dropiRole,
+        channel: dbUser.channel,
+        zone: dbUser.zone,
+        isAuthenticated: true,
+      };
+      setUser(dropiUser);
+      setToken(result.token);
+      setIsDemo(false);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dropiUser));
+      await AsyncStorage.setItem(TOKEN_KEY, result.token);
+      await AsyncStorage.setItem(DEMO_KEY, "false");
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message || "Registration failed" };
+    }
+  }, []);
+
+  // Demo mode (local only, no server)
+  const enterDemoMode = useCallback(async (email: string) => {
     const normalizedEmail = email.toLowerCase().trim();
     const demoUser = DEMO_USERS[normalizedEmail];
-
     if (demoUser) {
       setUser(demoUser);
+      setIsDemo(true);
+      setToken(null);
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(demoUser));
-      return true;
+      await AsyncStorage.setItem(DEMO_KEY, "true");
     }
-
-    // Default: create a customer user for any email
-    const newUser: DropiUser = {
-      id: Date.now(),
-      name: email.split("@")[0] || "User",
-      email: normalizedEmail,
-      dropiRole: "customer",
-      channel: "C1",
-      zone: "Manila-Central",
-      isAuthenticated: true,
-    };
-    setUser(newUser);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
-    return true;
   }, []);
 
   const logout = useCallback(async () => {
+    if (!isDemo && token) {
+      try {
+        await apiCall("dropiAuth.logout", {}, token);
+      } catch {}
+    }
     setUser(null);
-    await AsyncStorage.removeItem(STORAGE_KEY);
-  }, []);
+    setToken(null);
+    setIsDemo(false);
+    await AsyncStorage.multiRemove([STORAGE_KEY, TOKEN_KEY, DEMO_KEY]);
+  }, [isDemo, token]);
 
   const switchRole = useCallback(async (role: DropiRole, channel: Channel) => {
     if (user) {
@@ -102,8 +209,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
+  const forgotPassword = useCallback(async (email: string): Promise<{ success: boolean; message?: string; resetToken?: string }> => {
+    try {
+      const result = await apiCall("dropiAuth.forgotPassword", { email: email.toLowerCase().trim() });
+      return { success: true, message: result.message, resetToken: result.resetToken };
+    } catch (error: any) {
+      return { success: false, message: error.message || "Failed to send reset email" };
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (resetToken: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      await apiCall("dropiAuth.resetPassword", { token: resetToken, newPassword });
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message || "Password reset failed" };
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, switchRole }}>
+    <AuthContext.Provider value={{
+      user, loading, isDemo, token,
+      login, register, logout, switchRole,
+      enterDemoMode, forgotPassword, resetPassword,
+    }}>
       {children}
     </AuthContext.Provider>
   );
