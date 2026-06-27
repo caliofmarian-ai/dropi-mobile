@@ -8,9 +8,9 @@ export default function ForgotPasswordScreen() {
   const router = useRouter();
   const { forgotPassword, resetPassword } = useDropiAuth();
 
-  const [step, setStep] = useState<"email" | "reset">("email");
+  const [step, setStep] = useState<"email" | "code" | "newpass">("email");
   const [email, setEmail] = useState("");
-  const [resetToken, setResetToken] = useState("");
+  const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ export default function ForgotPasswordScreen() {
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSendReset = useCallback(async () => {
+  const handleSendCode = useCallback(async () => {
     if (!email.trim()) {
       setError("Please enter your email address");
       return;
@@ -29,17 +29,26 @@ export default function ForgotPasswordScreen() {
     const result = await forgotPassword(email);
     setLoading(false);
     if (result.success) {
-      setSuccess("A reset link has been sent to your email. Check your inbox.");
-      // For development: if resetToken is returned, allow inline reset
-      if (result.resetToken) {
-        setResetToken(result.resetToken);
-        setStep("reset");
-        setSuccess("Enter your new password below.");
-      }
+      setSuccess("A 6-digit code has been sent to your email. Check your inbox.");
+      setStep("code");
     } else {
-      setError(result.message || "Failed to send reset email");
+      setError(result.message || "Failed to send reset code");
     }
   }, [email, forgotPassword]);
+
+  const handleVerifyCode = useCallback(() => {
+    if (!code.trim() || code.length !== 6) {
+      setError("Please enter the 6-digit code from your email");
+      return;
+    }
+    if (!/^\d{6}$/.test(code)) {
+      setError("Code must be 6 digits");
+      return;
+    }
+    setError("");
+    setSuccess("Code accepted. Enter your new password.");
+    setStep("newpass");
+  }, [code]);
 
   const handleResetPassword = useCallback(async () => {
     if (!newPassword.trim()) {
@@ -65,15 +74,23 @@ export default function ForgotPasswordScreen() {
 
     setLoading(true);
     setError("");
-    const result = await resetPassword(resetToken, newPassword);
+    const result = await resetPassword(code, newPassword);
     setLoading(false);
     if (result.success) {
-      setSuccess("Password reset successfully! You can now login with your new password.");
+      setSuccess("Password reset successfully! Redirecting to login...");
       setTimeout(() => router.replace("/login" as any), 2000);
     } else {
-      setError(result.error || "Password reset failed");
+      setError(result.error || "Invalid or expired code. Please request a new one.");
+      // If token is invalid/expired, go back to email step
+      if (result.error?.includes("expired") || result.error?.includes("Invalid")) {
+        setTimeout(() => {
+          setStep("email");
+          setCode("");
+          setSuccess("");
+        }, 2000);
+      }
     }
-  }, [newPassword, confirmPassword, resetToken, resetPassword, router]);
+  }, [newPassword, confirmPassword, code, resetPassword, router]);
 
   return (
     <ScreenContainer edges={["top", "bottom", "left", "right"]} className="p-6">
@@ -89,12 +106,14 @@ export default function ForgotPasswordScreen() {
                 <Text className="text-primary text-base font-medium">← Back to Login</Text>
               </TouchableOpacity>
               <Text className="text-3xl font-bold text-foreground">
-                {step === "email" ? "Reset Password" : "New Password"}
+                {step === "email" ? "Reset Password" : step === "code" ? "Enter Code" : "New Password"}
               </Text>
               <Text className="text-sm text-muted mt-2">
                 {step === "email"
-                  ? "Enter your email address and we'll send you a reset link."
-                  : "Enter your new password below."}
+                  ? "Enter your email address and we'll send you a 6-digit verification code."
+                  : step === "code"
+                  ? "Enter the 6-digit code sent to your email."
+                  : "Choose a new password for your account."}
               </Text>
             </View>
 
@@ -112,9 +131,9 @@ export default function ForgotPasswordScreen() {
               </View>
             ) : null}
 
-            {step === "email" ? (
+            {/* Step 1: Email */}
+            {step === "email" && (
               <>
-                {/* Email Input */}
                 <View className="mb-6">
                   <Text className="text-sm font-medium text-foreground mb-1.5">Email Address</Text>
                   <TextInput
@@ -127,13 +146,12 @@ export default function ForgotPasswordScreen() {
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="done"
-                    onSubmitEditing={handleSendReset}
+                    onSubmitEditing={handleSendCode}
                   />
                 </View>
 
-                {/* Send Button */}
                 <TouchableOpacity
-                  onPress={handleSendReset}
+                  onPress={handleSendCode}
                   disabled={loading}
                   activeOpacity={0.9}
                 >
@@ -141,14 +159,57 @@ export default function ForgotPasswordScreen() {
                     {loading ? (
                       <ActivityIndicator color="#fff" />
                     ) : (
-                      <Text className="text-white font-semibold text-base">Send Reset Link</Text>
+                      <Text className="text-white font-semibold text-base">Send Verification Code</Text>
                     )}
                   </View>
                 </TouchableOpacity>
               </>
-            ) : (
+            )}
+
+            {/* Step 2: Enter 6-digit code */}
+            {step === "code" && (
               <>
-                {/* New Password */}
+                <View className="mb-6">
+                  <Text className="text-sm font-medium text-foreground mb-1.5">6-Digit Code</Text>
+                  <TextInput
+                    className="bg-surface border border-border rounded-xl px-4 py-3.5 text-foreground text-base text-center tracking-widest"
+                    placeholder="000000"
+                    placeholderTextColor="#9BA1A6"
+                    value={code}
+                    onChangeText={(t) => { setCode(t.replace(/[^0-9]/g, "").slice(0, 6)); setError(""); }}
+                    keyboardType="number-pad"
+                    maxLength={6}
+                    returnKeyType="done"
+                    onSubmitEditing={handleVerifyCode}
+                    style={{ fontSize: 24, letterSpacing: 8 }}
+                  />
+                  <Text className="text-xs text-muted mt-2 text-center">
+                    Code expires in 15 minutes
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  onPress={handleVerifyCode}
+                  disabled={loading || code.length !== 6}
+                  activeOpacity={0.9}
+                >
+                  <View className="bg-primary rounded-xl py-4 items-center" style={{ opacity: code.length !== 6 ? 0.5 : 1 }}>
+                    <Text className="text-white font-semibold text-base">Verify Code</Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => { setStep("email"); setCode(""); setError(""); setSuccess(""); }}
+                  style={{ marginTop: 16 }}
+                >
+                  <Text className="text-primary text-sm text-center">Didn't receive code? Send again</Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {/* Step 3: New Password */}
+            {step === "newpass" && (
+              <>
                 <View className="mb-4">
                   <Text className="text-sm font-medium text-foreground mb-1.5">New Password</Text>
                   <View className="flex-row items-center bg-surface border border-border rounded-xl">
@@ -169,7 +230,6 @@ export default function ForgotPasswordScreen() {
                   </View>
                 </View>
 
-                {/* Confirm Password */}
                 <View className="mb-6">
                   <Text className="text-sm font-medium text-foreground mb-1.5">Confirm Password</Text>
                   <TextInput
@@ -184,7 +244,6 @@ export default function ForgotPasswordScreen() {
                   />
                 </View>
 
-                {/* Reset Button */}
                 <TouchableOpacity
                   onPress={handleResetPassword}
                   disabled={loading}

@@ -121,3 +121,14 @@
 ## Bug Fix: Language Consistency
 - [x] Remove all Romanian text from UI — app must be English-only for now
 - [ ] Future: Add language selector at install (English, Romanian, Tagalog)
+
+## Bug Fixes: Registration + Password Recovery (Sprint 1-2 fixes)
+- [x] Remove channel/role selector from Register screen — roles are assigned by admin, not self-selected
+- [x] Register shows only account type: Customer, Merchant (with sub-type: Business/Community/Artisan/P2P), Delivery Partner
+- [x] Auto-activate accounts: Customer, Merchant, Delivery Partner (unverified flag)
+- [ ] Require admin approval for: Ops Manager, Emergency Coordinator, Fleet Manager, DronePort Operator, Safety Officer, all authority roles
+- [ ] Delivery Partner gets "unverified" status — cannot receive missions until verified
+- [x] Add Artisan as Merchant sub-type (not a separate role)
+- [x] Fix Forgot Password: 6-digit verification code generated on server, NOT returned to client
+- [x] Fix Forgot Password: token expires after 15 min, single-use
+- [x] Fix Forgot Password: cannot reset password without valid token (security fix applied)

@@ -15,7 +15,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   switchRole: (role: DropiRole, channel: Channel) => Promise<void>;
   enterDemoMode: (email: string) => Promise<void>;
-  forgotPassword: (email: string) => Promise<{ success: boolean; message?: string; resetToken?: string }>;
+  forgotPassword: (email: string) => Promise<{ success: boolean; message?: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
 }
 
@@ -26,6 +26,8 @@ interface RegisterData {
   dropiRole?: string;
   channel?: Channel;
   zone?: string;
+  merchantSubType?: string;
+  isVerified?: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -220,12 +222,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
-  const forgotPassword = useCallback(async (email: string): Promise<{ success: boolean; message?: string; resetToken?: string }> => {
+  const forgotPassword = useCallback(async (email: string): Promise<{ success: boolean; message?: string }> => {
     try {
       const result = await apiCall("dropiAuth.forgotPassword", { email: email.toLowerCase().trim() });
-      return { success: true, message: result.message, resetToken: result.resetToken };
+      return { success: true, message: result.message };
     } catch (error: any) {
-      return { success: false, message: error.message || "Failed to send reset email" };
+      return { success: false, message: error.message || "Failed to send reset code" };
     }
   }, []);
 

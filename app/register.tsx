@@ -3,7 +3,22 @@ import { Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator,
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
-import { CHANNEL_INFO, getRolesForChannel, type Channel } from "@/shared/types";
+
+type AccountType = "customer" | "merchant" | "delivery_partner";
+type MerchantSubType = "verified_business" | "community_seller" | "artisan" | "p2p_seller";
+
+const ACCOUNT_TYPES: { id: AccountType; label: string; description: string; icon: string }[] = [
+  { id: "customer", label: "Customer", description: "Buy products from marketplace", icon: "🛒" },
+  { id: "merchant", label: "Merchant", description: "Sell products on marketplace", icon: "🏪" },
+  { id: "delivery_partner", label: "Delivery Partner", description: "Deliver orders (verification required)", icon: "🚀" },
+];
+
+const MERCHANT_SUB_TYPES: { id: MerchantSubType; label: string; description: string }[] = [
+  { id: "verified_business", label: "Registered Business", description: "Licensed company or store" },
+  { id: "community_seller", label: "Community Seller", description: "Local community vendor" },
+  { id: "artisan", label: "Artisan", description: "Handmade & custom products" },
+  { id: "p2p_seller", label: "P2P Seller", description: "Peer-to-peer selling" },
+];
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -13,13 +28,11 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [channel, setChannel] = useState<Channel>("C1");
-  const [role, setRole] = useState("customer");
+  const [accountType, setAccountType] = useState<AccountType>("customer");
+  const [merchantSubType, setMerchantSubType] = useState<MerchantSubType>("verified_business");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  const roles = getRolesForChannel(channel);
 
   const handleRegister = useCallback(async () => {
     // Validation
@@ -44,15 +57,22 @@ export default function RegisterScreen() {
       return;
     }
 
+    // Map account type to role
+    let dropiRole = "customer";
+    if (accountType === "merchant") dropiRole = "merchant";
+    if (accountType === "delivery_partner") dropiRole = "delivery_partner";
+
     setLoading(true);
     setError("");
     const result = await register({
       email,
       password,
       name,
-      dropiRole: role,
-      channel,
+      dropiRole,
+      channel: "C1", // All self-registered accounts start in C1 (Marketplace)
       zone: "Manila-Central",
+      merchantSubType: accountType === "merchant" ? merchantSubType : undefined,
+      isVerified: accountType !== "delivery_partner", // Delivery partners need verification
     });
     setLoading(false);
 
@@ -61,7 +81,7 @@ export default function RegisterScreen() {
     } else {
       setError(result.error || "Registration failed");
     }
-  }, [name, email, password, confirmPassword, channel, role, register, router]);
+  }, [name, email, password, confirmPassword, accountType, merchantSubType, register, router]);
 
   return (
     <ScreenContainer edges={["top", "bottom", "left", "right"]} className="p-6">
@@ -86,6 +106,84 @@ export default function RegisterScreen() {
                 <Text className="text-error text-sm text-center">{error}</Text>
               </View>
             ) : null}
+
+            {/* Account Type Selection */}
+            <View className="mb-5">
+              <Text className="text-sm font-medium text-foreground mb-2">I want to...</Text>
+              <View className="gap-2">
+                {ACCOUNT_TYPES.map((type) => (
+                  <TouchableOpacity
+                    key={type.id}
+                    onPress={() => { setAccountType(type.id); setError(""); }}
+                    activeOpacity={0.7}
+                  >
+                    <View
+                      className="rounded-xl px-4 py-3 border flex-row items-center"
+                      style={{
+                        borderColor: accountType === type.id ? "#0066FF" : "#E5E7EB",
+                        backgroundColor: accountType === type.id ? "#0066FF10" : "transparent",
+                      }}
+                    >
+                      <Text style={{ fontSize: 20, marginRight: 12 }}>{type.icon}</Text>
+                      <View className="flex-1">
+                        <Text style={{ color: accountType === type.id ? "#0066FF" : "#11181C", fontWeight: "600", fontSize: 14 }}>
+                          {type.label}
+                        </Text>
+                        <Text style={{ color: "#687076", fontSize: 12, marginTop: 2 }}>
+                          {type.description}
+                        </Text>
+                      </View>
+                      {accountType === type.id && (
+                        <Text style={{ color: "#0066FF", fontSize: 18 }}>✓</Text>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Merchant Sub-Type (only if merchant selected) */}
+            {accountType === "merchant" && (
+              <View className="mb-5">
+                <Text className="text-sm font-medium text-foreground mb-2">Merchant Type</Text>
+                <View className="gap-2">
+                  {MERCHANT_SUB_TYPES.map((subType) => (
+                    <TouchableOpacity
+                      key={subType.id}
+                      onPress={() => { setMerchantSubType(subType.id); setError(""); }}
+                      activeOpacity={0.7}
+                    >
+                      <View
+                        className="rounded-lg px-3 py-2.5 border flex-row items-center"
+                        style={{
+                          borderColor: merchantSubType === subType.id ? "#0066FF" : "#E5E7EB",
+                          backgroundColor: merchantSubType === subType.id ? "#0066FF10" : "transparent",
+                        }}
+                      >
+                        <View className="flex-1">
+                          <Text style={{ color: merchantSubType === subType.id ? "#0066FF" : "#11181C", fontWeight: "500", fontSize: 13 }}>
+                            {subType.label}
+                          </Text>
+                          <Text style={{ color: "#687076", fontSize: 11, marginTop: 1 }}>
+                            {subType.description}
+                          </Text>
+                        </View>
+                        {merchantSubType === subType.id && (
+                          <Text style={{ color: "#0066FF", fontSize: 16 }}>✓</Text>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Delivery Partner Notice */}
+            {accountType === "delivery_partner" && (
+              <View className="mb-4 bg-warning/10 border border-warning rounded-lg p-3">
+                <Text className="text-warning text-xs font-medium">Note: Delivery partners require verification before receiving missions. You will need to submit your credentials after registration.</Text>
+              </View>
+            )}
 
             {/* Name */}
             <View className="mb-4">
@@ -147,60 +245,6 @@ export default function RegisterScreen() {
                 onChangeText={(t) => { setConfirmPassword(t); setError(""); }}
                 secureTextEntry={!showPassword}
               />
-            </View>
-
-            {/* Channel Selection */}
-            <View className="mb-4">
-              <Text className="text-sm font-medium text-foreground mb-2">Channel</Text>
-              <View className="flex-row gap-2">
-                {(Object.keys(CHANNEL_INFO) as Channel[]).map((ch) => (
-                  <TouchableOpacity
-                    key={ch}
-                    onPress={() => { setChannel(ch); setRole(getRolesForChannel(ch)[0]?.role || "customer"); }}
-                    activeOpacity={0.7}
-                  >
-                    <View
-                      className="rounded-lg px-3 py-2 border"
-                      style={{
-                        borderColor: channel === ch ? CHANNEL_INFO[ch].color : "#E5E7EB",
-                        backgroundColor: channel === ch ? CHANNEL_INFO[ch].color + "15" : "transparent",
-                      }}
-                    >
-                      <Text style={{ color: channel === ch ? CHANNEL_INFO[ch].color : "#6B7280", fontWeight: "600", fontSize: 12 }}>
-                        {ch}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            {/* Role Selection */}
-            <View className="mb-6">
-              <Text className="text-sm font-medium text-foreground mb-2">Role</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View className="flex-row gap-2">
-                  {roles.map((rc) => (
-                    <TouchableOpacity
-                      key={rc.role}
-                      onPress={() => setRole(rc.role)}
-                      activeOpacity={0.7}
-                    >
-                      <View
-                        className="rounded-lg px-3 py-2 border"
-                        style={{
-                          borderColor: role === rc.role ? CHANNEL_INFO[channel].color : "#E5E7EB",
-                          backgroundColor: role === rc.role ? CHANNEL_INFO[channel].color + "15" : "transparent",
-                        }}
-                      >
-                        <Text style={{ color: role === rc.role ? CHANNEL_INFO[channel].color : "#6B7280", fontWeight: "500", fontSize: 11 }}>
-                          {rc.label}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
             </View>
 
             {/* Register Button */}

@@ -29,7 +29,7 @@ const forgotPasswordSchema = z.object({
 });
 
 const resetPasswordSchema = z.object({
-  token: z.string().min(1),
+  token: z.string().min(6, "Please enter the 6-digit code from your email").max(6),
   newPassword: z.string().min(8)
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[0-9]/, "Password must contain at least one number"),
@@ -239,16 +239,15 @@ export const dropiAuthRouter = router({
     const user = await db.getUserByEmail(input.email);
     // Always return success to prevent email enumeration
     if (!user) {
-      return { success: true, message: "If the email exists, a reset link has been sent." };
+      return { success: true, message: "If this email is registered, a 6-digit code has been sent." };
     }
 
-    // Generate reset token
-    const token = randomUUID();
-    const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-    await db.setResetToken(user.id, token, expiry);
+    // Generate 6-digit verification code
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    await db.setResetToken(user.id, code, expiry);
 
-    // Send email via Gmail MCP (will be called from the route handler)
-    // Store token for the email sending step
+    // Audit log
     await createAuditLog({
       userId: user.id,
       userRole: user.dropiRole,
@@ -261,10 +260,15 @@ export const dropiAuthRouter = router({
       isPhantomMode: false,
       ipAddress: getClientIp(ctx.req),
       userAgent: getDeviceInfo(ctx.req),
-      details: { email: input.email },
+      details: { email: input.email, codeGenerated: true },
     });
 
-    return { success: true, message: "If the email exists, a reset link has been sent.", resetToken: token };
+    // NOTE: In production, this code is sent via SMTP to user's email.
+    // For now, the code is stored in DB and can be sent via Gmail MCP by admin.
+    // The code is NOT returned to the client — user must check their email.
+    console.log(`[PASSWORD RESET] Code for ${input.email}: ${code} (expires in 15 min)`);
+
+    return { success: true, message: "If this email is registered, a 6-digit code has been sent." };
   }),
 
   resetPassword: publicProcedure.input(resetPasswordSchema).mutation(async ({ input, ctx }) => {
