@@ -1,60 +1,93 @@
-import { Text, View, FlatList, TouchableOpacity, ScrollView } from "react-native";
+import { Text, View, FlatList, TouchableOpacity } from "react-native";
 import { useState } from "react";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
+import { useColors } from "@/hooks/use-colors";
 
-interface DronePortStation {
+type StationType = "droneport" | "vehicle_depot" | "transfer_hub";
+type StationStatus = "active" | "maintenance" | "offline";
+
+interface LogisticsStation {
   id: string;
   name: string;
+  type: StationType;
   zone: string;
-  status: "active" | "maintenance" | "offline";
-  dronesTotal: number;
-  dronesAvailable: number;
-  dronesInFlight: number;
-  dronesCharging: number;
-  batterySlots: number;
-  batteryAvailable: number;
+  status: StationStatus;
+  // Drone-specific
+  dronesTotal?: number;
+  dronesAvailable?: number;
+  dronesInFlight?: number;
+  dronesCharging?: number;
+  batterySlots?: number;
+  batteryAvailable?: number;
+  // Terrestrial-specific
+  vehiclesTotal?: number;
+  vehiclesAvailable?: number;
+  vehiclesInTransit?: number;
+  vehicleTypes?: { auto: number; van: number; ebike: number };
+  // Transfer hub specific
+  transferCapacity?: number;
+  activeTransfers?: number;
+  // Common
   lastInspection: string;
   nextMaintenance: string;
   coordinates: { lat: number; lng: number };
 }
 
-const DRONEPORTS: DronePortStation[] = [
+const STATIONS: LogisticsStation[] = [
   {
-    id: "DP-001", name: "Central Hub Manila", zone: "Manila-Central",
+    id: "DP-001", name: "Central Hub Manila", type: "droneport", zone: "Manila-Central",
     status: "active", dronesTotal: 12, dronesAvailable: 7, dronesInFlight: 3, dronesCharging: 2,
-    batterySlots: 24, batteryAvailable: 18, lastInspection: "2024-01-15",
-    nextMaintenance: "2024-02-01", coordinates: { lat: 14.5995, lng: 120.9842 },
+    batterySlots: 24, batteryAvailable: 18, lastInspection: "2026-06-15",
+    nextMaintenance: "2026-07-01", coordinates: { lat: 14.5995, lng: 120.9842 },
   },
   {
-    id: "DP-002", name: "Makati Station", zone: "Makati-CBD",
+    id: "DP-002", name: "Makati DronePort", type: "droneport", zone: "Makati-CBD",
     status: "active", dronesTotal: 8, dronesAvailable: 5, dronesInFlight: 2, dronesCharging: 1,
-    batterySlots: 16, batteryAvailable: 12, lastInspection: "2024-01-12",
-    nextMaintenance: "2024-01-28", coordinates: { lat: 14.5547, lng: 121.0244 },
+    batterySlots: 16, batteryAvailable: 12, lastInspection: "2026-06-12",
+    nextMaintenance: "2026-06-28", coordinates: { lat: 14.5547, lng: 121.0244 },
   },
   {
-    id: "DP-003", name: "BGC Tower", zone: "Taguig-BGC",
-    status: "maintenance", dronesTotal: 6, dronesAvailable: 0, dronesInFlight: 0, dronesCharging: 6,
-    batterySlots: 12, batteryAvailable: 4, lastInspection: "2024-01-10",
-    nextMaintenance: "2024-01-20", coordinates: { lat: 14.5506, lng: 121.0494 },
+    id: "VD-001", name: "Quezon Vehicle Depot", type: "vehicle_depot", zone: "Quezon-North",
+    status: "active", vehiclesTotal: 18, vehiclesAvailable: 12, vehiclesInTransit: 6,
+    vehicleTypes: { auto: 8, van: 4, ebike: 6 }, lastInspection: "2026-06-14",
+    nextMaintenance: "2026-06-30", coordinates: { lat: 14.6760, lng: 121.0437 },
   },
   {
-    id: "DP-004", name: "QC North Station", zone: "Quezon-North",
-    status: "active", dronesTotal: 10, dronesAvailable: 6, dronesInFlight: 3, dronesCharging: 1,
-    batterySlots: 20, batteryAvailable: 15, lastInspection: "2024-01-14",
-    nextMaintenance: "2024-01-30", coordinates: { lat: 14.6760, lng: 121.0437 },
+    id: "VD-002", name: "Pasig Fleet Center", type: "vehicle_depot", zone: "Pasig-Ortigas",
+    status: "active", vehiclesTotal: 14, vehiclesAvailable: 9, vehiclesInTransit: 5,
+    vehicleTypes: { auto: 6, van: 3, ebike: 5 }, lastInspection: "2026-06-13",
+    nextMaintenance: "2026-06-29", coordinates: { lat: 14.5764, lng: 121.0851 },
   },
   {
-    id: "DP-005", name: "Emergency Reserve", zone: "Manila-Port",
-    status: "active", dronesTotal: 4, dronesAvailable: 4, dronesInFlight: 0, dronesCharging: 0,
-    batterySlots: 8, batteryAvailable: 8, lastInspection: "2024-01-16",
-    nextMaintenance: "2024-02-05", coordinates: { lat: 14.5833, lng: 120.9667 },
+    id: "TH-001", name: "BGC Transfer Hub", type: "transfer_hub", zone: "Taguig-BGC",
+    status: "active", transferCapacity: 50, activeTransfers: 12,
+    dronesTotal: 4, dronesAvailable: 3, dronesInFlight: 1, dronesCharging: 0,
+    vehiclesTotal: 6, vehiclesAvailable: 4, vehiclesInTransit: 2,
+    vehicleTypes: { auto: 2, van: 2, ebike: 2 },
+    lastInspection: "2026-06-16", nextMaintenance: "2026-07-02",
+    coordinates: { lat: 14.5506, lng: 121.0494 },
+  },
+  {
+    id: "TH-002", name: "Manila Port Transfer", type: "transfer_hub", zone: "Manila-Port",
+    status: "maintenance", transferCapacity: 30, activeTransfers: 0,
+    dronesTotal: 3, dronesAvailable: 0, dronesInFlight: 0, dronesCharging: 3,
+    vehiclesTotal: 4, vehiclesAvailable: 2, vehiclesInTransit: 0,
+    vehicleTypes: { auto: 2, van: 1, ebike: 1 },
+    lastInspection: "2026-06-10", nextMaintenance: "2026-06-20",
+    coordinates: { lat: 14.5833, lng: 120.9667 },
   },
 ];
 
-function StatusIndicator({ status }: { status: DronePortStation["status"] }) {
+const TYPE_INFO: Record<StationType, { icon: string; label: string; color: string }> = {
+  droneport: { icon: "🚁", label: "DronePort", color: "#0066FF" },
+  vehicle_depot: { icon: "🚗", label: "Vehicle Depot", color: "#10B981" },
+  transfer_hub: { icon: "🔄", label: "Transfer Hub", color: "#6366F1" },
+};
+
+function StatusIndicator({ status }: { status: StationStatus }) {
   const colors = { active: "#10B981", maintenance: "#F59E0B", offline: "#EF4444" };
-  const labels = { active: "ACTIVE", maintenance: "MAINTENANCE", offline: "OFFLINE" };
+  const labels = { active: "ACTIV", maintenance: "MENTENANȚĂ", offline: "OFFLINE" };
   return (
     <View style={{ backgroundColor: colors[status] + "20", paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 }}>
       <Text style={{ color: colors[status], fontSize: 10, fontWeight: "700" }}>{labels[status]}</Text>
@@ -62,9 +95,10 @@ function StatusIndicator({ status }: { status: DronePortStation["status"] }) {
   );
 }
 
-function DronePortCard({ port }: { port: DronePortStation }) {
+function StationCard({ station }: { station: LogisticsStation }) {
   const [expanded, setExpanded] = useState(false);
-  const utilizationRate = ((port.dronesInFlight + port.dronesCharging) / port.dronesTotal * 100).toFixed(0);
+  const colors = useColors();
+  const typeInfo = TYPE_INFO[station.type];
 
   return (
     <TouchableOpacity
@@ -74,73 +108,152 @@ function DronePortCard({ port }: { port: DronePortStation }) {
     >
       <View className="flex-row justify-between items-start mb-2">
         <View className="flex-1">
-          <Text className="text-base font-semibold text-foreground">{port.name}</Text>
-          <Text className="text-xs text-muted mt-0.5">{port.id} • {port.zone}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={{ fontSize: 18, marginRight: 6 }}>{typeInfo.icon}</Text>
+            <Text className="text-base font-semibold text-foreground">{station.name}</Text>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
+            <View style={{ backgroundColor: typeInfo.color + "15", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, marginRight: 6 }}>
+              <Text style={{ color: typeInfo.color, fontSize: 9, fontWeight: "700" }}>{typeInfo.label}</Text>
+            </View>
+            <Text className="text-xs text-muted">{station.id} • {station.zone}</Text>
+          </View>
         </View>
-        <StatusIndicator status={port.status} />
+        <StatusIndicator status={station.status} />
       </View>
 
       {/* Quick Stats Row */}
       <View className="flex-row mt-3 gap-2">
-        <View className="flex-1 bg-background rounded-lg p-2 items-center">
-          <Text className="text-lg font-bold text-success">{port.dronesAvailable}</Text>
-          <Text className="text-[10px] text-muted">Available</Text>
-        </View>
-        <View className="flex-1 bg-background rounded-lg p-2 items-center">
-          <Text className="text-lg font-bold text-primary">{port.dronesInFlight}</Text>
-          <Text className="text-[10px] text-muted">In Flight</Text>
-        </View>
-        <View className="flex-1 bg-background rounded-lg p-2 items-center">
-          <Text className="text-lg font-bold text-warning">{port.dronesCharging}</Text>
-          <Text className="text-[10px] text-muted">Charging</Text>
-        </View>
-        <View className="flex-1 bg-background rounded-lg p-2 items-center">
-          <Text className="text-lg font-bold text-foreground">{port.dronesTotal}</Text>
-          <Text className="text-[10px] text-muted">Total</Text>
-        </View>
+        {station.type === "droneport" && (
+          <>
+            <View className="flex-1 bg-background rounded-lg p-2 items-center">
+              <Text className="text-lg font-bold text-success">{station.dronesAvailable}</Text>
+              <Text className="text-[10px] text-muted">Disponibile</Text>
+            </View>
+            <View className="flex-1 bg-background rounded-lg p-2 items-center">
+              <Text className="text-lg font-bold text-primary">{station.dronesInFlight}</Text>
+              <Text className="text-[10px] text-muted">În Zbor</Text>
+            </View>
+            <View className="flex-1 bg-background rounded-lg p-2 items-center">
+              <Text className="text-lg font-bold text-warning">{station.dronesCharging}</Text>
+              <Text className="text-[10px] text-muted">Încărcare</Text>
+            </View>
+            <View className="flex-1 bg-background rounded-lg p-2 items-center">
+              <Text className="text-lg font-bold text-foreground">{station.dronesTotal}</Text>
+              <Text className="text-[10px] text-muted">Total</Text>
+            </View>
+          </>
+        )}
+        {station.type === "vehicle_depot" && (
+          <>
+            <View className="flex-1 bg-background rounded-lg p-2 items-center">
+              <Text className="text-lg font-bold text-success">{station.vehiclesAvailable}</Text>
+              <Text className="text-[10px] text-muted">Disponibile</Text>
+            </View>
+            <View className="flex-1 bg-background rounded-lg p-2 items-center">
+              <Text className="text-lg font-bold text-primary">{station.vehiclesInTransit}</Text>
+              <Text className="text-[10px] text-muted">În Tranzit</Text>
+            </View>
+            <View className="flex-1 bg-background rounded-lg p-2 items-center">
+              <Text className="text-lg font-bold text-foreground">{station.vehiclesTotal}</Text>
+              <Text className="text-[10px] text-muted">Total</Text>
+            </View>
+          </>
+        )}
+        {station.type === "transfer_hub" && (
+          <>
+            <View className="flex-1 bg-background rounded-lg p-2 items-center">
+              <Text className="text-lg font-bold text-primary">{station.activeTransfers}</Text>
+              <Text className="text-[10px] text-muted">Transferuri</Text>
+            </View>
+            <View className="flex-1 bg-background rounded-lg p-2 items-center">
+              <Text className="text-lg font-bold text-success">{station.dronesAvailable || 0}</Text>
+              <Text className="text-[10px] text-muted">Drone</Text>
+            </View>
+            <View className="flex-1 bg-background rounded-lg p-2 items-center">
+              <Text className="text-lg font-bold text-success">{station.vehiclesAvailable || 0}</Text>
+              <Text className="text-[10px] text-muted">Vehicule</Text>
+            </View>
+            <View className="flex-1 bg-background rounded-lg p-2 items-center">
+              <Text className="text-lg font-bold text-foreground">{station.transferCapacity}</Text>
+              <Text className="text-[10px] text-muted">Capacitate</Text>
+            </View>
+          </>
+        )}
       </View>
 
       {expanded && (
         <View className="mt-3 pt-3 border-t border-border">
-          {/* Battery Status */}
-          <View className="mb-3">
-            <Text className="text-sm font-medium text-foreground mb-1">Battery Status</Text>
-            <View className="flex-row items-center gap-2">
-              <View className="flex-1 h-3 bg-background rounded-full overflow-hidden">
-                <View
-                  style={{ width: `${(port.batteryAvailable / port.batterySlots) * 100}%`, height: "100%", backgroundColor: "#10B981", borderRadius: 6 }}
-                />
+          {/* Vehicle breakdown for depots and hubs */}
+          {station.vehicleTypes && (
+            <View className="mb-3">
+              <Text className="text-sm font-medium text-foreground mb-2">Flotă Vehicule</Text>
+              <View className="flex-row gap-3">
+                <View className="flex-row items-center">
+                  <Text style={{ fontSize: 14 }}>🚗</Text>
+                  <Text className="text-xs text-muted ml-1">Auto: {station.vehicleTypes.auto}</Text>
+                </View>
+                <View className="flex-row items-center">
+                  <Text style={{ fontSize: 14 }}>🚐</Text>
+                  <Text className="text-xs text-muted ml-1">Van: {station.vehicleTypes.van}</Text>
+                </View>
+                <View className="flex-row items-center">
+                  <Text style={{ fontSize: 14 }}>🚲</Text>
+                  <Text className="text-xs text-muted ml-1">E-Bike: {station.vehicleTypes.ebike}</Text>
+                </View>
               </View>
-              <Text className="text-xs text-muted">{port.batteryAvailable}/{port.batterySlots}</Text>
             </View>
-          </View>
+          )}
 
-          {/* Utilization */}
+          {/* Battery status for droneports */}
+          {station.batterySlots && (
+            <View className="mb-3">
+              <Text className="text-sm font-medium text-foreground mb-1">Baterii Drone</Text>
+              <View className="flex-row items-center gap-2">
+                <View className="flex-1 h-3 bg-background rounded-full overflow-hidden">
+                  <View
+                    style={{ width: `${(station.batteryAvailable! / station.batterySlots) * 100}%`, height: "100%", backgroundColor: "#10B981", borderRadius: 6 }}
+                  />
+                </View>
+                <Text className="text-xs text-muted">{station.batteryAvailable}/{station.batterySlots}</Text>
+              </View>
+            </View>
+          )}
+
+          {/* Maintenance info */}
           <View className="flex-row justify-between mb-2">
-            <Text className="text-xs text-muted">Utilization Rate</Text>
-            <Text className="text-xs font-medium text-foreground">{utilizationRate}%</Text>
+            <Text className="text-xs text-muted">Ultima Inspecție</Text>
+            <Text className="text-xs font-medium text-foreground">{station.lastInspection}</Text>
           </View>
           <View className="flex-row justify-between mb-2">
-            <Text className="text-xs text-muted">Last Inspection</Text>
-            <Text className="text-xs font-medium text-foreground">{port.lastInspection}</Text>
-          </View>
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-xs text-muted">Next Maintenance</Text>
-            <Text className="text-xs font-medium text-foreground">{port.nextMaintenance}</Text>
+            <Text className="text-xs text-muted">Următoarea Mentenanță</Text>
+            <Text className="text-xs font-medium text-foreground">{station.nextMaintenance}</Text>
           </View>
           <View className="flex-row justify-between">
-            <Text className="text-xs text-muted">Coordinates</Text>
-            <Text className="text-xs font-medium text-foreground">{port.coordinates.lat.toFixed(4)}, {port.coordinates.lng.toFixed(4)}</Text>
+            <Text className="text-xs text-muted">Coordonate</Text>
+            <Text className="text-xs font-medium text-foreground">{station.coordinates.lat.toFixed(4)}, {station.coordinates.lng.toFixed(4)}</Text>
           </View>
 
           {/* Actions */}
-          {port.status === "active" && (
+          {station.status === "active" && (
             <View className="flex-row gap-2 mt-3">
-              <TouchableOpacity className="flex-1 bg-primary/10 rounded-lg py-2 items-center" activeOpacity={0.7}>
-                <Text className="text-primary text-xs font-semibold">Request Drone</Text>
-              </TouchableOpacity>
+              {station.type === "droneport" && (
+                <TouchableOpacity className="flex-1 bg-primary/10 rounded-lg py-2 items-center" activeOpacity={0.7}>
+                  <Text className="text-primary text-xs font-semibold">Solicită Dronă</Text>
+                </TouchableOpacity>
+              )}
+              {station.type === "vehicle_depot" && (
+                <TouchableOpacity className="flex-1 bg-primary/10 rounded-lg py-2 items-center" activeOpacity={0.7}>
+                  <Text className="text-primary text-xs font-semibold">Solicită Vehicul</Text>
+                </TouchableOpacity>
+              )}
+              {station.type === "transfer_hub" && (
+                <TouchableOpacity className="flex-1 bg-primary/10 rounded-lg py-2 items-center" activeOpacity={0.7}>
+                  <Text className="text-primary text-xs font-semibold">Inițiază Transfer</Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity className="flex-1 bg-warning/10 rounded-lg py-2 items-center" activeOpacity={0.7}>
-                <Text className="text-warning text-xs font-semibold">Schedule Maint.</Text>
+                <Text className="text-warning text-xs font-semibold">Programează Maint.</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -152,37 +265,53 @@ function DronePortCard({ port }: { port: DronePortStation }) {
 
 export default function DronePortScreen() {
   const { user } = useDropiAuth();
-  const totalDrones = DRONEPORTS.reduce((sum, p) => sum + p.dronesTotal, 0);
-  const totalAvailable = DRONEPORTS.reduce((sum, p) => sum + p.dronesAvailable, 0);
-  const totalInFlight = DRONEPORTS.reduce((sum, p) => sum + p.dronesInFlight, 0);
-  const activeStations = DRONEPORTS.filter((p) => p.status === "active").length;
+  const [filter, setFilter] = useState<"all" | StationType>("all");
+
+  const filteredStations = filter === "all" ? STATIONS : STATIONS.filter((s) => s.type === filter);
+  const totalDrones = STATIONS.reduce((sum, s) => sum + (s.dronesTotal || 0), 0);
+  const totalVehicles = STATIONS.reduce((sum, s) => sum + (s.vehiclesTotal || 0), 0);
+  const activeStations = STATIONS.filter((s) => s.status === "active").length;
 
   return (
     <ScreenContainer className="px-4 pt-4">
-      <Text className="text-2xl font-bold text-foreground mb-1">DronePort Network</Text>
-      <Text className="text-sm text-muted mb-4">{activeStations} active stations • {totalDrones} drones</Text>
+      <Text className="text-2xl font-bold text-foreground mb-1">Rețea Logistică</Text>
+      <Text className="text-sm text-muted mb-4">{activeStations} stații active • {totalDrones} drone • {totalVehicles} vehicule</Text>
 
       {/* Summary Cards */}
       <View className="flex-row gap-2 mb-4">
-        <View className="flex-1 bg-success/10 border border-success/20 rounded-xl p-3 items-center">
-          <Text className="text-xl font-bold text-success">{totalAvailable}</Text>
-          <Text className="text-[10px] text-muted">Available</Text>
-        </View>
         <View className="flex-1 bg-primary/10 border border-primary/20 rounded-xl p-3 items-center">
-          <Text className="text-xl font-bold text-primary">{totalInFlight}</Text>
-          <Text className="text-[10px] text-muted">In Flight</Text>
+          <Text className="text-xl font-bold text-primary">{totalDrones}</Text>
+          <Text className="text-[10px] text-muted">Drone</Text>
+        </View>
+        <View className="flex-1 bg-success/10 border border-success/20 rounded-xl p-3 items-center">
+          <Text className="text-xl font-bold text-success">{totalVehicles}</Text>
+          <Text className="text-[10px] text-muted">Vehicule</Text>
         </View>
         <View className="flex-1 bg-surface border border-border rounded-xl p-3 items-center">
-          <Text className="text-xl font-bold text-foreground">{DRONEPORTS.length}</Text>
-          <Text className="text-[10px] text-muted">Stations</Text>
+          <Text className="text-xl font-bold text-foreground">{STATIONS.length}</Text>
+          <Text className="text-[10px] text-muted">Stații</Text>
         </View>
+      </View>
+
+      {/* Filter Tabs */}
+      <View className="flex-row gap-2 mb-4">
+        {([["all", "Toate"], ["droneport", "🚁 Drone"], ["vehicle_depot", "🚗 Vehicule"], ["transfer_hub", "🔄 Transfer"]] as const).map(([key, label]) => (
+          <TouchableOpacity
+            key={key}
+            style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: filter === key ? "#0066FF" : "transparent", borderWidth: 1, borderColor: filter === key ? "#0066FF" : "#E5E7EB" }}
+            activeOpacity={0.7}
+            onPress={() => setFilter(key)}
+          >
+            <Text style={{ fontSize: 11, fontWeight: "600", color: filter === key ? "#FFFFFF" : "#687076" }}>{label}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       {/* Station List */}
       <FlatList
-        data={DRONEPORTS}
+        data={filteredStations}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <DronePortCard port={item} />}
+        renderItem={({ item }) => <StationCard station={item} />}
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       />

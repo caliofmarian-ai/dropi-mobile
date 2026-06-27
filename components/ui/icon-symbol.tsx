@@ -36,6 +36,7 @@ const MAPPING = {
   "questionmark.circle": "help",
   "shield.fill": "shield",
   "dollarsign.circle.fill": "attach-money",
+  "cart.fill": "shopping-cart",
 } as IconMapping;
 
 export { IconSymbolName };

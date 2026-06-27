@@ -4,8 +4,27 @@ import { useState, useCallback } from "react";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
 import { CLIENT_ORDERS, MERCHANT_ORDERS, PILOT_MISSIONS } from "@/lib/mock-data";
+import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
+import type { DeliveryMode } from "@/lib/marketplace-data";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, CHANNEL_INFO, getRoleConfig } from "@/shared/types";
 import type { OrderStatus, Channel } from "@/shared/types";
+
+const VEHICLE_ICONS: Record<string, string> = {
+  drone: "🚁",
+  auto: "🚗",
+  van: "🚐",
+  ebike: "🚲",
+};
+
+function DeliveryModeBadge({ mode }: { mode: DeliveryMode }) {
+  const info = DELIVERY_MODE_INFO[mode];
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: info.color + "15", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginRight: 6 }}>
+      <Text style={{ fontSize: 12 }}>{info.icon}</Text>
+      <Text style={{ fontSize: 10, color: info.color, fontWeight: "600", marginLeft: 3 }}>{info.label}</Text>
+    </View>
+  );
+}
 
 function StatusBadge({ status }: { status: OrderStatus }) {
   const color = ORDER_STATUS_COLORS[status];
@@ -43,12 +62,21 @@ function CustomerDashboard() {
               <StatusBadge status={item.status} />
             </View>
             <View className="flex-row justify-between items-center mt-2">
-              <Text className="text-sm text-muted">{item.items.map((i) => `${i.quantity}x ${i.name}`).join(", ")}</Text>
-              <Text className="text-sm font-medium text-foreground">₱{item.totalAmount}</Text>
+              <Text className="text-sm text-muted" numberOfLines={1} style={{ flex: 1 }}>{item.items.map((i) => `${i.quantity}x ${i.name}`).join(", ")}</Text>
+              <Text className="text-sm font-medium text-foreground ml-2">₱{item.totalAmount}</Text>
+            </View>
+            {/* Delivery Mode Badge */}
+            <View className="flex-row items-center mt-2">
+              <DeliveryModeBadge mode={item.deliveryMode} />
+              {item.vehicleType && (
+                <Text style={{ fontSize: 10, color: "#6B7280" }}>{VEHICLE_ICONS[item.vehicleType]} {item.vehicleId}</Text>
+              )}
             </View>
             {item.status === "in_execution" && (
               <View className="mt-3 bg-primary/10 rounded-lg px-3 py-2">
-                <Text className="text-primary text-sm font-medium">Live Tracking — ETA {item.estimatedTime} min</Text>
+                <Text className="text-primary text-sm font-medium">
+                  {VEHICLE_ICONS[item.vehicleType || "drone"]} Live Tracking — ETA {item.estimatedTime} min
+                </Text>
               </View>
             )}
           </TouchableOpacity>
@@ -116,7 +144,7 @@ function DeliveryPartnerDashboard() {
   return (
     <ScreenContainer className="px-4 pt-4">
       <Text className="text-2xl font-bold text-foreground mb-1">Mission Radar</Text>
-      <Text className="text-sm text-muted mb-4">{availableMissions.length} available in your zone</Text>
+      <Text className="text-sm text-muted mb-4">{availableMissions.length} misiuni disponibile în zona ta</Text>
       <FlatList
         data={availableMissions}
         keyExtractor={(item) => item.id.toString()}
@@ -125,7 +153,14 @@ function DeliveryPartnerDashboard() {
         renderItem={({ item }) => (
           <TouchableOpacity className="bg-surface border border-border rounded-2xl p-4 mb-3" activeOpacity={0.7} onPress={() => router.push(`/mission/${item.id}`)}>
             <View className="flex-row justify-between items-start mb-2">
-              <Text className="text-base font-semibold text-foreground">{item.merchantName}</Text>
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-foreground">{item.merchantName}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
+                  <DeliveryModeBadge mode={item.deliveryMode} />
+                  <Text style={{ fontSize: 14 }}>{VEHICLE_ICONS[item.vehicleType]}</Text>
+                  <Text style={{ fontSize: 10, color: "#6B7280", marginLeft: 4 }}>{item.vehicleType.toUpperCase()}</Text>
+                </View>
+              </View>
               <View className="bg-primary/10 px-2.5 py-1 rounded-lg">
                 <Text className="text-primary text-xs font-semibold">{item.estimatedTime} min</Text>
               </View>
@@ -140,7 +175,7 @@ function DeliveryPartnerDashboard() {
             </View>
           </TouchableOpacity>
         )}
-        ListEmptyComponent={<View className="items-center py-12"><Text className="text-muted text-base">No missions available</Text></View>}
+        ListEmptyComponent={<View className="items-center py-12"><Text className="text-muted text-base">Nicio misiune disponibilă</Text></View>}
       />
     </ScreenContainer>
   );
@@ -288,19 +323,34 @@ function LogisticsCoordinatorDashboard() {
 function FleetManagerDashboard() {
   return (
     <ScreenContainer className="px-4 pt-4">
-      <Text className="text-2xl font-bold text-foreground mb-1">Fleet</Text>
-      <Text className="text-sm text-muted mb-4">Drone Fleet Management</Text>
-      <View className="flex-row gap-3 mb-4">
-        <MetricBox label="Total Drones" value="28" trend="" />
-        <MetricBox label="Active" value="18" trend="" />
-      </View>
-      <View className="flex-row gap-3 mb-4">
-        <MetricBox label="Maintenance" value="4" trend="" />
-        <MetricBox label="Grounded" value="6" trend="" />
-      </View>
-      <StatCard title="Battery Health Avg" value="87%" color="#10B981" />
-      <StatCard title="Next Maintenance" value="DRN-007 in 2h" color="#F59E0B" />
-      <ChartPlaceholder title="Fleet Utilization" />
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+        <Text className="text-2xl font-bold text-foreground mb-1">Flotă Multimodală</Text>
+        <Text className="text-sm text-muted mb-4">Managementul Flotei DROPi</Text>
+        {/* Drone fleet */}
+        <Text className="text-sm font-semibold text-foreground mb-2">🚁 Drone</Text>
+        <View className="flex-row gap-3 mb-4">
+          <MetricBox label="Total" value="28" trend="" />
+          <MetricBox label="Active" value="18" trend="" />
+        </View>
+        <View className="flex-row gap-3 mb-4">
+          <MetricBox label="Maintenance" value="4" trend="" />
+          <MetricBox label="Grounded" value="6" trend="" />
+        </View>
+        {/* Terrestrial fleet */}
+        <Text className="text-sm font-semibold text-foreground mb-2">🚗 Vehicule Terestre</Text>
+        <View className="flex-row gap-3 mb-4">
+          <MetricBox label="Auto" value="12" trend="" />
+          <MetricBox label="Van" value="6" trend="" />
+        </View>
+        <View className="flex-row gap-3 mb-4">
+          <MetricBox label="E-Bike" value="15" trend="" />
+          <MetricBox label="Active" value="24" trend="" />
+        </View>
+        <StatCard title="Battery Health (Drone)" value="87%" color="#10B981" />
+        <StatCard title="Next Maintenance" value="DRN-007 in 2h" color="#F59E0B" />
+        <StatCard title="Fuel Status (Auto/Van)" value="78%" color="#10B981" />
+        <ChartPlaceholder title="Fleet Utilization by Type" />
+      </ScrollView>
     </ScreenContainer>
   );
 }

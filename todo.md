@@ -44,6 +44,32 @@
 - [x] Audit Core (complete logging)
 - [x] Admin Phantom Mode (login as any user)
 
+## Phase 3 - Marketplace & Multimodal Delivery Integration
+- [x] Marketplace module: Product catalog with categories
+- [x] Marketplace module: Merchant store pages
+- [x] Marketplace module: Product detail with delivery badges (drone/terrestrial/multimodal)
+- [x] Marketplace module: Shopping cart
+- [x] Marketplace module: Checkout flow with delivery mode selection
+- [x] Marketplace module: Zone-based product visibility
+- [x] Delivery badges: Drone eligible indicator
+- [x] Delivery badges: Terrestrial eligible indicator
+- [x] Delivery badges: Multimodal eligible indicator
+- [x] Delivery mode selection: Drone (with tutorial + conditions acceptance)
+- [x] Delivery mode selection: Auto/Van/E-bike (terrestrial)
+- [x] Delivery mode selection: DronePort buffer (staged delivery)
+- [x] Connect marketplace orders to operational flow (validated → preparing → ready → dispatch)
+- [x] Pilot types: Drone pilot vs Terrestrial driver distinction
+- [x] Fallback mechanism: Drone → Terrestrial when conditions change
+- [x] DronePort as transfer hub in multimodal flow
+- [x] Participant types: Authorized merchant, Artisan, P2P user, Community seller
+- [x] Trust & reputation badges on seller profiles
+- [x] Eligibility engine: Product weight/size/category → available delivery modes
+
+## Phase 4 - Multimodal Auxiliary Modules Update
+- [x] DronePort → Rețea Logistică (drone + vehicule + transfer hubs)
+- [x] Authorities → Conformitate aeriană + terestră (permise multimodale)
+- [x] Accounting → Costuri per mod de livrare (drone vs auto vs van vs ebike vs multimodal)
+
 ## Future Enhancements
 - [ ] Real map integration (Mapbox/Google Maps) for live drone tracking
 - [ ] Push notifications for order status changes

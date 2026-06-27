@@ -8,10 +8,13 @@ import { useDropiAuth } from "@/lib/auth-context";
 import type { Channel, DropiRole } from "@/shared/types";
 
 function getHomeTitle(role: DropiRole, channel: Channel): string {
+  if (role === "customer") return "Comenzile Mele";
+  if (role === "merchant") return "Magazin";
+  if (role === "delivery_partner") return "Misiuni";
   switch (channel) {
-    case "C1": return "Marketplace";
-    case "C2": return "Operations";
-    case "C3": return "Emergency";
+    case "C1": return "Dashboard";
+    case "C2": return "Operațiuni";
+    case "C3": return "Urgențe";
     case "ADMIN": return "Admin";
     default: return "Home";
   }
@@ -24,6 +27,9 @@ function getHomeIcon(role: DropiRole): string {
   if (role === "security_officer") return "shield.fill";
   return "house.fill";
 }
+
+// Roles that should see the Marketplace (Shop) tab
+const MARKETPLACE_ROLES: DropiRole[] = ["customer"];
 
 // Roles that should see the History tab
 const HISTORY_ROLES: DropiRole[] = ["customer", "merchant", "delivery_partner"];
@@ -103,11 +109,21 @@ export default function TabLayout() {
         }}
       />
 
+      {/* Marketplace (Shop) - visible to customer */}
+      <Tabs.Screen
+        name="marketplace"
+        options={{
+          title: "Shop",
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cart.fill" color={color} />,
+          href: MARKETPLACE_ROLES.includes(role) ? "/marketplace" : null,
+        }}
+      />
+
       {/* History - visible to customer, merchant, delivery_partner */}
       <Tabs.Screen
         name="history"
         options={{
-          title: "History",
+          title: "Istoric",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="clock.fill" color={color} />,
           href: HISTORY_ROLES.includes(role) ? "/history" : null,
         }}
@@ -117,7 +133,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="active"
         options={{
-          title: "Active",
+          title: "Activ",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="bolt.fill" color={color} />,
           href: ACTIVE_ROLES.includes(role) ? "/active" : null,
         }}
@@ -127,7 +143,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="alerts"
         options={{
-          title: "Alerts",
+          title: "Alerte",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="bell.fill" color={color} />,
           href: ALERTS_ROLES.includes(role) ? "/alerts" : null,
         }}
@@ -137,7 +153,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="fleet"
         options={{
-          title: "Fleet",
+          title: "Flotă",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="bus.fill" color={color} />,
           href: FLEET_ROLES.includes(role) ? "/fleet" : null,
         }}
@@ -157,7 +173,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="authorities"
         options={{
-          title: "Regulatory",
+          title: "Regulatoriu",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="shield.fill" color={color} />,
           href: AUTHORITIES_ROLES.includes(role) ? "/authorities" : null,
         }}
@@ -167,7 +183,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="accounting"
         options={{
-          title: "Finance",
+          title: "Finanțe",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />,
           href: ACCOUNTING_ROLES.includes(role) ? "/accounting" : null,
         }}
@@ -177,7 +193,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: "Profil",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
         }}
       />

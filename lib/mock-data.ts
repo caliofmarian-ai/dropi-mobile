@@ -1,4 +1,5 @@
 import type { OrderStatus, DeliveryStatus, OrderItem } from "@/shared/types";
+import type { DeliveryMode } from "@/lib/marketplace-data";
 
 export interface MockOrder {
   id: number;
@@ -17,6 +18,12 @@ export interface MockOrder {
   estimatedTime: number;
   packageWeight: number;
   createdAt: string;
+  // Multimodal delivery fields
+  deliveryMode: DeliveryMode;
+  fallbackMode: DeliveryMode | null;
+  receptionType: "personal" | "door" | "gate" | "yard" | "droneport";
+  vehicleId: string | null;
+  vehicleType: "drone" | "auto" | "van" | "ebike" | null;
 }
 
 export interface MockDelivery {
@@ -24,7 +31,8 @@ export interface MockDelivery {
   deliveryUid: string;
   orderId: number;
   pilotId: number;
-  droneId: string;
+  vehicleId: string;
+  vehicleType: "drone" | "auto" | "van" | "ebike";
   status: DeliveryStatus;
   pickupLat: number;
   pickupLng: number;
@@ -44,9 +52,11 @@ export interface MockMission {
   estimatedTime: number;
   merchantName: string;
   status: "available" | "accepted" | "in_progress";
+  vehicleType: "drone" | "auto" | "van" | "ebike";
+  deliveryMode: DeliveryMode;
 }
 
-// Demo orders for client view
+// Demo orders for client view — now with multimodal delivery info
 export const CLIENT_ORDERS: MockOrder[] = [
   {
     id: 1,
@@ -58,13 +68,18 @@ export const CLIENT_ORDERS: MockOrder[] = [
     pilotName: "Carlos R.",
     status: "in_execution",
     items: [{ name: "Chicken Adobo", quantity: 2, weight: 0.8 }, { name: "Rice", quantity: 2, weight: 0.5 }],
-    totalAmount: 450,
+    totalAmount: 535,
     deliveryAddress: "123 Rizal Ave, Manila",
     pickupAddress: "Juan's Kitchen, Quezon City",
     zone: "Manila-Central",
     estimatedTime: 12,
     packageWeight: 1.3,
     createdAt: new Date(Date.now() - 20 * 60000).toISOString(),
+    deliveryMode: "drone",
+    fallbackMode: "ebike",
+    receptionType: "personal",
+    vehicleId: "DRN-007",
+    vehicleType: "drone",
   },
   {
     id: 2,
@@ -76,13 +91,18 @@ export const CLIENT_ORDERS: MockOrder[] = [
     pilotName: null,
     status: "preparing",
     items: [{ name: "Vitamins Pack", quantity: 1, weight: 0.2 }],
-    totalAmount: 280,
+    totalAmount: 225,
     deliveryAddress: "123 Rizal Ave, Manila",
     pickupAddress: "Fresh Pharmacy, Makati",
     zone: "Manila-Central",
     estimatedTime: 25,
     packageWeight: 0.2,
     createdAt: new Date(Date.now() - 5 * 60000).toISOString(),
+    deliveryMode: "ebike",
+    fallbackMode: null,
+    receptionType: "door",
+    vehicleId: null,
+    vehicleType: null,
   },
   {
     id: 3,
@@ -94,13 +114,64 @@ export const CLIENT_ORDERS: MockOrder[] = [
     pilotName: "Carlos R.",
     status: "completed",
     items: [{ name: "Sinigang", quantity: 1, weight: 0.9 }],
-    totalAmount: 320,
+    totalAmount: 405,
     deliveryAddress: "123 Rizal Ave, Manila",
     pickupAddress: "Juan's Kitchen, Quezon City",
     zone: "Manila-Central",
     estimatedTime: 15,
     packageWeight: 0.9,
     createdAt: new Date(Date.now() - 3 * 3600000).toISOString(),
+    deliveryMode: "drone",
+    fallbackMode: null,
+    receptionType: "personal",
+    vehicleId: "DRN-003",
+    vehicleType: "drone",
+  },
+  {
+    id: 7,
+    orderUid: "ORD-2026-007",
+    customerId: 1,
+    merchantId: 8,
+    merchantName: "Tech Store PH",
+    pilotId: 9,
+    pilotName: "Miguel S.",
+    status: "in_execution",
+    items: [{ name: "USB-C Hub", quantity: 1, weight: 0.3 }, { name: "Phone Case", quantity: 1, weight: 0.1 }],
+    totalAmount: 890,
+    deliveryAddress: "123 Rizal Ave, Manila",
+    pickupAddress: "Tech Store PH, Ortigas",
+    zone: "Manila-East",
+    estimatedTime: 18,
+    packageWeight: 0.4,
+    createdAt: new Date(Date.now() - 10 * 60000).toISOString(),
+    deliveryMode: "auto",
+    fallbackMode: null,
+    receptionType: "gate",
+    vehicleId: "VAN-012",
+    vehicleType: "auto",
+  },
+  {
+    id: 8,
+    orderUid: "ORD-2026-008",
+    customerId: 1,
+    merchantId: 3,
+    merchantName: "Manila Blooms",
+    pilotId: null,
+    pilotName: null,
+    status: "validated",
+    items: [{ name: "Rose Bouquet Premium", quantity: 1, weight: 0.8 }],
+    totalAmount: 650,
+    deliveryAddress: "123 Rizal Ave, Manila",
+    pickupAddress: "Manila Blooms, BGC",
+    zone: "Manila-South",
+    estimatedTime: 30,
+    packageWeight: 0.8,
+    createdAt: new Date(Date.now() - 2 * 60000).toISOString(),
+    deliveryMode: "multimodal",
+    fallbackMode: "van",
+    receptionType: "personal",
+    vehicleId: null,
+    vehicleType: null,
   },
 ];
 
@@ -123,6 +194,11 @@ export const MERCHANT_ORDERS: MockOrder[] = [
     estimatedTime: 20,
     packageWeight: 1.0,
     createdAt: new Date(Date.now() - 2 * 60000).toISOString(),
+    deliveryMode: "drone",
+    fallbackMode: "ebike",
+    receptionType: "personal",
+    vehicleId: null,
+    vehicleType: null,
   },
   {
     id: 5,
@@ -141,6 +217,11 @@ export const MERCHANT_ORDERS: MockOrder[] = [
     estimatedTime: 15,
     packageWeight: 1.1,
     createdAt: new Date(Date.now() - 8 * 60000).toISOString(),
+    deliveryMode: "van",
+    fallbackMode: null,
+    receptionType: "door",
+    vehicleId: null,
+    vehicleType: null,
   },
   {
     id: 6,
@@ -159,10 +240,15 @@ export const MERCHANT_ORDERS: MockOrder[] = [
     estimatedTime: 10,
     packageWeight: 0.7,
     createdAt: new Date(Date.now() - 15 * 60000).toISOString(),
+    deliveryMode: "ebike",
+    fallbackMode: null,
+    receptionType: "gate",
+    vehicleId: "EBK-005",
+    vehicleType: "ebike",
   },
 ];
 
-// Demo missions for pilot view
+// Demo missions for pilot view — now with vehicle type
 export const PILOT_MISSIONS: MockMission[] = [
   {
     id: 1,
@@ -174,6 +260,8 @@ export const PILOT_MISSIONS: MockMission[] = [
     estimatedTime: 8,
     merchantName: "Juan's Kitchen",
     status: "available",
+    vehicleType: "drone",
+    deliveryMode: "drone",
   },
   {
     id: 2,
@@ -185,6 +273,8 @@ export const PILOT_MISSIONS: MockMission[] = [
     estimatedTime: 5,
     merchantName: "Fresh Pharmacy",
     status: "available",
+    vehicleType: "ebike",
+    deliveryMode: "ebike",
   },
   {
     id: 3,
@@ -196,6 +286,34 @@ export const PILOT_MISSIONS: MockMission[] = [
     estimatedTime: 6,
     merchantName: "Tech Store PH",
     status: "available",
+    vehicleType: "auto",
+    deliveryMode: "auto",
+  },
+  {
+    id: 4,
+    orderId: 4,
+    pickupZone: "Quezon City - District 4",
+    deliveryZone: "Manila - Bonifacio",
+    packageWeight: 1.0,
+    distance: 5.5,
+    estimatedTime: 10,
+    merchantName: "Juan's Kitchen",
+    status: "available",
+    vehicleType: "drone",
+    deliveryMode: "drone",
+  },
+  {
+    id: 5,
+    orderId: 12,
+    pickupZone: "BGC - Taguig",
+    deliveryZone: "Makati - Ayala",
+    packageWeight: 2.5,
+    distance: 3.8,
+    estimatedTime: 12,
+    merchantName: "Manila Blooms",
+    status: "available",
+    vehicleType: "van",
+    deliveryMode: "multimodal",
   },
 ];
 
@@ -205,7 +323,8 @@ export const ACTIVE_DELIVERY: MockDelivery = {
   deliveryUid: "DEL-2026-001",
   orderId: 1,
   pilotId: 3,
-  droneId: "DRN-007",
+  vehicleId: "DRN-007",
+  vehicleType: "drone",
   status: "in_flight",
   pickupLat: 14.6507,
   pickupLng: 121.0495,
