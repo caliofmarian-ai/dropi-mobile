@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import type { DropiRole, Channel, DropiUser } from "@/shared/types";
+import { getApiBaseUrl } from "@/constants/oauth";
 
 // ===== AUTH CONTEXT TYPE =====
 interface AuthContextType {
@@ -33,10 +34,17 @@ const STORAGE_KEY = "@dropi_user";
 const TOKEN_KEY = "@dropi_token";
 const DEMO_KEY = "@dropi_demo";
 
-// API base URL
-const API_BASE = Platform.OS === "web"
-  ? "/api/trpc"
-  : `${process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000"}/api/trpc`;
+// API base URL — uses the same resolver as tRPC client
+// On web: derives from current hostname (8081 → 3000)
+// On native via Expo Go: uses EXPO_PUBLIC_API_BASE_URL env var
+function getApiTrpcUrl(): string {
+  const base = getApiBaseUrl();
+  if (base) return `${base}/api/trpc`;
+  // Web fallback: relative path
+  if (Platform.OS === "web") return "/api/trpc";
+  // Native fallback: should not happen if env is set
+  return "http://localhost:3000/api/trpc";
+}
 
 // ===== DEMO ACCOUNTS (kept for demo mode) =====
 const DEMO_USERS: Record<string, DropiUser> = {
@@ -73,14 +81,14 @@ const DEMO_USERS: Record<string, DropiUser> = {
 
 // ===== API HELPER =====
 async function apiCall(path: string, input: any, token?: string | null) {
-  const url = `${API_BASE}/${path}`;
+  const url = `${getApiTrpcUrl()}/${path}`;
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const response = await fetch(url, {
     method: "POST",
     headers,
-    body: JSON.stringify(input),
+    body: JSON.stringify({ json: input }),
     credentials: "include",
   });
 
@@ -88,7 +96,8 @@ async function apiCall(path: string, input: any, token?: string | null) {
   if (data.error) {
     throw new Error(data.error.message || "API error");
   }
-  return data.result?.data;
+  // tRPC with superjson wraps in result.data.json
+  return data.result?.data?.json ?? data.result?.data;
 }
 
 // ===== AUTH PROVIDER =====
