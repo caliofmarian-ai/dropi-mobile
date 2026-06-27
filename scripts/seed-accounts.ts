@@ -38,7 +38,7 @@ const SEED_ACCOUNTS = [
   { role: "c3_data_analyst", channel: "C3", name: "Fernando Analyst", email: "c3.analyst@dropi.app", zone: "Manila-Central" },
   { role: "incident_commander", channel: "C3", name: "Gen. Santos", email: "commander@dropi.app", zone: "Manila-Central" },
   // ADMIN (6 roles)
-  { role: "system_administrator", channel: "ADMIN", name: "Super Admin", email: "admin@dropi.app", zone: null },
+  { role: "system_administrator", channel: "ADMIN", name: "Super Admin", email: "dropi.deliveries@gmail.com", zone: null },
   { role: "security_officer", channel: "ADMIN", name: "Security Officer", email: "security@dropi.app", zone: null },
   { role: "audit_manager", channel: "ADMIN", name: "Audit Manager", email: "audit@dropi.app", zone: null },
   { role: "configuration_manager", channel: "ADMIN", name: "Config Manager", email: "config@dropi.app", zone: null },

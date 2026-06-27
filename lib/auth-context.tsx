@@ -71,7 +71,7 @@ const DEMO_USERS: Record<string, DropiUser> = {
   "comms@dropi.app": { id: 21, name: "Patricia Comms", email: "comms@dropi.app", dropiRole: "communication_officer", channel: "C3", zone: "Manila-Central", isAuthenticated: true },
   "c3.analyst@dropi.app": { id: 22, name: "Fernando Analyst", email: "c3.analyst@dropi.app", dropiRole: "c3_data_analyst", channel: "C3", zone: "Manila-Central", isAuthenticated: true },
   "commander@dropi.app": { id: 23, name: "Gen. Santos", email: "commander@dropi.app", dropiRole: "incident_commander", channel: "C3", zone: "Manila-Central", isAuthenticated: true },
-  "admin@dropi.app": { id: 24, name: "Super Admin", email: "admin@dropi.app", dropiRole: "system_administrator", channel: "ADMIN", zone: null, isAuthenticated: true },
+  "dropi.deliveries@gmail.com": { id: 24, name: "Super Admin", email: "dropi.deliveries@gmail.com", dropiRole: "system_administrator", channel: "ADMIN", zone: null, isAuthenticated: true },
   "security@dropi.app": { id: 25, name: "Security Officer", email: "security@dropi.app", dropiRole: "security_officer", channel: "ADMIN", zone: null, isAuthenticated: true },
   "audit@dropi.app": { id: 26, name: "Audit Manager", email: "audit@dropi.app", dropiRole: "audit_manager", channel: "ADMIN", zone: null, isAuthenticated: true },
   "config@dropi.app": { id: 27, name: "Config Manager", email: "config@dropi.app", dropiRole: "configuration_manager", channel: "ADMIN", zone: null, isAuthenticated: true },
