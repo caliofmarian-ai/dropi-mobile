@@ -34,6 +34,8 @@ const MAPPING = {
   "location.fill": "my-location",
   "gear": "settings",
   "questionmark.circle": "help",
+  "shield.fill": "shield",
+  "dollarsign.circle.fill": "attach-money",
 } as IconMapping;
 
 export { IconSymbolName };

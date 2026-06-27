@@ -2,21 +2,7 @@ import { Text, View, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
-import type { DropiRole } from "@/shared/types";
-
-const ROLE_LABELS: Record<DropiRole, string> = {
-  client: "Client",
-  merchant: "Merchant",
-  pilot: "Pilot",
-  operator: "Operator",
-};
-
-const ROLE_COLORS: Record<DropiRole, string> = {
-  client: "#0066FF",
-  merchant: "#F59E0B",
-  pilot: "#8B5CF6",
-  operator: "#10B981",
-};
+import { getRoleConfig, CHANNEL_INFO } from "@/shared/types";
 
 export default function ProfileScreen() {
   const { user, logout } = useDropiAuth();
@@ -38,7 +24,9 @@ export default function ProfileScreen() {
 
   if (!user) return null;
 
-  const roleColor = ROLE_COLORS[user.dropiRole];
+  const roleConfig = getRoleConfig(user.dropiRole);
+  const channelInfo = CHANNEL_INFO[user.channel];
+  const roleColor = channelInfo?.color || "#0066FF";
 
   return (
     <ScreenContainer className="px-4 pt-4">
@@ -61,14 +49,16 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          <View className="flex-row gap-3">
+          <View className="flex-row flex-wrap gap-2">
             <View style={{ backgroundColor: roleColor + "15", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 }}>
               <Text style={{ color: roleColor, fontSize: 12, fontWeight: "600" }}>
-                {ROLE_LABELS[user.dropiRole]}
+                {roleConfig?.label || user.dropiRole.replace(/_/g, " ")}
               </Text>
             </View>
-            <View className="bg-primary/10 px-3 py-1.5 rounded-lg">
-              <Text className="text-primary text-xs font-semibold">Channel {user.channel}</Text>
+            <View style={{ backgroundColor: channelInfo?.color + "15", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 }}>
+              <Text style={{ color: channelInfo?.color, fontSize: 12, fontWeight: "600" }}>
+                {user.channel} — {channelInfo?.label}
+              </Text>
             </View>
             {user.zone && (
               <View className="bg-surface border border-border px-3 py-1.5 rounded-lg">
@@ -76,7 +66,25 @@ export default function ProfileScreen() {
               </View>
             )}
           </View>
+
+          {roleConfig && (
+            <Text className="text-xs text-muted mt-3 italic">{roleConfig.description}</Text>
+          )}
         </View>
+
+        {/* Permissions */}
+        {roleConfig && (
+          <View className="bg-surface border border-border rounded-xl p-4 mb-4">
+            <Text className="text-sm font-semibold text-foreground mb-2">Permissions</Text>
+            <View className="flex-row flex-wrap gap-1.5">
+              {roleConfig.permissions.map((perm) => (
+                <View key={perm} className="bg-primary/10 px-2.5 py-1 rounded-md">
+                  <Text className="text-primary text-xs">{perm.replace(/_/g, " ")}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         {/* Settings */}
         <View className="bg-surface border border-border rounded-xl overflow-hidden mb-4">
@@ -97,8 +105,9 @@ export default function ProfileScreen() {
         {/* Audit Info */}
         <View className="bg-surface border border-border rounded-xl p-4 mb-6">
           <Text className="text-xs font-medium text-muted mb-1">Audit Info</Text>
-          <Text className="text-xs text-muted">All actions are logged and auditable.</Text>
-          <Text className="text-xs text-muted mt-0.5">User ID: {user.id}</Text>
+          <Text className="text-xs text-muted">All actions are logged and auditable per DROPi Canonical Policy.</Text>
+          <Text className="text-xs text-muted mt-0.5">User ID: {user.id} • Channel: {user.channel}</Text>
+          <Text className="text-xs text-muted mt-0.5">Role: {user.dropiRole}</Text>
         </View>
 
         {/* Logout */}
