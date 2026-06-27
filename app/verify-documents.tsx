@@ -8,12 +8,15 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
 import { getApiBaseUrl } from "@/constants/oauth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system/legacy";
 
 const TOKEN_KEY = "@dropi_token";
 
@@ -102,6 +105,9 @@ export default function VerifyDocumentsScreen() {
   const [vehicleType, setVehicleType] = useState<string>("");
   const [expiryDate, setExpiryDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [selectedFile, setSelectedFile] = useState<{ uri: string; name: string; type: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -123,6 +129,82 @@ export default function VerifyDocumentsScreen() {
     loadData();
   }, [loadData]);
 
+  const handlePickDocument = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission Required", "Please allow access to your photo library to upload documents.");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        quality: 0.8,
+        allowsEditing: false,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        const fileName = asset.fileName || `document_${Date.now()}.jpg`;
+        const mimeType = asset.mimeType || "image/jpeg";
+        setSelectedFile({ uri: asset.uri, name: fileName, type: mimeType });
+        setUploadedUrl(null);
+      }
+    } catch (err: any) {
+      Alert.alert("Error", "Failed to pick document: " + (err.message || "Unknown error"));
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission Required", "Please allow camera access to photograph documents.");
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        quality: 0.8,
+        allowsEditing: false,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        const fileName = asset.fileName || `photo_${Date.now()}.jpg`;
+        const mimeType = asset.mimeType || "image/jpeg";
+        setSelectedFile({ uri: asset.uri, name: fileName, type: mimeType });
+        setUploadedUrl(null);
+      }
+    } catch (err: any) {
+      Alert.alert("Error", "Failed to take photo: " + (err.message || "Unknown error"));
+    }
+  };
+
+  const handleUploadFile = async (): Promise<string | null> => {
+    if (!selectedFile) return null;
+    setUploading(true);
+    try {
+      // Read file as base64
+      const base64 = await FileSystem.readAsStringAsync(selectedFile.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const result = await apiCall("verification.uploadDocument", {
+        fileName: selectedFile.name,
+        fileBase64: base64,
+        contentType: selectedFile.type,
+      });
+
+      setUploadedUrl(result.url);
+      return result.url;
+    } catch (err: any) {
+      Alert.alert("Upload Error", err.message || "Failed to upload document");
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!licenseNumber.trim()) {
       Alert.alert("Error", "License/Document number is required");
@@ -131,10 +213,17 @@ export default function VerifyDocumentsScreen() {
 
     setSubmitting(true);
     try {
+      // Upload file first if selected
+      let documentUrl = uploadedUrl;
+      if (selectedFile && !uploadedUrl) {
+        documentUrl = await handleUploadFile();
+      }
+
       const input: any = {
         documentType,
         licenseNumber: licenseNumber.trim(),
       };
+      if (documentUrl) input.documentUrl = documentUrl;
       if (vehicleType) input.vehicleType = vehicleType;
       if (expiryDate) input.expiryDate = expiryDate;
       if (notes.trim()) input.notes = notes.trim();
@@ -146,6 +235,8 @@ export default function VerifyDocumentsScreen() {
       setVehicleType("");
       setExpiryDate("");
       setNotes("");
+      setSelectedFile(null);
+      setUploadedUrl(null);
       setShowForm(false);
 
       // Reload data
@@ -305,6 +396,44 @@ export default function VerifyDocumentsScreen() {
               className="bg-background border border-border rounded-lg px-4 py-3 text-foreground mb-4"
               placeholderTextColor="#687076"
             />
+
+            {/* Document Upload */}
+            <Text className="text-sm font-medium text-foreground mb-2">Upload Document (Photo/Scan)</Text>
+            <View className="flex-row gap-2 mb-3">
+              <TouchableOpacity
+                onPress={handlePickDocument}
+                className="flex-1 bg-background border border-border rounded-lg py-3 items-center"
+              >
+                <Text className="text-foreground text-sm">📁 From Gallery</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleTakePhoto}
+                className="flex-1 bg-background border border-border rounded-lg py-3 items-center"
+              >
+                <Text className="text-foreground text-sm">📷 Take Photo</Text>
+              </TouchableOpacity>
+            </View>
+            {selectedFile && (
+              <View className="mb-4 rounded-lg overflow-hidden border border-border">
+                <Image
+                  source={{ uri: selectedFile.uri }}
+                  style={{ width: "100%", height: 180 }}
+                  resizeMode="cover"
+                />
+                <View className="flex-row items-center justify-between p-2 bg-surface">
+                  <Text className="text-xs text-muted flex-1" numberOfLines={1}>{selectedFile.name}</Text>
+                  {uploadedUrl ? (
+                    <Text className="text-xs text-green-600 font-medium">✓ Uploaded</Text>
+                  ) : uploading ? (
+                    <ActivityIndicator size="small" color="#0a7ea4" />
+                  ) : (
+                    <TouchableOpacity onPress={() => { setSelectedFile(null); setUploadedUrl(null); }}>
+                      <Text className="text-xs text-error font-medium">Remove</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            )}
 
             {/* Notes */}
             <Text className="text-sm font-medium text-foreground mb-2">Additional Notes (optional)</Text>

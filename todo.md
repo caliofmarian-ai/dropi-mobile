@@ -148,3 +148,12 @@
 - [x] SMTP: Email notification on verification approval/rejection
 - [x] Audit: All verification and role actions logged (L6 compliance)
 - [x] Navigation: Profile screen links to Verify Documents, Apply for Role, Admin Approvals
+
+## Sprint 3-4 Continuation: Guards, Upload, Email Verification
+- [x] Server: Mission guard — block unverified delivery partners from accepting missions
+- [x] Server: File upload endpoint for document verification (S3/local storage)
+- [x] UI: Update verify-documents screen with file picker + upload (gallery & camera)
+- [x] Server: Email verification flow (send code on register, verify endpoint, resend)
+- [x] DB: Add emailVerified, emailVerifyToken, emailVerifyExpires to users
+- [x] UI: Email verification screen after registration (/app/verify-email.tsx)
+- [x] Registration redirects to verify-email screen instead of tabs

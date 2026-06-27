@@ -17,6 +17,36 @@ const smtpTransporter = nodemailer.createTransport({
   },
 });
 
+async function sendVerificationEmail(toEmail: string, code: string): Promise<boolean> {
+  try {
+    await smtpTransporter.sendMail({
+      from: '"DROPi Platform" <dropi.deliveries@gmail.com>',
+      to: toEmail,
+      subject: "DROPi - Verify Your Email",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+          <h2 style="color: #2563EB; margin-bottom: 8px;">DROPi</h2>
+          <p style="color: #666; font-size: 14px;">Logistics Platform</p>
+          <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 16px 0;" />
+          <p>Welcome! Please verify your email address with the code below:</p>
+          <div style="background: #F3F4F6; border-radius: 8px; padding: 16px; text-align: center; margin: 24px 0;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #111;">${code}</span>
+          </div>
+          <p style="color: #666; font-size: 13px;">This code expires in <strong>30 minutes</strong>.</p>
+          <p style="color: #666; font-size: 13px;">If you did not create an account, please ignore this email.</p>
+          <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 16px 0;" />
+          <p style="color: #999; font-size: 11px;">&copy; DROPi Deliveries. All rights reserved.</p>
+        </div>
+      `,
+    });
+    console.log(`[SMTP] Verification email sent to ${toEmail}`);
+    return true;
+  } catch (err) {
+    console.error(`[SMTP] Failed to send verification email to ${toEmail}:`, err);
+    return false;
+  }
+}
+
 async function sendRecoveryEmail(toEmail: string, code: string): Promise<boolean> {
   try {
     await smtpTransporter.sendMail({
@@ -132,7 +162,18 @@ export const dropiAuthRouter = router({
       zone: input.zone,
     });
 
-    // Create session token
+    // Generate email verification code
+    const verifyCode = String(Math.floor(100000 + Math.random() * 900000));
+    const verifyExpiry = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+    await db.setEmailVerifyToken(id, verifyCode, verifyExpiry);
+
+    // Send verification email
+    const emailSent = await sendVerificationEmail(input.email, verifyCode);
+    if (!emailSent) {
+      console.log(`[EMAIL VERIFY] SMTP failed, code for ${input.email}: ${verifyCode}`);
+    }
+
+    // Create session token (user can login but will see verification prompt)
     const token = await sdk.createSessionToken(openId, { name: input.name });
 
     // Store session in DB
@@ -158,11 +199,11 @@ export const dropiAuthRouter = router({
       isPhantomMode: false,
       ipAddress: getClientIp(ctx.req),
       userAgent: getDeviceInfo(ctx.req),
-      details: { email: input.email, role: input.dropiRole, channel: input.channel },
+      details: { email: input.email, role: input.dropiRole, channel: input.channel, emailVerificationSent: emailSent },
     });
 
     const user = await db.getUserById(id);
-    return { user, token };
+    return { user, token, emailVerificationRequired: true };
   }),
 
   login: publicProcedure.input(loginSchema).mutation(async ({ input, ctx }) => {
@@ -376,6 +417,85 @@ export const dropiAuthRouter = router({
     });
 
     return { success: true };
+  }),
+
+  // Verify email with 6-digit code
+  verifyEmail: protectedProcedure.input(z.object({
+    code: z.string().length(6),
+  })).mutation(async ({ input, ctx }) => {
+    const userId = ctx.user!.id;
+    const user = await db.getUserById(userId);
+    if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+
+    if (user.emailVerified) {
+      return { success: true, message: "Email already verified" };
+    }
+
+    if (!user.emailVerifyToken || user.emailVerifyToken !== input.code) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid verification code" });
+    }
+
+    if (user.emailVerifyExpires && new Date(user.emailVerifyExpires) < new Date()) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Verification code has expired. Please request a new one." });
+    }
+
+    await db.markEmailVerified(userId);
+
+    await createAuditLog({
+      userId,
+      userRole: user.dropiRole,
+      action: "auth.email_verified",
+      resourceType: "user",
+      resourceId: String(userId),
+      severity: "info",
+      channel: user.channel as any,
+      isAIAction: user.isAIAgent,
+      isPhantomMode: false,
+      ipAddress: getClientIp(ctx.req),
+      userAgent: getDeviceInfo(ctx.req),
+    });
+
+    return { success: true, message: "Email verified successfully" };
+  }),
+
+  // Resend verification code
+  resendVerificationCode: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.user!.id;
+    const user = await db.getUserById(userId);
+    if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+
+    if (user.emailVerified) {
+      return { success: true, message: "Email already verified" };
+    }
+
+    // Generate new code
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiry = new Date(Date.now() + 30 * 60 * 1000);
+    await db.setEmailVerifyToken(userId, code, expiry);
+
+    // Send email
+    if (user.email) {
+      const sent = await sendVerificationEmail(user.email, code);
+      if (!sent) {
+        console.log(`[EMAIL VERIFY] Resend SMTP failed, code for ${user.email}: ${code}`);
+      }
+    }
+
+    await createAuditLog({
+      userId,
+      userRole: user.dropiRole,
+      action: "auth.resend_verification",
+      resourceType: "user",
+      resourceId: String(userId),
+      severity: "info",
+      channel: user.channel as any,
+      isAIAction: user.isAIAgent,
+      isPhantomMode: false,
+      ipAddress: getClientIp(ctx.req),
+      userAgent: getDeviceInfo(ctx.req),
+    });
+
+    return { success: true, message: "Verification code sent" };
   }),
 
   updateProfile: protectedProcedure.input(z.object({

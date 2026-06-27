@@ -3,10 +3,13 @@ import { Text, View, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
+import { useDropiAuth } from "@/lib/auth-context";
 import { PILOT_MISSIONS } from "@/lib/mock-data";
 import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
 import { DeliveryMap, createDemoRoute } from "@/components/delivery-map";
 import type { VehicleType } from "@/components/delivery-map";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getApiBaseUrl } from "@/constants/oauth";
 
 type MissionPhase = "detail" | "preflight" | "inflight" | "complete";
 
@@ -44,8 +47,11 @@ export default function MissionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const colors = useColors();
+  const { user } = useDropiAuth();
   const mission = PILOT_MISSIONS.find((m) => m.id === Number(id));
   const [phase, setPhase] = useState<MissionPhase>("detail");
+  const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
+  const [checkingVerification, setCheckingVerification] = useState(false);
 
   const vehicleType = mission?.vehicleType || "drone";
   const isDrone = vehicleType === "drone";
@@ -68,7 +74,36 @@ export default function MissionDetailScreen() {
     setChecks((prev) => prev.map((c) => (c.id === checkId ? { ...c, checked: !c.checked } : c)));
   };
 
-  const handleAcceptMission = () => {
+  const handleAcceptMission = async () => {
+    // Mission guard: block unverified delivery partners
+    if (user?.dropiRole === "delivery_partner") {
+      setCheckingVerification(true);
+      try {
+        const token = await AsyncStorage.getItem("@dropi_token");
+        const baseUrl = getApiBaseUrl();
+        const res = await fetch(`${baseUrl}/api/trpc/verification.myStatus`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        const data = await res.json();
+        const result = data?.result?.data;
+        if (!result?.isFullyVerified) {
+          Alert.alert(
+            "Verification Required",
+            "You must complete document verification before accepting missions. At minimum, a driving license or drone license must be approved.",
+            [
+              { text: "Cancel", style: "cancel" },
+              { text: "Verify Now", onPress: () => router.push("/verify-documents" as any) },
+            ]
+          );
+          setCheckingVerification(false);
+          return;
+        }
+      } catch (e) {
+        // If we can't check, allow in demo mode but warn
+        console.warn("Could not verify status:", e);
+      }
+      setCheckingVerification(false);
+    }
     setPhase("preflight");
   };
 

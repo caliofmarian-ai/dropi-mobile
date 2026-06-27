@@ -303,3 +303,24 @@ export async function getAuditStats(opts: { channel?: string; from?: Date; to?: 
   const totalResult = await db.select({ count: sql<number>`count(*)` }).from(auditLogs).where(where);
   return { total: totalResult[0]?.count || 0 };
 }
+
+// ===== EMAIL VERIFICATION HELPERS =====
+
+export async function setEmailVerifyToken(userId: number, token: string, expiry: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set({ emailVerifyToken: token, emailVerifyExpires: expiry }).where(eq(users.id, userId));
+}
+
+export async function getUserByEmailVerifyToken(token: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.emailVerifyToken, token)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function markEmailVerified(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set({ emailVerified: true, emailVerifyToken: null, emailVerifyExpires: null }).where(eq(users.id, userId));
+}

@@ -42,6 +42,10 @@ export const users = mysqlTable("users", {
   isAIAgent: boolean("isAIAgent").default(false).notNull(),
   agentMode: mysqlEnum("agentMode", ["autonomous", "assistant"]),
   humanPairId: int("humanPairId"),
+  // Email verification
+  emailVerified: boolean("emailVerified").default(false).notNull(),
+  emailVerifyToken: varchar("emailVerifyToken", { length: 10 }),
+  emailVerifyExpires: timestamp("emailVerifyExpires"),
   // Security fields
   lastIp: varchar("lastIp", { length: 45 }),
   lastDevice: varchar("lastDevice", { length: 255 }),

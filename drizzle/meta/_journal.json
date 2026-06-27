@@ -29,6 +29,13 @@
       "when": 1782594796718,
       "tag": "0003_worried_sprite",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1782595933528,
+      "tag": "0004_plain_husk",
+      "breakpoints": true
     }
   ]
 }

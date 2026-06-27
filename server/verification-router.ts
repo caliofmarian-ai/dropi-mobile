@@ -4,6 +4,7 @@ import { verifications, roleApplications, users } from "../drizzle/schema";
 import { getDb } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import nodemailer from "nodemailer";
+import { storagePut } from "./storage";
 
 // SMTP transporter for notifications
 const transporter = nodemailer.createTransport({
@@ -27,6 +28,37 @@ const ROLES_REQUIRING_APPROVAL = [
 
 // ===== VERIFICATION ROUTER (Delivery Partner Documents) =====
 export const verificationRouter = router({
+  // Upload a document file to S3 storage
+  uploadDocument: protectedProcedure
+    .input(z.object({
+      fileName: z.string(),
+      fileBase64: z.string(), // base64-encoded file content
+      contentType: z.string().default("application/octet-stream"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user!.id;
+
+      // Validate file size (max 10MB after base64 decode)
+      const buffer = Buffer.from(input.fileBase64, "base64");
+      if (buffer.length > 10 * 1024 * 1024) {
+        throw new Error("File too large. Maximum size is 10MB.");
+      }
+
+      // Validate content type
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+      if (!allowedTypes.includes(input.contentType)) {
+        throw new Error("Invalid file type. Allowed: JPEG, PNG, WebP, PDF");
+      }
+
+      // Upload to S3 via storage helper
+      const ext = input.fileName.split(".").pop() || "bin";
+      const storagePath = `verifications/user_${userId}/${Date.now()}_${input.fileName}`;
+      const { key, url } = await storagePut(storagePath, buffer, input.contentType);
+
+      console.log(`[UPLOAD] User ${userId} uploaded document: ${key}`);
+      return { key, url, fileName: input.fileName };
+    }),
+
   // Submit a new verification document
   submit: protectedProcedure
     .input(z.object({
@@ -88,16 +120,21 @@ export const verificationRouter = router({
   myStatus: protectedProcedure
     .query(async ({ ctx }) => {
       const db = await getDb();
-      if (!db) return { isVerified: false, hasPending: false, totalSubmitted: 0, approved: 0, rejected: 0, pending: 0 };
+      if (!db) return { isVerified: false, isFullyVerified: false, hasPending: false, totalSubmitted: 0, approved: 0, rejected: 0, pending: 0 };
       const userId = ctx.user!.id;
       const results = await db.select().from(verifications)
         .where(eq(verifications.userId, userId));
 
       const hasApproved = results.some((v: any) => v.status === "approved");
       const hasPending = results.some((v: any) => v.status === "pending");
+      // Fully verified = at least one license (driving or drone) is approved
+      const hasLicenseApproved = results.some((v: any) => 
+        v.status === "approved" && (v.documentType === "driving_license" || v.documentType === "drone_license")
+      );
 
       return {
         isVerified: hasApproved,
+        isFullyVerified: hasLicenseApproved,
         hasPending,
         totalSubmitted: results.length,
         approved: results.filter((v: any) => v.status === "approved").length,

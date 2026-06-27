@@ -77,7 +77,8 @@ export default function RegisterScreen() {
     setLoading(false);
 
     if (result.success) {
-      router.replace("/(tabs)");
+      // Redirect to email verification screen
+      router.replace("/verify-email");
     } else {
       setError(result.error || "Registration failed");
     }
