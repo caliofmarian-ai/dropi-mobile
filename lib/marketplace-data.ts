@@ -13,11 +13,11 @@ export interface DeliveryBadge {
 }
 
 export const DELIVERY_MODE_INFO: Record<DeliveryMode, { label: string; icon: string; color: string; description: string }> = {
-  drone: { label: "Dronă", icon: "🚁", color: "#0066FF", description: "Livrare aeriană rapidă — doar produse eligibile" },
-  auto: { label: "Auto", icon: "🚗", color: "#10B981", description: "Livrare terestră cu mașina" },
-  van: { label: "Van", icon: "🚐", color: "#8B5CF6", description: "Livrare terestră cu van — colete mari" },
-  ebike: { label: "E-Bike", icon: "🚲", color: "#F59E0B", description: "Livrare cu bicicletă electrică — zone urbane" },
-  multimodal: { label: "Multimodal", icon: "🔄", color: "#6366F1", description: "Combinat: merchant → DronePort → client" },
+  drone: { label: "Drone", icon: "🚁", color: "#0066FF", description: "Fast aerial delivery — eligible products only" },
+  auto: { label: "Car", icon: "🚗", color: "#10B981", description: "Ground delivery by car" },
+  van: { label: "Van", icon: "🚐", color: "#8B5CF6", description: "Ground delivery by van — large parcels" },
+  ebike: { label: "E-Bike", icon: "🚲", color: "#F59E0B", description: "Electric bike delivery — urban zones" },
+  multimodal: { label: "Multimodal", icon: "🔄", color: "#6366F1", description: "Combined: merchant → DronePort → client" },
 };
 
 // ===== PRODUCT CATEGORIES =====
@@ -31,16 +31,16 @@ export interface ProductCategory {
 }
 
 export const PRODUCT_CATEGORIES: ProductCategory[] = [
-  { id: "food", name: "Mâncare & Băuturi", icon: "🍜", droneEligible: true, maxWeightDrone: 2.0, description: "Preparate gata, băuturi, snacks" },
-  { id: "pharmacy", name: "Farmacie", icon: "💊", droneEligible: true, maxWeightDrone: 1.5, description: "Medicamente, vitamine, produse de sănătate" },
+  { id: "food", name: "Food & Drinks", icon: "🍜", droneEligible: true, maxWeightDrone: 2.0, description: "Ready meals, drinks, snacks" },
+  { id: "pharmacy", name: "Pharmacy", icon: "💊", droneEligible: true, maxWeightDrone: 1.5, description: "Medicines, vitamins, health products" },
   { id: "electronics", name: "Electronice", icon: "📱", droneEligible: true, maxWeightDrone: 1.0, description: "Telefoane, accesorii, gadgets mici" },
   { id: "groceries", name: "Alimente", icon: "🛒", droneEligible: true, maxWeightDrone: 3.0, description: "Produse alimentare, fructe, legume" },
-  { id: "documents", name: "Documente", icon: "📄", droneEligible: true, maxWeightDrone: 0.5, description: "Plicuri, documente, corespondență" },
+  { id: "documents", name: "Documents", icon: "📄", droneEligible: true, maxWeightDrone: 0.5, description: "Envelopes, documents, correspondence" },
   { id: "flowers", name: "Flori & Cadouri", icon: "💐", droneEligible: true, maxWeightDrone: 1.5, description: "Buchete, cadouri mici" },
-  { id: "furniture", name: "Mobilier", icon: "🪑", droneEligible: false, maxWeightDrone: 0, description: "Mobilă, decorațiuni mari" },
+  { id: "furniture", name: "Furniture", icon: "🪑", droneEligible: false, maxWeightDrone: 0, description: "Furniture, large decorations" },
   { id: "heavy", name: "Colete Grele", icon: "📦", droneEligible: false, maxWeightDrone: 0, description: "Pachete >5kg, echipamente" },
-  { id: "fragile", name: "Fragile", icon: "⚠️", droneEligible: false, maxWeightDrone: 0, description: "Obiecte fragile care necesită transport special" },
-  { id: "community", name: "Comunitar", icon: "🤝", droneEligible: true, maxWeightDrone: 2.0, description: "Donații, transferuri gratuite, vânzări ocazionale" },
+  { id: "fragile", name: "Fragile", icon: "⚠️", droneEligible: false, maxWeightDrone: 0, description: "Fragile items requiring special transport" },
+  { id: "community", name: "Community", icon: "🤝", droneEligible: true, maxWeightDrone: 2.0, description: "Donations, free transfers, occasional sales" },
 ];
 
 // ===== MERCHANT TYPES =====
@@ -157,9 +157,9 @@ function computeDeliveryBadges(weight: number, category: string, zone: string): 
 
   // Drone eligibility
   if (cat?.droneEligible && weight <= (cat?.maxWeightDrone || 0)) {
-    badges.push({ mode: "drone", label: "Dronă", icon: "🚁", available: true, estimatedTime: "8-15 min", estimatedCost: 85 });
+    badges.push({ mode: "drone", label: "Drone", icon: "🚁", available: true, estimatedTime: "8-15 min", estimatedCost: 85 });
   } else {
-    badges.push({ mode: "drone", label: "Dronă", icon: "🚁", available: false });
+    badges.push({ mode: "drone", label: "Drone", icon: "🚁", available: false });
   }
 
   // E-bike eligibility (up to 5kg, urban zones)
@@ -169,7 +169,7 @@ function computeDeliveryBadges(weight: number, category: string, zone: string): 
 
   // Auto eligibility (up to 20kg)
   if (weight <= 20) {
-    badges.push({ mode: "auto", label: "Auto", icon: "🚗", available: true, estimatedTime: "20-35 min", estimatedCost: 65 });
+    badges.push({ mode: "auto", label: "Car", icon: "🚗", available: true, estimatedTime: "20-35 min", estimatedCost: 65 });
   }
 
   // Van eligibility (any weight)

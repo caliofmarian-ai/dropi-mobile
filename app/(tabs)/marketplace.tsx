@@ -152,7 +152,7 @@ export default function MarketplaceScreen() {
             Marketplace
           </Text>
           <Text style={{ fontSize: 13, color: colors.muted, marginTop: 4 }}>
-            Marketplace controlat DROPi — Livrare multimodală
+            DROPi controlled Marketplace — Multimodal Delivery
           </Text>
         </View>
 
@@ -181,7 +181,7 @@ export default function MarketplaceScreen() {
         <View style={{ marginBottom: 12 }}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 }}>
             <CategoryChip
-              category={{ id: "all", name: "Toate", icon: "🏪", droneEligible: false, maxWeightDrone: 0, description: "" }}
+              category={{ id: "all", name: "All", icon: "🏪", droneEligible: false, maxWeightDrone: 0, description: "" }}
               selected={selectedCategory === null}
               onPress={() => setSelectedCategory(null)}
             />
@@ -236,7 +236,7 @@ export default function MarketplaceScreen() {
             <View style={{ alignItems: "center", paddingTop: 40 }}>
               <Text style={{ fontSize: 40 }}>🔍</Text>
               <Text style={{ fontSize: 14, color: colors.muted, marginTop: 8 }}>
-                Niciun produs găsit în această categorie
+                No products found in this category
               </Text>
             </View>
           }

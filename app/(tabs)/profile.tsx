@@ -4,7 +4,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
 import { getRoleConfig, CHANNEL_INFO } from "@/shared/types";
 
-export default function ProfileScreen() {
+export default function ProfileeScreen() {
   const { user, logout } = useDropiAuth();
   const router = useRouter();
 
@@ -31,7 +31,7 @@ export default function ProfileScreen() {
   return (
     <ScreenContainer className="px-4 pt-4">
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        <Text className="text-2xl font-bold text-foreground mb-6">Profile</Text>
+        <Text className="text-2xl font-bold text-foreground mb-6">Profilee</Text>
 
         {/* User Card */}
         <View className="bg-surface border border-border rounded-2xl p-5 mb-4">

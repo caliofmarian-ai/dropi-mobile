@@ -45,9 +45,9 @@ export default function StoreScreen() {
   if (!merchant) {
     return (
       <ScreenContainer className="p-6">
-        <Text style={{ color: colors.foreground, fontSize: 16 }}>Magazin negăsit</Text>
+        <Text style={{ color: colors.foreground, fontSize: 16 }}>Store not found</Text>
         <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 16 }}>
-          <Text style={{ color: colors.primary }}>← Înapoi</Text>
+          <Text style={{ color: colors.primary }}>← Back</Text>
         </TouchableOpacity>
       </ScreenContainer>
     );
@@ -55,7 +55,7 @@ export default function StoreScreen() {
 
   const trustBadgeLabel = {
     verified: "✓ Verificat",
-    trusted: "★ De Încredere",
+    trusted: "★ Trusted",
     new: "🆕 Nou",
     community: "🤝 Comunitar",
   };
@@ -73,7 +73,7 @@ export default function StoreScreen() {
               onPress={() => router.back()}
               style={{ paddingHorizontal: 20, paddingTop: 12 }}
             >
-              <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "600" }}>← Înapoi la Marketplace</Text>
+              <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "600" }}>← Back la Marketplace</Text>
             </TouchableOpacity>
 
             {/* Merchant Header */}
@@ -122,7 +122,7 @@ export default function StoreScreen() {
                 </View>
                 <View style={{ alignItems: "center" }}>
                   <Text style={{ fontSize: 16, fontWeight: "700", color: merchant.isOpen ? "#10B981" : colors.error }}>
-                    {merchant.isOpen ? "DESCHIS" : "ÎNCHIS"}
+                    {merchant.isOpen ? "OPEN" : "CLOSED"}
                   </Text>
                   <Text style={{ fontSize: 10, color: colors.muted }}>Status</Text>
                 </View>
@@ -161,14 +161,14 @@ export default function StoreScreen() {
                       merchant.type === "community_seller" ? "Seller Comunitar (Neautorizat)" : "P2P"}
               </Text>
               <Text style={{ fontSize: 11, color: colors.muted }}>
-                Zonă: {merchant.zone}
+                Zone: {merchant.zone}
               </Text>
             </View>
 
             {/* Products Header */}
             <View style={{ paddingHorizontal: 20, marginTop: 20, marginBottom: 12 }}>
               <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground }}>
-                Produse ({products.length})
+                Products ({products.length})
               </Text>
             </View>
           </View>

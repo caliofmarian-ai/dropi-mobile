@@ -48,25 +48,25 @@ export default function CartScreen() {
   const total = subtotal + deliveryTotal;
 
   const receptionOptions = [
-    { id: "personal", label: "Predare personală", icon: "🤝", description: "Clientul preia personal coletul" },
-    { id: "door", label: "La ușă", icon: "🚪", description: "Lăsat la ușa de intrare" },
-    { id: "gate", label: "La poartă", icon: "🏠", description: "Lăsat la poartă" },
-    { id: "yard", label: "În curte", icon: "🌳", description: "Lăsat în curte (risc acceptat)" },
+    { id: "personal", label: "Personal handoff", icon: "🤝", description: "Client picks up the package personally" },
+    { id: "door", label: "At the door", icon: "🚪", description: "Left at the front door" },
+    { id: "gate", label: "At the gate", icon: "🏠", description: "Left at the gate" },
+    { id: "yard", label: "In the yard", icon: "🌳", description: "Left in the yard (risk accepted)" },
     { id: "droneport", label: "DronePort Pickup", icon: "🏗️", description: "Ridicare de la DronePort-ul cel mai apropiat" },
   ];
 
   function handleCheckout() {
     Alert.alert(
-      "Confirmare Comandă",
-      `Total: ₱${total}\nRecepție: ${receptionOptions.find(r => r.id === receptionPoint)?.label}\n\nComanda va fi validată de platformă. Metoda finală de livrare este decisă de DROPi.`,
+      "Confirm Order",
+      `Total: ₱${total}\nReception: ${receptionOptions.find(r => r.id === receptionPoint)?.label}\n\nOrder will be validated by the platform. Final delivery method is decided by DROPi.`,
       [
-        { text: "Anulează", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Plasează Comanda",
+          text: "Place Order",
           onPress: () => {
             Alert.alert(
-              "Comandă Plasată ✓",
-              "Comanda ta a fost trimisă pentru validare.\n\nFlux: Marketplace → Cerere → Aplicație → Decizie → Livrare\n\nVei primi notificări despre statusul comenzii.",
+              "Order Placed ✓",
+              "Your order has been sent for validation.\n\nFlow: Marketplace → Request → Application → Decision → Delivery\n\nYou will receive notifications about order status.",
               [{ text: "OK", onPress: () => router.replace("/(tabs)") }]
             );
           },
@@ -85,10 +85,10 @@ export default function CartScreen() {
         {/* Header */}
         <View style={{ paddingHorizontal: 20, paddingTop: 16, flexDirection: "row", alignItems: "center" }}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "600" }}>← Înapoi</Text>
+            <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "600" }}>← Back</Text>
           </TouchableOpacity>
           <Text style={{ fontSize: 22, fontWeight: "800", color: colors.foreground, marginLeft: 16 }}>
-            Coș ({cart.length})
+            Cart ({cart.length})
           </Text>
         </View>
 
@@ -154,7 +154,7 @@ export default function CartScreen() {
         {/* Reception Point Selection */}
         <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
           <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground, marginBottom: 12 }}>
-            Punct de recepție
+            Reception point
           </Text>
           {receptionOptions.map((option) => (
             <TouchableOpacity
@@ -198,14 +198,14 @@ export default function CartScreen() {
             }}
           >
             <Text style={{ fontSize: 12, fontWeight: "700", color: "#92400E", marginBottom: 4 }}>
-              ⚠️ Informare Canonică
+              ⚠️ Canonical Notice
             </Text>
             <Text style={{ fontSize: 11, color: "#92400E", lineHeight: 18 }}>
-              • Badge-urile de livrare sunt informative, nu garanții{"\n"}
-              • Metoda finală de livrare este decisă exclusiv de platformă{"\n"}
-              • Marketplace-ul inițiază cererea, aplicația validează și orchestrează{"\n"}
-              • Costurile afișate sunt estimative și supuse validării finale{"\n"}
-              • Opțiunile pasive de recepție (ușă/poartă/curte) = risc acceptat de client
+              • Delivery badges are informational, not guarantees{"\n"}
+              • Final delivery method is decided exclusively by the platform{"\n"}
+              • Marketplace initiates the request, app validates and orchestrates{"\n"}
+              • Displayed costs are estimates subject to final validation{"\n"}
+              • Passive reception options (door/gate/yard) = risk accepted by client
             </Text>
           </View>
         </View>
@@ -222,7 +222,7 @@ export default function CartScreen() {
             }}
           >
             <Text style={{ fontSize: 14, fontWeight: "700", color: colors.foreground, marginBottom: 12 }}>
-              Sumar Comandă
+              Order Summary
             </Text>
             <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 6 }}>
               <Text style={{ fontSize: 13, color: colors.muted }}>Subtotal produse</Text>
@@ -267,11 +267,11 @@ export default function CartScreen() {
           activeOpacity={0.8}
         >
           <Text style={{ color: "#FFFFFF", fontWeight: "800", fontSize: 16 }}>
-            Plasează Comanda — ₱{total}
+            Place Order — ₱{total}
           </Text>
         </TouchableOpacity>
         <Text style={{ fontSize: 10, color: colors.muted, textAlign: "center", marginTop: 8 }}>
-          Flux canonic: Client → Marketplace → Cerere → Aplicație → Decizie → Livrare
+          Canonical flow: Client → Marketplace → Request → Application → Decision → Delivery
         </Text>
       </View>
     </ScreenContainer>

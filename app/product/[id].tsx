@@ -28,9 +28,9 @@ export default function ProductDetailScreen() {
   if (!product || !merchant) {
     return (
       <ScreenContainer className="p-6">
-        <Text style={{ color: colors.foreground, fontSize: 16 }}>Produs negăsit</Text>
+        <Text style={{ color: colors.foreground, fontSize: 16 }}>Product not found</Text>
         <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 16 }}>
-          <Text style={{ color: colors.primary }}>← Înapoi</Text>
+          <Text style={{ color: colors.primary }}>← Back</Text>
         </TouchableOpacity>
       </ScreenContainer>
     );
@@ -52,7 +52,7 @@ export default function ProductDetailScreen() {
 
   function handleAddToCart() {
     if (!selectedMode) {
-      Alert.alert("Selectează modul de livrare", "Te rugăm să alegi un mod de livrare înainte de a continua.");
+      Alert.alert("Select delivery mode", "Please choose a delivery mode before continuing.");
       return;
     }
     if (selectedMode === "drone" && !droneAccepted) {
@@ -60,11 +60,11 @@ export default function ProductDetailScreen() {
       return;
     }
     Alert.alert(
-      "Adăugat în coș ✓",
+      "Added to cart ✓",
       `${product!.name} x${quantity}\nLivrare: ${DELIVERY_MODE_INFO[selectedMode].label}\nTotal: ₱${totalPrice}`,
       [
-        { text: "Continuă cumpărăturile", onPress: () => router.back() },
-        { text: "Vezi coșul", onPress: () => router.push("/cart" as any) },
+        { text: "Continue shopping", onPress: () => router.back() },
+        { text: "View cart", onPress: () => router.push("/cart" as any) },
       ]
     );
   }
@@ -77,7 +77,7 @@ export default function ProductDetailScreen() {
           onPress={() => router.back()}
           style={{ paddingHorizontal: 20, paddingTop: 12 }}
         >
-          <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "600" }}>← Înapoi</Text>
+          <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "600" }}>← Back</Text>
         </TouchableOpacity>
 
         {/* Product Image */}
@@ -137,15 +137,15 @@ export default function ProductDetailScreen() {
           {/* Product Specs */}
           <View style={{ flexDirection: "row", marginTop: 16, gap: 8 }}>
             <View style={{ flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 12, alignItems: "center" }}>
-              <Text style={{ fontSize: 11, color: colors.muted }}>Greutate</Text>
+              <Text style={{ fontSize: 11, color: colors.muted }}>Weight</Text>
               <Text style={{ fontSize: 15, fontWeight: "700", color: colors.foreground }}>{product.weight} kg</Text>
             </View>
             <View style={{ flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 12, alignItems: "center" }}>
-              <Text style={{ fontSize: 11, color: colors.muted }}>Categorie</Text>
+              <Text style={{ fontSize: 11, color: colors.muted }}>Category</Text>
               <Text style={{ fontSize: 15, fontWeight: "700", color: colors.foreground }}>{category?.icon} {category?.name}</Text>
             </View>
             <View style={{ flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 12, alignItems: "center" }}>
-              <Text style={{ fontSize: 11, color: colors.muted }}>Zonă</Text>
+              <Text style={{ fontSize: 11, color: colors.muted }}>Zone</Text>
               <Text style={{ fontSize: 15, fontWeight: "700", color: colors.foreground }}>{product.zone}</Text>
             </View>
           </View>
@@ -160,7 +160,7 @@ export default function ProductDetailScreen() {
           {/* Quantity Selector */}
           <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
             <Text style={{ fontSize: 14, fontWeight: "600", color: colors.foreground, marginRight: 12 }}>
-              Cantitate:
+              Quantity:
             </Text>
             <TouchableOpacity
               onPress={() => setQuantity(Math.max(1, quantity - 1))}
@@ -190,10 +190,10 @@ export default function ProductDetailScreen() {
           {/* Delivery Mode Selection */}
           <View style={{ marginTop: 24 }}>
             <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground, marginBottom: 12 }}>
-              Selectează modul de livrare
+              Select delivery mode
             </Text>
             <Text style={{ fontSize: 11, color: colors.muted, marginBottom: 12 }}>
-              Badge-urile indică modurile posibile. Metoda finală este decisă de platformă.
+              Badges indicate possible modes. Final method is decided by the platform.
             </Text>
 
             {product.deliveryBadges.map((badge) => {
@@ -232,7 +232,7 @@ export default function ProductDetailScreen() {
                       {modeInfo.label}
                     </Text>
                     <Text style={{ fontSize: 11, color: colors.muted }}>
-                      {isAvailable ? modeInfo.description : "Indisponibil pentru acest produs"}
+                      {isAvailable ? modeInfo.description : "Unavailable pentru acest produs"}
                     </Text>
                   </View>
                   {isAvailable && (
@@ -266,29 +266,29 @@ export default function ProductDetailScreen() {
               }}
             >
               <Text style={{ fontSize: 16, fontWeight: "800", color: colors.foreground, marginBottom: 12 }}>
-                🚁 Condiții Livrare cu Dronă
+                🚁 Drone Delivery Conditions
               </Text>
               <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 20, marginBottom: 8 }}>
-                Prin selectarea livrării cu dronă, accept următoarele condiții:
+                By selecting drone delivery, I accept the following conditions:
               </Text>
               <View style={{ gap: 6 }}>
                 <Text style={{ fontSize: 12, color: colors.foreground }}>
-                  • Drona NU așteaptă clientul la punctul de recepție
+                  • The drone does NOT wait for the client at the reception point
                 </Text>
                 <Text style={{ fontSize: 12, color: colors.foreground }}>
-                  • Drona NU negociază locul de livrare
+                  • The drone does NOT negotiate the delivery location
                 </Text>
                 <Text style={{ fontSize: 12, color: colors.foreground }}>
-                  • Drona NU repetă livrarea dacă recepția eșuează
+                  • The drone does NOT repeat delivery if reception fails
                 </Text>
                 <Text style={{ fontSize: 12, color: colors.foreground }}>
-                  • Recepția eșuată declanșează fallback (livrare terestră)
+                  • Failed reception triggers fallback (ground delivery)
                 </Text>
                 <Text style={{ fontSize: 12, color: colors.foreground }}>
-                  • Punctul de recepție trebuie să fie valid și accesibil
+                  • The reception point must be valid and accessible
                 </Text>
                 <Text style={{ fontSize: 12, color: colors.foreground }}>
-                  • Metoda finală poate fi schimbată de platformă (meteo, capacitate)
+                  • Final method may be changed by platform (weather, capacity)
                 </Text>
               </View>
               <View style={{ flexDirection: "row", marginTop: 16, gap: 10 }}>
@@ -300,7 +300,7 @@ export default function ProductDetailScreen() {
                     borderWidth: 0.5, borderColor: colors.border,
                   }}
                 >
-                  <Text style={{ color: colors.muted, fontWeight: "600" }}>Anulează</Text>
+                  <Text style={{ color: colors.muted, fontWeight: "600" }}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleAcceptDroneConditions}
@@ -309,7 +309,7 @@ export default function ProductDetailScreen() {
                     backgroundColor: "#0066FF", alignItems: "center",
                   }}
                 >
-                  <Text style={{ color: "#FFFFFF", fontWeight: "700" }}>Accept Condițiile</Text>
+                  <Text style={{ color: "#FFFFFF", fontWeight: "700" }}>Accept Conditionsle</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -351,7 +351,7 @@ export default function ProductDetailScreen() {
           activeOpacity={0.8}
         >
           <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 15 }}>
-            Adaugă în coș
+            Add to cart
           </Text>
         </TouchableOpacity>
       </View>

@@ -19,25 +19,25 @@ interface CheckItem {
 // Different pre-checks depending on vehicle type
 const DRONE_PREFLIGHT: CheckItem[] = [
   { id: "battery", label: "Baterie > 80%", checked: false },
-  { id: "weather", label: "Condiții meteo OK (vânt < 35 km/h)", checked: false },
+  { id: "weather", label: "Weather OK (wind < 35 km/h)", checked: false },
   { id: "connection", label: "Semnal telemetrie stabil", checked: false },
-  { id: "cargo", label: "Colet securizat & cântărit", checked: false },
-  { id: "route", label: "Rută de zbor liberă (no-fly zone clear)", checked: false },
-  { id: "airspace", label: "Autorizare spațiu aerian confirmată", checked: false },
+  { id: "cargo", label: "Package secured & weighed", checked: false },
+  { id: "route", label: "Flight route clear (no-fly zone clear)", checked: false },
+  { id: "airspace", label: "Airspace authorization confirmed", checked: false },
 ];
 
 const TERRESTRIAL_PREFLIGHT: CheckItem[] = [
-  { id: "vehicle", label: "Vehicul verificat & funcțional", checked: false },
-  { id: "cargo", label: "Colet securizat & cântărit", checked: false },
-  { id: "route", label: "Rută de navigare calculată", checked: false },
-  { id: "fuel", label: "Combustibil/Baterie suficientă", checked: false },
+  { id: "vehicle", label: "Vehicle checked & functional", checked: false },
+  { id: "cargo", label: "Package secured & weighed", checked: false },
+  { id: "route", label: "Navigation route calculated", checked: false },
+  { id: "fuel", label: "Fuel/Battery sufficient", checked: false },
 ];
 
 const VEHICLE_INFO: Record<string, { icon: string; label: string; launchText: string; inTransitLabel: string; stopLabel: string; fallbackLabel: string }> = {
-  drone: { icon: "🚁", label: "Dronă", launchText: "Lansare Dronă", inTransitLabel: "Supervizare Zbor", stopLabel: "⛔ STOP — Oprire de Urgență", fallbackLabel: "↩ FALLBACK — Retur la DronePort" },
-  auto: { icon: "🚗", label: "Auto", launchText: "Pornire Cursă", inTransitLabel: "În Tranzit — Auto", stopLabel: "⛔ STOP — Oprire Imediată", fallbackLabel: "↩ RETUR — Întoarcere la Depozit" },
-  van: { icon: "🚐", label: "Van", launchText: "Pornire Cursă", inTransitLabel: "În Tranzit — Van", stopLabel: "⛔ STOP — Oprire Imediată", fallbackLabel: "↩ RETUR — Întoarcere la Depozit" },
-  ebike: { icon: "🚲", label: "E-Bike", launchText: "Pornire Livrare", inTransitLabel: "În Tranzit — E-Bike", stopLabel: "⛔ STOP — Oprire Imediată", fallbackLabel: "↩ RETUR — Întoarcere la Punct Pickup" },
+  drone: { icon: "🚁", label: "Drone", launchText: "Launch Drone", inTransitLabel: "Flight Supervision", stopLabel: "⛔ STOP — Emergency Stop", fallbackLabel: "↩ FALLBACK — Return to DronePort" },
+  auto: { icon: "🚗", label: "Car", launchText: "Start Delivery", inTransitLabel: "In Transit — Car", stopLabel: "⛔ STOP — Immediate Stop", fallbackLabel: "↩ RETURN — Back to Depot" },
+  van: { icon: "🚐", label: "Van", launchText: "Start Delivery", inTransitLabel: "In Transit — Van", stopLabel: "⛔ STOP — Immediate Stop", fallbackLabel: "↩ RETURN — Back to Depot" },
+  ebike: { icon: "🚲", label: "E-Bike", launchText: "Start Delivery", inTransitLabel: "In Transit — E-Bike", stopLabel: "⛔ STOP — Immediate Stop", fallbackLabel: "↩ RETURN — Back to Pickup Point" },
 };
 
 export default function MissionDetailScreen() {
@@ -55,7 +55,7 @@ export default function MissionDetailScreen() {
   if (!mission) {
     return (
       <ScreenContainer edges={["top", "bottom", "left", "right"]} className="items-center justify-center">
-        <Text className="text-muted">Misiune negăsită</Text>
+        <Text className="text-muted">Mission not found</Text>
       </ScreenContainer>
     );
   }
@@ -74,7 +74,7 @@ export default function MissionDetailScreen() {
 
   const handleLaunch = () => {
     if (!allChecked) {
-      Alert.alert("Verificare Incompletă", "Toate punctele trebuie confirmate înainte de lansare.");
+      Alert.alert("Incomplete Check", "All items must be confirmed before launch.");
       return;
     }
     setPhase("inflight");
@@ -82,17 +82,17 @@ export default function MissionDetailScreen() {
 
   const handleStop = () => {
     Alert.alert(
-      "OPRIRE DE URGENȚĂ",
+      "EMERGENCY STOP",
       isDrone
-        ? "Aceasta va opri imediat drona. Ești sigur?"
-        : "Aceasta va opri imediat vehiculul. Ești sigur?",
+        ? "This will immediately stop the drone. Are you sure?"
+        : "This will immediately stop the vehicle. Are you sure?",
       [
-        { text: "Anulează", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "STOP ACUM",
+          text: "STOP NOW",
           style: "destructive",
           onPress: () => {
-            Alert.alert("Vehicul Oprit", "Oprire de urgență executată. Se creează raport de incident.");
+            Alert.alert("Vehicle Stopped", "Emergency stop executed. Creating incident report.");
             setPhase("complete");
           },
         },
@@ -102,17 +102,17 @@ export default function MissionDetailScreen() {
 
   const handleFallback = () => {
     const fallbackMsg = isDrone
-      ? "Drona se va întoarce la cel mai apropiat DronePort. Confirmi?"
-      : "Vehiculul se va întoarce la punctul de origine. Confirmi?";
+      ? "The drone will return to the nearest DronePort. Confirm?"
+      : "The vehicle will return to the origin point. Confirm?";
     Alert.alert(
-      "Activare Fallback",
+      "Activate Fallback",
       fallbackMsg,
       [
-        { text: "Anulează", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Confirmă Fallback",
+          text: "Confirm Fallback",
           onPress: () => {
-            Alert.alert("Fallback Activ", isDrone ? "Drona se întoarce la DronePort Alpha." : "Vehiculul se întoarce la depozit.");
+            Alert.alert("Fallback Active", isDrone ? "Drone returning to DronePort Alpha." : "Vehicle returning to depot.");
             setPhase("complete");
           },
         },
@@ -121,7 +121,7 @@ export default function MissionDetailScreen() {
   };
 
   const handleComplete = () => {
-    Alert.alert("Misiune Completă", "Raportul post-misiune a fost înregistrat.");
+    Alert.alert("Mission Complete", "Post-mission report has been recorded.");
     router.back();
   };
 
@@ -132,7 +132,7 @@ export default function MissionDetailScreen() {
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
           <View className="px-4 pt-4 pb-3 flex-row items-center">
             <TouchableOpacity onPress={() => router.back()} className="mr-3 p-2">
-              <Text className="text-primary text-base">← Înapoi</Text>
+              <Text className="text-primary text-base">← Back</Text>
             </TouchableOpacity>
             <Text className="text-lg font-bold text-foreground">Detalii Misiune</Text>
           </View>
@@ -177,7 +177,7 @@ export default function MissionDetailScreen() {
               <Text className="text-sm text-foreground">{mission.packageWeight} kg</Text>
             </View>
             <View className="flex-row justify-between py-1.5">
-              <Text className="text-sm text-muted">Distanță</Text>
+              <Text className="text-sm text-muted">Distance</Text>
               <Text className="text-sm text-foreground">{mission.distance} km</Text>
             </View>
             <View className="flex-row justify-between py-1.5">
@@ -196,7 +196,7 @@ export default function MissionDetailScreen() {
               activeOpacity={0.8}
               onPress={handleAcceptMission}
             >
-              <Text className="text-white font-bold text-base">Acceptă Misiunea</Text>
+              <Text className="text-white font-bold text-base">Accept Mission</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -214,7 +214,7 @@ export default function MissionDetailScreen() {
               {isDrone ? "Pre-Flight Checklist" : "Checklist Pre-Plecare"}
             </Text>
             <Text className="text-sm text-muted mt-1">
-              {isDrone ? "Toate punctele trebuie confirmate înainte de lansare" : "Verifică toate punctele înainte de pornire"}
+              {isDrone ? "All items must be confirmed before launch" : "Verify all items before departure"}
             </Text>
             <View style={{ flexDirection: "row", alignItems: "center", marginTop: 8 }}>
               <Text style={{ fontSize: 18 }}>{vehicleInfo.icon}</Text>
@@ -259,7 +259,7 @@ export default function MissionDetailScreen() {
               onPress={handleLaunch}
             >
               <Text className={`font-bold text-base ${allChecked ? "text-white" : "text-muted"}`}>
-                {allChecked ? vehicleInfo.launchText : "Completează Toate Verificările"}
+                {allChecked ? vehicleInfo.launchText : "Complete All Checks"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -303,12 +303,12 @@ export default function MissionDetailScreen() {
                 {isDrone ? (
                   <>
                     <Text className="text-muted text-xs">📶 Alt: 85m</Text>
-                    <Text className="text-muted text-xs">⚡ Viteză: 65 km/h</Text>
+                    <Text className="text-muted text-xs">⚡ Speed: 65 km/h</Text>
                     <Text className="text-muted text-xs">🔋 Baterie: 74%</Text>
                   </>
                 ) : (
                   <>
-                    <Text className="text-muted text-xs">⚡ Viteză: 28 km/h</Text>
+                    <Text className="text-muted text-xs">⚡ Speed: 28 km/h</Text>
                     <Text className="text-muted text-xs">📍 Dist: {(mission.distance * 0.6).toFixed(1)} km</Text>
                   </>
                 )}
@@ -325,7 +325,7 @@ export default function MissionDetailScreen() {
               onPress={handleStop}
             >
               <Text className="text-white font-bold text-xl">{vehicleInfo.stopLabel}</Text>
-              <Text className="text-white/80 text-xs mt-0.5">Oprire Imediată — Raport Incident</Text>
+              <Text className="text-white/80 text-xs mt-0.5">Immediate Stop — Incident Report</Text>
             </TouchableOpacity>
 
             {/* FALLBACK Button */}
@@ -343,7 +343,7 @@ export default function MissionDetailScreen() {
               activeOpacity={0.8}
               onPress={() => setPhase("complete")}
             >
-              <Text className="text-white font-semibold text-base">✓ Livrare Completă</Text>
+              <Text className="text-white font-semibold text-base">✓ Delivery Complete</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -357,17 +357,17 @@ export default function MissionDetailScreen() {
       <View className="w-20 h-20 rounded-full bg-success/20 items-center justify-center mb-4">
         <Text className="text-3xl">✓</Text>
       </View>
-      <Text className="text-xl font-bold text-foreground mb-2">Misiune Completă</Text>
+      <Text className="text-xl font-bold text-foreground mb-2">Mission Complete</Text>
       <Text className="text-sm text-muted text-center mb-2">
         {vehicleInfo.icon} {vehicleInfo.label} — {mission.merchantName}
       </Text>
-      <Text className="text-xs text-muted text-center mb-6">Raportul post-misiune a fost înregistrat în sistemul de audit.</Text>
+      <Text className="text-xs text-muted text-center mb-6">Post-mission report has been recorded in the audit system.</Text>
       <TouchableOpacity
         className="bg-primary rounded-xl px-8 py-3.5"
         activeOpacity={0.8}
         onPress={handleComplete}
       >
-        <Text className="text-white font-semibold">Înapoi la Misiuni</Text>
+        <Text className="text-white font-semibold">Back to Missions</Text>
       </TouchableOpacity>
     </ScreenContainer>
   );

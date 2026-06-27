@@ -144,7 +144,7 @@ function DeliveryPartnerDashboard() {
   return (
     <ScreenContainer className="px-4 pt-4">
       <Text className="text-2xl font-bold text-foreground mb-1">Mission Radar</Text>
-      <Text className="text-sm text-muted mb-4">{availableMissions.length} misiuni disponibile în zona ta</Text>
+      <Text className="text-sm text-muted mb-4">{availableMissions.length} missions available in your area</Text>
       <FlatList
         data={availableMissions}
         keyExtractor={(item) => item.id.toString()}
@@ -175,7 +175,7 @@ function DeliveryPartnerDashboard() {
             </View>
           </TouchableOpacity>
         )}
-        ListEmptyComponent={<View className="items-center py-12"><Text className="text-muted text-base">Nicio misiune disponibilă</Text></View>}
+        ListEmptyComponent={<View className="items-center py-12"><Text className="text-muted text-base">No missions available</Text></View>}
       />
     </ScreenContainer>
   );
@@ -324,7 +324,7 @@ function FleetManagerDashboard() {
   return (
     <ScreenContainer className="px-4 pt-4">
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        <Text className="text-2xl font-bold text-foreground mb-1">Flotă Multimodală</Text>
+        <Text className="text-2xl font-bold text-foreground mb-1">Multimodal Fleet</Text>
         <Text className="text-sm text-muted mb-4">Managementul Flotei DROPi</Text>
         {/* Drone fleet */}
         <Text className="text-sm font-semibold text-foreground mb-2">🚁 Drone</Text>

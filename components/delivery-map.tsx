@@ -33,15 +33,15 @@ interface DeliveryMapProps {
 }
 
 const VEHICLE_MARKERS: Record<VehicleType, { icon: string; color: string; label: string }> = {
-  drone: { icon: "🚁", color: "#0066FF", label: "Dronă" },
+  drone: { icon: "🚁", color: "#0066FF", label: "Drone" },
   auto: { icon: "🚗", color: "#10B981", label: "Auto" },
   van: { icon: "🚐", color: "#8B5CF6", label: "Van" },
   ebike: { icon: "🚲", color: "#F59E0B", label: "E-Bike" },
 };
 
 const STATUS_LABELS: Record<DeliveryStatus, string> = {
-  picking_up: "Se ridică comanda",
-  in_transit: "În tranzit",
+  picking_up: "Picking up order",
+  in_transit: "In transit",
   approaching: "Se apropie",
   delivered: "Livrat",
 };
@@ -379,7 +379,7 @@ export function createDemoRoute(
 
   return {
     pickup: { ...r.pickup, label: "Merchant — Pickup" },
-    dropoff: { ...r.dropoff, label: "Client — Destinație" },
+    dropoff: { ...r.dropoff, label: "Client — Destination" },
     dronePort: r.dronePort ? { ...r.dronePort, label: "DronePort Hub" } : undefined,
     currentPosition,
     vehicleType,

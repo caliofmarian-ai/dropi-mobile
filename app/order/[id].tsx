@@ -24,10 +24,10 @@ const VEHICLE_ICONS: Record<string, string> = {
 };
 
 const RECEPTION_LABELS: Record<string, string> = {
-  personal: "🤝 Predare personală",
-  door: "🚪 La ușă",
-  gate: "🏠 La poartă",
-  yard: "🌳 În curte",
+  personal: "🤝 Personal handoff",
+  door: "🚪 At the door",
+  gate: "🏠 At the gate",
+  yard: "🌳 In the yard",
   droneport: "🏗️ DronePort Pickup",
 };
 
@@ -40,7 +40,7 @@ export default function OrderDetailScreen() {
   if (!order) {
     return (
       <ScreenContainer edges={["top", "bottom", "left", "right"]} className="items-center justify-center">
-        <Text className="text-muted">Comandă negăsită</Text>
+        <Text className="text-muted">Order not found</Text>
       </ScreenContainer>
     );
   }
@@ -55,7 +55,7 @@ export default function OrderDetailScreen() {
         {/* Header */}
         <View className="px-4 pt-4 pb-3 flex-row items-center">
           <TouchableOpacity onPress={() => router.back()} className="mr-3 p-2">
-            <Text className="text-primary text-base">← Înapoi</Text>
+            <Text className="text-primary text-base">← Back</Text>
           </TouchableOpacity>
           <Text className="text-lg font-bold text-foreground flex-1">{order.orderUid}</Text>
         </View>
@@ -77,15 +77,15 @@ export default function OrderDetailScreen() {
                 Live — ETA {order.estimatedTime} min
               </Text>
               <Text className="text-primary/70 text-xs mt-0.5">
-                {order.vehicleType === "drone" ? "Dronă în zbor spre locația ta" :
-                 order.vehicleType === "auto" ? "Vehicul auto în drum spre tine" :
-                 order.vehicleType === "van" ? "Van în drum spre tine" :
-                 "Curier pe bicicletă electrică în drum"}
+                {order.vehicleType === "drone" ? "Drone flying to your location" :
+                 order.vehicleType === "auto" ? "Car on its way to you" :
+                 order.vehicleType === "van" ? "Van on its way to you" :
+                 "E-bike courier on the way"}
               </Text>
             </View>
           )}
 
-          <Text className="text-sm text-muted">Livrare la: {order.deliveryAddress}</Text>
+          <Text className="text-sm text-muted">Delivery to: {order.deliveryAddress}</Text>
           <Text className="text-sm text-muted mt-1">Ridicare de la: {order.pickupAddress}</Text>
         </View>
 
@@ -118,7 +118,7 @@ export default function OrderDetailScreen() {
               <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: colors.border }}>
                 <Text style={{ fontSize: 16 }}>{VEHICLE_ICONS[order.vehicleType || "drone"]}</Text>
                 <Text style={{ fontSize: 12, color: colors.foreground, fontWeight: "600", marginLeft: 8 }}>
-                  Vehicul: {order.vehicleId}
+                  Vehicle: {order.vehicleId}
                 </Text>
                 {order.pilotName && (
                   <Text style={{ fontSize: 12, color: colors.muted, marginLeft: 12 }}>
@@ -132,7 +132,7 @@ export default function OrderDetailScreen() {
             {fallbackInfo && (
               <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: colors.border }}>
                 <Text style={{ fontSize: 11, color: colors.muted, fontWeight: "600" }}>
-                  FALLBACK (dacă metoda primară eșuează):
+                  FALLBACK (if primary method fails):
                 </Text>
                 <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
                   <Text style={{ fontSize: 14 }}>{fallbackInfo.icon}</Text>
@@ -145,7 +145,7 @@ export default function OrderDetailScreen() {
 
             {/* Reception type */}
             <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: colors.border }}>
-              <Text style={{ fontSize: 11, color: colors.muted, fontWeight: "600" }}>PUNCT DE RECEPȚIE:</Text>
+              <Text style={{ fontSize: 11, color: colors.muted, fontWeight: "600" }}>RECEPTION POINT:</Text>
               <Text style={{ fontSize: 13, color: colors.foreground, marginTop: 4 }}>
                 {RECEPTION_LABELS[order.receptionType] || order.receptionType}
               </Text>
@@ -155,7 +155,7 @@ export default function OrderDetailScreen() {
 
         {/* Progress Timeline */}
         <View className="mx-4 mb-4">
-          <Text className="text-base font-semibold text-foreground mb-3">Progres Comandă</Text>
+          <Text className="text-base font-semibold text-foreground mb-3">Order Progress</Text>
           {TIMELINE_STEPS.map((step, index) => {
             const isCompleted = index <= currentStep;
             const isCurrent = index === currentStep;
@@ -194,7 +194,7 @@ export default function OrderDetailScreen() {
 
         {/* Items */}
         <View className="mx-4 bg-surface border border-border rounded-xl p-4 mb-4">
-          <Text className="text-base font-semibold text-foreground mb-2">Produse</Text>
+          <Text className="text-base font-semibold text-foreground mb-2">Products</Text>
           {order.items.map((item, idx) => (
             <View key={idx} className="flex-row justify-between py-1.5">
               <Text className="text-sm text-foreground">{item.quantity}x {item.name}</Text>
@@ -203,7 +203,7 @@ export default function OrderDetailScreen() {
           ))}
           <View className="border-t border-border mt-2 pt-2">
             <View className="flex-row justify-between">
-              <Text className="text-sm text-muted">Greutate totală</Text>
+              <Text className="text-sm text-muted">Total weight</Text>
               <Text className="text-sm text-foreground">{order.packageWeight} kg</Text>
             </View>
             <View className="flex-row justify-between mt-1">
@@ -216,7 +216,7 @@ export default function OrderDetailScreen() {
         {/* Interactive Live Tracking Map */}
         {(order.status === "in_execution" || order.status === "accepted") && (
           <View className="mx-4 mb-4">
-            <Text className="text-base font-semibold text-foreground mb-2">📍 Urmărire Live</Text>
+            <Text className="text-base font-semibold text-foreground mb-2">📍 Live Tracking</Text>
             <DeliveryMap
               route={createDemoRoute(
                 (order.vehicleType || order.deliveryMode || "auto") as VehicleType,
@@ -242,8 +242,8 @@ export default function OrderDetailScreen() {
             }}
           >
             <Text style={{ fontSize: 10, color: colors.muted, lineHeight: 16 }}>
-              ℹ️ Metoda de livrare afișată este cea selectată de platformă. Badge-urile din marketplace sunt informative.
-              Platforma poate schimba metoda în orice moment (meteo, capacitate, urgență). Fallback-ul se activează automat.
+              ℹ️ The delivery method shown is selected by the platform. Marketplace badges are informational.
+              The platform may change the method at any time (weather, capacity, emergency). Fallback activates automatically.
             </Text>
           </View>
         </View>

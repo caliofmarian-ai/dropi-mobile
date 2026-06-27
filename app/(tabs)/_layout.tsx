@@ -8,13 +8,13 @@ import { useDropiAuth } from "@/lib/auth-context";
 import type { Channel, DropiRole } from "@/shared/types";
 
 function getHomeTitle(role: DropiRole, channel: Channel): string {
-  if (role === "customer") return "Comenzile Mele";
+  if (role === "customer") return "Ordersle Mele";
   if (role === "merchant") return "Magazin";
-  if (role === "delivery_partner") return "Misiuni";
+  if (role === "delivery_partner") return "Missions";
   switch (channel) {
     case "C1": return "Dashboard";
-    case "C2": return "Operațiuni";
-    case "C3": return "Urgențe";
+    case "C2": return "Operations";
+    case "C3": return "Emergency";
     case "ADMIN": return "Admin";
     default: return "Home";
   }
@@ -153,7 +153,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="fleet"
         options={{
-          title: "Flotă",
+          title: "Fleet",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="bus.fill" color={color} />,
           href: FLEET_ROLES.includes(role) ? "/fleet" : null,
         }}
@@ -183,7 +183,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="accounting"
         options={{
-          title: "Finanțe",
+          title: "Finance",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />,
           href: ACCOUNTING_ROLES.includes(role) ? "/accounting" : null,
         }}

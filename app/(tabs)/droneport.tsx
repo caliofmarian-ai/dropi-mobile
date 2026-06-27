@@ -87,7 +87,7 @@ const TYPE_INFO: Record<StationType, { icon: string; label: string; color: strin
 
 function StatusIndicator({ status }: { status: StationStatus }) {
   const colors = { active: "#10B981", maintenance: "#F59E0B", offline: "#EF4444" };
-  const labels = { active: "ACTIV", maintenance: "MENTENANȚĂ", offline: "OFFLINE" };
+  const labels = { active: "ACTIVE", maintenance: "MAINTENANCE", offline: "OFFLINE" };
   return (
     <View style={{ backgroundColor: colors[status] + "20", paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 }}>
       <Text style={{ color: colors[status], fontSize: 10, fontWeight: "700" }}>{labels[status]}</Text>
@@ -128,15 +128,15 @@ function StationCard({ station }: { station: LogisticsStation }) {
           <>
             <View className="flex-1 bg-background rounded-lg p-2 items-center">
               <Text className="text-lg font-bold text-success">{station.dronesAvailable}</Text>
-              <Text className="text-[10px] text-muted">Disponibile</Text>
+              <Text className="text-[10px] text-muted">Available</Text>
             </View>
             <View className="flex-1 bg-background rounded-lg p-2 items-center">
               <Text className="text-lg font-bold text-primary">{station.dronesInFlight}</Text>
-              <Text className="text-[10px] text-muted">În Zbor</Text>
+              <Text className="text-[10px] text-muted">In Flight</Text>
             </View>
             <View className="flex-1 bg-background rounded-lg p-2 items-center">
               <Text className="text-lg font-bold text-warning">{station.dronesCharging}</Text>
-              <Text className="text-[10px] text-muted">Încărcare</Text>
+              <Text className="text-[10px] text-muted">Charging</Text>
             </View>
             <View className="flex-1 bg-background rounded-lg p-2 items-center">
               <Text className="text-lg font-bold text-foreground">{station.dronesTotal}</Text>
@@ -148,11 +148,11 @@ function StationCard({ station }: { station: LogisticsStation }) {
           <>
             <View className="flex-1 bg-background rounded-lg p-2 items-center">
               <Text className="text-lg font-bold text-success">{station.vehiclesAvailable}</Text>
-              <Text className="text-[10px] text-muted">Disponibile</Text>
+              <Text className="text-[10px] text-muted">Available</Text>
             </View>
             <View className="flex-1 bg-background rounded-lg p-2 items-center">
               <Text className="text-lg font-bold text-primary">{station.vehiclesInTransit}</Text>
-              <Text className="text-[10px] text-muted">În Tranzit</Text>
+              <Text className="text-[10px] text-muted">In Transit</Text>
             </View>
             <View className="flex-1 bg-background rounded-lg p-2 items-center">
               <Text className="text-lg font-bold text-foreground">{station.vehiclesTotal}</Text>
@@ -172,11 +172,11 @@ function StationCard({ station }: { station: LogisticsStation }) {
             </View>
             <View className="flex-1 bg-background rounded-lg p-2 items-center">
               <Text className="text-lg font-bold text-success">{station.vehiclesAvailable || 0}</Text>
-              <Text className="text-[10px] text-muted">Vehicule</Text>
+              <Text className="text-[10px] text-muted">Vehicles</Text>
             </View>
             <View className="flex-1 bg-background rounded-lg p-2 items-center">
               <Text className="text-lg font-bold text-foreground">{station.transferCapacity}</Text>
-              <Text className="text-[10px] text-muted">Capacitate</Text>
+              <Text className="text-[10px] text-muted">Capacity</Text>
             </View>
           </>
         )}
@@ -187,7 +187,7 @@ function StationCard({ station }: { station: LogisticsStation }) {
           {/* Vehicle breakdown for depots and hubs */}
           {station.vehicleTypes && (
             <View className="mb-3">
-              <Text className="text-sm font-medium text-foreground mb-2">Flotă Vehicule</Text>
+              <Text className="text-sm font-medium text-foreground mb-2">Fleet Vehicles</Text>
               <View className="flex-row gap-3">
                 <View className="flex-row items-center">
                   <Text style={{ fontSize: 14 }}>🚗</Text>
@@ -208,7 +208,7 @@ function StationCard({ station }: { station: LogisticsStation }) {
           {/* Battery status for droneports */}
           {station.batterySlots && (
             <View className="mb-3">
-              <Text className="text-sm font-medium text-foreground mb-1">Baterii Drone</Text>
+              <Text className="text-sm font-medium text-foreground mb-1">Drone Batteries</Text>
               <View className="flex-row items-center gap-2">
                 <View className="flex-1 h-3 bg-background rounded-full overflow-hidden">
                   <View
@@ -222,11 +222,11 @@ function StationCard({ station }: { station: LogisticsStation }) {
 
           {/* Maintenance info */}
           <View className="flex-row justify-between mb-2">
-            <Text className="text-xs text-muted">Ultima Inspecție</Text>
+            <Text className="text-xs text-muted">Last Inspection</Text>
             <Text className="text-xs font-medium text-foreground">{station.lastInspection}</Text>
           </View>
           <View className="flex-row justify-between mb-2">
-            <Text className="text-xs text-muted">Următoarea Mentenanță</Text>
+            <Text className="text-xs text-muted">Next Maintenance</Text>
             <Text className="text-xs font-medium text-foreground">{station.nextMaintenance}</Text>
           </View>
           <View className="flex-row justify-between">
@@ -239,21 +239,21 @@ function StationCard({ station }: { station: LogisticsStation }) {
             <View className="flex-row gap-2 mt-3">
               {station.type === "droneport" && (
                 <TouchableOpacity className="flex-1 bg-primary/10 rounded-lg py-2 items-center" activeOpacity={0.7}>
-                  <Text className="text-primary text-xs font-semibold">Solicită Dronă</Text>
+                  <Text className="text-primary text-xs font-semibold">Request Drone</Text>
                 </TouchableOpacity>
               )}
               {station.type === "vehicle_depot" && (
                 <TouchableOpacity className="flex-1 bg-primary/10 rounded-lg py-2 items-center" activeOpacity={0.7}>
-                  <Text className="text-primary text-xs font-semibold">Solicită Vehicul</Text>
+                  <Text className="text-primary text-xs font-semibold">Request Vehicle</Text>
                 </TouchableOpacity>
               )}
               {station.type === "transfer_hub" && (
                 <TouchableOpacity className="flex-1 bg-primary/10 rounded-lg py-2 items-center" activeOpacity={0.7}>
-                  <Text className="text-primary text-xs font-semibold">Inițiază Transfer</Text>
+                  <Text className="text-primary text-xs font-semibold">Initiate Transfer</Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity className="flex-1 bg-warning/10 rounded-lg py-2 items-center" activeOpacity={0.7}>
-                <Text className="text-warning text-xs font-semibold">Programează Maint.</Text>
+                <Text className="text-warning text-xs font-semibold">Schedule Maint.</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -274,8 +274,8 @@ export default function DronePortScreen() {
 
   return (
     <ScreenContainer className="px-4 pt-4">
-      <Text className="text-2xl font-bold text-foreground mb-1">Rețea Logistică</Text>
-      <Text className="text-sm text-muted mb-4">{activeStations} stații active • {totalDrones} drone • {totalVehicles} vehicule</Text>
+      <Text className="text-2xl font-bold text-foreground mb-1">Logistics Network</Text>
+      <Text className="text-sm text-muted mb-4">{activeStations} active stations • {totalDrones} drone • {totalVehicles} vehicles</Text>
 
       {/* Summary Cards */}
       <View className="flex-row gap-2 mb-4">
@@ -285,17 +285,17 @@ export default function DronePortScreen() {
         </View>
         <View className="flex-1 bg-success/10 border border-success/20 rounded-xl p-3 items-center">
           <Text className="text-xl font-bold text-success">{totalVehicles}</Text>
-          <Text className="text-[10px] text-muted">Vehicule</Text>
+          <Text className="text-[10px] text-muted">Vehicles</Text>
         </View>
         <View className="flex-1 bg-surface border border-border rounded-xl p-3 items-center">
           <Text className="text-xl font-bold text-foreground">{STATIONS.length}</Text>
-          <Text className="text-[10px] text-muted">Stații</Text>
+          <Text className="text-[10px] text-muted">Stations</Text>
         </View>
       </View>
 
       {/* Filter Tabs */}
       <View className="flex-row gap-2 mb-4">
-        {([["all", "Toate"], ["droneport", "🚁 Drone"], ["vehicle_depot", "🚗 Vehicule"], ["transfer_hub", "🔄 Transfer"]] as const).map(([key, label]) => (
+        {([["all", "All"], ["droneport", "🚁 Drone"], ["vehicle_depot", "🚗 Vehicles"], ["transfer_hub", "🔄 Transfer"]] as const).map(([key, label]) => (
           <TouchableOpacity
             key={key}
             style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: filter === key ? "#0066FF" : "transparent", borderWidth: 1, borderColor: filter === key ? "#0066FF" : "#E5E7EB" }}

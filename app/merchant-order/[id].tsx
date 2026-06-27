@@ -24,7 +24,7 @@ export default function MerchantOrderDetailScreen() {
   if (!order) {
     return (
       <ScreenContainer edges={["top", "bottom", "left", "right"]} className="items-center justify-center">
-        <Text className="text-muted">Comanda nu a fost găsită</Text>
+        <Text className="text-muted">Order not found</Text>
       </ScreenContainer>
     );
   }
@@ -33,16 +33,16 @@ export default function MerchantOrderDetailScreen() {
 
   const handleStartPreparing = () => {
     setCurrentStatus("preparing");
-    Alert.alert("Status Actualizat", "Comanda este acum în pregătire.");
+    Alert.alert("Status Updated", "Order is now in preparation.");
   };
 
   const handleMarkReady = () => {
     setCurrentStatus("ready");
-    Alert.alert("Colet Gata", "Comanda marcată ca gata de ridicare. Un pilot/șofer va fi asignat.");
+    Alert.alert("Package Ready", "Order marked as ready for pickup. A pilot/driver will be assigned.");
   };
 
   const handleReportIssue = () => {
-    Alert.alert("Raportare Problemă", "Problema a fost raportată echipei de operațiuni.");
+    Alert.alert("Report Issue", "Issue has been reported to the operations team.");
   };
 
   return (
@@ -51,7 +51,7 @@ export default function MerchantOrderDetailScreen() {
         {/* Header */}
         <View className="px-4 pt-4 pb-3 flex-row items-center">
           <TouchableOpacity onPress={() => router.back()} className="mr-3 p-2">
-            <Text className="text-primary text-base">← Înapoi</Text>
+            <Text className="text-primary text-base">← Back</Text>
           </TouchableOpacity>
           <Text className="text-lg font-bold text-foreground flex-1">{order.orderUid}</Text>
         </View>
@@ -59,14 +59,14 @@ export default function MerchantOrderDetailScreen() {
         {/* Status */}
         <View className="mx-4 bg-surface border border-border rounded-2xl p-4 mb-4">
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-base font-semibold text-foreground">Status Comandă</Text>
+            <Text className="text-base font-semibold text-foreground">Order Status</Text>
             <View style={{ backgroundColor: ORDER_STATUS_COLORS[currentStatus] + "20", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
               <Text style={{ color: ORDER_STATUS_COLORS[currentStatus], fontSize: 12, fontWeight: "600" }}>
                 {ORDER_STATUS_LABELS[currentStatus]}
               </Text>
             </View>
           </View>
-          <Text className="text-sm text-muted">Livrare la: {order.deliveryAddress}</Text>
+          <Text className="text-sm text-muted">Delivery to: {order.deliveryAddress}</Text>
         </View>
 
         {/* Delivery Mode Info */}
@@ -74,7 +74,7 @@ export default function MerchantOrderDetailScreen() {
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={{ fontSize: 22 }}>{modeInfo.icon}</Text>
             <View style={{ marginLeft: 10, flex: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: "700", color: modeInfo.color }}>Mod Livrare: {modeInfo.label}</Text>
+              <Text style={{ fontSize: 14, fontWeight: "700", color: modeInfo.color }}>Delivery Mode: {modeInfo.label}</Text>
               <Text style={{ fontSize: 11, color: colors.muted }}>{modeInfo.description}</Text>
             </View>
           </View>
@@ -88,7 +88,7 @@ export default function MerchantOrderDetailScreen() {
 
         {/* Items */}
         <View className="mx-4 bg-surface border border-border rounded-xl p-4 mb-4">
-          <Text className="text-base font-semibold text-foreground mb-2">Articole de Pregătit</Text>
+          <Text className="text-base font-semibold text-foreground mb-2">Items to Prepare</Text>
           {order.items.map((item, idx) => (
             <View key={idx} className="flex-row justify-between py-2 border-b border-border">
               <Text className="text-sm text-foreground">{item.quantity}x {item.name}</Text>
@@ -103,25 +103,25 @@ export default function MerchantOrderDetailScreen() {
 
         {/* Packaging Instructions based on delivery mode */}
         <View className="mx-4 bg-surface border border-border rounded-xl p-4 mb-4">
-          <Text className="text-sm font-semibold text-foreground mb-2">Instrucțiuni Ambalare</Text>
+          <Text className="text-sm font-semibold text-foreground mb-2">Instructions Packaging</Text>
           {order.deliveryMode === "drone" ? (
             <View className="gap-1.5">
-              <Text className="text-xs text-muted">• Coletul trebuie securizat pentru zbor (vibrații)</Text>
+              <Text className="text-xs text-muted">• Package must be secured for flight (vibrations)</Text>
               <Text className="text-xs text-muted">• Greutate max: {order.packageWeight} kg</Text>
               <Text className="text-xs text-muted">• Dimensiuni compatibile cu compartimentul dronei</Text>
-              <Text className="text-xs text-muted">• Etichetă QR obligatorie pe colet</Text>
+              <Text className="text-xs text-muted">• QR label mandatory on package</Text>
             </View>
           ) : order.deliveryMode === "multimodal" ? (
             <View className="gap-1.5">
               <Text className="text-xs text-muted">• Coletul va trece prin DronePort (transfer)</Text>
-              <Text className="text-xs text-muted">• Ambalare rezistentă la manipulare multiplă</Text>
-              <Text className="text-xs text-muted">• Etichetă QR + cod de transfer obligatoriu</Text>
+              <Text className="text-xs text-muted">• Packaging resistant to multiple handling</Text>
+              <Text className="text-xs text-muted">• QR label + transfer code mandatory</Text>
             </View>
           ) : (
             <View className="gap-1.5">
-              <Text className="text-xs text-muted">• Ambalare standard pentru transport terestru</Text>
-              <Text className="text-xs text-muted">• Etichetă cu adresa de livrare vizibilă</Text>
-              <Text className="text-xs text-muted">• Protecție adecvată pentru tipul produsului</Text>
+              <Text className="text-xs text-muted">• Packaging standard pentru transport terestru</Text>
+              <Text className="text-xs text-muted">• Label with visible delivery address</Text>
+              <Text className="text-xs text-muted">• Adequate protection for product type</Text>
             </View>
           )}
         </View>
@@ -134,7 +134,7 @@ export default function MerchantOrderDetailScreen() {
               activeOpacity={0.8}
               onPress={handleStartPreparing}
             >
-              <Text className="text-white font-bold text-base">Începe Pregătirea</Text>
+              <Text className="text-white font-bold text-base">Start Preparation</Text>
             </TouchableOpacity>
           )}
 
@@ -144,14 +144,14 @@ export default function MerchantOrderDetailScreen() {
               activeOpacity={0.8}
               onPress={handleMarkReady}
             >
-              <Text className="text-white font-bold text-base">Marchează ca Gata (Colet)</Text>
+              <Text className="text-white font-bold text-base">Mark as Ready (Colet)</Text>
             </TouchableOpacity>
           )}
 
           {currentStatus === "ready" && (
             <View className="bg-success/10 border border-success/30 rounded-xl p-4 items-center">
               <Text className="text-success font-semibold">
-                {order.deliveryMode === "drone" ? "Se așteaptă Pilot Dronă" : "Se așteaptă Șofer/Curier"}
+                {order.deliveryMode === "drone" ? "Waiting for Drone Pilot" : "Waiting for Driver/Courier"}
               </Text>
             </View>
           )}
@@ -161,7 +161,7 @@ export default function MerchantOrderDetailScreen() {
             activeOpacity={0.8}
             onPress={handleReportIssue}
           >
-            <Text className="text-error font-medium text-sm">Raportează Problemă</Text>
+            <Text className="text-error font-medium text-sm">Report Issue</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

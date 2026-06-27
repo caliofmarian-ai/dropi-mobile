@@ -117,3 +117,7 @@
 - [x] Admin phantom mode (login as any user from dashboard)
 - [x] Password recovery via Gmail (email link)
 - [ ] qa-debugger validation for Sprint 1-2 (pending)
+
+## Bug Fix: Language Consistency
+- [x] Remove all Romanian text from UI — app must be English-only for now
+- [ ] Future: Add language selector at install (English, Romanian, Tagalog)

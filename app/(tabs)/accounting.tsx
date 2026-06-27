@@ -47,29 +47,29 @@ const DELIVERY_COSTS: DeliveryCostBreakdown[] = [
 const TRANSACTIONS: Transaction[] = [
   { id: "TXN-001", type: "order_payment", amount: 450, currency: "PHP", from: "Client #1247", to: "DROPi Escrow", status: "completed", timestamp: "2026-06-27 14:32", orderId: "ORD-4521", deliveryMode: "drone" },
   { id: "TXN-002", type: "commission", amount: 67.5, currency: "PHP", from: "DROPi Escrow", to: "DROPi Revenue", status: "completed", timestamp: "2026-06-27 14:32", orderId: "ORD-4521", deliveryMode: "drone" },
-  { id: "TXN-003", type: "pilot_payout", amount: 180, currency: "PHP", from: "DROPi Escrow", to: "Pilot Dronă #089", status: "processing", timestamp: "2026-06-27 14:35", orderId: "ORD-4521", deliveryMode: "drone" },
+  { id: "TXN-003", type: "pilot_payout", amount: 180, currency: "PHP", from: "DROPi Escrow", to: "Drone Pilot #089", status: "processing", timestamp: "2026-06-27 14:35", orderId: "ORD-4521", deliveryMode: "drone" },
   { id: "TXN-004", type: "droneport_fee", amount: 45, currency: "PHP", from: "DROPi Escrow", to: "DronePort Central", status: "completed", timestamp: "2026-06-27 14:33", orderId: "ORD-4521", deliveryMode: "drone" },
   { id: "TXN-005", type: "order_payment", amount: 320, currency: "PHP", from: "Client #1198", to: "DROPi Escrow", status: "completed", timestamp: "2026-06-27 12:15", orderId: "ORD-4498", deliveryMode: "ebike" },
   { id: "TXN-006", type: "pilot_payout", amount: 95, currency: "PHP", from: "DROPi Escrow", to: "Curier E-Bike #045", status: "completed", timestamp: "2026-06-27 12:20", orderId: "ORD-4498", deliveryMode: "ebike" },
   { id: "TXN-007", type: "vehicle_rental", amount: 150, currency: "PHP", from: "DROPi Fleet", to: "Vehicle Depot QC", status: "completed", timestamp: "2026-06-27 11:00", deliveryMode: "van" },
   { id: "TXN-008", type: "order_payment", amount: 890, currency: "PHP", from: "Client #1302", to: "DROPi Escrow", status: "completed", timestamp: "2026-06-27 07:22", orderId: "ORD-4520", deliveryMode: "multimodal" },
   { id: "TXN-009", type: "subscription", amount: 4999, currency: "PHP", from: "Merchant #034", to: "DROPi Revenue", status: "completed", timestamp: "2026-06-27 09:00" },
-  { id: "TXN-010", type: "penalty", amount: 500, currency: "PHP", from: "Pilot #045", to: "DROPi Penalități", status: "pending", timestamp: "2026-06-27 08:45" },
+  { id: "TXN-010", type: "penalty", amount: 500, currency: "PHP", from: "Pilot #045", to: "DROPi Penalties", status: "pending", timestamp: "2026-06-27 08:45" },
   { id: "TXN-011", type: "refund", amount: 280, currency: "PHP", from: "DROPi Escrow", to: "Client #1156", status: "completed", timestamp: "2026-06-26 22:10", orderId: "ORD-4515", deliveryMode: "auto" },
 ];
 
 const INVOICES: Invoice[] = [
-  { id: "INV-001", client: "Enterprise Corp", amount: 125000, currency: "PHP", status: "paid", issuedDate: "2026-06-01", dueDate: "2026-06-15", items: [{ description: "C2 Serviciu Lunar — 500 livrări (mix dronă/auto)", amount: 100000 }, { description: "Suport prioritar", amount: 25000 }] },
-  { id: "INV-002", client: "MedSupply Inc", amount: 89000, currency: "PHP", status: "pending", issuedDate: "2026-06-10", dueDate: "2026-06-25", items: [{ description: "C3 Răspuns urgență — 50 deployments dronă", amount: 75000 }, { description: "Închiriere echipament", amount: 14000 }] },
-  { id: "INV-003", client: "FoodChain PH", amount: 45000, currency: "PHP", status: "overdue", issuedDate: "2026-05-15", dueDate: "2026-06-05", items: [{ description: "C2 Contract — 200 livrări e-bike", amount: 40000 }, { description: "Suprataxă asigurare", amount: 5000 }] },
-  { id: "INV-004", client: "Primăria Orașului", amount: 200000, currency: "PHP", status: "draft", issuedDate: "2026-06-16", dueDate: "2026-07-15", items: [{ description: "C3 Contract anual urgențe (dronă + van)", amount: 180000 }, { description: "Training & certificare", amount: 20000 }] },
+  { id: "INV-001", client: "Enterprise Corp", amount: 125000, currency: "PHP", status: "paid", issuedDate: "2026-06-01", dueDate: "2026-06-15", items: [{ description: "C2 Monthly Service — 500 deliveries (drone/car mix)", amount: 100000 }, { description: "Priority support", amount: 25000 }] },
+  { id: "INV-002", client: "MedSupply Inc", amount: 89000, currency: "PHP", status: "pending", issuedDate: "2026-06-10", dueDate: "2026-06-25", items: [{ description: "C3 Emergency response — 50 drone deployments", amount: 75000 }, { description: "Equipment rental", amount: 14000 }] },
+  { id: "INV-003", client: "FoodChain PH", amount: 45000, currency: "PHP", status: "overdue", issuedDate: "2026-05-15", dueDate: "2026-06-05", items: [{ description: "C2 Contract — 200 e-bike deliveries", amount: 40000 }, { description: "Insurance surcharge", amount: 5000 }] },
+  { id: "INV-004", client: "City Hall", amount: 200000, currency: "PHP", status: "draft", issuedDate: "2026-06-16", dueDate: "2026-07-15", items: [{ description: "C3 Annual emergency contract (drone + van)", amount: 180000 }, { description: "Training & certification", amount: 20000 }] },
 ];
 
 const MODE_ICONS: Record<string, string> = {
   drone: "🚁", auto: "🚗", van: "🚐", ebike: "🚲", multimodal: "🔄",
 };
 const MODE_LABELS: Record<string, string> = {
-  drone: "Dronă", auto: "Auto", van: "Van", ebike: "E-Bike", multimodal: "Multimodal",
+  drone: "Drone", auto: "Car", van: "Van", ebike: "E-Bike", multimodal: "Multimodal",
 };
 
 function formatCurrency(amount: number): string {
@@ -80,9 +80,9 @@ function formatCurrency(amount: number): string {
 
 function TransactionCard({ txn }: { txn: Transaction }) {
   const typeLabels: Record<Transaction["type"], string> = {
-    order_payment: "Plată Comandă", commission: "Comision", pilot_payout: "Plată Pilot/Curier",
+    order_payment: "Order Payment", commission: "Commission", pilot_payout: "Pilot/Courier Payment",
     refund: "Rambursare", subscription: "Abonament", penalty: "Penalitate",
-    droneport_fee: "Taxă DronePort", vehicle_rental: "Închiriere Vehicul",
+    droneport_fee: "DronePort Fee", vehicle_rental: "Vehicle Rental",
   };
   const typeColors: Record<Transaction["type"], string> = {
     order_payment: "#10B981", commission: "#0066FF", pilot_payout: "#8B5CF6",
@@ -121,7 +121,7 @@ function TransactionCard({ txn }: { txn: Transaction }) {
 
 function InvoiceCard({ invoice }: { invoice: Invoice }) {
   const statusColors = { paid: "#10B981", pending: "#F59E0B", overdue: "#EF4444", draft: "#6B7280" };
-  const statusLabels = { paid: "PLĂTIT", pending: "ÎN AȘTEPTARE", overdue: "ÎNTÂRZIAT", draft: "CIORNĂ" };
+  const statusLabels = { paid: "PAID", pending: "PENDING", overdue: "OVERDUE", draft: "DRAFT" };
 
   return (
     <View className="bg-surface border border-border rounded-xl p-4 mb-2">
@@ -154,12 +154,12 @@ function DeliveryCostCard({ cost }: { cost: DeliveryCostBreakdown }) {
           <Text style={{ fontSize: 20, marginRight: 8 }}>{MODE_ICONS[cost.mode]}</Text>
           <View>
             <Text className="text-sm font-semibold text-foreground">{MODE_LABELS[cost.mode]}</Text>
-            <Text className="text-xs text-muted">{cost.totalDeliveries.toLocaleString()} livrări</Text>
+            <Text className="text-xs text-muted">{cost.totalDeliveries.toLocaleString()} deliveries</Text>
           </View>
         </View>
         <View className="items-end">
           <Text className="text-base font-bold text-foreground">{formatCurrency(cost.totalRevenue)}</Text>
-          <Text style={{ color: modeColors[cost.mode], fontSize: 10, fontWeight: "600" }}>+{cost.profitMargin}% marjă</Text>
+          <Text style={{ color: modeColors[cost.mode], fontSize: 10, fontWeight: "600" }}>+{cost.profitMargin}% margin</Text>
         </View>
       </View>
       <View className="flex-row gap-3">
@@ -168,11 +168,11 @@ function DeliveryCostCard({ cost }: { cost: DeliveryCostBreakdown }) {
           <Text className="text-xs font-semibold text-foreground">₱{cost.avgCostPerDelivery}</Text>
         </View>
         <View className="flex-1">
-          <Text className="text-[10px] text-muted">Distanță medie</Text>
+          <Text className="text-[10px] text-muted">Average distance</Text>
           <Text className="text-xs font-semibold text-foreground">{cost.avgDistance} km</Text>
         </View>
         <View className="flex-1">
-          <Text className="text-[10px] text-muted">Marjă profit</Text>
+          <Text className="text-[10px] text-muted">Profit margin</Text>
           <Text style={{ fontSize: 12, fontWeight: "600", color: cost.profitMargin > 20 ? "#10B981" : cost.profitMargin > 15 ? "#F59E0B" : "#EF4444" }}>{cost.profitMargin}%</Text>
         </View>
       </View>
@@ -187,16 +187,16 @@ export default function AccountingScreen() {
   const totalDeliveries = DELIVERY_COSTS.reduce((sum, c) => sum + c.totalDeliveries, 0);
 
   const tabs = [
-    { key: "overview" as const, label: "Sumar" },
-    { key: "delivery_costs" as const, label: "Costuri" },
-    { key: "transactions" as const, label: "Tranzacții" },
-    { key: "invoices" as const, label: "Facturi" },
+    { key: "overview" as const, label: "Summary" },
+    { key: "delivery_costs" as const, label: "Costs" },
+    { key: "transactions" as const, label: "Transactions" },
+    { key: "invoices" as const, label: "Invoices" },
   ];
 
   return (
     <ScreenContainer className="px-4 pt-4">
-      <Text className="text-2xl font-bold text-foreground mb-1">Contabilitate</Text>
-      <Text className="text-sm text-muted mb-4">Operațiuni Financiare — Livrare Multimodală</Text>
+      <Text className="text-2xl font-bold text-foreground mb-1">Accounting</Text>
+      <Text className="text-sm text-muted mb-4">Financial Operations — Multimodal Delivery</Text>
 
       {/* Tab Selector */}
       <View className="flex-row bg-surface rounded-xl p-1 mb-4">
@@ -219,14 +219,14 @@ export default function AccountingScreen() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
           {/* Revenue Card */}
           <View className="bg-primary/10 border border-primary/20 rounded-2xl p-4 mb-3">
-            <Text className="text-xs text-primary font-medium">Venituri Totale (30 zile)</Text>
+            <Text className="text-xs text-primary font-medium">Revenue Totale (30 zile)</Text>
             <Text className="text-3xl font-bold text-primary mt-1">{formatCurrency(totalRevenue)}</Text>
-            <Text className="text-xs text-muted mt-1">{totalDeliveries.toLocaleString()} livrări completate</Text>
+            <Text className="text-xs text-muted mt-1">{totalDeliveries.toLocaleString()} deliveries completate</Text>
           </View>
 
           {/* Mode Breakdown */}
           <View className="bg-surface border border-border rounded-2xl p-4 mb-3">
-            <Text className="text-sm font-semibold text-foreground mb-3">Venituri per Mod de Livrare</Text>
+            <Text className="text-sm font-semibold text-foreground mb-3">Revenue per Mod de Livrare</Text>
             {DELIVERY_COSTS.map((cost) => (
               <View key={cost.mode} className="flex-row justify-between items-center mb-2">
                 <View className="flex-row items-center">
@@ -245,7 +245,7 @@ export default function AccountingScreen() {
 
           {/* Commission Structure */}
           <View className="bg-surface border border-border rounded-xl p-4 mb-3">
-            <Text className="text-sm font-semibold text-foreground mb-3">Structură Comisioane per Canal</Text>
+            <Text className="text-sm font-semibold text-foreground mb-3">Commission Structure per Canal</Text>
             <View className="flex-row justify-between mb-2">
               <Text className="text-xs text-muted">C1 Marketplace (15%)</Text>
               <Text className="text-xs font-medium text-foreground">₱245,200</Text>
@@ -264,8 +264,8 @@ export default function AccountingScreen() {
           <View className="bg-warning/10 border border-warning/20 rounded-xl p-3 mb-3">
             <View className="flex-row justify-between items-center">
               <View>
-                <Text className="text-sm font-medium text-foreground">Plăți în Așteptare</Text>
-                <Text className="text-xs text-muted">12 piloți + 5 curieri terestri</Text>
+                <Text className="text-sm font-medium text-foreground">Pending Payments</Text>
+                <Text className="text-xs text-muted">12 pilots + 5 ground couriers</Text>
               </View>
               <Text className="text-lg font-bold text-warning">₱89.4K</Text>
             </View>
@@ -277,18 +277,18 @@ export default function AccountingScreen() {
       {activeTab === "delivery_costs" && (
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
           <View className="bg-surface border border-border rounded-xl p-3 mb-4">
-            <Text className="text-xs text-muted text-center">Comparație costuri per mod de livrare — ultimele 30 zile</Text>
+            <Text className="text-xs text-muted text-center">Cost comparison per delivery mode — last 30 days</Text>
           </View>
           {DELIVERY_COSTS.map((cost) => (
             <DeliveryCostCard key={cost.mode} cost={cost} />
           ))}
           {/* Cost Comparison Summary */}
           <View className="bg-primary/5 border border-primary/10 rounded-xl p-4 mt-2">
-            <Text className="text-sm font-semibold text-foreground mb-2">Concluzii Costuri</Text>
+            <Text className="text-sm font-semibold text-foreground mb-2">Concluzii Costs</Text>
             <Text className="text-xs text-muted leading-5">
-              • E-Bike oferă cea mai bună marjă (28%) pentru distanțe scurte (&lt;3km){"\n"}
-              • Drona este optimă pentru livrări rapide cu marjă de 22%{"\n"}
-              • Multimodal are costul cel mai ridicat dar acoperă distanțe mari{"\n"}
+              • E-Bike offers the best margin (28%) for short distances (&lt;3km){"\n"}
+              • Drone is optimal for fast deliveries with 22% margin{"\n"}
+              • Multimodal has the highest cost but covers long distances{"\n"}
               • Van-ul este eficient pentru colete grele/voluminoase
             </Text>
           </View>
@@ -318,15 +318,15 @@ export default function AccountingScreen() {
             <View className="flex-row gap-2 mb-3">
               <View className="flex-1 bg-success/10 rounded-lg p-2 items-center">
                 <Text className="text-sm font-bold text-success">{INVOICES.filter(i => i.status === "paid").length}</Text>
-                <Text className="text-[10px] text-muted">Plătite</Text>
+                <Text className="text-[10px] text-muted">Paide</Text>
               </View>
               <View className="flex-1 bg-warning/10 rounded-lg p-2 items-center">
                 <Text className="text-sm font-bold text-warning">{INVOICES.filter(i => i.status === "pending").length}</Text>
-                <Text className="text-[10px] text-muted">Așteptare</Text>
+                <Text className="text-[10px] text-muted">Pending</Text>
               </View>
               <View className="flex-1 bg-error/10 rounded-lg p-2 items-center">
                 <Text className="text-sm font-bold text-error">{INVOICES.filter(i => i.status === "overdue").length}</Text>
-                <Text className="text-[10px] text-muted">Întârziate</Text>
+                <Text className="text-[10px] text-muted">Overduee</Text>
               </View>
             </View>
           }
