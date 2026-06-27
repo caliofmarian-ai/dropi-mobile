@@ -18,7 +18,7 @@ interface CheckItem {
 
 // Different pre-checks depending on vehicle type
 const DRONE_PREFLIGHT: CheckItem[] = [
-  { id: "battery", label: "Baterie > 80%", checked: false },
+  { id: "battery", label: "Battery > 80%", checked: false },
   { id: "weather", label: "Weather OK (wind < 35 km/h)", checked: false },
   { id: "connection", label: "Semnal telemetrie stabil", checked: false },
   { id: "cargo", label: "Package secured & weighed", checked: false },
@@ -134,7 +134,7 @@ export default function MissionDetailScreen() {
             <TouchableOpacity onPress={() => router.back()} className="mr-3 p-2">
               <Text className="text-primary text-base">← Back</Text>
             </TouchableOpacity>
-            <Text className="text-lg font-bold text-foreground">Detalii Misiune</Text>
+            <Text className="text-lg font-bold text-foreground">Mission Details</Text>
           </View>
 
           {/* Vehicle & Delivery Mode */}
@@ -148,7 +148,7 @@ export default function MissionDetailScreen() {
             </View>
             <View style={{ flexDirection: "row", marginTop: 10, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: colors.border }}>
               <View style={{ backgroundColor: colors.surface, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginRight: 8 }}>
-                <Text style={{ fontSize: 11, color: colors.foreground, fontWeight: "600" }}>Vehicul: {vehicleInfo.label}</Text>
+                <Text style={{ fontSize: 11, color: colors.foreground, fontWeight: "600" }}>Vehicle: {vehicleInfo.label}</Text>
               </View>
               <View style={{ backgroundColor: colors.surface, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
                 <Text style={{ fontSize: 11, color: colors.foreground, fontWeight: "600" }}>Mod: {mission.deliveryMode.toUpperCase()}</Text>
@@ -165,15 +165,15 @@ export default function MissionDetailScreen() {
               </View>
               <View className="flex-row items-center">
                 <View className="w-3 h-3 rounded-full bg-error mr-2" />
-                <Text className="text-sm text-foreground">Livrare: {mission.deliveryZone}</Text>
+                <Text className="text-sm text-foreground">Delivery: {mission.deliveryZone}</Text>
               </View>
             </View>
           </View>
 
           <View className="mx-4 bg-surface border border-border rounded-xl p-4 mb-4">
-            <Text className="text-sm font-medium text-foreground mb-2">Info Misiune</Text>
+            <Text className="text-sm font-medium text-foreground mb-2">Mission Info</Text>
             <View className="flex-row justify-between py-1.5">
-              <Text className="text-sm text-muted">Greutate Colet</Text>
+              <Text className="text-sm text-muted">Package Weight</Text>
               <Text className="text-sm text-foreground">{mission.packageWeight} kg</Text>
             </View>
             <View className="flex-row justify-between py-1.5">
@@ -181,11 +181,11 @@ export default function MissionDetailScreen() {
               <Text className="text-sm text-foreground">{mission.distance} km</Text>
             </View>
             <View className="flex-row justify-between py-1.5">
-              <Text className="text-sm text-muted">{isDrone ? "Timp Estimat Zbor" : "Timp Estimat Tranzit"}</Text>
+              <Text className="text-sm text-muted">{isDrone ? "Estimated Flight Time" : "Estimated Transit Time"}</Text>
               <Text className="text-sm text-foreground">{mission.estimatedTime} min</Text>
             </View>
             <View className="flex-row justify-between py-1.5">
-              <Text className="text-sm text-muted">Tip Vehicul</Text>
+              <Text className="text-sm text-muted">Vehicle Type</Text>
               <Text className="text-sm text-foreground">{vehicleInfo.icon} {vehicleInfo.label}</Text>
             </View>
           </View>
@@ -304,7 +304,7 @@ export default function MissionDetailScreen() {
                   <>
                     <Text className="text-muted text-xs">📶 Alt: 85m</Text>
                     <Text className="text-muted text-xs">⚡ Speed: 65 km/h</Text>
-                    <Text className="text-muted text-xs">🔋 Baterie: 74%</Text>
+                    <Text className="text-muted text-xs">🔋 Battery: 74%</Text>
                   </>
                 ) : (
                   <>

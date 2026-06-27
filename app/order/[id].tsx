@@ -101,7 +101,7 @@ export default function OrderDetailScreen() {
             }}
           >
             <Text style={{ fontSize: 14, fontWeight: "700", color: colors.foreground, marginBottom: 10 }}>
-              Mod de Livrare
+              Delivery Mode
             </Text>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Text style={{ fontSize: 28 }}>{modeInfo.icon}</Text>

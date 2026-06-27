@@ -34,11 +34,11 @@ export const PRODUCT_CATEGORIES: ProductCategory[] = [
   { id: "food", name: "Food & Drinks", icon: "🍜", droneEligible: true, maxWeightDrone: 2.0, description: "Ready meals, drinks, snacks" },
   { id: "pharmacy", name: "Pharmacy", icon: "💊", droneEligible: true, maxWeightDrone: 1.5, description: "Medicines, vitamins, health products" },
   { id: "electronics", name: "Electronice", icon: "📱", droneEligible: true, maxWeightDrone: 1.0, description: "Telefoane, accesorii, gadgets mici" },
-  { id: "groceries", name: "Alimente", icon: "🛒", droneEligible: true, maxWeightDrone: 3.0, description: "Produse alimentare, fructe, legume" },
+  { id: "groceries", name: "Groceries", icon: "🛒", droneEligible: true, maxWeightDrone: 3.0, description: "Food products, fruits, vegetables" },
   { id: "documents", name: "Documents", icon: "📄", droneEligible: true, maxWeightDrone: 0.5, description: "Envelopes, documents, correspondence" },
   { id: "flowers", name: "Flori & Cadouri", icon: "💐", droneEligible: true, maxWeightDrone: 1.5, description: "Buchete, cadouri mici" },
   { id: "furniture", name: "Furniture", icon: "🪑", droneEligible: false, maxWeightDrone: 0, description: "Furniture, large decorations" },
-  { id: "heavy", name: "Colete Grele", icon: "📦", droneEligible: false, maxWeightDrone: 0, description: "Pachete >5kg, echipamente" },
+  { id: "heavy", name: "Heavy Parcels", icon: "📦", droneEligible: false, maxWeightDrone: 0, description: "Packages >5kg, equipment" },
   { id: "fragile", name: "Fragile", icon: "⚠️", droneEligible: false, maxWeightDrone: 0, description: "Fragile items requiring special transport" },
   { id: "community", name: "Community", icon: "🤝", droneEligible: true, maxWeightDrone: 2.0, description: "Donations, free transfers, occasional sales" },
 ];

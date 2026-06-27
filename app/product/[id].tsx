@@ -61,7 +61,7 @@ export default function ProductDetailScreen() {
     }
     Alert.alert(
       "Added to cart ✓",
-      `${product!.name} x${quantity}\nLivrare: ${DELIVERY_MODE_INFO[selectedMode].label}\nTotal: ₱${totalPrice}`,
+      `${product!.name} x${quantity}\nDelivery: ${DELIVERY_MODE_INFO[selectedMode].label}\nTotal: ₱${totalPrice}`,
       [
         { text: "Continue shopping", onPress: () => router.back() },
         { text: "View cart", onPress: () => router.push("/cart" as any) },
@@ -123,7 +123,7 @@ export default function ProductDetailScreen() {
               <Text style={{ fontSize: 11, color: colors.muted }}>
                 {merchant.type === "authorized" ? "✓ Comerciant Autorizat" :
                  merchant.type === "artisan" ? "🎨 Artizan" :
-                 merchant.type === "community_seller" ? "🤝 Seller Comunitar" : "👤 P2P"}
+                 merchant.type === "community_seller" ? "🤝 Community Seller" : "👤 P2P"}
               </Text>
             </View>
             <View style={{ alignItems: "center" }}>

@@ -81,7 +81,7 @@ export default function MerchantOrderDetailScreen() {
           {order.vehicleType && (
             <View style={{ flexDirection: "row", alignItems: "center", marginTop: 8, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: colors.border }}>
               <Text style={{ fontSize: 16 }}>{VEHICLE_ICONS[order.vehicleType]}</Text>
-              <Text style={{ fontSize: 11, color: colors.foreground, marginLeft: 6 }}>Vehicul asignat: {order.vehicleType.toUpperCase()}</Text>
+              <Text style={{ fontSize: 11, color: colors.foreground, marginLeft: 6 }}>Assigned Vehicle: {order.vehicleType.toUpperCase()}</Text>
             </View>
           )}
         </View>
@@ -96,7 +96,7 @@ export default function MerchantOrderDetailScreen() {
             </View>
           ))}
           <View className="flex-row justify-between mt-3">
-            <Text className="text-sm text-muted">Greutate Colet</Text>
+            <Text className="text-sm text-muted">Package Weight</Text>
             <Text className="text-sm font-medium text-foreground">{order.packageWeight} kg</Text>
           </View>
         </View>
@@ -107,7 +107,7 @@ export default function MerchantOrderDetailScreen() {
           {order.deliveryMode === "drone" ? (
             <View className="gap-1.5">
               <Text className="text-xs text-muted">• Package must be secured for flight (vibrations)</Text>
-              <Text className="text-xs text-muted">• Greutate max: {order.packageWeight} kg</Text>
+              <Text className="text-xs text-muted">• Max weight: {order.packageWeight} kg</Text>
               <Text className="text-xs text-muted">• Dimensiuni compatibile cu compartimentul dronei</Text>
               <Text className="text-xs text-muted">• QR label mandatory on package</Text>
             </View>

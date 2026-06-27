@@ -57,7 +57,7 @@ export default function StoreScreen() {
     verified: "✓ Verificat",
     trusted: "★ Trusted",
     new: "🆕 Nou",
-    community: "🤝 Comunitar",
+    community: "🤝 Community",
   };
 
   return (
@@ -158,7 +158,7 @@ export default function StoreScreen() {
               <Text style={{ fontSize: 11, color: colors.muted, marginTop: 10 }}>
                 Tip: {merchant.type === "authorized" ? "Comerciant Autorizat B2C" :
                       merchant.type === "artisan" ? "Artizan Independent" :
-                      merchant.type === "community_seller" ? "Seller Comunitar (Neautorizat)" : "P2P"}
+                      merchant.type === "community_seller" ? "Community Seller (Unauthorized)" : "P2P"}
               </Text>
               <Text style={{ fontSize: 11, color: colors.muted }}>
                 Zone: {merchant.zone}

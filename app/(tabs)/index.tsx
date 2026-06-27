@@ -337,7 +337,7 @@ function FleetManagerDashboard() {
           <MetricBox label="Grounded" value="6" trend="" />
         </View>
         {/* Terrestrial fleet */}
-        <Text className="text-sm font-semibold text-foreground mb-2">🚗 Vehicule Terestre</Text>
+        <Text className="text-sm font-semibold text-foreground mb-2">🚗 Ground Vehicles</Text>
         <View className="flex-row gap-3 mb-4">
           <MetricBox label="Auto" value="12" trend="" />
           <MetricBox label="Van" value="6" trend="" />

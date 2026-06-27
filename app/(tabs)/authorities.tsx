@@ -41,10 +41,10 @@ interface AirspaceRestriction {
 const PERMITS: RegulatoryPermit[] = [
   { id: "PRM-001", type: "flight_zone", authority: "CAAP", status: "approved", zone: "Manila-Central", validFrom: "2026-01-01", validUntil: "2026-06-30", conditions: ["Max altitude 120m", "Daytime only", "Direct line of sight"], deliveryModes: ["drone"] },
   { id: "PRM-002", type: "night_ops", authority: "CAAP", status: "pending", zone: "Makati-CBD", validFrom: "2026-07-01", validUntil: "2026-12-31", conditions: ["Anti-collision lights mandatory", "Reduced speed 30km/h"], deliveryModes: ["drone"] },
-  { id: "PRM-003", type: "cargo", authority: "DOTr", status: "approved", zone: "Toate Zonele", validFrom: "2026-01-01", validUntil: "2026-12-31", conditions: ["Max payload 5kg drone", "Max payload 50kg van", "Hazmat excluded", "Insurance mandatory"], deliveryModes: ["drone", "auto", "van", "ebike"] },
+  { id: "PRM-003", type: "cargo", authority: "DOTr", status: "approved", zone: "All Zones", validFrom: "2026-01-01", validUntil: "2026-12-31", conditions: ["Max payload 5kg drone", "Max payload 50kg van", "Hazmat excluded", "Insurance mandatory"], deliveryModes: ["drone", "auto", "van", "ebike"] },
   { id: "PRM-004", type: "emergency", authority: "NDRRMC", status: "approved", zone: "National", validFrom: "2026-01-01", validUntil: "2027-01-01", conditions: ["Priority airspace access", "No altitude limit in emergency", "Real-time reporting"], deliveryModes: ["drone", "auto", "van"] },
   { id: "PRM-005", type: "vehicle_ops", authority: "LTO", status: "approved", zone: "Metro Manila", validFrom: "2026-01-01", validUntil: "2026-12-31", conditions: ["Registered vehicles", "Licensed drivers", "Mandatory GPS tracking", "Up-to-date technical inspection"], deliveryModes: ["auto", "van"] },
-  { id: "PRM-006", type: "multimodal_route", authority: "DOTr + CAAP", status: "approved", zone: "Manila-Makati-BGC", validFrom: "2026-03-01", validUntil: "2026-09-01", conditions: ["Transfer hub autorizat", "Timp max transfer 5 min", "Tracking continuu", "Audit trail complet"], deliveryModes: ["drone", "auto", "van", "ebike"] },
+  { id: "PRM-006", type: "multimodal_route", authority: "DOTr + CAAP", status: "approved", zone: "Manila-Makati-BGC", validFrom: "2026-03-01", validUntil: "2026-09-01", conditions: ["Authorized transfer hub", "Max transfer time 5 min", "Continuous tracking", "Complete audit trail"], deliveryModes: ["drone", "auto", "van", "ebike"] },
   { id: "PRM-007", type: "vehicle_ops", authority: "LTO", status: "expired", zone: "Quezon City", validFrom: "2025-06-01", validUntil: "2025-12-31", conditions: ["Registered e-bikes", "Max speed 25km/h", "Dedicated lane"], deliveryModes: ["ebike"] },
 ];
 
@@ -53,8 +53,8 @@ const REPORTS: ComplianceReport[] = [
   { id: "RPT-002", title: "Q2 Ground Fleet Safety Report", authority: "LTO", dueDate: "2026-07-15", status: "pending", type: "quarterly", category: "terrestrial" },
   { id: "RPT-003", title: "Incident — Near-miss DRN-023", authority: "CAAP", dueDate: "2026-06-20", status: "approved", type: "incident", category: "aerial" },
   { id: "RPT-004", title: "Audit Anual Impact Mediu", authority: "DENR", dueDate: "2026-09-30", status: "pending", type: "annual", category: "general" },
-  { id: "RPT-005", title: "Raport Lunar Rute Multimodale", authority: "DOTr", dueDate: "2026-07-05", status: "pending", type: "monthly", category: "multimodal" },
-  { id: "RPT-006", title: "Raport Accident Vehicul VAN-008", authority: "LTO", dueDate: "2026-06-25", status: "submitted", type: "incident", category: "terrestrial" },
+  { id: "RPT-005", title: "Monthly Multimodal Routes Report", authority: "DOTr", dueDate: "2026-07-05", status: "pending", type: "monthly", category: "multimodal" },
+  { id: "RPT-006", title: "Vehicle Accident Report VAN-008", authority: "LTO", dueDate: "2026-06-25", status: "submitted", type: "incident", category: "terrestrial" },
 ];
 
 const RESTRICTIONS: AirspaceRestriction[] = [
@@ -142,7 +142,7 @@ function RestrictionCard({ restriction }: { restriction: AirspaceRestriction }) 
         </View>
       </View>
       {restriction.maxAltitude && (
-        <Text className="text-xs text-warning mt-1">Altitudine max: {restriction.maxAltitude}m</Text>
+        <Text className="text-xs text-warning mt-1">Max altitude: {restriction.maxAltitude}m</Text>
       )}
       <View className="flex-row mt-2 gap-1">
         {restriction.affectsMode.map((mode) => (

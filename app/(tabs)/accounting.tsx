@@ -50,7 +50,7 @@ const TRANSACTIONS: Transaction[] = [
   { id: "TXN-003", type: "pilot_payout", amount: 180, currency: "PHP", from: "DROPi Escrow", to: "Drone Pilot #089", status: "processing", timestamp: "2026-06-27 14:35", orderId: "ORD-4521", deliveryMode: "drone" },
   { id: "TXN-004", type: "droneport_fee", amount: 45, currency: "PHP", from: "DROPi Escrow", to: "DronePort Central", status: "completed", timestamp: "2026-06-27 14:33", orderId: "ORD-4521", deliveryMode: "drone" },
   { id: "TXN-005", type: "order_payment", amount: 320, currency: "PHP", from: "Client #1198", to: "DROPi Escrow", status: "completed", timestamp: "2026-06-27 12:15", orderId: "ORD-4498", deliveryMode: "ebike" },
-  { id: "TXN-006", type: "pilot_payout", amount: 95, currency: "PHP", from: "DROPi Escrow", to: "Curier E-Bike #045", status: "completed", timestamp: "2026-06-27 12:20", orderId: "ORD-4498", deliveryMode: "ebike" },
+  { id: "TXN-006", type: "pilot_payout", amount: 95, currency: "PHP", from: "DROPi Escrow", to: "E-Bike Courier #045", status: "completed", timestamp: "2026-06-27 12:20", orderId: "ORD-4498", deliveryMode: "ebike" },
   { id: "TXN-007", type: "vehicle_rental", amount: 150, currency: "PHP", from: "DROPi Fleet", to: "Vehicle Depot QC", status: "completed", timestamp: "2026-06-27 11:00", deliveryMode: "van" },
   { id: "TXN-008", type: "order_payment", amount: 890, currency: "PHP", from: "Client #1302", to: "DROPi Escrow", status: "completed", timestamp: "2026-06-27 07:22", orderId: "ORD-4520", deliveryMode: "multimodal" },
   { id: "TXN-009", type: "subscription", amount: 4999, currency: "PHP", from: "Merchant #034", to: "DROPi Revenue", status: "completed", timestamp: "2026-06-27 09:00" },
@@ -221,12 +221,12 @@ export default function AccountingScreen() {
           <View className="bg-primary/10 border border-primary/20 rounded-2xl p-4 mb-3">
             <Text className="text-xs text-primary font-medium">Revenue Totale (30 zile)</Text>
             <Text className="text-3xl font-bold text-primary mt-1">{formatCurrency(totalRevenue)}</Text>
-            <Text className="text-xs text-muted mt-1">{totalDeliveries.toLocaleString()} deliveries completate</Text>
+            <Text className="text-xs text-muted mt-1">{totalDeliveries.toLocaleString()} deliveries completed</Text>
           </View>
 
           {/* Mode Breakdown */}
           <View className="bg-surface border border-border rounded-2xl p-4 mb-3">
-            <Text className="text-sm font-semibold text-foreground mb-3">Revenue per Mod de Livrare</Text>
+            <Text className="text-sm font-semibold text-foreground mb-3">Revenue per Delivery Mode</Text>
             {DELIVERY_COSTS.map((cost) => (
               <View key={cost.mode} className="flex-row justify-between items-center mb-2">
                 <View className="flex-row items-center">
