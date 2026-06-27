@@ -20,6 +20,7 @@ Acest director conține documentația de referință care ghidează **întreaga 
 | 1 | **DROPi_ROADMAP_BY_LAYERS.md** | Roadmap-ul principal — 191 pași organizați pe cele 6 straturi canonice |
 | 2 | **DROPi_6_LAYERS_EXPLAINED.md** | Explicație detaliată a celor 6 straturi ale arhitecturii platformei |
 | 3 | **DROPi_ROADMAP_COMPARISON.md** | Analiză comparativă v1 (tehnic) vs v2 (straturi) — justificarea deciziei |
+| 4 | **DROPi_REGISTRATION_FLOW_REPORT.md** | Raport complet: fluxul de înregistrare, tipuri cont, activare, securitate, limitări |
 
 ---
 

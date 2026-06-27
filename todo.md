@@ -132,3 +132,19 @@
 - [x] Fix Forgot Password: 6-digit verification code generated on server, NOT returned to client
 - [x] Fix Forgot Password: token expires after 15 min, single-use
 - [x] Fix Forgot Password: cannot reset password without valid token (security fix applied)
+
+## Sprint 3-4: Critical Tasks (User Lifecycle)
+- [x] DB: Create verifications table (id, userId, documentType, documentUrl, licenseNumber, expiryDate, vehicleType, status, reviewedBy, reviewedAt, rejectionReason)
+- [x] DB: Create role_applications table (id, userId, requestedRole, requestedChannel, motivation, documentUrls, status, reviewedBy, reviewedAt, rejectionReason)
+- [x] DB: Add emailVerified field to users table
+- [x] Server: submitVerification endpoint (delivery partner uploads documents)
+- [x] Server: reviewVerification endpoint (admin approves/rejects)
+- [x] Server: applyForRole endpoint (user requests operational role)
+- [x] Server: reviewApplication endpoint (admin approves/rejects role application)
+- [ ] Server: guard on mission endpoints (block unverified delivery partners)
+- [x] UI: Delivery Partner Verification screen (/app/verify-documents.tsx)
+- [x] UI: Admin Approvals panel (/app/admin/approvals.tsx) — combined verifications + role applications
+- [x] UI: Apply for Role screen (/app/apply-role.tsx)
+- [x] SMTP: Email notification on verification approval/rejection
+- [x] Audit: All verification and role actions logged (L6 compliance)
+- [x] Navigation: Profile screen links to Verify Documents, Apply for Role, Admin Approvals

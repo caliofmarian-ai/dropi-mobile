@@ -166,3 +166,51 @@ export const auditLogs = mysqlTable("auditLogs", {
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
+
+/**
+ * Verifications table — Delivery Partners submit documents to prove authorization.
+ * Admin reviews and approves/rejects. Until approved, pilot cannot receive missions.
+ */
+export const verifications = mysqlTable("verifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  documentType: mysqlEnum("documentType", ["driving_license", "drone_license", "vehicle_registration", "insurance", "background_check", "other"]).notNull(),
+  documentUrl: varchar("documentUrl", { length: 500 }),
+  licenseNumber: varchar("licenseNumber", { length: 100 }),
+  expiryDate: timestamp("expiryDate"),
+  vehicleType: mysqlEnum("vehicleType", ["drone", "car", "van", "ebike", "motorcycle"]),
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  reviewedBy: int("reviewedBy"),
+  reviewedAt: timestamp("reviewedAt"),
+  rejectionReason: text("rejectionReason"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Verification = typeof verifications.$inferSelect;
+export type InsertVerification = typeof verifications.$inferInsert;
+
+/**
+ * Role Applications table — Users apply for operational roles (C2/C3/Admin).
+ * Admin evaluates qualifications and approves/rejects.
+ * On approval, user's dropiRole and channel are updated.
+ */
+export const roleApplications = mysqlTable("roleApplications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  requestedRole: mysqlEnum("requestedRole", [...ALL_DROPI_ROLES]).notNull(),
+  requestedChannel: mysqlEnum("requestedChannel", ["C1", "C2", "C3", "ADMIN"]).notNull(),
+  motivation: text("motivation"),
+  qualifications: text("qualifications"),
+  documentUrls: json("documentUrls"),
+  status: mysqlEnum("status", ["pending", "under_review", "approved", "rejected", "withdrawn"]).default("pending").notNull(),
+  reviewedBy: int("reviewedBy"),
+  reviewedAt: timestamp("reviewedAt"),
+  rejectionReason: text("rejectionReason"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type RoleApplication = typeof roleApplications.$inferSelect;
+export type InsertRoleApplication = typeof roleApplications.$inferInsert;

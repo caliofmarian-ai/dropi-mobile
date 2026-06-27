@@ -86,6 +86,35 @@ export default function ProfileeScreen() {
           </View>
         )}
 
+        {/* Actions */}
+        <View className="bg-surface border border-border rounded-xl overflow-hidden mb-4">
+          {user.dropiRole === "delivery_partner" && (
+            <TouchableOpacity
+              className="px-4 py-3.5 border-b border-border flex-row justify-between items-center"
+              onPress={() => router.push("/verify-documents" as any)}
+            >
+              <Text className="text-sm text-foreground">Verify Documents</Text>
+              <Text className="text-primary text-xs font-medium">→</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            className="px-4 py-3.5 border-b border-border flex-row justify-between items-center"
+            onPress={() => router.push("/apply-role" as any)}
+          >
+            <Text className="text-sm text-foreground">Apply for Role</Text>
+            <Text className="text-primary text-xs font-medium">→</Text>
+          </TouchableOpacity>
+          {(user.dropiRole === "system_administrator" || user.dropiRole === "operations_manager" || user.dropiRole === "security_officer") && (
+            <TouchableOpacity
+              className="px-4 py-3.5 border-b border-border flex-row justify-between items-center"
+              onPress={() => router.push("/admin/approvals" as any)}
+            >
+              <Text className="text-sm text-foreground">Admin Approvals</Text>
+              <Text className="text-primary text-xs font-medium">→</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
         {/* Settings */}
         <View className="bg-surface border border-border rounded-xl overflow-hidden mb-4">
           <TouchableOpacity className="px-4 py-3.5 border-b border-border flex-row justify-between items-center">

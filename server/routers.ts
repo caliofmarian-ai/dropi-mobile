@@ -3,6 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { dropiAuthRouter, adminAuthRouter, auditRouter } from "./auth-router";
+import { verificationRouter, roleApplicationRouter } from "./verification-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -25,6 +26,12 @@ export const appRouter = router({
 
   // Audit log access
   audit: auditRouter,
+
+  // Delivery Partner document verification
+  verification: verificationRouter,
+
+  // Role applications (C2/C3/Admin operational roles)
+  roleApplications: roleApplicationRouter,
 });
 
 export type AppRouter = typeof appRouter;
