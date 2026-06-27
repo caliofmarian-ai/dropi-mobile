@@ -5,6 +5,8 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { PILOT_MISSIONS } from "@/lib/mock-data";
 import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
+import { DeliveryMap, createDemoRoute } from "@/components/delivery-map";
+import type { VehicleType } from "@/components/delivery-map";
 
 type MissionPhase = "detail" | "preflight" | "inflight" | "complete";
 
@@ -271,20 +273,46 @@ export default function MissionDetailScreen() {
     return (
       <ScreenContainer edges={["top", "bottom", "left", "right"]}>
         <View className="flex-1">
-          {/* Supervision Area */}
-          <View className="flex-1 bg-surface items-center justify-center mx-4 mt-4 rounded-2xl border border-primary/30">
-            <Text style={{ fontSize: 40 }}>{vehicleInfo.icon}</Text>
-            <Text className="text-primary font-semibold text-lg mt-2">{vehicleInfo.inTransitLabel}</Text>
-            <Text className="text-muted text-sm mt-1">{mission.merchantName} → {mission.deliveryZone}</Text>
-            <View className="mt-4 bg-primary/10 rounded-lg px-4 py-2">
-              {isDrone ? (
-                <Text className="text-primary text-sm">Alt: 45m | Viteză: 32 km/h | Baterie: 74%</Text>
-              ) : (
-                <Text className="text-primary text-sm">Viteză: 28 km/h | Distanță rămasă: {(mission.distance * 0.6).toFixed(1)} km</Text>
-              )}
+          {/* Interactive Map - Live Supervision */}
+          <View className="mx-4 mt-4 flex-1">
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-foreground font-semibold text-base">📍 Supervizare Live</Text>
+              <View className="flex-row items-center">
+                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.success, marginRight: 6 }} />
+                <Text className="text-muted text-xs">LIVE</Text>
+              </View>
             </View>
-            <View className="mt-2 bg-surface rounded-lg px-4 py-1.5">
-              <Text className="text-muted text-xs">ETA: {Math.ceil(mission.estimatedTime * 0.6)} min</Text>
+            <DeliveryMap
+              route={createDemoRoute(
+                (mission.vehicleType || "drone") as VehicleType,
+                "in_transit",
+                0.45
+              )}
+              height={200}
+              showRoute={true}
+              showETA={true}
+            />
+            {/* Telemetry overlay */}
+            <View className="bg-surface border border-border rounded-xl p-3 mt-2">
+              <View className="flex-row justify-between">
+                <Text className="text-foreground text-sm font-semibold">{vehicleInfo.inTransitLabel}</Text>
+                <Text className="text-primary text-sm font-bold">ETA: {Math.ceil(mission.estimatedTime * 0.6)} min</Text>
+              </View>
+              <Text className="text-muted text-xs mt-1">{mission.merchantName} → {mission.deliveryZone}</Text>
+              <View className="flex-row mt-2 gap-4">
+                {isDrone ? (
+                  <>
+                    <Text className="text-muted text-xs">📶 Alt: 85m</Text>
+                    <Text className="text-muted text-xs">⚡ Viteză: 65 km/h</Text>
+                    <Text className="text-muted text-xs">🔋 Baterie: 74%</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text className="text-muted text-xs">⚡ Viteză: 28 km/h</Text>
+                    <Text className="text-muted text-xs">📍 Dist: {(mission.distance * 0.6).toFixed(1)} km</Text>
+                  </>
+                )}
+              </View>
             </View>
           </View>
 

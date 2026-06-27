@@ -6,6 +6,8 @@ import { CLIENT_ORDERS } from "@/lib/mock-data";
 import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/shared/types";
 import type { OrderStatus } from "@/shared/types";
+import { DeliveryMap, createDemoRoute } from "@/components/delivery-map";
+import type { VehicleType, DeliveryStatus } from "@/components/delivery-map";
 
 const TIMELINE_STEPS: OrderStatus[] = ["initiated", "validated", "preparing", "ready", "accepted", "in_execution", "completed"];
 
@@ -211,29 +213,20 @@ export default function OrderDetailScreen() {
           </View>
         </View>
 
-        {/* Tracking Map Placeholder (when in_execution) */}
-        {order.status === "in_execution" && (
+        {/* Interactive Live Tracking Map */}
+        {(order.status === "in_execution" || order.status === "accepted") && (
           <View className="mx-4 mb-4">
-            <View
-              style={{
-                backgroundColor: colors.surface,
-                borderRadius: 16,
-                height: 180,
-                alignItems: "center",
-                justifyContent: "center",
-                borderWidth: 1.5,
-                borderColor: colors.primary + "30",
-              }}
-            >
-              <Text style={{ fontSize: 32 }}>{VEHICLE_ICONS[order.vehicleType || "drone"]}</Text>
-              <Text style={{ fontSize: 14, fontWeight: "600", color: colors.primary, marginTop: 8 }}>
-                Live Tracking
-              </Text>
-              <Text style={{ fontSize: 11, color: colors.muted, marginTop: 4 }}>
-                {order.vehicleType === "drone" ? "Altitudine: 120m • Viteză: 45 km/h" :
-                 "Viteză: 35 km/h • Distanță rămasă: 2.1 km"}
-              </Text>
-            </View>
+            <Text className="text-base font-semibold text-foreground mb-2">📍 Urmărire Live</Text>
+            <DeliveryMap
+              route={createDemoRoute(
+                (order.vehicleType || order.deliveryMode || "auto") as VehicleType,
+                order.status === "in_execution" ? "in_transit" : "picking_up",
+                order.status === "in_execution" ? 0.55 : 0.15
+              )}
+              height={260}
+              showRoute={true}
+              showETA={true}
+            />
           </View>
         )}
 

@@ -71,9 +71,19 @@
 - [x] Accounting → Costuri per mod de livrare (drone vs auto vs van vs ebike vs multimodal)
 
 ## Future Enhancements
-- [ ] Real map integration (Mapbox/Google Maps) for live drone tracking
+- [x] Real map integration (canvas-based + react-native-maps for native)
 - [ ] Push notifications for order status changes
 - [ ] Real-time WebSocket connections for live data
 - [ ] Backend API integration (replace mock data with real DB)
 - [ ] Biometric authentication (Face ID / Fingerprint)
 - [ ] Offline mode with data sync
+
+## Phase 5 - Interactive Map Integration
+- [x] Install react-native-maps package
+- [x] Create DeliveryMap component with real-time vehicle/drone tracking
+- [x] Integrate map into order detail screen (order/[id].tsx)
+- [x] Integrate map into mission detail screen (mission/[id].tsx)
+- [x] Add simulated real-time position updates for demo
+- [x] Show delivery route (pickup → delivery) with polyline
+- [x] Different markers for drone vs auto vs van vs ebike
+- [x] Show DronePort transfer points on map
