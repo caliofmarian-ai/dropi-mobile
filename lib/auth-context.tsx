@@ -94,7 +94,9 @@ async function apiCall(path: string, input: any, token?: string | null) {
 
   const data = await response.json();
   if (data.error) {
-    throw new Error(data.error.message || "API error");
+    // tRPC wraps errors in data.error.json.message
+    const msg = data.error?.json?.message || data.error?.message || "API error";
+    throw new Error(msg);
   }
   // tRPC with superjson wraps in result.data.json
   return data.result?.data?.json ?? data.result?.data;
