@@ -15,8 +15,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
 import { getApiBaseUrl } from "@/constants/oauth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system/legacy";
+// Document upload: uses web file input on web, expo-image-picker on native (lazy-loaded)
 
 const TOKEN_KEY = "@dropi_token";
 
@@ -130,7 +129,25 @@ export default function VerifyDocumentsScreen() {
   }, [loadData]);
 
   const handlePickDocument = async () => {
+    if (Platform.OS === "web") {
+      // Web fallback: use file input
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/jpeg,image/png,image/webp,application/pdf";
+      input.onchange = (e: any) => {
+        const file = e.target?.files?.[0];
+        if (file) {
+          const uri = URL.createObjectURL(file);
+          setSelectedFile({ uri, name: file.name, type: file.type });
+          setUploadedUrl(null);
+        }
+      };
+      input.click();
+      return;
+    }
+
     try {
+      const ImagePicker = require("expo-image-picker");
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Permission Required", "Please allow access to your photo library to upload documents.");
@@ -156,7 +173,13 @@ export default function VerifyDocumentsScreen() {
   };
 
   const handleTakePhoto = async () => {
+    if (Platform.OS === "web") {
+      Alert.alert("Not Available", "Camera capture is only available on mobile devices. Use 'From Gallery' on web.");
+      return;
+    }
+
     try {
+      const ImagePicker = require("expo-image-picker");
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Permission Required", "Please allow camera access to photograph documents.");
@@ -184,10 +207,28 @@ export default function VerifyDocumentsScreen() {
     if (!selectedFile) return null;
     setUploading(true);
     try {
-      // Read file as base64
-      const base64 = await FileSystem.readAsStringAsync(selectedFile.uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      let base64: string;
+
+      if (Platform.OS === "web") {
+        // Web: fetch blob and convert to base64
+        const response = await fetch(selectedFile.uri);
+        const blob = await response.blob();
+        base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const dataUrl = reader.result as string;
+            resolve(dataUrl.split(",")[1] || "");
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } else {
+        // Native: use FileSystem
+        const FS = require("expo-file-system/legacy");
+        base64 = await FS.readAsStringAsync(selectedFile.uri, {
+          encoding: FS.EncodingType.Base64,
+        });
+      }
 
       const result = await apiCall("verification.uploadDocument", {
         fileName: selectedFile.name,
