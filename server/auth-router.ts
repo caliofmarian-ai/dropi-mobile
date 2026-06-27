@@ -2,10 +2,50 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
+import nodemailer from "nodemailer";
 import { router, publicProcedure, protectedProcedure, adminProcedure } from "./_core/trpc";
 import { sdk } from "./_core/sdk";
 import * as db from "./db";
 import { createAuditLog } from "./db";
+
+// ===== SMTP TRANSPORTER =====
+const smtpTransporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "dropi.deliveries@gmail.com",
+    pass: process.env.GMAIL_APP_PASSWORD || "",
+  },
+});
+
+async function sendRecoveryEmail(toEmail: string, code: string): Promise<boolean> {
+  try {
+    await smtpTransporter.sendMail({
+      from: '"DROPi Platform" <dropi.deliveries@gmail.com>',
+      to: toEmail,
+      subject: "DROPi - Password Reset Code",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+          <h2 style="color: #2563EB; margin-bottom: 8px;">DROPi</h2>
+          <p style="color: #666; font-size: 14px;">Logistics Platform</p>
+          <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 16px 0;" />
+          <p>You requested a password reset. Use the code below to set a new password:</p>
+          <div style="background: #F3F4F6; border-radius: 8px; padding: 16px; text-align: center; margin: 24px 0;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #111;">${code}</span>
+          </div>
+          <p style="color: #666; font-size: 13px;">This code expires in <strong>15 minutes</strong>.</p>
+          <p style="color: #666; font-size: 13px;">If you did not request this, please ignore this email.</p>
+          <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 16px 0;" />
+          <p style="color: #999; font-size: 11px;">&copy; DROPi Deliveries. All rights reserved.</p>
+        </div>
+      `,
+    });
+    console.log(`[SMTP] Recovery email sent to ${toEmail}`);
+    return true;
+  } catch (err) {
+    console.error(`[SMTP] Failed to send recovery email to ${toEmail}:`, err);
+    return false;
+  }
+}
 
 // ===== VALIDATION SCHEMAS =====
 const registerSchema = z.object({
@@ -263,10 +303,11 @@ export const dropiAuthRouter = router({
       details: { email: input.email, codeGenerated: true },
     });
 
-    // NOTE: In production, this code is sent via SMTP to user's email.
-    // For now, the code is stored in DB and can be sent via Gmail MCP by admin.
-    // The code is NOT returned to the client — user must check their email.
-    console.log(`[PASSWORD RESET] Code for ${input.email}: ${code} (expires in 15 min)`);
+    // Send recovery email via SMTP
+    const emailSent = await sendRecoveryEmail(input.email, code);
+    if (!emailSent) {
+      console.log(`[PASSWORD RESET] SMTP failed, code for ${input.email}: ${code} (expires in 15 min)`);
+    }
 
     return { success: true, message: "If this email is registered, a 6-digit code has been sent." };
   }),
