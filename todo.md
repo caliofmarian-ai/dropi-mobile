@@ -78,6 +78,11 @@
 - [ ] Biometric authentication (Face ID / Fingerprint)
 - [ ] Offline mode with data sync
 
+## Canonical Documents (PERMANENT)
+- [x] canonical/AI_AGENT_SYSTEM.md — Sistem dual Cont Uman + Agent AI
+- [x] canonical/DELIVERY_MULTIMODAL.md — Referință livrare multimodală
+- [x] canonical/README.md — Index documente canonice
+
 ## Phase 5 - Interactive Map Integration
 - [x] Install react-native-maps package
 - [x] Create DeliveryMap component with real-time vehicle/drone tracking
