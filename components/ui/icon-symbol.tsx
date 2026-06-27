@@ -10,20 +10,36 @@ type IconSymbolName = keyof typeof MAPPING;
 
 /**
  * Add your SF Symbols to Material Icons mappings here.
- * - see Material Icons in the [Icons Directory](https://icons.expo.fyi).
- * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
  */
 const MAPPING = {
   "house.fill": "home",
   "paperplane.fill": "send",
   "chevron.left.forwardslash.chevron.right": "code",
   "chevron.right": "chevron-right",
+  // DROPi navigation icons
+  "shippingbox.fill": "local-shipping",
+  "clock.fill": "history",
+  "person.fill": "person",
+  "list.bullet": "list",
+  "airplane": "flight",
+  "bolt.fill": "flash-on",
+  "map.fill": "map",
+  "bell.fill": "notifications",
+  "bus.fill": "directions-bus",
+  "exclamationmark.triangle.fill": "warning",
+  "stop.fill": "stop",
+  "arrow.uturn.left": "undo",
+  "checkmark.circle.fill": "check-circle",
+  "xmark.circle.fill": "cancel",
+  "location.fill": "my-location",
+  "gear": "settings",
+  "questionmark.circle": "help",
 } as IconMapping;
+
+export { IconSymbolName };
 
 /**
  * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
- * This ensures a consistent look across platforms, and optimal resource usage.
- * Icon `name`s are based on SF Symbols and require manual mapping to Material Icons.
  */
 export function IconSymbol({
   name,

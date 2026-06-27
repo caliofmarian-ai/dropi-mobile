@@ -1,0 +1,26 @@
+# DROPi Mobile App — TODO
+
+- [x] Theme configuration (DROPi brand colors)
+- [x] Navigation structure (role-based tab bars)
+- [x] Authentication system (login, role selection, JWT)
+- [x] Role-based routing (redirect to correct dashboard after login)
+- [x] Client Dashboard (active deliveries list)
+- [x] Client Order Detail (progress timeline, ETA)
+- [x] Client Live Tracking (map with drone position)
+- [x] Client Order History
+- [x] Merchant Dashboard (order queue: New/Preparing/Ready)
+- [x] Merchant Order Processing (start preparing, mark ready)
+- [x] Merchant Report Issue
+- [x] Pilot Dashboard (Mission Radar - available missions)
+- [x] Pilot Mission Detail (pickup/delivery info)
+- [x] Pilot Pre-Flight Checklist
+- [x] Pilot In-Flight Supervision (map + STOP + FALLBACK)
+- [x] Pilot Post-Flight Report
+- [x] Operator Dashboard (Zone Map - God's eye view)
+- [x] Operator Fleet Status
+- [x] Operator Alert Feed
+- [x] Operator Zone Control (Ground All)
+- [x] Profile screen (shared)
+- [x] Support ticket system (shared)
+- [x] Audit logging (all actions logged)
+- [x] App logo generation and branding
