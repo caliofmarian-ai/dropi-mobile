@@ -51,16 +51,16 @@ function getDeviceInfo(req: any): string {
   return req.headers["user-agent"]?.slice(0, 255) || "unknown";
 }
 
-// Rate limiting in-memory store
+// Rate limiting in-memory store (per email, not per IP — mobile users share IPs via NAT/4G)
 const loginAttempts = new Map<string, { count: number; firstAttempt: number }>();
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
-const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_MAX = 10; // 10 attempts per email per window
 
-function checkRateLimit(ip: string): boolean {
+function checkRateLimit(key: string): boolean {
   const now = Date.now();
-  const record = loginAttempts.get(ip);
+  const record = loginAttempts.get(key);
   if (!record || now - record.firstAttempt > RATE_LIMIT_WINDOW) {
-    loginAttempts.set(ip, { count: 1, firstAttempt: now });
+    loginAttempts.set(key, { count: 1, firstAttempt: now });
     return true;
   }
   if (record.count >= RATE_LIMIT_MAX) {
@@ -128,9 +128,9 @@ export const dropiAuthRouter = router({
   login: publicProcedure.input(loginSchema).mutation(async ({ input, ctx }) => {
     const ip = getClientIp(ctx.req);
 
-    // Rate limiting
-    if (!checkRateLimit(ip)) {
-      throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many login attempts. Please try again in 15 minutes." });
+    // Rate limiting (per email — mobile users share IPs)
+    if (!checkRateLimit(input.email.toLowerCase().trim())) {
+      throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many login attempts for this account. Please try again in 15 minutes." });
     }
 
     // Find user
