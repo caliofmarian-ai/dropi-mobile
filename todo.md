@@ -163,3 +163,10 @@
 - [x] Server: Upload profile photo endpoint and save URL to user record
 - [x] DB: Added profilePhotoUrl column to users table
 - [x] Profile screen avatar is tappable to open photo modal
+
+## Image Cropping Feature
+- [x] UI: Add image cropping step to profile photo modal (zoom, pan, circular crop)
+- [x] Installed expo-image-manipulator for native crop operations
+- [x] Web fallback uses canvas-based cropping
+- [x] Circular preview with zoom/pan controls (D-pad + zoom buttons)
+- [x] 3-step flow: Select → Crop → Upload
