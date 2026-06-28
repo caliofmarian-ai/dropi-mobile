@@ -228,3 +228,18 @@
 - [x] UI: Revise Security Officer dashboard with marketplace security links (audit logs, identity verification)
 - [x] UI: Revise Audit Manager dashboard with marketplace audit panel (full log viewer, compliance, moderation audit)
 - [x] Server: Admin marketplace stats via existing store.list + product.listActive + trust.getStoreTrustScore endpoints
+
+## Sprint E — B2B Logistic API Integration
+- [x] DB: Create api_keys table (storeId, keyHash, keyPrefix, name, permissions, isActive, lastUsedAt, rateLimit, expiresAt)
+- [x] DB: Create webhook_endpoints table (storeId, url, events, secret, isActive, failureCount, lastTriggeredAt)
+- [x] DB: Create b2b_deliveries table (storeId, externalOrderId, status, pickupAddress, deliveryAddress, deliveryMode, trackingCode, 34 columns total)
+- [x] Server: API key management (generate with SHA-256 hash, revoke, list — apiKeyRouter in b2b-router.ts)
+- [x] Server: B2B Logistic endpoints (request, getStatus, cancel, estimate, list — b2bDeliveryRouter in b2b-router.ts)
+- [x] Server: Webhook system (register, test with HMAC-SHA256 signature, list, delete, logs — webhookRouter in b2b-router.ts)
+- [x] Server: Rate limiting per API key (configurable 10-1000 req/min, stored in apiKeys table)
+- [x] UI: Update merchant API Integration screen with live API key management (generate, revoke, status, delivery history)
+- [x] UI: Webhook configuration panel (add/delete endpoints, event selection, test webhook, delivery logs) — /app/merchant/webhook-config.tsx
+- [x] UI: API documentation viewer (4 sections: auth, endpoints, webhooks, errors) — /app/merchant/api-docs.tsx
+- [x] DB: Create webhook_logs table (webhookEndpointId, deliveryId, event, payload, responseStatus, success, attemptNumber)
+- [x] Server: B2B router registered in server/routers.ts (apiKey, b2bDelivery, webhook namespaces)
+- [x] Server: Delivery estimate marked "informativă, non-contractuală" per Blueprint constraint

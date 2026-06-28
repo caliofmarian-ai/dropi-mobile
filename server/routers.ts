@@ -6,6 +6,7 @@ import { dropiAuthRouter, adminAuthRouter, auditRouter } from "./auth-router";
 import { verificationRouter, roleApplicationRouter } from "./verification-router";
 import { storeRouter, productRouter, reviewRouter } from "./marketplace-router";
 import { trustRouter } from "./trust-router";
+import { apiKeyRouter, b2bDeliveryRouter, webhookRouter } from "./b2b-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -42,6 +43,11 @@ export const appRouter = router({
 
   // Trust & Badge System
   trust: trustRouter,
+
+  // B2B Logistic API — Sprint E
+  apiKey: apiKeyRouter,
+  b2bDelivery: b2bDeliveryRouter,
+  webhook: webhookRouter,
 });
 
 export type AppRouter = typeof appRouter;

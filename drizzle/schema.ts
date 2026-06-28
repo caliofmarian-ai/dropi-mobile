@@ -379,3 +379,126 @@ export const storeAnalytics = mysqlTable("storeAnalytics", {
 
 export type StoreAnalytics = typeof storeAnalytics.$inferSelect;
 export type InsertStoreAnalytics = typeof storeAnalytics.$inferInsert;
+
+
+// ===== B2B LOGISTIC API TABLES =====
+
+/**
+ * API keys for B2B partner integration.
+ * Each external store gets a unique API key for authentication.
+ */
+export const apiKeys = mysqlTable("apiKeys", {
+  id: int("id").autoincrement().primaryKey(),
+  storeId: int("storeId").notNull(),
+  keyHash: varchar("keyHash", { length: 128 }).notNull(), // SHA-256 hash of the actual key
+  keyPrefix: varchar("keyPrefix", { length: 12 }).notNull(), // First 8 chars for identification (dropi_xxxx)
+  name: varchar("name", { length: 100 }).notNull(), // Friendly name (e.g., "Production Key")
+  permissions: text("permissions"), // JSON array of allowed endpoints
+  isActive: boolean("isActive").default(true).notNull(),
+  rateLimit: int("rateLimit").default(100).notNull(), // Requests per minute
+  lastUsedAt: timestamp("lastUsedAt"),
+  expiresAt: timestamp("expiresAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  revokedAt: timestamp("revokedAt"),
+});
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type InsertApiKey = typeof apiKeys.$inferInsert;
+
+/**
+ * Webhook endpoints registered by B2B partners.
+ * DROPi sends delivery status updates to these URLs.
+ */
+export const webhookEndpoints = mysqlTable("webhookEndpoints", {
+  id: int("id").autoincrement().primaryKey(),
+  storeId: int("storeId").notNull(),
+  url: varchar("url", { length: 500 }).notNull(),
+  events: text("events").notNull(), // JSON array: ["delivery.status_changed", "delivery.completed", "delivery.cancelled"]
+  secret: varchar("secret", { length: 128 }).notNull(), // HMAC secret for signature verification
+  isActive: boolean("isActive").default(true).notNull(),
+  failureCount: int("failureCount").default(0).notNull(),
+  lastTriggeredAt: timestamp("lastTriggeredAt"),
+  lastSuccessAt: timestamp("lastSuccessAt"),
+  lastFailureReason: text("lastFailureReason"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type WebhookEndpoint = typeof webhookEndpoints.$inferSelect;
+export type InsertWebhookEndpoint = typeof webhookEndpoints.$inferInsert;
+
+/**
+ * B2B delivery requests from partner stores.
+ * Created when a partner calls POST /api/v1/delivery/request.
+ */
+export const b2bDeliveries = mysqlTable("b2bDeliveries", {
+  id: int("id").autoincrement().primaryKey(),
+  storeId: int("storeId").notNull(),
+  externalOrderId: varchar("externalOrderId", { length: 200 }).notNull(),
+  trackingCode: varchar("trackingCode", { length: 64 }).notNull().unique(),
+  status: mysqlEnum("status", [
+    "pending",       // Received, awaiting pilot assignment
+    "assigned",      // Pilot assigned
+    "pickup_enroute", // Pilot heading to pickup
+    "picked_up",     // Package collected
+    "in_transit",    // On the way to delivery address
+    "delivered",     // Successfully delivered
+    "cancelled",     // Cancelled by partner or system
+    "failed",        // Delivery attempt failed
+  ]).default("pending").notNull(),
+  // Pickup info
+  pickupAddress: text("pickupAddress").notNull(),
+  pickupContactName: varchar("pickupContactName", { length: 200 }),
+  pickupContactPhone: varchar("pickupContactPhone", { length: 30 }),
+  pickupReadyAt: timestamp("pickupReadyAt"),
+  // Delivery info
+  deliveryAddress: text("deliveryAddress").notNull(),
+  deliveryContactName: varchar("deliveryContactName", { length: 200 }),
+  deliveryContactPhone: varchar("deliveryContactPhone", { length: 30 }),
+  deliveryNotes: text("deliveryNotes"),
+  // Package info
+  packageWeight: int("packageWeight"), // grams
+  packageDimensionsL: int("packageDimensionsL"), // cm
+  packageDimensionsW: int("packageDimensionsW"), // cm
+  packageDimensionsH: int("packageDimensionsH"), // cm
+  packageFragile: boolean("packageFragile").default(false),
+  packageDescription: text("packageDescription"),
+  // Delivery preferences
+  preferredMode: mysqlEnum("preferredMode", ["drone", "terrestrial", "any"]).default("any"),
+  urgency: mysqlEnum("urgency", ["standard", "express", "scheduled"]).default("standard"),
+  scheduledAt: timestamp("scheduledAt"),
+  // Assignment & tracking
+  assignedPilotId: int("assignedPilotId"),
+  deliveryMode: mysqlEnum("deliveryMode", ["drone", "terrestrial"]),
+  estimatedArrival: timestamp("estimatedArrival"),
+  actualPickupAt: timestamp("actualPickupAt"),
+  actualDeliveryAt: timestamp("actualDeliveryAt"),
+  // Pricing
+  quotedPrice: decimal("quotedPrice", { precision: 10, scale: 2 }),
+  finalPrice: decimal("finalPrice", { precision: 10, scale: 2 }),
+  currency: varchar("currency", { length: 3 }).default("RON"),
+  // Cancellation
+  cancelledBy: mysqlEnum("cancelledBy", ["partner", "system", "pilot"]),
+  cancellationReason: text("cancellationReason"),
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type B2bDelivery = typeof b2bDeliveries.$inferSelect;
+export type InsertB2bDelivery = typeof b2bDeliveries.$inferInsert;
+
+/**
+ * Webhook delivery log — tracks each webhook attempt for debugging.
+ */
+export const webhookLogs = mysqlTable("webhookLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  webhookEndpointId: int("webhookEndpointId").notNull(),
+  deliveryId: int("deliveryId"),
+  event: varchar("event", { length: 100 }).notNull(),
+  payload: text("payload").notNull(), // JSON payload sent
+  responseStatus: int("responseStatus"),
+  responseBody: text("responseBody"),
+  success: boolean("success").default(false).notNull(),
+  attemptNumber: int("attemptNumber").default(1).notNull(),
+  sentAt: timestamp("sentAt").defaultNow().notNull(),
+  respondedAt: timestamp("respondedAt"),
+});
+export type WebhookLog = typeof webhookLogs.$inferSelect;
+export type InsertWebhookLog = typeof webhookLogs.$inferInsert;
