@@ -339,15 +339,23 @@ export const pilotSelectionRouter = router({
       const offset = input?.offset || 0;
       const minDeliveries = input?.minDeliveries || 0;
 
+      const zone = input?.zone;
+
+      // Build where conditions
+      const conditions = [
+        eq(users.isActive, true),
+        sql`cast(${pilotProfiles.totalDeliveries} as integer) >= ${minDeliveries}`,
+      ];
+      if (zone) {
+        conditions.push(eq(users.zone, zone));
+      }
+
       // Get total count
       const countResult = await db
         .select({ count: sql<number>`cast(count(*) as integer)` })
         .from(pilotProfiles)
         .innerJoin(users, eq(users.id, pilotProfiles.userId))
-        .where(and(
-          eq(users.isActive, true),
-          sql`cast(${pilotProfiles.totalDeliveries} as integer) >= ${minDeliveries}`
-        ));
+        .where(and(...conditions));
 
       const total = countResult[0]?.count || 0;
 
@@ -368,10 +376,7 @@ export const pilotSelectionRouter = router({
         })
         .from(pilotProfiles)
         .innerJoin(users, eq(users.id, pilotProfiles.userId))
-        .where(and(
-          eq(users.isActive, true),
-          sql`cast(${pilotProfiles.totalDeliveries} as integer) >= ${minDeliveries}`
-        ))
+        .where(and(...conditions))
         .orderBy(desc(pilotProfiles.rating))
         .limit(limit)
         .offset(offset);
