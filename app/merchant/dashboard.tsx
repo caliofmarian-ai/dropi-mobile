@@ -184,6 +184,17 @@ export default function MerchantDashboardScreen() {
               <TouchableOpacity
                 className="bg-surface border border-border rounded-xl p-4 flex-row items-center"
                 activeOpacity={0.7}
+                onPress={() => router.push("/merchant/orders" as any)}
+              >
+                <Text style={{ fontSize: 20, marginRight: 12 }}>📊</Text>
+                <View className="flex-1">
+                  <Text className="text-foreground font-semibold">B2B Orders</Text>
+                  <Text className="text-muted text-xs">Track deliveries in real-time</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="bg-surface border border-border rounded-xl p-4 flex-row items-center"
+                activeOpacity={0.7}
                 onPress={() => router.push("/merchant/partner-card" as any)}
               >
                 <Text style={{ fontSize: 20, marginRight: 12 }}>🏢</Text>

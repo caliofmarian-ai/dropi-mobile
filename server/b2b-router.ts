@@ -669,6 +669,125 @@ export const b2bDeliveryRouter = router({
         webhooksTriggered: events.length,
       };
     }),
+
+  /**
+   * Admin/Dispatch list — returns all B2B deliveries across all stores.
+   * Used by C2 Operations Manager and C3 Emergency Coordinator dispatch panels.
+   */
+  adminList: adminProcedure
+    .input(z.object({
+      status: z.enum(["pending", "assigned", "pickup_enroute", "picked_up", "in_transit", "delivered", "cancelled", "failed"]).optional(),
+      priority: z.enum(["normal", "urgent", "emergency"]).optional(),
+      limit: z.number().min(1).max(100).optional(),
+    }).optional())
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return { deliveries: [], total: 0 };
+
+      const limit = input?.limit || 50;
+      const conditions: any[] = [];
+      if (input?.status) {
+        conditions.push(eq(b2bDeliveries.status, input.status));
+      }
+
+      const where = conditions.length > 0 ? and(...conditions) : undefined;
+      const deliveries = await db.select().from(b2bDeliveries)
+        .where(where)
+        .orderBy(desc(b2bDeliveries.createdAt))
+        .limit(limit);
+
+      const countResult = await db.select({ count: sql<number>`count(*)` })
+        .from(b2bDeliveries).where(where);
+
+      return {
+        deliveries: deliveries.map((d) => ({
+          id: d.id,
+          storeId: d.storeId,
+          externalOrderId: d.externalOrderId,
+          trackingCode: d.trackingCode,
+          status: d.status,
+          pickupAddress: d.pickupAddress,
+          deliveryAddress: d.deliveryAddress,
+          deliveryMode: d.deliveryMode,
+          quotedPrice: d.quotedPrice,
+          assignedPilotId: d.assignedPilotId,
+          createdAt: d.createdAt.toISOString(),
+          updatedAt: d.updatedAt.toISOString(),
+        })),
+        total: countResult[0]?.count || 0,
+      };
+    }),
+
+  /**
+   * Admin assign pilot to a B2B delivery (dispatch action).
+   */
+  assignPilot: adminProcedure
+    .input(z.object({
+      deliveryId: z.number(),
+      pilotId: z.number(),
+    }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database unavailable");
+
+      const delivery = await db.select().from(b2bDeliveries)
+        .where(eq(b2bDeliveries.id, input.deliveryId))
+        .limit(1);
+
+      if (delivery.length === 0) throw new Error("Delivery not found");
+      if (delivery[0].status !== "pending") throw new Error("Can only assign pilots to pending deliveries");
+
+      await db.update(b2bDeliveries)
+        .set({
+          status: "assigned",
+          assignedPilotId: input.pilotId,
+          updatedAt: new Date(),
+        })
+        .where(eq(b2bDeliveries.id, input.deliveryId));
+
+      // Trigger webhooks
+      triggerWebhooks(delivery[0].storeId, delivery[0].id, "delivery.status_changed", {
+        deliveryId: delivery[0].id,
+        externalOrderId: delivery[0].externalOrderId,
+        trackingCode: delivery[0].trackingCode,
+        previousStatus: "pending",
+        newStatus: "assigned",
+        timestamp: new Date().toISOString(),
+        event: "delivery.status_changed",
+        details: { assignedPilotId: input.pilotId },
+      });
+
+      return { success: true, message: `Pilot ${input.pilotId} assigned to delivery ${input.deliveryId}` };
+    }),
+
+  /**
+   * Admin escalate delivery to emergency priority (C3).
+   */
+  escalate: adminProcedure
+    .input(z.object({
+      deliveryId: z.number(),
+      reason: z.string().min(5).max(500),
+    }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database unavailable");
+
+      const delivery = await db.select().from(b2bDeliveries)
+        .where(eq(b2bDeliveries.id, input.deliveryId))
+        .limit(1);
+
+      if (delivery.length === 0) throw new Error("Delivery not found");
+
+      await db.update(b2bDeliveries)
+        .set({
+          deliveryNotes: `[ESCALATED] ${input.reason} (at ${new Date().toISOString()})`,
+          urgency: "express",
+          updatedAt: new Date(),
+        })
+        .where(eq(b2bDeliveries.id, input.deliveryId));
+
+      return { success: true, message: `Delivery ${input.deliveryId} escalated to emergency priority` };
+    }),
 });
 
 // ===== WEBHOOK ROUTER =====

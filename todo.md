@@ -260,3 +260,14 @@
 - [x] UI: Wire pilot status updates into mission/[id].tsx (accept→assigned, launch→pickup_enroute→picked_up→in_transit, complete→delivered, stop/fallback→failed)
 - [x] UI: Webhook retry dashboard in webhook-config.tsx (filter failed-only, retry button per failed log, success/failure feedback, failed count summary)
 - [x] Server: webhook.retry procedure (re-sends failed webhook with fresh HMAC-SHA256 signature, resets failure count on success)
+
+## Sprint E++ — Merchant Orders, Live Tracking & C2/C3 Dispatch
+- [x] UI: Merchant Orders screen (/app/merchant/orders.tsx) — real-time B2B delivery list with status filters, tracking codes, timestamps
+- [x] UI: Order detail modal/expandable with delivery timeline, pilot info, webhook delivery status
+- [x] Navigation: Link Merchant Orders from merchant dashboard
+- [x] Server: WebSocket endpoint (/ws/tracking) for live pilot position broadcasting (server/live-tracking.ts)
+- [x] UI: LiveTrackingMap component (components/live-tracking-map.tsx) with animated position, reconnect logic
+- [x] UI: Customer and merchant can subscribe to delivery position updates via WebSocket
+- [x] Server: C2/C3 dispatch integration — adminList, assignPilot, escalate endpoints in b2b-router.ts
+- [x] UI: Operations Manager dashboard shows live pending queue with Assign button
+- [x] UI: Emergency Coordinator dashboard shows failed deliveries with Escalate button + in-flight ops

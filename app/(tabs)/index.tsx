@@ -9,6 +9,7 @@ import type { DeliveryMode } from "@/lib/marketplace-data";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, CHANNEL_INFO, getRoleConfig } from "@/shared/types";
 import type { OrderStatus, Channel } from "@/shared/types";
 import { OnboardingNudgeBanner } from "@/components/onboarding-nudge-banner";
+import { trpc } from "@/lib/trpc";
 
 const VEHICLE_ICONS: Record<string, string> = {
   drone: "🚁",
@@ -294,18 +295,85 @@ function IncidentResponderDashboard() {
 // ===== C2 DASHBOARDS =====
 
 function OperationsManagerDashboard() {
+  const router = useRouter();
+  const dispatchQuery = trpc.b2bDelivery.adminList.useQuery(
+    { status: "pending", limit: 10 },
+    { refetchInterval: 20000 }
+  );
+  const allQuery = trpc.b2bDelivery.adminList.useQuery(
+    { limit: 50 },
+    { refetchInterval: 30000 }
+  );
+  const assignMutation = trpc.b2bDelivery.assignPilot.useMutation({
+    onSuccess: () => { dispatchQuery.refetch(); allQuery.refetch(); },
+  });
+
+  const pending = dispatchQuery.data?.deliveries || [];
+  const all = allQuery.data?.deliveries || [];
+  const inTransit = all.filter((d) => ["assigned", "pickup_enroute", "picked_up", "in_transit"].includes(d.status)).length;
+  const completedToday = all.filter((d) => d.status === "delivered").length;
+
   return (
     <ScreenContainer className="px-4 pt-4">
-      <Text className="text-2xl font-bold text-foreground mb-1">Operations</Text>
-      <Text className="text-sm text-muted mb-4">C2 Contracted Operations</Text>
-      <View className="flex-row gap-3 mb-4">
-        <MetricBox label="Active Contracts" value="12" trend="+2" />
-        <MetricBox label="Deliveries Today" value="89" trend="+15%" />
-      </View>
-      <StatCard title="Team Members" value="24" color="#0066FF" />
-      <StatCard title="Pending Approvals" value="3" color="#F59E0B" />
-      <StatCard title="SLA Compliance" value="98.1%" color="#10B981" />
-      <ChartPlaceholder title="Operations Overview" />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        <Text className="text-2xl font-bold text-foreground mb-1">Operations</Text>
+        <Text className="text-sm text-muted mb-4">C2 Contracted Operations — B2B Dispatch</Text>
+        <View className="flex-row gap-3 mb-4">
+          <MetricBox label="Pending Dispatch" value={String(pending.length)} trend="" />
+          <MetricBox label="In Transit" value={String(inTransit)} trend="" />
+        </View>
+        <View className="flex-row gap-3 mb-4">
+          <MetricBox label="Completed Today" value={String(completedToday)} trend="" />
+          <MetricBox label="Total Queue" value={String(allQuery.data?.total || 0)} trend="" />
+        </View>
+
+        {/* Pending Dispatch Queue */}
+        <Text className="text-base font-semibold text-foreground mb-2">Dispatch Queue</Text>
+        {pending.length === 0 ? (
+          <View className="bg-surface border border-border rounded-xl p-4 mb-3 items-center">
+            <Text className="text-muted text-sm">No pending deliveries to dispatch</Text>
+          </View>
+        ) : (
+          pending.slice(0, 5).map((d) => (
+            <View key={d.id} className="bg-surface border border-border rounded-xl p-3 mb-2">
+              <View className="flex-row justify-between items-start">
+                <View className="flex-1">
+                  <Text className="text-sm font-medium text-foreground">{d.trackingCode}</Text>
+                  <Text className="text-xs text-muted mt-0.5">{d.pickupAddress} → {d.deliveryAddress}</Text>
+                  <Text className="text-xs text-muted mt-0.5">
+                    Mode: {d.deliveryMode || "auto"} | Price: {d.quotedPrice || "—"} RON
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={{ backgroundColor: "#0a7ea4", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
+                  activeOpacity={0.7}
+                  onPress={() => assignMutation.mutate({ deliveryId: d.id, pilotId: 1 })}
+                >
+                  <Text style={{ color: "#fff", fontSize: 11, fontWeight: "600" }}>Assign</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
+        )}
+
+        {/* Active Deliveries */}
+        <Text className="text-base font-semibold text-foreground mt-4 mb-2">Active Deliveries</Text>
+        {all.filter((d) => ["assigned", "pickup_enroute", "picked_up", "in_transit"].includes(d.status)).slice(0, 5).map((d) => (
+          <View key={d.id} className="bg-surface border border-border rounded-xl p-3 mb-2">
+            <View className="flex-row justify-between items-center">
+              <View className="flex-1">
+                <Text className="text-sm font-medium text-foreground">{d.trackingCode}</Text>
+                <Text className="text-xs text-muted">{d.deliveryAddress}</Text>
+              </View>
+              <View style={{ backgroundColor: "#0a7ea420", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
+                <Text style={{ color: "#0a7ea4", fontSize: 10, fontWeight: "600" }}>{d.status.replace("_", " ").toUpperCase()}</Text>
+              </View>
+            </View>
+          </View>
+        ))}
+
+        <ChartPlaceholder title="Delivery Performance (7d)" />
+      </ScrollView>
     </ScreenContainer>
   );
 }
@@ -435,35 +503,164 @@ function QualityAssuranceDashboard() {
 // ===== C3 DASHBOARDS =====
 
 function EmergencyCoordinatorDashboard() {
+  const allQuery = trpc.b2bDelivery.adminList.useQuery(
+    { limit: 50 },
+    { refetchInterval: 15000 }
+  );
+  const escalateMutation = trpc.b2bDelivery.escalate.useMutation({
+    onSuccess: () => allQuery.refetch(),
+  });
+
+  const all = allQuery.data?.deliveries || [];
+  const urgent = all.filter((d) => d.status !== "delivered" && d.status !== "cancelled" && d.status !== "failed");
+  const inFlight = all.filter((d) => ["pickup_enroute", "picked_up", "in_transit"].includes(d.status));
+  const failed = all.filter((d) => d.status === "failed");
+
   return (
     <ScreenContainer className="px-4 pt-4">
-      <Text className="text-2xl font-bold text-foreground mb-1">Emergency Ops</Text>
-      <Text className="text-sm text-muted mb-4">C3 Emergency Operations Center</Text>
-      <View className="bg-error/10 border border-error/30 rounded-xl p-4 mb-4">
-        <Text className="text-error font-bold text-base">ACTIVE EMERGENCY</Text>
-        <Text className="text-sm text-foreground mt-1">Medical supply delivery — Sector 7</Text>
-        <Text className="text-xs text-muted mt-1">Deployed 3 min ago • ETA 8 min</Text>
-      </View>
-      <StatCard title="Active Emergencies" value="1" color="#EF4444" />
-      <StatCard title="Drones Deployed" value="2" color="#F59E0B" />
-      <StatCard title="Resolved (24h)" value="4" color="#10B981" />
-      <StatCard title="Avg Response Time" value="4.2 min" color="#0066FF" />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        <Text className="text-2xl font-bold text-foreground mb-1">Emergency Ops</Text>
+        <Text className="text-sm text-muted mb-4">C3 Emergency Operations Center — B2B Priority</Text>
+
+        {/* Emergency Alert Banner */}
+        {urgent.length > 0 && (
+          <View className="bg-error/10 border border-error/30 rounded-xl p-4 mb-4">
+            <Text className="text-error font-bold text-base">ACTIVE OPERATIONS: {urgent.length}</Text>
+            <Text className="text-sm text-foreground mt-1">{inFlight.length} in-flight | {failed.length} failed requiring attention</Text>
+          </View>
+        )}
+
+        <View className="flex-row gap-3 mb-4">
+          <MetricBox label="Active Ops" value={String(urgent.length)} trend="" />
+          <MetricBox label="In Flight" value={String(inFlight.length)} trend="" />
+        </View>
+        <View className="flex-row gap-3 mb-4">
+          <MetricBox label="Failed" value={String(failed.length)} trend="" />
+          <MetricBox label="Total (all)" value={String(allQuery.data?.total || 0)} trend="" />
+        </View>
+
+        {/* Failed Deliveries - Escalation Queue */}
+        {failed.length > 0 && (
+          <>
+            <Text className="text-base font-semibold text-error mb-2">Failed — Escalation Required</Text>
+            {failed.slice(0, 5).map((d) => (
+              <View key={d.id} className="bg-surface border border-error/30 rounded-xl p-3 mb-2">
+                <View className="flex-row justify-between items-start">
+                  <View className="flex-1">
+                    <Text className="text-sm font-medium text-foreground">{d.trackingCode}</Text>
+                    <Text className="text-xs text-muted mt-0.5">{d.deliveryAddress}</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={{ backgroundColor: "#EF4444", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
+                    activeOpacity={0.7}
+                    onPress={() => escalateMutation.mutate({ deliveryId: d.id, reason: "Emergency escalation from C3 EOC" })}
+                  >
+                    <Text style={{ color: "#fff", fontSize: 11, fontWeight: "600" }}>Escalate</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </>
+        )}
+
+        {/* In-Flight Operations */}
+        <Text className="text-base font-semibold text-foreground mt-4 mb-2">In-Flight Operations</Text>
+        {inFlight.length === 0 ? (
+          <View className="bg-surface border border-border rounded-xl p-4 mb-3 items-center">
+            <Text className="text-muted text-sm">No active flights</Text>
+          </View>
+        ) : (
+          inFlight.slice(0, 5).map((d) => (
+            <View key={d.id} className="bg-surface border border-primary/20 rounded-xl p-3 mb-2">
+              <View className="flex-row justify-between items-center">
+                <View className="flex-1">
+                  <Text className="text-sm font-medium text-foreground">{d.trackingCode}</Text>
+                  <Text className="text-xs text-muted">{d.pickupAddress} → {d.deliveryAddress}</Text>
+                </View>
+                <View style={{ backgroundColor: "#F59E0B20", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
+                  <Text style={{ color: "#F59E0B", fontSize: 10, fontWeight: "600" }}>{d.status.replace("_", " ").toUpperCase()}</Text>
+                </View>
+              </View>
+            </View>
+          ))
+        )}
+
+        <StatCard title="Avg Response Time" value="4.2 min" color="#0066FF" />
+        <ChartPlaceholder title="Emergency Response Timeline" />
+      </ScrollView>
     </ScreenContainer>
   );
 }
 
 function DispatchManagerDashboard() {
+  const pendingQuery = trpc.b2bDelivery.adminList.useQuery(
+    { status: "pending", limit: 20 },
+    { refetchInterval: 10000 }
+  );
+  const assignedQuery = trpc.b2bDelivery.adminList.useQuery(
+    { status: "assigned", limit: 20 },
+    { refetchInterval: 15000 }
+  );
+  const assignMutation = trpc.b2bDelivery.assignPilot.useMutation({
+    onSuccess: () => { pendingQuery.refetch(); assignedQuery.refetch(); },
+  });
+
+  const pending = pendingQuery.data?.deliveries || [];
+  const assigned = assignedQuery.data?.deliveries || [];
+
   return (
     <ScreenContainer className="px-4 pt-4">
-      <Text className="text-2xl font-bold text-foreground mb-1">Dispatch</Text>
-      <Text className="text-sm text-muted mb-4">Emergency Resource Dispatch</Text>
-      <StatCard title="Queue" value="3" color="#F59E0B" />
-      <StatCard title="Dispatched" value="2" color="#0066FF" />
-      <StatCard title="Completed" value="7" color="#10B981" />
-      <AlertList alerts={[
-        { title: "Priority 1: Medical supply — Hospital Zone", severity: "critical", time: "NOW" },
-        { title: "Priority 2: Search equipment — Mountain Sector", severity: "warning", time: "5 min ago" },
-      ]} />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        <Text className="text-2xl font-bold text-foreground mb-1">Dispatch</Text>
+        <Text className="text-sm text-muted mb-4">Emergency Resource Dispatch — B2B Queue</Text>
+        <View className="flex-row gap-3 mb-4">
+          <MetricBox label="Queue" value={String(pending.length)} trend="" />
+          <MetricBox label="Dispatched" value={String(assigned.length)} trend="" />
+        </View>
+
+        {/* Priority Queue */}
+        <Text className="text-base font-semibold text-foreground mb-2">Priority Queue</Text>
+        {pending.length === 0 ? (
+          <View className="bg-surface border border-border rounded-xl p-4 mb-3 items-center">
+            <Text className="text-muted text-sm">Queue empty — all dispatched</Text>
+          </View>
+        ) : (
+          pending.map((d) => (
+            <View key={d.id} className="bg-surface border border-warning/30 rounded-xl p-3 mb-2">
+              <View className="flex-row justify-between items-start">
+                <View className="flex-1">
+                  <Text className="text-sm font-medium text-foreground">{d.trackingCode}</Text>
+                  <Text className="text-xs text-muted mt-0.5">{d.pickupAddress}</Text>
+                  <Text className="text-xs text-muted">→ {d.deliveryAddress}</Text>
+                </View>
+                <TouchableOpacity
+                  style={{ backgroundColor: "#0a7ea4", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
+                  activeOpacity={0.7}
+                  onPress={() => assignMutation.mutate({ deliveryId: d.id, pilotId: 1 })}
+                >
+                  <Text style={{ color: "#fff", fontSize: 11, fontWeight: "600" }}>Dispatch</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
+        )}
+
+        {/* Recently Dispatched */}
+        <Text className="text-base font-semibold text-foreground mt-4 mb-2">Recently Dispatched</Text>
+        {assigned.slice(0, 5).map((d) => (
+          <View key={d.id} className="bg-surface border border-border rounded-xl p-3 mb-2">
+            <View className="flex-row justify-between items-center">
+              <View className="flex-1">
+                <Text className="text-sm font-medium text-foreground">{d.trackingCode}</Text>
+                <Text className="text-xs text-muted">Pilot #{d.assignedPilotId} • {d.deliveryAddress}</Text>
+              </View>
+              <View style={{ backgroundColor: "#10B98120", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
+                <Text style={{ color: "#10B981", fontSize: 10, fontWeight: "600" }}>DISPATCHED</Text>
+              </View>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
     </ScreenContainer>
   );
 }

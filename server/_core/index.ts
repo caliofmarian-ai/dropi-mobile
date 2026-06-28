@@ -6,6 +6,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { createRestGateway } from "../rest-gateway";
+import { initLiveTracking, getTrackingStats } from "../live-tracking";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 
@@ -66,6 +67,11 @@ async function startServer() {
   // REST API Gateway for B2B partners (no tRPC client needed)
   app.use("/api/v1", createRestGateway());
 
+  // Live tracking stats endpoint
+  app.get("/api/tracking/stats", (_req, res) => {
+    res.json(getTrackingStats());
+  });
+
   app.use(
     "/api/trpc",
     createExpressMiddleware({
@@ -80,6 +86,9 @@ async function startServer() {
   if (port !== preferredPort) {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
+
+  // Initialize WebSocket live tracking on the HTTP server
+  initLiveTracking(server);
 
   server.listen(port, () => {
     console.log(`[api] server listening on port ${port}`);
