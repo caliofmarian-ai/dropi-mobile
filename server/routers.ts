@@ -8,6 +8,7 @@ import { storeRouter, productRouter, reviewRouter } from "./marketplace-router";
 import { trustRouter } from "./trust-router";
 import { apiKeyRouter, b2bDeliveryRouter, webhookRouter, apiAnalyticsRouter } from "./b2b-router";
 import { pilotSelectionRouter } from "./pilot-selection-router";
+import { pilotRatingAdminRouter } from "./pilot-rating-admin";
 
 export const appRouter = router({
   system: systemRouter,
@@ -53,6 +54,9 @@ export const appRouter = router({
 
   // Pilot Selection System (Blueprint §12)
   pilotSelection: pilotSelectionRouter,
+
+  // Pilot Rating Admin — Real-time Recalculation
+  pilotRatingAdmin: pilotRatingAdminRouter,
 });
 
 export type AppRouter = typeof appRouter;

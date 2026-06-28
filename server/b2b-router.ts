@@ -24,6 +24,7 @@ import { z } from "zod";
 import crypto from "crypto";
 import { notifyOwner } from "./_core/notification";
 import { triggerWebhooks, buildWebhookPayload, getWebhookEvents } from "./webhook-trigger";
+import { onB2bDeliveryCompleted, onB2bDeliveryFailed } from "./pilot-rating-hooks";
 
 // ===== HELPERS =====
 
@@ -551,6 +552,13 @@ export const b2bDeliveryRouter = router({
         .set(updateData)
         .where(eq(b2bDeliveries.id, input.deliveryId));
 
+      // Trigger rating hooks based on status
+      if (input.newStatus === "delivered" && delivery[0].assignedPilotId) {
+        onB2bDeliveryCompleted(delivery[0].id, delivery[0].assignedPilotId);
+      } else if (input.newStatus === "failed" && delivery[0].assignedPilotId) {
+        onB2bDeliveryFailed(delivery[0].id, delivery[0].assignedPilotId, input.failureReason);
+      }
+
       // Trigger webhooks
       const events = getWebhookEvents(input.newStatus);
       const webhookPayload = buildWebhookPayload(
@@ -640,6 +648,14 @@ export const b2bDeliveryRouter = router({
       await db.update(b2bDeliveries)
         .set(updateData)
         .where(eq(b2bDeliveries.id, input.deliveryId));
+
+      // Trigger rating hooks based on status
+      const pilotId = input.pilotId || delivery[0].assignedPilotId;
+      if (input.newStatus === "delivered" && pilotId) {
+        onB2bDeliveryCompleted(delivery[0].id, pilotId);
+      } else if (input.newStatus === "failed" && pilotId) {
+        onB2bDeliveryFailed(delivery[0].id, pilotId, input.cancellationReason);
+      }
 
       // Trigger webhooks
       const events = getWebhookEvents(input.newStatus);

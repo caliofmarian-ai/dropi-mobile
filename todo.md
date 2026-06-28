@@ -276,8 +276,13 @@
 - [x] DB: Create pilotProfiles table (24 columns: rating, components, stats, availability, capacity, COS eligibility, rotation)
 - [x] DB: Create pilotRatingHistory table (10 columns: audit trail for every rating change)
 - [x] DB: Generate and apply migration 0009_melted_excalibur.sql
-- [ ] Server: Rating Engine — recalculateRating procedure with weighted formula
-- [ ] Server: Rating hooks on delivery completion/failure/review
+- [x] Server: Rating Engine — recalculateRating procedure with weighted formula (pilot-rating-engine.ts)
+- [x] Server: Rating hooks on delivery completion/failure/review (pilot-rating-hooks.ts with 6 hooks: onB2bDeliveryCompleted, onB2bDeliveryFailed, onMarketplaceDeliveryCompleted, onMarketplaceDeliveryFailed, onCustomerReviewSubmitted, onIncidentReported)
+- [x] Server: Wired rating hooks into b2b-router.ts pilotUpdateStatus and updateStatus procedures
+- [x] Server: Admin rating adjustment endpoints (pilot-rating-admin.ts: adjustRating, getRatingHistory, getLeaderboard, getStats, triggerPeriodicRecalculation, resetRating)
+- [ ] Fix TypeScript errors in pilot-rating-hooks.ts (recalculateRating signature, RatingUpdateResult type)
+- [ ] Verify all rating recalculation flows end-to-end
+- [ ] Run QA verification against masterplan
 - [x] Server: pilotSelectionRouter — getEligiblePilots, getAutoSelectedPilot, assignPilotManual, updateAvailability, updatePosition, getMyProfile, getRatingHistory, getLeaderboard
 - [x] Server: Automatic selection algorithm (C1) with scoring formula (proximity 30%, rating 30%, completion 25%, rotation 15%)
 - [x] Server: Manual selection validation (C2/C3) with rating gate (>= 4.00, cosEligible = TRUE)
