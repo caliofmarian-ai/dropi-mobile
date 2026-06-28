@@ -5,7 +5,7 @@
  * Supports two store types: internal (products in DROPi) and external (redirect + Logistic API).
  */
 import { useState, useCallback } from "react";
-import { Text, View, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from "react-native";
+import { Text, View, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
@@ -109,23 +109,29 @@ export default function MerchantDashboardScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Trust Score */}
-        <View className="bg-surface border border-border rounded-2xl p-4 mb-4">
-          <View className="flex-row items-center justify-between">
-            <View>
-              <Text className="text-sm text-muted">Trust Score</Text>
-              <Text style={{ color: trustColor, fontSize: 32, fontWeight: "800" }}>{store?.trustScore || 0}</Text>
+        {/* Trust Score — tappable */}
+        <Pressable
+          onPress={() => router.push("/merchant/trust")}
+          style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+        >
+          <View className="bg-surface border border-border rounded-2xl p-4 mb-4">
+            <View className="flex-row items-center justify-between">
+              <View>
+                <Text className="text-sm text-muted">Trust Score</Text>
+                <Text style={{ color: trustColor, fontSize: 32, fontWeight: "800" }}>{store?.trustScore || 0}</Text>
+              </View>
+              <View className="items-end">
+                <Text className="text-sm text-muted">Total Reviews</Text>
+                <Text className="text-lg font-bold text-foreground">{store?.totalReviews || 0}</Text>
+              </View>
+              <View className="items-end">
+                <Text className="text-sm text-muted">Total Orders</Text>
+                <Text className="text-lg font-bold text-foreground">{store?.totalOrders || 0}</Text>
+              </View>
             </View>
-            <View className="items-end">
-              <Text className="text-sm text-muted">Total Reviews</Text>
-              <Text className="text-lg font-bold text-foreground">{store?.totalReviews || 0}</Text>
-            </View>
-            <View className="items-end">
-              <Text className="text-sm text-muted">Total Orders</Text>
-              <Text className="text-lg font-bold text-foreground">{store?.totalOrders || 0}</Text>
-            </View>
+            <Text className="text-primary text-xs text-center mt-2">Tap to view details →</Text>
           </View>
-        </View>
+        </Pressable>
 
         {/* Quick Stats */}
         <View className="flex-row gap-3 mb-4">

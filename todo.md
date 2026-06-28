@@ -205,3 +205,16 @@
 - [x] Server: Admin notification (notifyOwner) when products are submitted for review with warnings
 - [x] Server: Auto-approve products from trusted merchants (trustScore ≥ 80, no previous rejections)
 - [x] UI: Merchant gets real-time moderation feedback after submitForReview (auto-approved/rejected/pending)
+
+## Sprint C — Trust & Badge System
+- [x] Server: Trust score calculation engine (5 components: postDeliveryRating 35%, qualityVsDescription 20%, orderCompletionRate 20%, ruleCompliance 15%, absenceOfComplaints 10%)
+- [x] Server: Badge assignment logic (high_trust, new_activity, high_risk, restricted)
+- [x] Server: Natural elimination mechanism (4 levels: warning → restricted visibility → suspended → removed)
+- [x] Server: Trust endpoints (getMyTrustScore, getStoreTrustScore, recalculate, recalculateAll, overrideBadge)
+- [x] Server: Improvement tips generator based on weakest score components
+- [x] Server: Admin badge override with mandatory justification (logged in audit)
+- [x] UI: Merchant Trust Dashboard (score gauge, component breakdown, badge, elimination status)
+- [x] UI: Badge history timeline with active indicator
+- [x] UI: Improvement tips with priority and impact levels
+- [x] UI: Elimination status warning banner for merchants at risk
+- [x] Navigation: Trust Score card on merchant dashboard links to trust screen

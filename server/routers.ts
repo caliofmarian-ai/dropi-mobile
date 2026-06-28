@@ -5,6 +5,7 @@ import { publicProcedure, router } from "./_core/trpc";
 import { dropiAuthRouter, adminAuthRouter, auditRouter } from "./auth-router";
 import { verificationRouter, roleApplicationRouter } from "./verification-router";
 import { storeRouter, productRouter, reviewRouter } from "./marketplace-router";
+import { trustRouter } from "./trust-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -38,6 +39,9 @@ export const appRouter = router({
   store: storeRouter,
   product: productRouter,
   review: reviewRouter,
+
+  // Trust & Badge System
+  trust: trustRouter,
 });
 
 export type AppRouter = typeof appRouter;
