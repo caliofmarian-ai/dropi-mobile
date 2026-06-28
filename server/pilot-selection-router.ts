@@ -324,15 +324,34 @@ export const pilotSelectionRouter = router({
    * Get pilot leaderboard (top pilots by rating).
    * Access: admin only.
    */
-  getLeaderboard: adminProcedure
+  getLeaderboard: protectedProcedure
     .input(z.object({
-      limit: z.number().min(1).max(50).default(20),
+      limit: z.number().min(1).max(100).default(50),
+      offset: z.number().min(0).default(0),
       zone: z.string().optional(),
+      minDeliveries: z.number().min(0).default(0),
     }).optional())
     .query(async ({ input }) => {
       const db = await getDb();
-      if (!db) return [];
+      if (!db) return { leaderboard: [], total: 0 };
 
+      const limit = input?.limit || 50;
+      const offset = input?.offset || 0;
+      const minDeliveries = input?.minDeliveries || 0;
+
+      // Get total count
+      const countResult = await db
+        .select({ count: sql<number>`cast(count(*) as integer)` })
+        .from(pilotProfiles)
+        .innerJoin(users, eq(users.id, pilotProfiles.userId))
+        .where(and(
+          eq(users.isActive, true),
+          sql`cast(${pilotProfiles.totalDeliveries} as integer) >= ${minDeliveries}`
+        ));
+
+      const total = countResult[0]?.count || 0;
+
+      // Get paginated leaderboard with all metrics
       const pilots = await db
         .select({
           userId: users.id,
@@ -340,17 +359,31 @@ export const pilotSelectionRouter = router({
           rating: pilotProfiles.rating,
           totalDeliveries: pilotProfiles.totalDeliveries,
           completionRate: pilotProfiles.completionRate,
+          onTimeRate: pilotProfiles.onTimeRate,
+          customerRating: pilotProfiles.customerRating,
+          incidentRate: pilotProfiles.incidentRate,
           cosEligible: pilotProfiles.cosEligible,
           isAvailable: pilotProfiles.isAvailable,
           zone: users.zone,
         })
         .from(pilotProfiles)
         .innerJoin(users, eq(users.id, pilotProfiles.userId))
-        .where(eq(users.isActive, true))
+        .where(and(
+          eq(users.isActive, true),
+          sql`cast(${pilotProfiles.totalDeliveries} as integer) >= ${minDeliveries}`
+        ))
         .orderBy(desc(pilotProfiles.rating))
-        .limit(input?.limit || 20);
+        .limit(limit)
+        .offset(offset);
 
-      return pilots;
+      // Add rank to each pilot
+      const leaderboardWithRank = pilots.map((pilot, idx) => ({
+        ...pilot,
+        rank: offset + idx + 1,
+        totalB2b: 0, // Placeholder: would need separate B2B count from b2bDeliveries table
+      }));
+
+      return { leaderboard: leaderboardWithRank, total };
     }),
 
   /**

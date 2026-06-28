@@ -292,3 +292,12 @@
 - [x] UI: Wire PilotPickerModal into Operations Manager, Dispatch Manager, Emergency Coordinator dashboards
 - [x] Integration: Wire webhook payload with pilot info on assignment (delivery.assigned event)
 - [x] Integration: Audit log entries for all pilot selections (action: pilot_assigned_manual, channel, operator role)
+
+## Pilot Leaderboard Screen
+- [x] UI: Pilot leaderboard screen (/app/pilot/leaderboard.tsx) with zone filtering and sorting
+- [x] Server: getLeaderboard endpoint with pagination and metrics (limit, offset, minDeliveries, total count)
+- [x] UI: Sort by rating, completion rate, deliveries, on-time rate
+- [x] UI: Display rank badges (gold #1, silver #2, bronze #3)
+- [x] UI: Performance metrics grid (completion, on-time, customer rating, incident rate)
+- [x] UI: COS eligibility badge
+- [x] UI: Pull-to-refresh functionality
