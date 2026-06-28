@@ -104,16 +104,39 @@ export default function ProductNewScreen() {
 
       // If user wants to submit for review immediately
       if (submitForReview && result.productId) {
-        await submitMutation.mutateAsync({ productId: result.productId });
-      }
+        const modResult = await submitMutation.mutateAsync({ productId: result.productId });
 
-      Alert.alert(
-        "Success",
-        submitForReview
-          ? "Product submitted for review! Our team will check it within 24h."
-          : "Product saved as draft. You can edit and submit it for review later.",
-        [{ text: "OK", onPress: () => router.back() }]
-      );
+        // Show auto-moderation feedback
+        if (modResult.autoModerated && modResult.action === "approved") {
+          Alert.alert(
+            "✓ Auto-Approved!",
+            "Your product passed all checks and has been automatically approved. It is now live in the marketplace.",
+            [{ text: "Great!", onPress: () => router.back() }]
+          );
+        } else if (modResult.autoModerated && modResult.action === "rejected") {
+          Alert.alert(
+            "⚠️ Auto-Rejected",
+            `Your product was automatically rejected:\n\n${modResult.reason}\n\nPlease fix the issues and resubmit.`,
+            [{ text: "OK", onPress: () => router.back() }]
+          );
+        } else {
+          // Pending manual review
+          const warnings = modResult.violations?.length || 0;
+          Alert.alert(
+            "Submitted for Review",
+            warnings > 0
+              ? `Product submitted. ${warnings} warning(s) detected — our team will review within 24h.`
+              : "Product submitted for review! Our team will check it within 24h.",
+            [{ text: "OK", onPress: () => router.back() }]
+          );
+        }
+      } else {
+        Alert.alert(
+          "Saved",
+          "Product saved as draft. You can edit and submit it for review later.",
+          [{ text: "OK", onPress: () => router.back() }]
+        );
+      }
     } catch (err: any) {
       Alert.alert("Error", err.message || "Failed to create product");
     } finally {

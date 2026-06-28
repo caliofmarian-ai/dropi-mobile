@@ -195,3 +195,13 @@
 - [x] UI: Product Detail screen (badges, reviews, moderation notes, timeline)
 - [x] UI: Merchant Reviews screen (summary stats, star distribution, review list)
 - [x] UI: API Integration screen (external store merchants — API key, webhook config)
+
+## Sprint B — Catalog & Moderation
+- [x] Server: Auto-moderation rules engine (prohibited keywords, price limits, mandatory fields, weight/dimension validation)
+- [x] Server: Delivery badge auto-calculation on product create/update (drone ≤2kg + ≤30cm, terrestrial always, multimodal if both)
+- [x] Server: Auto-reject products with critical violations (prohibited content) with detailed reason
+- [x] UI: Admin Product Moderation Panel (pending queue, product details, approve/reject with notes, stats)
+- [x] UI: Moderation filters (by status: pending/approved/rejected)
+- [x] Server: Admin notification (notifyOwner) when products are submitted for review with warnings
+- [x] Server: Auto-approve products from trusted merchants (trustScore ≥ 80, no previous rejections)
+- [x] UI: Merchant gets real-time moderation feedback after submitForReview (auto-approved/rejected/pending)

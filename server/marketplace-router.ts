@@ -16,6 +16,8 @@ import { stores, products, productReviews, sellerBadges, deliveryBadges, storeAn
 import { eq, and, desc, sql, like, or } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "crypto";
+import { moderateProduct, formatViolationsForNote, type ProductForModeration, type StoreContext } from "./moderation-engine";
+import { notifyOwner } from "./_core/notification";
 
 // ===== DELIVERY MODE CALCULATION =====
 // Based on Blueprint: drone ≤2kg & ≤30×30×30cm, terrestrial always, multimodal if both eligible
@@ -365,7 +367,7 @@ export const productRouter = router({
       return { success: true };
     }),
 
-  // Submit product for review
+  // Submit product for review (with auto-moderation)
   submitForReview: protectedProcedure
     .input(z.object({ productId: z.number() }))
     .mutation(async ({ ctx, input }) => {
@@ -382,8 +384,92 @@ export const productRouter = router({
         throw new Error("Only draft or rejected products can be submitted for review");
       }
 
-      await db.update(products).set({ status: "pending_review" }).where(eq(products.id, input.productId));
-      return { success: true };
+      // === AUTO-MODERATION ENGINE ===
+      // Count previous rejections for this store
+      const [rejCount] = await db.select({ count: sql<number>`count(*)` })
+        .from(products)
+        .where(and(eq(products.storeId, store.id), eq(products.status, "rejected")));
+
+      const productData: ProductForModeration = {
+        name: product.name,
+        description: product.description,
+        price: parseFloat(product.price as any),
+        currency: product.currency,
+        category: product.category,
+        weight: parseFloat(product.weight as any),
+        dimensions: product.dimensions as any,
+        images: product.images as string[] | null,
+        isFragile: product.isFragile,
+        requiresSpecialPackaging: product.requiresSpecialPackaging,
+        stock: product.stock,
+      };
+
+      const storeContext: StoreContext = {
+        trustScore: store.trustScore,
+        totalOrders: store.totalOrders,
+        previousRejections: rejCount?.count || 0,
+      };
+
+      const moderationResult = moderateProduct(productData, storeContext);
+      const moderationNote = formatViolationsForNote(moderationResult);
+
+      if (moderationResult.autoAction === "reject") {
+        // Auto-reject: critical violations found
+        await db.update(products).set({
+          status: "rejected",
+          moderationNote,
+          moderatedBy: null, // system
+          moderatedAt: new Date(),
+          isActive: false,
+        }).where(eq(products.id, input.productId));
+
+        return {
+          success: false,
+          autoModerated: true,
+          action: "rejected",
+          reason: moderationResult.reason,
+          violations: moderationResult.violations,
+        };
+      } else if (moderationResult.autoAction === "approve") {
+        // Auto-approve: trusted merchant, no violations
+        await db.update(products).set({
+          status: "approved",
+          isActive: true,
+          moderationNote,
+          moderatedBy: null, // system auto-approve
+          moderatedAt: new Date(),
+        }).where(eq(products.id, input.productId));
+
+        return {
+          success: true,
+          autoModerated: true,
+          action: "approved",
+          reason: moderationResult.reason,
+          violations: [],
+        };
+      } else {
+        // Needs manual review
+        await db.update(products).set({
+          status: "pending_review",
+          moderationNote: moderationResult.violations.length > 0 ? moderationNote : null,
+        }).where(eq(products.id, input.productId));
+
+        // Notify admin about new product pending review
+        try {
+          await notifyOwner({
+            title: "Product Pending Review",
+            content: `"${product.name}" from store "${store.name}" needs review. ${moderationResult.violations.length} warning(s) detected.`,
+          });
+        } catch (e) { /* notification failure is non-blocking */ }
+
+        return {
+          success: true,
+          autoModerated: false,
+          action: "pending_review",
+          reason: moderationResult.reason,
+          violations: moderationResult.violations,
+        };
+      }
     }),
 
   // Delete product (soft — set to draft and inactive)
