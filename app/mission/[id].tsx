@@ -10,6 +10,7 @@ import { DeliveryMap, createDemoRoute } from "@/components/delivery-map";
 import type { VehicleType } from "@/components/delivery-map";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApiBaseUrl } from "@/constants/oauth";
+import { trpc } from "@/lib/trpc";
 
 type MissionPhase = "detail" | "preflight" | "inflight" | "complete";
 
@@ -57,6 +58,33 @@ export default function MissionDetailScreen() {
   const isDrone = vehicleType === "drone";
   const initialChecks = isDrone ? DRONE_PREFLIGHT : TERRESTRIAL_PREFLIGHT;
   const [checks, setChecks] = useState<CheckItem[]>(initialChecks);
+  const [statusUpdating, setStatusUpdating] = useState(false);
+
+  // tRPC mutation for pilot status updates (triggers webhooks server-side)
+  const pilotUpdateStatus = trpc.b2bDelivery.pilotUpdateStatus.useMutation({
+    onError: (err) => {
+      console.warn("[Pilot Status] Update failed:", err.message);
+      // Non-blocking: mission flow continues even if server update fails
+    },
+  });
+
+  // Helper to sync status to server (non-blocking for UX)
+  const syncStatusToServer = async (newStatus: string, extras?: { failureReason?: string }) => {
+    // Only sync if mission has a B2B delivery ID (orderId maps to delivery)
+    if (!mission?.orderId) return;
+    setStatusUpdating(true);
+    try {
+      await pilotUpdateStatus.mutateAsync({
+        deliveryId: mission.orderId,
+        newStatus: newStatus as any,
+        ...(extras?.failureReason && { failureReason: extras.failureReason }),
+      });
+    } catch (e) {
+      // Silent fail — local flow continues
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
 
   if (!mission) {
     return (
@@ -104,6 +132,8 @@ export default function MissionDetailScreen() {
       }
       setCheckingVerification(false);
     }
+    // Sync to server: assigned
+    syncStatusToServer("assigned");
     setPhase("preflight");
   };
 
@@ -112,6 +142,10 @@ export default function MissionDetailScreen() {
       Alert.alert("Incomplete Check", "All items must be confirmed before launch.");
       return;
     }
+    // Sync to server: pickup_enroute → picked_up → in_transit (rapid progression)
+    syncStatusToServer("pickup_enroute");
+    setTimeout(() => syncStatusToServer("picked_up"), 500);
+    setTimeout(() => syncStatusToServer("in_transit"), 1000);
     setPhase("inflight");
   };
 
@@ -126,7 +160,8 @@ export default function MissionDetailScreen() {
         {
           text: "STOP NOW",
           style: "destructive",
-          onPress: () => {
+              onPress: () => {
+            syncStatusToServer("failed", { failureReason: "Emergency stop executed by pilot" });
             Alert.alert("Vehicle Stopped", "Emergency stop executed. Creating incident report.");
             setPhase("complete");
           },
@@ -146,7 +181,8 @@ export default function MissionDetailScreen() {
         { text: "Cancel", style: "cancel" },
         {
           text: "Confirm Fallback",
-          onPress: () => {
+            onPress: () => {
+            syncStatusToServer("failed", { failureReason: isDrone ? "Fallback: drone returning to DronePort" : "Fallback: vehicle returning to depot" });
             Alert.alert("Fallback Active", isDrone ? "Drone returning to DronePort Alpha." : "Vehicle returning to depot.");
             setPhase("complete");
           },
@@ -374,9 +410,12 @@ export default function MissionDetailScreen() {
 
             {/* Complete Delivery */}
             <TouchableOpacity
-              style={{ backgroundColor: colors.success, borderRadius: 12, paddingVertical: 14, alignItems: "center" }}
+              style={{ backgroundColor: colors.success, borderRadius: 12, paddingVertical: 14, alignItems: "center", opacity: statusUpdating ? 0.6 : 1 }}
               activeOpacity={0.8}
-              onPress={() => setPhase("complete")}
+              onPress={() => {
+                syncStatusToServer("delivered");
+                setPhase("complete");
+              }}
             >
               <Text className="text-white font-semibold text-base">✓ Delivery Complete</Text>
             </TouchableOpacity>

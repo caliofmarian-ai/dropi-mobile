@@ -502,3 +502,26 @@ export const webhookLogs = mysqlTable("webhookLogs", {
 });
 export type WebhookLog = typeof webhookLogs.$inferSelect;
 export type InsertWebhookLog = typeof webhookLogs.$inferInsert;
+
+
+/**
+ * API Request Logs — tracks every REST API call for analytics and auditing.
+ * Records method, endpoint, response status, timing, and request metadata.
+ */
+export const apiRequestLogs = mysqlTable("apiRequestLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  apiKeyId: int("apiKeyId").notNull(),
+  storeId: int("storeId").notNull(),
+  method: varchar("method", { length: 10 }).notNull(), // GET, POST, PUT, DELETE
+  endpoint: varchar("endpoint", { length: 200 }).notNull(), // /api/v1/delivery/request
+  statusCode: int("statusCode").notNull(),
+  responseTimeMs: int("responseTimeMs").notNull(), // milliseconds
+  requestBodySize: int("requestBodySize").default(0), // bytes
+  responseBodySize: int("responseBodySize").default(0), // bytes
+  ipAddress: varchar("ipAddress", { length: 45 }),
+  userAgent: varchar("userAgent", { length: 500 }),
+  errorCode: varchar("errorCode", { length: 50 }), // null if success
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ApiRequestLog = typeof apiRequestLogs.$inferSelect;
+export type InsertApiRequestLog = typeof apiRequestLogs.$inferInsert;

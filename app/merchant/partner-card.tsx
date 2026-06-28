@@ -20,6 +20,7 @@ export default function PartnerCardScreen() {
   const apiKeysQuery = trpc.apiKey.list.useQuery(undefined, { enabled: !!storeQuery.data });
   const webhooksQuery = trpc.webhook.list.useQuery(undefined, { enabled: !!storeQuery.data });
   const deliveriesQuery = trpc.b2bDelivery.list.useQuery(undefined, { enabled: !!storeQuery.data });
+  const analyticsQuery = trpc.apiAnalytics.summary.useQuery(undefined, { enabled: !!storeQuery.data });
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -27,7 +28,7 @@ export default function PartnerCardScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([storeQuery.refetch(), apiKeysQuery.refetch(), webhooksQuery.refetch(), deliveriesQuery.refetch()]);
+    await Promise.all([storeQuery.refetch(), apiKeysQuery.refetch(), webhooksQuery.refetch(), deliveriesQuery.refetch(), analyticsQuery.refetch()]);
     setRefreshing(false);
   };
 
@@ -194,6 +195,68 @@ export default function PartnerCardScreen() {
             <StatCard label="Completed" value={String(completedDeliveries)} color="#22C55E" />
           </View>
         </View>
+
+        {/* API Analytics (from apiRequestLogs) */}
+        {analyticsQuery.data && (
+          <View className="bg-surface border border-border rounded-2xl p-4 mb-4">
+            <Text className="text-sm font-semibold text-foreground mb-3">API Analytics (Last 30 Days)</Text>
+
+            {/* Summary Row */}
+            <View className="flex-row justify-between mb-4">
+              <View className="items-center flex-1">
+                <Text style={{ fontSize: 18, fontWeight: "700", color: "#0a7ea4" }}>{analyticsQuery.data.totals.requests}</Text>
+                <Text className="text-xs text-muted mt-0.5">Total Calls</Text>
+              </View>
+              <View className="items-center flex-1">
+                <Text style={{ fontSize: 18, fontWeight: "700", color: analyticsQuery.data.totals.errorRate > 10 ? "#EF4444" : "#22C55E" }}>
+                  {analyticsQuery.data.totals.errorRate}%
+                </Text>
+                <Text className="text-xs text-muted mt-0.5">Error Rate</Text>
+              </View>
+              <View className="items-center flex-1">
+                <Text style={{ fontSize: 18, fontWeight: "700", color: "#8B5CF6" }}>
+                  {analyticsQuery.data.performance.avgResponseTimeMs}ms
+                </Text>
+                <Text className="text-xs text-muted mt-0.5">Avg Response</Text>
+              </View>
+            </View>
+
+            {/* Daily Chart (simple bar representation) */}
+            {analyticsQuery.data.daily.length > 0 && (
+              <View className="mb-3">
+                <Text className="text-xs text-muted mb-2">Daily Requests (Last 7 Days)</Text>
+                <View className="flex-row items-end gap-1" style={{ height: 50 }}>
+                  {analyticsQuery.data.daily.map((day, i) => {
+                    const maxCount = Math.max(...analyticsQuery.data!.daily.map((d) => d.requests), 1);
+                    const height = Math.max((day.requests / maxCount) * 40, 4);
+                    return (
+                      <View key={i} className="flex-1 items-center">
+                        <View style={{ height, backgroundColor: "#0a7ea4", borderRadius: 3, width: "80%" }} />
+                        <Text style={{ fontSize: 8, color: "#687076", marginTop: 2 }}>
+                          {day.date.split("-")[2]}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            )}
+
+            {/* Top Endpoints */}
+            {analyticsQuery.data.topEndpoints.length > 0 && (
+              <View>
+                <Text className="text-xs text-muted mb-2">Top Endpoints</Text>
+                {analyticsQuery.data.topEndpoints.slice(0, 4).map((ep, i) => (
+                  <View key={i} className="flex-row items-center justify-between py-1.5 border-b border-border/50">
+                    <Text className="text-xs text-foreground flex-1" numberOfLines={1}>{ep.endpoint}</Text>
+                    <Text className="text-xs text-muted ml-2">{ep.requests} calls</Text>
+                    <Text className="text-xs text-muted ml-2">{ep.avgResponseTimeMs}ms</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
 
         {/* Storefront Redirect */}
         <View className="bg-surface border border-border rounded-2xl p-4 mb-4">

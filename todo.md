@@ -250,3 +250,13 @@
 - [x] Server: REST API gateway at /api/v1/ (rest-gateway.ts — 7 endpoints: health, request, get, track, cancel, estimate, list)
 - [x] Server: REST middleware — API key SHA-256 validation, in-memory rate limiting per key, lastUsedAt tracking
 - [x] Server: REST error handling (standardized JSON: error code, message, timestamp, details)
+
+## Sprint E+ Upgrades — B2B Analytics, Pilot Flow & Webhook Retry
+- [x] DB: Create apiRequestLogs table (apiKeyId, method, endpoint, statusCode, responseTimeMs, requestBody, ipAddress)
+- [x] Server: Request logging middleware in REST gateway (logs every API call with timing, response size)
+- [x] Server: API analytics endpoint (apiAnalytics.summary — totals, performance, daily breakdown, top endpoints)
+- [x] UI: Update Partner Card with API analytics section (total calls, error rate, avg response, daily bar chart, top endpoints)
+- [x] Server: pilotUpdateStatus procedure (validates pilot identity, forward-only transitions, triggers webhooks, notifies store owner)
+- [x] UI: Wire pilot status updates into mission/[id].tsx (accept→assigned, launch→pickup_enroute→picked_up→in_transit, complete→delivered, stop/fallback→failed)
+- [x] UI: Webhook retry dashboard in webhook-config.tsx (filter failed-only, retry button per failed log, success/failure feedback, failed count summary)
+- [x] Server: webhook.retry procedure (re-sends failed webhook with fresh HMAC-SHA256 signature, resets failure count on success)

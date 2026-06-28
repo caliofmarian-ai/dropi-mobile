@@ -20,7 +20,7 @@
 
 import { Router, Request, Response, NextFunction } from "express";
 import { getDb } from "./db";
-import { apiKeys, stores, b2bDeliveries, webhookEndpoints } from "../drizzle/schema";
+import { apiKeys, stores, b2bDeliveries, webhookEndpoints, apiRequestLogs } from "../drizzle/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import crypto from "crypto";
 import { triggerWebhooks, buildWebhookPayload, getWebhookEvents } from "./webhook-trigger";
@@ -213,6 +213,41 @@ export function createRestGateway(): Router {
 
   // Apply API key auth to all other routes
   gateway.use(authenticateApiKey);
+
+  // Request logging middleware (runs after auth, logs every API call)
+  gateway.use((req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const startTime = Date.now();
+    const originalJson = res.json.bind(res);
+
+    res.json = (body: any) => {
+      const responseTimeMs = Date.now() - startTime;
+      const responseBodySize = JSON.stringify(body || {}).length;
+
+      // Log asynchronously (non-blocking)
+      if (req.apiKey && req.store) {
+        getDb().then((db) => {
+          if (!db) return;
+          db.insert(apiRequestLogs).values({
+            apiKeyId: req.apiKey!.id,
+            storeId: req.store!.id,
+            method: req.method,
+            endpoint: req.originalUrl || req.path,
+            statusCode: res.statusCode,
+            responseTimeMs,
+            requestBodySize: JSON.stringify(req.body || {}).length,
+            responseBodySize,
+            ipAddress: (req.headers["x-forwarded-for"] as string)?.split(",")[0] || req.ip || null,
+            userAgent: (req.headers["user-agent"] as string)?.substring(0, 500) || null,
+            errorCode: res.statusCode >= 400 ? (body?.error || null) : null,
+          }).catch((err) => console.error("[API Log] Failed to log request:", err.message));
+        });
+      }
+
+      return originalJson(body);
+    };
+
+    next();
+  });
 
   // ===== POST /delivery/request — Create a new delivery =====
   gateway.post("/delivery/request", async (req: AuthenticatedRequest, res: Response) => {

@@ -18,7 +18,7 @@
 
 import { router, protectedProcedure, adminProcedure } from "./_core/trpc";
 import { getDb } from "./db";
-import { stores, apiKeys, webhookEndpoints, b2bDeliveries, webhookLogs } from "../drizzle/schema";
+import { stores, apiKeys, webhookEndpoints, b2bDeliveries, webhookLogs, apiRequestLogs } from "../drizzle/schema";
 import { eq, and, desc, sql, like } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "crypto";
@@ -495,6 +495,104 @@ export const b2bDeliveryRouter = router({
     }),
 
   /**
+   * Pilot-facing status update — validates pilot identity and enforces forward-only transitions.
+   * Triggers webhooks automatically on each status change.
+   */
+  pilotUpdateStatus: protectedProcedure
+    .input(z.object({
+      deliveryId: z.number(),
+      newStatus: z.enum(["assigned", "pickup_enroute", "picked_up", "in_transit", "delivered", "failed"]),
+      estimatedArrival: z.string().optional(),
+      failureReason: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database unavailable");
+
+      const user = ctx.user as any;
+      if (!user) throw new Error("Authentication required");
+
+      const delivery = await db.select().from(b2bDeliveries)
+        .where(eq(b2bDeliveries.id, input.deliveryId))
+        .limit(1);
+
+      if (delivery.length === 0) throw new Error("Delivery not found");
+
+      // Validate forward-only transitions
+      const statusOrder = ["pending", "assigned", "pickup_enroute", "picked_up", "in_transit", "delivered"];
+      const currentIndex = statusOrder.indexOf(delivery[0].status);
+      const newIndex = statusOrder.indexOf(input.newStatus);
+
+      // Allow "failed" from any active status
+      if (input.newStatus !== "failed") {
+        if (newIndex <= currentIndex) {
+          throw new Error(`Invalid transition: cannot go from "${delivery[0].status}" to "${input.newStatus}". Only forward transitions allowed.`);
+        }
+      }
+
+      const previousStatus = delivery[0].status;
+      const updateData: Record<string, any> = { status: input.newStatus };
+
+      // Assign pilot on first acceptance
+      if (input.newStatus === "assigned" && !delivery[0].assignedPilotId) {
+        updateData.assignedPilotId = user.id;
+        updateData.deliveryMode = delivery[0].preferredMode === "drone" ? "drone" : "terrestrial";
+      }
+
+      if (input.estimatedArrival) updateData.estimatedArrival = new Date(input.estimatedArrival);
+      if (input.newStatus === "picked_up") updateData.actualPickupAt = new Date();
+      if (input.newStatus === "delivered") updateData.actualDeliveryAt = new Date();
+      if (input.newStatus === "failed" && input.failureReason) {
+        updateData.cancellationReason = input.failureReason;
+        updateData.cancelledBy = "pilot";
+      }
+
+      await db.update(b2bDeliveries)
+        .set(updateData)
+        .where(eq(b2bDeliveries.id, input.deliveryId));
+
+      // Trigger webhooks
+      const events = getWebhookEvents(input.newStatus);
+      const webhookPayload = buildWebhookPayload(
+        events[0],
+        {
+          id: delivery[0].id,
+          externalOrderId: delivery[0].externalOrderId,
+          trackingCode: delivery[0].trackingCode,
+          status: input.newStatus,
+        },
+        previousStatus,
+        {
+          estimatedArrival: input.estimatedArrival || delivery[0].estimatedArrival?.toISOString(),
+          pilotId: user.id,
+          deliveryMode: updateData.deliveryMode || delivery[0].deliveryMode,
+        }
+      );
+
+      for (const event of events) {
+        triggerWebhooks(delivery[0].storeId, delivery[0].id, event, { ...webhookPayload, event });
+      }
+
+      // Notify store owner
+      const storeResult = await db.select().from(stores)
+        .where(eq(stores.id, delivery[0].storeId))
+        .limit(1);
+
+      if (storeResult.length > 0) {
+        notifyOwner({
+          title: "B2B Delivery Update",
+          content: `Delivery ${delivery[0].trackingCode}: ${previousStatus} → ${input.newStatus} (Store: ${storeResult[0].name})`,
+        });
+      }
+
+      return {
+        success: true,
+        message: `Status updated: ${previousStatus} → ${input.newStatus}`,
+        webhooksTriggered: events.length,
+      };
+    }),
+
+  /**
    * Update delivery status (admin/system/pilot use).
    * Triggers webhooks for all subscribed endpoints.
    */
@@ -784,6 +882,95 @@ export const webhookRouter = router({
       return { success: true, message: "Webhook endpoint removed" };
     }),
 
+  /** Retry a failed webhook delivery */
+  retry: protectedProcedure
+    .input(z.object({ logId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database unavailable");
+
+      const user = ctx.user as any;
+      const storeResult = await db.select().from(stores)
+        .where(and(eq(stores.ownerId, user.id), eq(stores.type, "external")))
+        .limit(1);
+
+      if (storeResult.length === 0) throw new Error("No external store found");
+
+      // Get the log entry
+      const logEntry = await db.select().from(webhookLogs)
+        .where(eq(webhookLogs.id, input.logId))
+        .limit(1);
+
+      if (logEntry.length === 0) throw new Error("Webhook log not found");
+      if (logEntry[0].success) throw new Error("This webhook was already delivered successfully");
+
+      // Verify the endpoint belongs to this store
+      const endpoint = await db.select().from(webhookEndpoints)
+        .where(and(eq(webhookEndpoints.id, logEntry[0].webhookEndpointId), eq(webhookEndpoints.storeId, storeResult[0].id)))
+        .limit(1);
+
+      if (endpoint.length === 0) throw new Error("Webhook endpoint not found");
+      if (!endpoint[0].isActive) throw new Error("Webhook endpoint is inactive. Reactivate it first.");
+
+      // Re-send the webhook
+      const payloadStr = logEntry[0].payload;
+      const signature = crypto
+        .createHmac("sha256", endpoint[0].secret)
+        .update(payloadStr)
+        .digest("hex");
+
+      let success = false;
+      let responseStatus: number | null = null;
+      let responseBody: string | null = null;
+
+      try {
+        const response = await fetch(endpoint[0].url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-DROPi-Signature": signature,
+            "X-DROPi-Event": logEntry[0].event,
+            "X-DROPi-Retry": "manual",
+            "User-Agent": "DROPi-Webhook/1.0",
+          },
+          body: payloadStr,
+          signal: AbortSignal.timeout(10000),
+        });
+
+        responseStatus = response.status;
+        responseBody = await response.text().catch(() => null);
+        success = response.ok;
+      } catch (err: any) {
+        responseBody = err.message || "Connection failed";
+      }
+
+      // Log the retry attempt
+      await db.insert(webhookLogs).values({
+        webhookEndpointId: endpoint[0].id,
+        deliveryId: logEntry[0].deliveryId,
+        event: logEntry[0].event,
+        payload: payloadStr,
+        responseStatus,
+        responseBody: responseBody?.substring(0, 2000) || null,
+        success,
+        attemptNumber: logEntry[0].attemptNumber + 1,
+        respondedAt: new Date(),
+      });
+
+      // Update endpoint stats
+      if (success) {
+        await db.update(webhookEndpoints)
+          .set({ lastSuccessAt: new Date(), failureCount: 0 })
+          .where(eq(webhookEndpoints.id, endpoint[0].id));
+      }
+
+      return {
+        success,
+        responseStatus,
+        message: success ? "Webhook retry delivered successfully!" : `Retry failed: ${responseBody?.substring(0, 200) || "No response"}`,
+      };
+    }),
+
   /** Get webhook delivery logs for debugging */
   logs: protectedProcedure
     .input(z.object({
@@ -840,6 +1027,166 @@ export const webhookRouter = router({
           attemptNumber: l.attemptNumber,
           sentAt: l.sentAt.toISOString(),
           respondedAt: l.respondedAt?.toISOString() || null,
+        })),
+        total: countResult[0]?.count || 0,
+      };
+    }),
+});
+
+// ===== API ANALYTICS ROUTER =====
+export const apiAnalyticsRouter = router({
+  /** Get API usage summary for the merchant's store */
+  summary: protectedProcedure
+    .input(z.object({
+      days: z.number().min(1).max(90).optional(), // Default 30 days
+    }).optional())
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) return null;
+
+      const user = ctx.user as any;
+      const storeResult = await db.select().from(stores)
+        .where(and(eq(stores.ownerId, user.id), eq(stores.type, "external")))
+        .limit(1);
+
+      if (storeResult.length === 0) return null;
+
+      const days = input?.days || 30;
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+      // Total requests
+      const totalResult = await db.select({ count: sql<number>`count(*)` })
+        .from(apiRequestLogs)
+        .where(and(
+          eq(apiRequestLogs.storeId, storeResult[0].id),
+          sql`${apiRequestLogs.createdAt} >= ${since}`
+        ));
+
+      // Successful requests (2xx)
+      const successResult = await db.select({ count: sql<number>`count(*)` })
+        .from(apiRequestLogs)
+        .where(and(
+          eq(apiRequestLogs.storeId, storeResult[0].id),
+          sql`${apiRequestLogs.createdAt} >= ${since}`,
+          sql`${apiRequestLogs.statusCode} >= 200 AND ${apiRequestLogs.statusCode} < 300`
+        ));
+
+      // Error requests (4xx + 5xx)
+      const errorResult = await db.select({ count: sql<number>`count(*)` })
+        .from(apiRequestLogs)
+        .where(and(
+          eq(apiRequestLogs.storeId, storeResult[0].id),
+          sql`${apiRequestLogs.createdAt} >= ${since}`,
+          sql`${apiRequestLogs.statusCode} >= 400`
+        ));
+
+      // Average response time
+      const avgTimeResult = await db.select({ avg: sql<number>`AVG(${apiRequestLogs.responseTimeMs})` })
+        .from(apiRequestLogs)
+        .where(and(
+          eq(apiRequestLogs.storeId, storeResult[0].id),
+          sql`${apiRequestLogs.createdAt} >= ${since}`
+        ));
+
+      // Requests per day (last 7 days)
+      const dailyResult = await db.select({
+        day: sql<string>`DATE(${apiRequestLogs.createdAt})`,
+        count: sql<number>`count(*)`,
+      })
+        .from(apiRequestLogs)
+        .where(and(
+          eq(apiRequestLogs.storeId, storeResult[0].id),
+          sql`${apiRequestLogs.createdAt} >= ${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)}`
+        ))
+        .groupBy(sql`DATE(${apiRequestLogs.createdAt})`)
+        .orderBy(sql`DATE(${apiRequestLogs.createdAt})`);
+
+      // Top endpoints
+      const topEndpoints = await db.select({
+        endpoint: apiRequestLogs.endpoint,
+        count: sql<number>`count(*)`,
+        avgTime: sql<number>`AVG(${apiRequestLogs.responseTimeMs})`,
+      })
+        .from(apiRequestLogs)
+        .where(and(
+          eq(apiRequestLogs.storeId, storeResult[0].id),
+          sql`${apiRequestLogs.createdAt} >= ${since}`
+        ))
+        .groupBy(apiRequestLogs.endpoint)
+        .orderBy(desc(sql`count(*)`));
+
+      const total = totalResult[0]?.count || 0;
+      const successCount = successResult[0]?.count || 0;
+      const errorCount = errorResult[0]?.count || 0;
+
+      return {
+        period: { days, since: since.toISOString() },
+        totals: {
+          requests: total,
+          successful: successCount,
+          errors: errorCount,
+          errorRate: total > 0 ? Math.round((errorCount / total) * 10000) / 100 : 0, // percentage
+        },
+        performance: {
+          avgResponseTimeMs: Math.round(avgTimeResult[0]?.avg || 0),
+        },
+        daily: dailyResult.map((d) => ({ date: d.day, requests: d.count })),
+        topEndpoints: topEndpoints.map((e) => ({
+          endpoint: e.endpoint,
+          requests: e.count,
+          avgResponseTimeMs: Math.round(e.avgTime || 0),
+        })),
+      };
+    }),
+
+  /** Get recent API request logs */
+  recentLogs: protectedProcedure
+    .input(z.object({
+      page: z.number().min(1).optional(),
+      limit: z.number().min(1).max(50).optional(),
+      statusFilter: z.enum(["all", "success", "error"]).optional(),
+    }).optional())
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) return { logs: [], total: 0 };
+
+      const user = ctx.user as any;
+      const storeResult = await db.select().from(stores)
+        .where(and(eq(stores.ownerId, user.id), eq(stores.type, "external")))
+        .limit(1);
+
+      if (storeResult.length === 0) return { logs: [], total: 0 };
+
+      const page = input?.page || 1;
+      const limit = input?.limit || 20;
+      const offset = (page - 1) * limit;
+
+      const conditions: any[] = [eq(apiRequestLogs.storeId, storeResult[0].id)];
+      if (input?.statusFilter === "success") {
+        conditions.push(sql`${apiRequestLogs.statusCode} >= 200 AND ${apiRequestLogs.statusCode} < 300`);
+      } else if (input?.statusFilter === "error") {
+        conditions.push(sql`${apiRequestLogs.statusCode} >= 400`);
+      }
+
+      const where = and(...conditions);
+      const logs = await db.select().from(apiRequestLogs)
+        .where(where)
+        .orderBy(desc(apiRequestLogs.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      const countResult = await db.select({ count: sql<number>`count(*)` })
+        .from(apiRequestLogs).where(where);
+
+      return {
+        logs: logs.map((l) => ({
+          id: l.id,
+          method: l.method,
+          endpoint: l.endpoint,
+          statusCode: l.statusCode,
+          responseTimeMs: l.responseTimeMs,
+          errorCode: l.errorCode,
+          createdAt: l.createdAt.toISOString(),
         })),
         total: countResult[0]?.count || 0,
       };

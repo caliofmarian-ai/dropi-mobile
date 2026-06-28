@@ -57,6 +57,13 @@
       "when": 1782652382506,
       "tag": "0007_nice_typhoid_mary",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1782654708782,
+      "tag": "0008_lively_snowbird",
+      "breakpoints": true
     }
   ]
 }

@@ -27,6 +27,7 @@ export default function WebhookConfigScreen() {
   const registerMutation = trpc.webhook.register.useMutation();
   const testMutation = trpc.webhook.test.useMutation();
   const deleteMutation = trpc.webhook.delete.useMutation();
+  const retryMutation = trpc.webhook.retry.useMutation();
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [newUrl, setNewUrl] = useState("");
@@ -34,6 +35,8 @@ export default function WebhookConfigScreen() {
   const [newSecret, setNewSecret] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [testingId, setTestingId] = useState<number | null>(null);
+  const [retryingId, setRetryingId] = useState<number | null>(null);
+  const [showFailedOnly, setShowFailedOnly] = useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -297,9 +300,19 @@ export default function WebhookConfigScreen() {
           )}
         </View>
 
-        {/* Recent Webhook Logs */}
+        {/* Webhook Retry Dashboard */}
         <View className="bg-surface border border-border rounded-2xl p-4 mb-4">
-          <Text className="text-sm font-semibold text-foreground mb-3">Recent Delivery Logs</Text>
+          <View className="flex-row items-center justify-between mb-3">
+            <Text className="text-sm font-semibold text-foreground">Delivery Logs</Text>
+            <TouchableOpacity
+              onPress={() => setShowFailedOnly(!showFailedOnly)}
+              style={{ backgroundColor: showFailedOnly ? "#EF444420" : "#E5E7EB", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}
+            >
+              <Text style={{ color: showFailedOnly ? "#EF4444" : "#687076", fontSize: 11, fontWeight: "600" }}>
+                {showFailedOnly ? "Failed Only" : "All Logs"}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           {logsQuery.isLoading ? (
             <ActivityIndicator size="small" />
@@ -307,18 +320,61 @@ export default function WebhookConfigScreen() {
             <Text className="text-xs text-muted text-center py-3">No webhook deliveries yet.</Text>
           ) : (
             <View className="gap-2">
-              {logs.map((log) => (
-                <View key={log.id} className="flex-row items-center py-2 border-b border-border">
-                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: log.success ? "#22C55E" : "#EF4444", marginRight: 8 }} />
-                  <View className="flex-1">
-                    <Text className="text-xs font-medium text-foreground">{log.event}</Text>
-                    <Text className="text-xs text-muted">
-                      {log.responseStatus ? `HTTP ${log.responseStatus}` : "No response"} • Attempt {log.attemptNumber}
-                    </Text>
+              {logs
+                .filter((log) => !showFailedOnly || !log.success)
+                .map((log) => (
+                <View key={log.id} className="py-2 border-b border-border">
+                  <View className="flex-row items-center">
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: log.success ? "#22C55E" : "#EF4444", marginRight: 8 }} />
+                    <View className="flex-1">
+                      <Text className="text-xs font-medium text-foreground">{log.event}</Text>
+                      <Text className="text-xs text-muted">
+                        {log.responseStatus ? `HTTP ${log.responseStatus}` : "No response"} • Attempt {log.attemptNumber}
+                      </Text>
+                    </View>
+                    <Text className="text-xs text-muted">{new Date(log.sentAt).toLocaleTimeString()}</Text>
                   </View>
-                  <Text className="text-xs text-muted">{new Date(log.sentAt).toLocaleTimeString()}</Text>
+
+                  {/* Retry button for failed deliveries */}
+                  {!log.success && (
+                    <TouchableOpacity
+                      className="mt-2 ml-4 bg-warning/10 border border-warning/30 rounded-lg py-1.5 px-3 self-start"
+                      activeOpacity={0.7}
+                      disabled={retryingId === log.id}
+                      onPress={async () => {
+                        setRetryingId(log.id);
+                        try {
+                          const result = await retryMutation.mutateAsync({ logId: log.id });
+                          Alert.alert(
+                            result.success ? "Retry Successful" : "Retry Failed",
+                            result.message
+                          );
+                          await logsQuery.refetch();
+                          await webhooksQuery.refetch();
+                        } catch (err: any) {
+                          Alert.alert("Retry Error", err.message || "Failed to retry webhook");
+                        } finally {
+                          setRetryingId(null);
+                        }
+                      }}
+                    >
+                      <Text style={{ color: "#F59E0B", fontSize: 11, fontWeight: "600" }}>
+                        {retryingId === log.id ? "Retrying..." : "↻ Retry Now"}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               ))}
+
+              {/* Summary of failed deliveries */}
+              {logs.filter((l) => !l.success).length > 0 && (
+                <View className="mt-2 bg-error/5 border border-error/20 rounded-lg p-2.5">
+                  <Text className="text-xs text-muted">
+                    {logs.filter((l) => !l.success).length} failed delivery(ies) in recent logs.
+                    Use “Retry Now” to re-send individual webhooks.
+                  </Text>
+                </View>
+              )}
             </View>
           )}
         </View>
