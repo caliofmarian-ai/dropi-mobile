@@ -149,7 +149,15 @@ function DeliveryPartnerDashboard() {
   return (
     <ScreenContainer className="px-4 pt-4">
       <OnboardingNudgeBanner />
-      <Text className="text-2xl font-bold text-foreground mb-1">Mission Radar</Text>
+      <View className="flex-row justify-between items-center mb-1">
+        <Text className="text-2xl font-bold text-foreground">Mission Radar</Text>
+        <TouchableOpacity
+          style={{ backgroundColor: '#0066FF15', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}
+          onPress={() => router.push('/pilot/leaderboard')}
+        >
+          <Text style={{ color: '#0066FF', fontSize: 12, fontWeight: '600' }}>🏆 Leaderboard</Text>
+        </TouchableOpacity>
+      </View>
       <Text className="text-sm text-muted mb-4">{availableMissions.length} missions available in your area</Text>
       <FlatList
         data={availableMissions}

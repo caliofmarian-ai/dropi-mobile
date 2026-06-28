@@ -75,9 +75,26 @@ Each test list MUST follow this format:
 ## 4. Delivery Format
 
 After each implementation, the test list is:
-1. **Included in the delivery message** to the user
+1. **Sent to the user in chat** — so they can manually verify on-device that the implementation works visually and functionally (not just on paper)
 2. **Appended to `/home/ubuntu/dropi-mobile/tests/TEST_REGISTRY.md`** for cumulative tracking
-3. **Critical tests are implemented** as Vitest unit tests in `/home/ubuntu/dropi-mobile/tests/`
+3. **Critical tests are auto-executed** as Vitest unit tests in `/home/ubuntu/dropi-mobile/tests/` BEFORE saving checkpoint
+
+### 4.1 Mandatory Auto-Testing (Agent Responsibility)
+
+Before every checkpoint save, the agent MUST:
+- Run `npx vitest run` to execute all existing tests
+- Verify 0 test failures before proceeding
+- If tests fail, fix the implementation before delivery
+- Report test results (pass/fail count) in the delivery message
+
+### 4.2 User Manual Testing (User Responsibility)
+
+The test list sent in chat serves as a **manual QA checklist** for the user to:
+- Open the app on their device (via Expo Go QR)
+- Navigate to the affected screens
+- Verify visual changes are visible (not just code changes)
+- Confirm interactions work (buttons, filters, navigation)
+- Report any discrepancies back for fixing
 
 ---
 
