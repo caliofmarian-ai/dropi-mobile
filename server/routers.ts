@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { dropiAuthRouter, adminAuthRouter, auditRouter } from "./auth-router";
 import { verificationRouter, roleApplicationRouter } from "./verification-router";
+import { storeRouter, productRouter, reviewRouter } from "./marketplace-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -32,6 +33,11 @@ export const appRouter = router({
 
   // Role applications (C2/C3/Admin operational roles)
   roleApplications: roleApplicationRouter,
+
+  // Marketplace — Stores, Products, Reviews
+  store: storeRouter,
+  product: productRouter,
+  review: reviewRouter,
 });
 
 export type AppRouter = typeof appRouter;

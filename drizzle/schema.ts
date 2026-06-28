@@ -220,3 +220,162 @@ export const roleApplications = mysqlTable("roleApplications", {
 
 export type RoleApplication = typeof roleApplications.$inferSelect;
 export type InsertRoleApplication = typeof roleApplications.$inferInsert;
+
+// ===== MARKETPLACE TABLES (Sprint A — Blueprint Implementation) =====
+
+/**
+ * Stores table — represents a merchant's commercial entity in the DROPi ecosystem.
+ * Supports two types: 'internal' (products listed in DROPi marketplace) and 'external' (redirect to partner site + Logistic API).
+ */
+export const stores = mysqlTable("stores", {
+  id: int("id").autoincrement().primaryKey(),
+  ownerId: int("ownerId").notNull(),
+  name: varchar("name", { length: 200 }).notNull(),
+  description: text("description"),
+  logoUrl: varchar("logoUrl", { length: 500 }),
+  coverImageUrl: varchar("coverImageUrl", { length: 500 }),
+  type: mysqlEnum("type", ["internal", "external"]).default("internal").notNull(),
+  externalUrl: varchar("externalUrl", { length: 500 }),
+  apiKey: varchar("apiKey", { length: 64 }),
+  webhookUrl: varchar("webhookUrl", { length: 500 }),
+  zone: varchar("zone", { length: 100 }).notNull(),
+  category: varchar("category", { length: 100 }).notNull(),
+  status: mysqlEnum("status", ["pending", "active", "suspended", "closed"]).default("pending").notNull(),
+  trustScore: int("trustScore").default(0).notNull(),
+  totalOrders: int("totalOrders").default(0).notNull(),
+  totalReviews: int("totalReviews").default(0).notNull(),
+  // Internal store fields
+  workingHours: json("workingHours"),
+  physicalAddress: text("physicalAddress"),
+  contactPhone: varchar("contactPhone", { length: 20 }),
+  // Suspension
+  suspendedAt: timestamp("suspendedAt"),
+  suspensionReason: text("suspensionReason"),
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Store = typeof stores.$inferSelect;
+export type InsertStore = typeof stores.$inferInsert;
+
+/**
+ * Products table — items listed in the DROPi marketplace by merchants.
+ * Each product goes through moderation (pending_review → approved/rejected).
+ * Badge-eligible delivery modes are calculated from weight/dimensions.
+ */
+export const products = mysqlTable("products", {
+  id: int("id").autoincrement().primaryKey(),
+  storeId: int("storeId").notNull(),
+  name: varchar("name", { length: 300 }).notNull(),
+  description: text("description"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).default("RON").notNull(),
+  images: json("images"), // array of URLs
+  category: varchar("category", { length: 100 }).notNull(),
+  subcategory: varchar("subcategory", { length: 100 }),
+  weight: decimal("weight", { precision: 8, scale: 2 }).notNull(), // grams
+  dimensions: json("dimensions"), // { l, w, h } in cm
+  deliveryModes: json("deliveryModes"), // calculated: ["drone", "terrestrial", "multimodal"]
+  cancellationPolicy: json("cancellationPolicy"), // per-state refund rules
+  stock: int("stock"), // null = unlimited
+  zone: varchar("zone", { length: 100 }).notNull(),
+  // Moderation
+  status: mysqlEnum("status", ["draft", "pending_review", "approved", "rejected", "suspended"]).default("draft").notNull(),
+  moderationNote: text("moderationNote"),
+  moderatedBy: int("moderatedBy"),
+  moderatedAt: timestamp("moderatedAt"),
+  isActive: boolean("isActive").default(false).notNull(),
+  // Flags
+  isFragile: boolean("isFragile").default(false).notNull(),
+  requiresSpecialPackaging: boolean("requiresSpecialPackaging").default(false).notNull(),
+  // Stats
+  viewCount: int("viewCount").default(0).notNull(),
+  orderCount: int("orderCount").default(0).notNull(),
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = typeof products.$inferInsert;
+
+/**
+ * Product Reviews — collected exclusively after confirmed delivery.
+ * Cannot be modified or deleted by seller. One review per order.
+ */
+export const productReviews = mysqlTable("productReviews", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  storeId: int("storeId").notNull(),
+  orderId: int("orderId").notNull(),
+  userId: int("userId").notNull(),
+  overallRating: int("overallRating").notNull(), // 1-5
+  qualityRating: int("qualityRating").notNull(), // 1-5 (quality vs description)
+  comment: text("comment"),
+  isVerifiedPurchase: boolean("isVerifiedPurchase").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductReview = typeof productReviews.$inferSelect;
+export type InsertProductReview = typeof productReviews.$inferInsert;
+
+/**
+ * Seller Badges — auto-assigned based on trust score and behavior.
+ * Only one badge active per store at a time (highest priority wins).
+ * Manual override requires justification (audited).
+ */
+export const sellerBadges = mysqlTable("sellerBadges", {
+  id: int("id").autoincrement().primaryKey(),
+  storeId: int("storeId").notNull(),
+  type: mysqlEnum("type", ["high_trust", "new_activity", "high_risk", "restricted"]).notNull(),
+  reason: text("reason").notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  issuedAt: timestamp("issuedAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt"),
+  overriddenBy: int("overriddenBy"),
+  overrideReason: text("overrideReason"),
+});
+
+export type SellerBadge = typeof sellerBadges.$inferSelect;
+export type InsertSellerBadge = typeof sellerBadges.$inferInsert;
+
+/**
+ * Delivery Badges — calculated per product based on weight, dimensions, zone.
+ * Indicates which delivery modes are eligible (drone, terrestrial, multimodal).
+ */
+export const deliveryBadges = mysqlTable("deliveryBadges", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  mode: mysqlEnum("mode", ["drone", "terrestrial", "multimodal"]).notNull(),
+  isEligible: boolean("isEligible").default(true).notNull(),
+  conditions: text("conditions"),
+  calculatedAt: timestamp("calculatedAt").defaultNow().notNull(),
+});
+
+export type DeliveryBadge = typeof deliveryBadges.$inferSelect;
+export type InsertDeliveryBadge = typeof deliveryBadges.$inferInsert;
+
+/**
+ * Store Analytics — pre-calculated aggregate statistics for merchant dashboard.
+ * Updated daily and monthly by a scheduled job.
+ */
+export const storeAnalytics = mysqlTable("storeAnalytics", {
+  id: int("id").autoincrement().primaryKey(),
+  storeId: int("storeId").notNull(),
+  period: varchar("period", { length: 10 }).notNull(), // YYYY-MM-DD or YYYY-MM
+  periodType: mysqlEnum("periodType", ["daily", "monthly"]).notNull(),
+  totalOrders: int("totalOrders").default(0).notNull(),
+  completedOrders: int("completedOrders").default(0).notNull(),
+  cancelledOrders: int("cancelledOrders").default(0).notNull(),
+  avgRating: decimal("avgRating", { precision: 3, scale: 2 }),
+  revenue: decimal("revenue", { precision: 12, scale: 2 }).default("0").notNull(),
+  commissionPaid: decimal("commissionPaid", { precision: 12, scale: 2 }).default("0").notNull(),
+  refundsIssued: decimal("refundsIssued", { precision: 12, scale: 2 }).default("0").notNull(),
+  newReviews: int("newReviews").default(0).notNull(),
+  productViews: int("productViews").default(0).notNull(),
+  calculatedAt: timestamp("calculatedAt").defaultNow().notNull(),
+});
+
+export type StoreAnalytics = typeof storeAnalytics.$inferSelect;
+export type InsertStoreAnalytics = typeof storeAnalytics.$inferInsert;
