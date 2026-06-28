@@ -307,3 +307,6 @@
 - [x] UI: Pilot profile detail screen (/app/pilot/profile/[id].tsx) with rating breakdown, stats, history timeline
 - [x] Navigation: Tap pilot in leaderboard → opens profile detail (Pressable wrapper + "Tap for details" hint)
 - [x] DB: Demo rating history entries for 6 demo pilots (21 entries total)
+
+## Blueprint Documents
+- [x] Save BLUEPRINT_TESTING_FORMAT.md — permanent rule for post-checkpoint test delivery format (title, numbered tests, ✅/❌ choice)
