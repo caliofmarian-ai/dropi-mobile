@@ -538,54 +538,139 @@ function IncidentCommanderDashboard() {
 // ===== ADMIN DASHBOARDS =====
 
 function SystemAdminDashboard() {
+  const router = useRouter();
   return (
     <ScreenContainer className="px-4 pt-4">
-      <Text className="text-2xl font-bold text-foreground mb-1">System Admin</Text>
-      <Text className="text-sm text-muted mb-4">Platform Administration</Text>
-      <View className="flex-row gap-3 mb-4">
-        <MetricBox label="Users" value="1,247" trend="+23" />
-        <MetricBox label="Active Now" value="89" trend="" />
-      </View>
-      <StatCard title="System Health" value="Healthy" color="#10B981" />
-      <StatCard title="API Uptime" value="99.97%" color="#10B981" />
-      <StatCard title="Pending Actions" value="5" color="#F59E0B" />
-      <StatCard title="Storage Used" value="67%" color="#0066FF" />
-      <TouchableOpacity className="bg-primary rounded-xl py-3 items-center mt-4" activeOpacity={0.8}>
-        <Text className="text-white font-semibold">Phantom Mode — View as User</Text>
-      </TouchableOpacity>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Text className="text-2xl font-bold text-foreground mb-1">System Admin</Text>
+        <Text className="text-sm text-muted mb-4">Platform Administration</Text>
+        <View className="flex-row gap-3 mb-4">
+          <MetricBox label="Users" value="—" trend="" />
+          <MetricBox label="Active Now" value="—" trend="" />
+        </View>
+        <StatCard title="System Health" value="Healthy" color="#10B981" />
+        <StatCard title="API Uptime" value="99.97%" color="#10B981" />
+        <StatCard title="Pending Actions" value="—" color="#F59E0B" />
+
+        {/* Marketplace Section */}
+        <Text className="text-base font-semibold text-foreground mt-4 mb-2">Marketplace</Text>
+        <TouchableOpacity className="bg-surface border border-border rounded-xl p-3 mb-2 flex-row items-center" activeOpacity={0.7} onPress={() => router.push("/admin/marketplace-overview" as any)}>
+          <Text style={{ fontSize: 16, marginRight: 8 }}>🏪</Text>
+          <View style={{ flex: 1 }}>
+            <Text className="text-sm font-medium text-foreground">Marketplace Overview</Text>
+            <Text className="text-xs text-muted">Stores, products, trust scores</Text>
+          </View>
+          <Text className="text-muted">→</Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="bg-surface border border-border rounded-xl p-3 mb-2 flex-row items-center" activeOpacity={0.7} onPress={() => router.push("/admin/moderation" as any)}>
+          <Text style={{ fontSize: 16, marginRight: 8 }}>📋</Text>
+          <View style={{ flex: 1 }}>
+            <Text className="text-sm font-medium text-foreground">Product Moderation</Text>
+            <Text className="text-xs text-muted">Pending reviews & flagged items</Text>
+          </View>
+          <Text className="text-muted">→</Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="bg-surface border border-border rounded-xl p-3 mb-2 flex-row items-center" activeOpacity={0.7} onPress={() => router.push("/admin/audit-logs" as any)}>
+          <Text style={{ fontSize: 16, marginRight: 8 }}>📜</Text>
+          <View style={{ flex: 1 }}>
+            <Text className="text-sm font-medium text-foreground">Audit Logs</Text>
+            <Text className="text-xs text-muted">Full activity trail, phantom mode</Text>
+          </View>
+          <Text className="text-muted">→</Text>
+        </TouchableOpacity>
+
+        {/* Phantom Mode */}
+        <TouchableOpacity className="bg-primary rounded-xl py-3 items-center mt-4" activeOpacity={0.8}>
+          <Text className="text-white font-semibold">👻 Phantom Mode — View as User</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </ScreenContainer>
   );
 }
 
 function SecurityOfficerDashboard() {
+  const router = useRouter();
   return (
     <ScreenContainer className="px-4 pt-4">
-      <Text className="text-2xl font-bold text-foreground mb-1">Security</Text>
-      <Text className="text-sm text-muted mb-4">Platform Security Monitoring</Text>
-      <StatCard title="Threat Level" value="LOW" color="#10B981" />
-      <StatCard title="Failed Logins (24h)" value="12" color="#F59E0B" />
-      <StatCard title="Blocked IPs" value="3" color="#EF4444" />
-      <StatCard title="Active Sessions" value="89" color="#0066FF" />
-      <AlertList alerts={[
-        { title: "Brute force attempt — IP 192.168.x.x", severity: "warning", time: "1h ago" },
-        { title: "Unusual API pattern — Service account", severity: "warning", time: "3h ago" },
-      ]} />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Text className="text-2xl font-bold text-foreground mb-1">Security</Text>
+        <Text className="text-sm text-muted mb-4">Platform Security Monitoring</Text>
+        <StatCard title="Threat Level" value="LOW" color="#10B981" />
+        <StatCard title="Failed Logins (24h)" value="—" color="#F59E0B" />
+        <StatCard title="Blocked IPs" value="—" color="#EF4444" />
+        <StatCard title="Active Sessions" value="—" color="#0066FF" />
+
+        {/* Marketplace Security */}
+        <Text className="text-base font-semibold text-foreground mt-4 mb-2">Marketplace Security</Text>
+        <TouchableOpacity className="bg-surface border border-border rounded-xl p-3 mb-2 flex-row items-center" activeOpacity={0.7} onPress={() => router.push("/admin/audit-logs" as any)}>
+          <Text style={{ fontSize: 16, marginRight: 8 }}>📜</Text>
+          <View style={{ flex: 1 }}>
+            <Text className="text-sm font-medium text-foreground">Security Audit Logs</Text>
+            <Text className="text-xs text-muted">Critical events, phantom mode tracking</Text>
+          </View>
+          <Text className="text-muted">→</Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="bg-surface border border-border rounded-xl p-3 mb-2 flex-row items-center" activeOpacity={0.7} onPress={() => router.push("/admin/approvals" as any)}>
+          <Text style={{ fontSize: 16, marginRight: 8 }}>🔐</Text>
+          <View style={{ flex: 1 }}>
+            <Text className="text-sm font-medium text-foreground">Identity Verification</Text>
+            <Text className="text-xs text-muted">Document & role verifications</Text>
+          </View>
+          <Text className="text-muted">→</Text>
+        </TouchableOpacity>
+
+        <AlertList alerts={[
+          { title: "Brute force attempt — IP 192.168.x.x", severity: "warning", time: "1h ago" },
+          { title: "Unusual API pattern — Service account", severity: "warning", time: "3h ago" },
+        ]} />
+      </ScrollView>
     </ScreenContainer>
   );
 }
 
 function AuditManagerDashboard() {
+  const router = useRouter();
   return (
     <ScreenContainer className="px-4 pt-4">
-      <Text className="text-2xl font-bold text-foreground mb-1">Audit</Text>
-      <Text className="text-sm text-muted mb-4">Platform Audit Trail</Text>
-      <View className="flex-row gap-3 mb-4">
-        <MetricBox label="Logs (24h)" value="45.2K" trend="" />
-        <MetricBox label="Flagged" value="7" trend="" />
-      </View>
-      <StatCard title="Compliance Score" value="96%" color="#10B981" />
-      <StatCard title="Pending Reviews" value="4" color="#F59E0B" />
-      <ChartPlaceholder title="Audit Activity (7d)" />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Text className="text-2xl font-bold text-foreground mb-1">Audit</Text>
+        <Text className="text-sm text-muted mb-4">Platform Audit Trail & Compliance</Text>
+        <View className="flex-row gap-3 mb-4">
+          <MetricBox label="Logs (24h)" value="—" trend="" />
+          <MetricBox label="Flagged" value="—" trend="" />
+        </View>
+        <StatCard title="Compliance Score" value="—" color="#10B981" />
+        <StatCard title="Pending Reviews" value="—" color="#F59E0B" />
+
+        {/* Marketplace Audit */}
+        <Text className="text-base font-semibold text-foreground mt-4 mb-2">Marketplace Audit</Text>
+        <TouchableOpacity className="bg-surface border border-border rounded-xl p-3 mb-2 flex-row items-center" activeOpacity={0.7} onPress={() => router.push("/admin/audit-logs" as any)}>
+          <Text style={{ fontSize: 16, marginRight: 8 }}>📜</Text>
+          <View style={{ flex: 1 }}>
+            <Text className="text-sm font-medium text-foreground">Full Audit Log Viewer</Text>
+            <Text className="text-xs text-muted">Filters, export, phantom mode, AI markers</Text>
+          </View>
+          <Text className="text-muted">→</Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="bg-surface border border-border rounded-xl p-3 mb-2 flex-row items-center" activeOpacity={0.7} onPress={() => router.push("/admin/marketplace-overview" as any)}>
+          <Text style={{ fontSize: 16, marginRight: 8 }}>🏪</Text>
+          <View style={{ flex: 1 }}>
+            <Text className="text-sm font-medium text-foreground">Marketplace Compliance</Text>
+            <Text className="text-xs text-muted">Store health, trust scores, violations</Text>
+          </View>
+          <Text className="text-muted">→</Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="bg-surface border border-border rounded-xl p-3 mb-2 flex-row items-center" activeOpacity={0.7} onPress={() => router.push("/admin/moderation" as any)}>
+          <Text style={{ fontSize: 16, marginRight: 8 }}>📦</Text>
+          <View style={{ flex: 1 }}>
+            <Text className="text-sm font-medium text-foreground">Product Moderation Audit</Text>
+            <Text className="text-xs text-muted">Review decisions, auto-moderation logs</Text>
+          </View>
+          <Text className="text-muted">→</Text>
+        </TouchableOpacity>
+
+        <ChartPlaceholder title="Audit Activity (7d)" />
+      </ScrollView>
     </ScreenContainer>
   );
 }

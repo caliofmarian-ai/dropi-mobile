@@ -218,3 +218,13 @@
 - [x] UI: Improvement tips with priority and impact levels
 - [x] UI: Elimination status warning banner for merchants at risk
 - [x] Navigation: Trust Score card on merchant dashboard links to trust screen
+
+## Sprint D — Admin Dashboard Revision (Marketplace)
+- [x] UI: Admin Marketplace Overview panel (pending moderation count, trust alerts, store stats, flagged products, trust distribution)
+- [x] UI: Audit Log Viewer screen (filterable by action type, actor, date, severity, phantom mode)
+- [x] UI: Phantom mode toggle in audit viewer (highlight admin-as-user actions with distinct styling)
+- [x] UI: Export audit logs functionality (JSON download)
+- [x] UI: Revise System Administrator dashboard with marketplace section (overview, moderation, audit links)
+- [x] UI: Revise Security Officer dashboard with marketplace security links (audit logs, identity verification)
+- [x] UI: Revise Audit Manager dashboard with marketplace audit panel (full log viewer, compliance, moderation audit)
+- [x] Server: Admin marketplace stats via existing store.list + product.listActive + trust.getStoreTrustScore endpoints
