@@ -301,3 +301,9 @@
 - [x] UI: Performance metrics grid (completion, on-time, customer rating, incident rate)
 - [x] UI: COS eligibility badge
 - [x] UI: Pull-to-refresh functionality
+
+## Pilot Profile Detail Screen
+- [x] Server: getPilotDetail endpoint (full profile + rating history + delivery stats + recent deliveries)
+- [x] UI: Pilot profile detail screen (/app/pilot/profile/[id].tsx) with rating breakdown, stats, history timeline
+- [x] Navigation: Tap pilot in leaderboard → opens profile detail (Pressable wrapper + "Tap for details" hint)
+- [x] DB: Demo rating history entries for 6 demo pilots (21 entries total)

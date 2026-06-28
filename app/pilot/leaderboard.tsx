@@ -11,6 +11,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { ScrollView, View, Text, Pressable, ActivityIndicator, FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { trpc } from "@/lib/trpc";
 import { useColors } from "@/hooks/use-colors";
@@ -44,6 +45,7 @@ const SORT_OPTIONS: { value: SortBy; label: string }[] = [
 export default function PilotLeaderboardScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const [filters, setFilters] = useState<LeaderboardFilters>({
     zone: undefined,
@@ -120,9 +122,12 @@ export default function PilotLeaderboardScreen() {
   };
 
   const renderPilotCard = ({ item, index }: { item: any; index: number }) => (
+    <Pressable
+      onPress={() => router.push(`/pilot/profile/${item.userId}` as any)}
+      style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1, marginHorizontal: 16 }]}
+    >
     <View
       className="mb-3 rounded-lg border border-border bg-surface p-4"
-      style={{ marginHorizontal: 16 }}
     >
       {/* Rank and Basic Info */}
       <View className="flex-row items-center justify-between mb-3">
@@ -221,7 +226,11 @@ export default function PilotLeaderboardScreen() {
           </Text>
         </View>
       )}
+
+      {/* Tap hint */}
+      <Text className="text-xs text-muted text-right mt-2">Tap for details →</Text>
     </View>
+    </Pressable>
   );
 
   return (

@@ -405,6 +405,86 @@ export const pilotSelectionRouter = router({
     }),
 
   /**
+   * Get detailed pilot profile by userId (for leaderboard drill-down).
+   * Returns full profile, user info, rating history, and delivery stats.
+   * Access: any authenticated user.
+   */
+  getPilotDetail: protectedProcedure
+    .input(z.object({ userId: z.number() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return null;
+
+      // Get user info
+      const [user] = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          zone: users.zone,
+          channel: users.channel,
+          dropiRole: users.dropiRole,
+          createdAt: users.createdAt,
+        })
+        .from(users)
+        .where(eq(users.id, input.userId))
+        .limit(1);
+
+      if (!user) return null;
+
+      // Get pilot profile
+      const [profile] = await db
+        .select()
+        .from(pilotProfiles)
+        .where(eq(pilotProfiles.userId, input.userId))
+        .limit(1);
+
+      if (!profile) return null;
+
+      // Get rating history (last 20 entries)
+      const ratingHistory = await db
+        .select()
+        .from(pilotRatingHistory)
+        .where(eq(pilotRatingHistory.userId, input.userId))
+        .orderBy(desc(pilotRatingHistory.createdAt))
+        .limit(20);
+
+      // Get B2B delivery stats
+      const deliveryStats = await db
+        .select({
+          total: sql<number>`cast(count(*) as unsigned)`,
+          completed: sql<number>`cast(sum(case when ${b2bDeliveries.status} = 'delivered' then 1 else 0 end) as unsigned)`,
+          failed: sql<number>`cast(sum(case when ${b2bDeliveries.status} = 'failed' then 1 else 0 end) as unsigned)`,
+          inTransit: sql<number>`cast(sum(case when ${b2bDeliveries.status} = 'in_transit' then 1 else 0 end) as unsigned)`,
+        })
+        .from(b2bDeliveries)
+        .where(eq(b2bDeliveries.assignedPilotId, input.userId));
+
+      // Get recent deliveries (last 10)
+      const recentDeliveries = await db
+        .select({
+          id: b2bDeliveries.id,
+          trackingCode: b2bDeliveries.trackingCode,
+          status: b2bDeliveries.status,
+          deliveryMode: b2bDeliveries.deliveryMode,
+          createdAt: b2bDeliveries.createdAt,
+          completedAt: b2bDeliveries.actualDeliveryAt,
+        })
+        .from(b2bDeliveries)
+        .where(eq(b2bDeliveries.assignedPilotId, input.userId))
+        .orderBy(desc(b2bDeliveries.createdAt))
+        .limit(10);
+
+      return {
+        user,
+        profile,
+        ratingHistory,
+        deliveryStats: deliveryStats[0] || { total: 0, completed: 0, failed: 0, inTransit: 0 },
+        recentDeliveries,
+      };
+    }),
+
+  /**
    * Trigger rating recalculation for a pilot (admin use or system hook).
    */
   triggerRatingRecalc: adminProcedure
