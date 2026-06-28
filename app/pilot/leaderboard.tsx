@@ -155,7 +155,7 @@ export default function PilotLeaderboardScreen() {
           {/* Pilot Name and ID */}
           <View className="flex-1">
             <Text className="text-base font-semibold text-foreground">
-              Pilot #{item.userId}
+              {item.name || `Pilot #${item.userId}`}
             </Text>
             <Text className="text-xs text-muted">
               {item.totalDeliveries} deliveries
