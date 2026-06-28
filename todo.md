@@ -170,3 +170,8 @@
 - [x] Web fallback uses canvas-based cropping
 - [x] Circular preview with zoom/pan controls (D-pad + zoom buttons)
 - [x] 3-step flow: Select → Crop → Upload
+
+## Suggested Upgrades (Sprint 5)
+- [x] UI: Pinch-to-zoom and pan gesture for image cropper (react-native-gesture-handler + reanimated)
+- [x] Server: Push notification on verification approval (notifyOwner on both verification and role application review)
+- [x] UI: Onboarding nudge banner on home screen when profile completion < 100% (Customer, Merchant, Delivery Partner dashboards)

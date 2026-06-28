@@ -5,6 +5,7 @@ import { getDb } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import nodemailer from "nodemailer";
 import { storagePut } from "./storage";
+import { notifyOwner } from "./_core/notification";
 
 // SMTP transporter for notifications
 const transporter = nodemailer.createTransport({
@@ -240,6 +241,16 @@ export const verificationRouter = router({
         }
       }
 
+      // Push notification to project owner about the review action
+      try {
+        await notifyOwner({
+          title: `Verification ${input.decision === "approved" ? "Approved" : "Rejected"}`,
+          content: `Admin (ID: ${adminId}) ${input.decision} verification #${input.verificationId} for user ${user?.name || user?.email || verification.userId}. Document type: ${verification.documentType.replace(/_/g, " ")}.${input.decision === "rejected" ? " Reason: " + (input.rejectionReason || "Not specified") : ""}`,
+        });
+      } catch (notifErr) {
+        console.warn("[NOTIFICATION] Failed to send push notification:", notifErr);
+      }
+
       return { success: true, decision: input.decision };
     }),
 });
@@ -424,6 +435,17 @@ export const roleApplicationRouter = router({
         } catch (err) {
           console.error("[SMTP] Failed to send role notification:", err);
         }
+      }
+
+      // Push notification to project owner about role application review
+      try {
+        const roleName = application.requestedRole.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+        await notifyOwner({
+          title: `Role Application ${input.decision === "approved" ? "Approved" : "Rejected"}`,
+          content: `Admin (ID: ${adminId}) ${input.decision} role application #${input.applicationId} for user ${user?.name || user?.email || application.userId}. Role: ${roleName}, Channel: ${application.requestedChannel}.${input.decision === "rejected" ? " Reason: " + (input.rejectionReason || "Not specified") : ""}`,
+        });
+      } catch (notifErr) {
+        console.warn("[NOTIFICATION] Failed to send push notification:", notifErr);
       }
 
       return { success: true, decision: input.decision };

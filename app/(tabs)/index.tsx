@@ -8,6 +8,7 @@ import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
 import type { DeliveryMode } from "@/lib/marketplace-data";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, CHANNEL_INFO, getRoleConfig } from "@/shared/types";
 import type { OrderStatus, Channel } from "@/shared/types";
+import { OnboardingNudgeBanner } from "@/components/onboarding-nudge-banner";
 
 const VEHICLE_ICONS: Record<string, string> = {
   drone: "🚁",
@@ -45,6 +46,7 @@ function CustomerDashboard() {
 
   return (
     <ScreenContainer className="px-4 pt-4">
+      <OnboardingNudgeBanner />
       <Text className="text-2xl font-bold text-foreground mb-1">My Deliveries</Text>
       <Text className="text-sm text-muted mb-4">{activeOrders.length} active</Text>
       <FlatList
@@ -102,6 +104,7 @@ function MerchantDashboard() {
 
   return (
     <ScreenContainer className="px-4 pt-4">
+      <OnboardingNudgeBanner />
       <Text className="text-2xl font-bold text-foreground mb-1">Order Queue</Text>
       <Text className="text-sm text-muted mb-4">{MERCHANT_ORDERS.length} orders today</Text>
       <FlatList
@@ -143,6 +146,7 @@ function DeliveryPartnerDashboard() {
 
   return (
     <ScreenContainer className="px-4 pt-4">
+      <OnboardingNudgeBanner />
       <Text className="text-2xl font-bold text-foreground mb-1">Mission Radar</Text>
       <Text className="text-sm text-muted mb-4">{availableMissions.length} missions available in your area</Text>
       <FlatList
