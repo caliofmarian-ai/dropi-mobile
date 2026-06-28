@@ -40,6 +40,7 @@ function createAuthContext(): { ctx: TrpcContext; clearedCookies: CookieCall[] }
     lastDevice: null,
     failedLoginAttempts: 0,
     lockedUntil: null,
+    profilePhotoUrl: null,
   };
   
   const ctx: TrpcContext = {

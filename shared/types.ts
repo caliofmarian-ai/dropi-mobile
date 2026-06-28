@@ -93,6 +93,11 @@ export interface DropiUser {
   channel: Channel;
   zone: string | null;
   isAuthenticated: boolean;
+  // Profile completion fields (optional, populated from server)
+  emailVerified?: boolean;
+  isVerified?: boolean;
+  hasAppliedForRole?: boolean;
+  profilePhotoUrl?: string | null;
 }
 
 export interface SupportTicket {

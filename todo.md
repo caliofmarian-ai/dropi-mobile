@@ -157,3 +157,9 @@
 - [x] DB: Add emailVerified, emailVerifyToken, emailVerifyExpires to users
 - [x] UI: Email verification screen after registration (/app/verify-email.tsx)
 - [x] Registration redirects to verify-email screen instead of tabs
+
+## Profile Photo Upload
+- [x] UI: Profile photo upload modal (gallery + camera) on profile screen
+- [x] Server: Upload profile photo endpoint and save URL to user record
+- [x] DB: Added profilePhotoUrl column to users table
+- [x] Profile screen avatar is tappable to open photo modal

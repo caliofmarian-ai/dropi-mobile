@@ -51,6 +51,8 @@ export const users = mysqlTable("users", {
   lastDevice: varchar("lastDevice", { length: 255 }),
   failedLoginAttempts: int("failedLoginAttempts").default(0).notNull(),
   lockedUntil: timestamp("lockedUntil"),
+  // Profile
+  profilePhotoUrl: varchar("profilePhotoUrl", { length: 512 }),
   // Timestamps
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

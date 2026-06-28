@@ -1,12 +1,17 @@
-import { Text, View, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { useState } from "react";
+import { Text, View, TouchableOpacity, ScrollView, Alert, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
 import { getRoleConfig, CHANNEL_INFO } from "@/shared/types";
+import { ProfileCompletionBar } from "@/components/profile-completion-bar";
+import { ProfilePhotoModal } from "@/components/profile-photo-modal";
 
-export default function ProfileeScreen() {
+export default function ProfileScreen() {
   const { user, logout } = useDropiAuth();
   const router = useRouter();
+  const [photoModalVisible, setPhotoModalVisible] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to sign out?", [
@@ -27,22 +32,58 @@ export default function ProfileeScreen() {
   const roleConfig = getRoleConfig(user.dropiRole);
   const channelInfo = CHANNEL_INFO[user.channel];
   const roleColor = channelInfo?.color || "#0066FF";
+  const currentPhoto = photoUrl || user.profilePhotoUrl;
 
   return (
     <ScreenContainer className="px-4 pt-4">
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        <Text className="text-2xl font-bold text-foreground mb-6">Profilee</Text>
+        <Text className="text-2xl font-bold text-foreground mb-6">Profile</Text>
 
         {/* User Card */}
         <View className="bg-surface border border-border rounded-2xl p-5 mb-4">
           <View className="flex-row items-center mb-4">
-            <View
-              style={{ backgroundColor: roleColor + "20", width: 56, height: 56, borderRadius: 28, alignItems: "center", justifyContent: "center" }}
+            {/* Tappable avatar */}
+            <TouchableOpacity
+              onPress={() => setPhotoModalVisible(true)}
+              activeOpacity={0.7}
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                overflow: "hidden",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: roleColor + "20",
+              }}
             >
-              <Text style={{ color: roleColor, fontSize: 20, fontWeight: "700" }}>
-                {user.name?.charAt(0)?.toUpperCase() || "U"}
-              </Text>
-            </View>
+              {currentPhoto ? (
+                <Image
+                  source={{ uri: currentPhoto }}
+                  style={{ width: 56, height: 56 }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Text style={{ color: roleColor, fontSize: 20, fontWeight: "700" }}>
+                  {user.name?.charAt(0)?.toUpperCase() || "U"}
+                </Text>
+              )}
+              {/* Camera badge */}
+              <View
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  right: 0,
+                  width: 18,
+                  height: 18,
+                  borderRadius: 9,
+                  backgroundColor: "#0066FF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text style={{ color: "#fff", fontSize: 9 }}>📷</Text>
+              </View>
+            </TouchableOpacity>
             <View className="ml-4 flex-1">
               <Text className="text-lg font-semibold text-foreground">{user.name}</Text>
               <Text className="text-sm text-muted">{user.email}</Text>
@@ -72,6 +113,9 @@ export default function ProfileeScreen() {
           )}
         </View>
 
+        {/* Profile Completion */}
+        <ProfileCompletionBar user={{ ...user, profilePhotoUrl: currentPhoto }} />
+
         {/* Permissions */}
         {roleConfig && (
           <View className="bg-surface border border-border rounded-xl p-4 mb-4">
@@ -88,6 +132,14 @@ export default function ProfileeScreen() {
 
         {/* Actions */}
         <View className="bg-surface border border-border rounded-xl overflow-hidden mb-4">
+          {/* Change Profile Photo */}
+          <TouchableOpacity
+            className="px-4 py-3.5 border-b border-border flex-row justify-between items-center"
+            onPress={() => setPhotoModalVisible(true)}
+          >
+            <Text className="text-sm text-foreground">Change Profile Photo</Text>
+            <Text className="text-primary text-xs font-medium">→</Text>
+          </TouchableOpacity>
           {user.dropiRole === "delivery_partner" && (
             <TouchableOpacity
               className="px-4 py-3.5 border-b border-border flex-row justify-between items-center"
@@ -148,6 +200,14 @@ export default function ProfileeScreen() {
           <Text className="text-error font-semibold">Sign Out</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Profile Photo Modal */}
+      <ProfilePhotoModal
+        visible={photoModalVisible}
+        onClose={() => setPhotoModalVisible(false)}
+        onPhotoUploaded={(url) => setPhotoUrl(url || null)}
+        currentPhotoUrl={currentPhoto}
+      />
     </ScreenContainer>
   );
 }

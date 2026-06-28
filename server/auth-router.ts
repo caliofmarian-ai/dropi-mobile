@@ -501,6 +501,7 @@ export const dropiAuthRouter = router({
   updateProfile: protectedProcedure.input(z.object({
     name: z.string().min(2).optional(),
     zone: z.string().optional(),
+    profilePhotoUrl: z.string().optional(),
   })).mutation(async ({ input, ctx }) => {
     const db2 = await db.getDb();
     if (!db2) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
@@ -509,11 +510,48 @@ export const dropiAuthRouter = router({
     const updateData: Record<string, any> = {};
     if (input.name) updateData.name = input.name;
     if (input.zone !== undefined) updateData.zone = input.zone;
+    if (input.profilePhotoUrl !== undefined) updateData.profilePhotoUrl = input.profilePhotoUrl;
     if (Object.keys(updateData).length > 0) {
       await db2.update(users).set(updateData).where(eq(users.id, ctx.user!.id));
     }
     const updated = await db.getUserById(ctx.user!.id);
     return updated;
+  }),
+
+  uploadProfilePhoto: protectedProcedure.input(z.object({
+    fileBase64: z.string(), // base64-encoded image
+    contentType: z.string().default("image/jpeg"),
+    fileName: z.string().default("profile.jpg"),
+  })).mutation(async ({ input, ctx }) => {
+    const { storagePut } = await import("./storage");
+    const userId = ctx.user!.id;
+
+    // Validate file size (max 5MB)
+    const sizeBytes = Buffer.from(input.fileBase64, "base64").length;
+    if (sizeBytes > 5 * 1024 * 1024) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "File too large. Maximum 5MB." });
+    }
+
+    // Validate content type
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(input.contentType)) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Only JPEG, PNG, and WebP images are allowed." });
+    }
+
+    // Upload to S3
+    const ext = input.contentType.split("/")[1] || "jpg";
+    const key = `profile-photos/user_${userId}.${ext}`;
+    const buffer = Buffer.from(input.fileBase64, "base64");
+    const { url } = await storagePut(key, buffer, input.contentType);
+
+    // Save URL to user record
+    const db2 = await db.getDb();
+    if (!db2) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+    const { users } = await import("../drizzle/schema");
+    const { eq } = await import("drizzle-orm");
+    await db2.update(users).set({ profilePhotoUrl: url }).where(eq(users.id, userId));
+
+    return { success: true, url };
   }),
 });
 
