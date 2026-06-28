@@ -271,3 +271,18 @@
 - [x] Server: C2/C3 dispatch integration — adminList, assignPilot, escalate endpoints in b2b-router.ts
 - [x] UI: Operations Manager dashboard shows live pending queue with Assign button
 - [x] UI: Emergency Coordinator dashboard shows failed deliveries with Escalate button + in-flight ops
+
+## Pilot Selection System (Blueprint §12)
+- [x] DB: Create pilotProfiles table (24 columns: rating, components, stats, availability, capacity, COS eligibility, rotation)
+- [x] DB: Create pilotRatingHistory table (10 columns: audit trail for every rating change)
+- [x] DB: Generate and apply migration 0009_melted_excalibur.sql
+- [ ] Server: Rating Engine — recalculateRating procedure with weighted formula
+- [ ] Server: Rating hooks on delivery completion/failure/review
+- [x] Server: pilotSelectionRouter — getEligiblePilots, getAutoSelectedPilot, assignPilotManual, updateAvailability, updatePosition, getMyProfile, getRatingHistory, getLeaderboard
+- [x] Server: Automatic selection algorithm (C1) with scoring formula (proximity 30%, rating 30%, completion 25%, rotation 15%)
+- [x] Server: Manual selection validation (C2/C3) with rating gate (>= 4.00, cosEligible = TRUE)
+- [x] UI: PilotPickerModal component for C2/C3 dashboards (eligible pilots list, stats, selection modal)
+- [x] UI: AutoAssignBadge component for C1 marketplace (system-selected badge with selection reason)
+- [x] UI: Wire PilotPickerModal into Operations Manager, Dispatch Manager, Emergency Coordinator dashboards
+- [x] Integration: Wire webhook payload with pilot info on assignment (delivery.assigned event)
+- [x] Integration: Audit log entries for all pilot selections (action: pilot_assigned_manual, channel, operator role)

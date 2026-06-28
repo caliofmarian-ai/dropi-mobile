@@ -525,3 +525,102 @@ export const apiRequestLogs = mysqlTable("apiRequestLogs", {
 });
 export type ApiRequestLog = typeof apiRequestLogs.$inferSelect;
 export type InsertApiRequestLog = typeof apiRequestLogs.$inferInsert;
+
+
+// ===== PILOT SELECTION SYSTEM =====
+
+/**
+ * Pilot Profiles — extends delivery_partner users with performance metrics,
+ * availability, and COS eligibility data for the pilot selection system.
+ * 
+ * Canonical reference: Delivery_Multimodal §5 — selection criteria:
+ * eligibilitate tehnică, poziționare, rating, istoric livrări, mecanisme de rotație.
+ * 
+ * C1 (Marketplace): automatic selection only (no manual override)
+ * C2/C3 (COS): manual selection allowed IF rating >= cosMinRating AND cosEligible = TRUE
+ */
+export const pilotProfiles = mysqlTable("pilotProfiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(), // FK → users.id (dropiRole = "delivery_partner")
+
+  // === Rating Compozit (0.00 - 5.00) ===
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00").notNull(),
+
+  // === Componente Rating ===
+  completionRate: decimal("completionRate", { precision: 5, scale: 2 }).default("100.00"), // % livrări finalizate cu succes
+  onTimeRate: decimal("onTimeRate", { precision: 5, scale: 2 }).default("100.00"),         // % livrări la timp
+  incidentRate: decimal("incidentRate", { precision: 5, scale: 2 }).default("0.00"),       // % livrări cu incidente
+  customerRating: decimal("customerRating", { precision: 3, scale: 2 }).default("5.00"),   // Rating mediu clienți (1-5)
+
+  // === Statistici ===
+  totalDeliveries: int("totalDeliveries").default(0).notNull(),
+  totalB2bDeliveries: int("totalB2bDeliveries").default(0).notNull(),
+  totalFailedDeliveries: int("totalFailedDeliveries").default(0).notNull(),
+  lastDeliveryAt: timestamp("lastDeliveryAt"),
+
+  // === Disponibilitate ===
+  isAvailable: boolean("isAvailable").default(false).notNull(),
+  currentLat: decimal("currentLat", { precision: 10, scale: 8 }),
+  currentLng: decimal("currentLng", { precision: 11, scale: 8 }),
+  lastPositionUpdate: timestamp("lastPositionUpdate"),
+
+  // === Capacități ===
+  maxWeightGrams: int("maxWeightGrams").default(5000),
+  vehicleTypes: json("vehicleTypes"), // JSON array: ["drone", "car", "van", "ebike", "motorcycle"]
+  operatingZones: json("operatingZones"), // JSON array: ["zone_a", "zone_b"]
+
+  // === COS Eligibilitate (C2/C3 manual selection gate) ===
+  cosEligible: boolean("cosEligible").default(false).notNull(),
+  cosMinRating: decimal("cosMinRating", { precision: 3, scale: 2 }).default("4.00"), // Rating minim pentru selecție manuală COS
+
+  // === Rotație (echitate în distribuție) ===
+  lastAssignedAt: timestamp("lastAssignedAt"),
+  assignmentCount24h: int("assignmentCount24h").default(0),
+
+  // === Timestamps ===
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PilotProfile = typeof pilotProfiles.$inferSelect;
+export type InsertPilotProfile = typeof pilotProfiles.$inferInsert;
+
+/**
+ * Pilot Rating History — immutable audit trail for every rating change.
+ * Each modification to a pilot's rating generates a log entry here.
+ * 
+ * Canonical reference: Cap. 6, §6.5.4 — Sistemul de audit și logare:
+ * "Auditul este tehnic, informațional, orientat spre trasabilitate."
+ */
+export const pilotRatingHistory = mysqlTable("pilotRatingHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  pilotProfileId: int("pilotProfileId").notNull(), // FK → pilotProfiles.id
+  userId: int("userId").notNull(), // FK → users.id (for quick lookup)
+
+  // === Rating Change ===
+  previousRating: decimal("previousRating", { precision: 3, scale: 2 }).notNull(),
+  newRating: decimal("newRating", { precision: 3, scale: 2 }).notNull(),
+
+  // === Reason & Context ===
+  reason: mysqlEnum("reason", [
+    "delivery_completed",    // Livrare finalizată cu succes
+    "delivery_failed",       // Livrare eșuată (pilot fault)
+    "delivery_late",         // Livrare cu întârziere
+    "customer_review",       // Review primit de la client
+    "incident_reported",     // Incident raportat
+    "periodic_recalculation", // Recalculare periodică (job zilnic)
+    "admin_adjustment",      // Ajustare manuală admin (excepțional, auditat)
+    "initial_calculation",   // Calcul inițial la creare profil
+  ]).notNull(),
+
+  // === Delivery Reference (optional) ===
+  deliveryId: int("deliveryId"),
+  deliveryType: mysqlEnum("deliveryType", ["marketplace", "b2b"]),
+
+  // === Calculation Details (audit) ===
+  calculationDetails: json("calculationDetails"), // JSON: weights, component scores, etc.
+
+  // === Timestamp ===
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PilotRatingHistoryEntry = typeof pilotRatingHistory.$inferSelect;
+export type InsertPilotRatingHistoryEntry = typeof pilotRatingHistory.$inferInsert;

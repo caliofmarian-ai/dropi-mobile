@@ -1,0 +1,41 @@
+CREATE TABLE `pilotProfiles` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`userId` int NOT NULL,
+	`rating` decimal(3,2) NOT NULL DEFAULT '0.00',
+	`completionRate` decimal(5,2) DEFAULT '100.00',
+	`onTimeRate` decimal(5,2) DEFAULT '100.00',
+	`incidentRate` decimal(5,2) DEFAULT '0.00',
+	`customerRating` decimal(3,2) DEFAULT '5.00',
+	`totalDeliveries` int NOT NULL DEFAULT 0,
+	`totalB2bDeliveries` int NOT NULL DEFAULT 0,
+	`totalFailedDeliveries` int NOT NULL DEFAULT 0,
+	`lastDeliveryAt` timestamp,
+	`isAvailable` boolean NOT NULL DEFAULT false,
+	`currentLat` decimal(10,8),
+	`currentLng` decimal(11,8),
+	`lastPositionUpdate` timestamp,
+	`maxWeightGrams` int DEFAULT 5000,
+	`vehicleTypes` json,
+	`operatingZones` json,
+	`cosEligible` boolean NOT NULL DEFAULT false,
+	`cosMinRating` decimal(3,2) DEFAULT '4.00',
+	`lastAssignedAt` timestamp,
+	`assignmentCount24h` int DEFAULT 0,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `pilotProfiles_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
+CREATE TABLE `pilotRatingHistory` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`pilotProfileId` int NOT NULL,
+	`userId` int NOT NULL,
+	`previousRating` decimal(3,2) NOT NULL,
+	`newRating` decimal(3,2) NOT NULL,
+	`reason` enum('delivery_completed','delivery_failed','delivery_late','customer_review','incident_reported','periodic_recalculation','admin_adjustment','initial_calculation') NOT NULL,
+	`deliveryId` int,
+	`deliveryType` enum('marketplace','b2b'),
+	`calculationDetails` json,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	CONSTRAINT `pilotRatingHistory_id` PRIMARY KEY(`id`)
+);

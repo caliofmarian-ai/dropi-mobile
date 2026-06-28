@@ -7,6 +7,7 @@ import { verificationRouter, roleApplicationRouter } from "./verification-router
 import { storeRouter, productRouter, reviewRouter } from "./marketplace-router";
 import { trustRouter } from "./trust-router";
 import { apiKeyRouter, b2bDeliveryRouter, webhookRouter, apiAnalyticsRouter } from "./b2b-router";
+import { pilotSelectionRouter } from "./pilot-selection-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -49,6 +50,9 @@ export const appRouter = router({
   b2bDelivery: b2bDeliveryRouter,
   webhook: webhookRouter,
   apiAnalytics: apiAnalyticsRouter,
+
+  // Pilot Selection System (Blueprint §12)
+  pilotSelection: pilotSelectionRouter,
 });
 
 export type AppRouter = typeof appRouter;

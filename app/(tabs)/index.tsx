@@ -9,6 +9,7 @@ import type { DeliveryMode } from "@/lib/marketplace-data";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, CHANNEL_INFO, getRoleConfig } from "@/shared/types";
 import type { OrderStatus, Channel } from "@/shared/types";
 import { OnboardingNudgeBanner } from "@/components/onboarding-nudge-banner";
+import { PilotPickerModal } from "@/components/pilot-picker-modal";
 import { trpc } from "@/lib/trpc";
 
 const VEHICLE_ICONS: Record<string, string> = {
@@ -296,6 +297,8 @@ function IncidentResponderDashboard() {
 
 function OperationsManagerDashboard() {
   const router = useRouter();
+  const [pilotPickerVisible, setPilotPickerVisible] = useState(false);
+  const [selectedDeliveryId, setSelectedDeliveryId] = useState<number | null>(null);
   const dispatchQuery = trpc.b2bDelivery.adminList.useQuery(
     { status: "pending", limit: 10 },
     { refetchInterval: 20000 }
@@ -347,7 +350,10 @@ function OperationsManagerDashboard() {
                 <TouchableOpacity
                   style={{ backgroundColor: "#0a7ea4", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
                   activeOpacity={0.7}
-                  onPress={() => assignMutation.mutate({ deliveryId: d.id, pilotId: 1 })}
+                  onPress={() => {
+                    setSelectedDeliveryId(d.id);
+                    setPilotPickerVisible(true);
+                  }}
                 >
                   <Text style={{ color: "#fff", fontSize: 11, fontWeight: "600" }}>Assign</Text>
                 </TouchableOpacity>
@@ -374,6 +380,22 @@ function OperationsManagerDashboard() {
 
         <ChartPlaceholder title="Delivery Performance (7d)" />
       </ScrollView>
+
+      {/* Pilot Picker Modal */}
+      {selectedDeliveryId && (
+        <PilotPickerModal
+          visible={pilotPickerVisible}
+          onClose={() => {
+            setPilotPickerVisible(false);
+            setSelectedDeliveryId(null);
+          }}
+          deliveryId={selectedDeliveryId}
+          onPilotSelected={(pilotId) => {
+            dispatchQuery.refetch();
+            allQuery.refetch();
+          }}
+        />
+      )}
     </ScreenContainer>
   );
 }
@@ -503,6 +525,8 @@ function QualityAssuranceDashboard() {
 // ===== C3 DASHBOARDS =====
 
 function EmergencyCoordinatorDashboard() {
+  const [pilotPickerVisible, setPilotPickerVisible] = useState(false);
+  const [selectedDeliveryId, setSelectedDeliveryId] = useState<number | null>(null);
   const allQuery = trpc.b2bDelivery.adminList.useQuery(
     { limit: 50 },
     { refetchInterval: 15000 }
@@ -588,11 +612,26 @@ function EmergencyCoordinatorDashboard() {
         <StatCard title="Avg Response Time" value="4.2 min" color="#0066FF" />
         <ChartPlaceholder title="Emergency Response Timeline" />
       </ScrollView>
+
+      {/* Pilot Picker Modal */}
+      {selectedDeliveryId && (
+        <PilotPickerModal
+          visible={pilotPickerVisible}
+          onClose={() => {
+            setPilotPickerVisible(false);
+            setSelectedDeliveryId(null);
+          }}
+          deliveryId={selectedDeliveryId}
+          onPilotSelected={() => allQuery.refetch()}
+        />
+      )}
     </ScreenContainer>
   );
 }
 
 function DispatchManagerDashboard() {
+  const [pilotPickerVisible, setPilotPickerVisible] = useState(false);
+  const [selectedDeliveryId, setSelectedDeliveryId] = useState<number | null>(null);
   const pendingQuery = trpc.b2bDelivery.adminList.useQuery(
     { status: "pending", limit: 20 },
     { refetchInterval: 10000 }
@@ -636,7 +675,10 @@ function DispatchManagerDashboard() {
                 <TouchableOpacity
                   style={{ backgroundColor: "#0a7ea4", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
                   activeOpacity={0.7}
-                  onPress={() => assignMutation.mutate({ deliveryId: d.id, pilotId: 1 })}
+                  onPress={() => {
+                    setSelectedDeliveryId(d.id);
+                    setPilotPickerVisible(true);
+                  }}
                 >
                   <Text style={{ color: "#fff", fontSize: 11, fontWeight: "600" }}>Dispatch</Text>
                 </TouchableOpacity>
@@ -659,8 +701,24 @@ function DispatchManagerDashboard() {
               </View>
             </View>
           </View>
-        ))}
+                  ))}
       </ScrollView>
+
+      {/* Pilot Picker Modal */}
+      {selectedDeliveryId && (
+        <PilotPickerModal
+          visible={pilotPickerVisible}
+          onClose={() => {
+            setPilotPickerVisible(false);
+            setSelectedDeliveryId(null);
+          }}
+          deliveryId={selectedDeliveryId}
+          onPilotSelected={() => {
+            pendingQuery.refetch();
+            assignedQuery.refetch();
+          }}
+        />
+      )}
     </ScreenContainer>
   );
 }
