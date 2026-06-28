@@ -243,3 +243,10 @@
 - [x] DB: Create webhook_logs table (webhookEndpointId, deliveryId, event, payload, responseStatus, success, attemptNumber)
 - [x] Server: B2B router registered in server/routers.ts (apiKey, b2bDelivery, webhook namespaces)
 - [x] Server: Delivery estimate marked "informativă, non-contractuală" per Blueprint constraint
+
+## Sprint E Upgrades — B2B API Enhancements
+- [x] Server: Webhook auto-trigger on delivery status transitions (webhook-trigger.ts with HMAC-SHA256, exponential backoff 1/5/30min, auto-deactivation after 10 failures)
+- [x] UI: Partner Card screen (/app/merchant/partner-card.tsx) — store branding, integration health score, API usage stats, storefront redirect URL, partner profile link
+- [x] Server: REST API gateway at /api/v1/ (rest-gateway.ts — 7 endpoints: health, request, get, track, cancel, estimate, list)
+- [x] Server: REST middleware — API key SHA-256 validation, in-memory rate limiting per key, lastUsedAt tracking
+- [x] Server: REST error handling (standardized JSON: error code, message, timestamp, details)

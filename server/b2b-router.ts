@@ -23,6 +23,7 @@ import { eq, and, desc, sql, like } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "crypto";
 import { notifyOwner } from "./_core/notification";
+import { triggerWebhooks, buildWebhookPayload, getWebhookEvents } from "./webhook-trigger";
 
 // ===== HELPERS =====
 
@@ -388,6 +389,8 @@ export const b2bDeliveryRouter = router({
         throw new Error(`Cannot cancel delivery in status "${delivery[0].status}". Only pending, assigned, or pickup_enroute deliveries can be cancelled.`);
       }
 
+      const previousStatus = delivery[0].status;
+
       await db.update(b2bDeliveries)
         .set({
           status: "cancelled",
@@ -395,6 +398,18 @@ export const b2bDeliveryRouter = router({
           cancellationReason: input.reason,
         })
         .where(eq(b2bDeliveries.id, input.deliveryId));
+
+      // Trigger webhooks for cancellation
+      const events = getWebhookEvents("cancelled");
+      const payload = buildWebhookPayload(
+        "delivery.cancelled",
+        { id: input.deliveryId, externalOrderId: delivery[0].externalOrderId, trackingCode: delivery[0].trackingCode, status: "cancelled" },
+        previousStatus,
+        { cancelledBy: "partner", reason: input.reason }
+      );
+      for (const event of events) {
+        triggerWebhooks(storeResult[0].id, input.deliveryId, event, { ...payload, event });
+      }
 
       return { success: true, message: "Delivery cancelled successfully" };
     }),
@@ -476,6 +491,84 @@ export const b2bDeliveryRouter = router({
           updatedAt: d.updatedAt.toISOString(),
         })),
         total: countResult[0]?.count || 0,
+      };
+    }),
+
+  /**
+   * Update delivery status (admin/system/pilot use).
+   * Triggers webhooks for all subscribed endpoints.
+   */
+  updateStatus: adminProcedure
+    .input(z.object({
+      deliveryId: z.number(),
+      newStatus: z.enum(["pending", "assigned", "pickup_enroute", "picked_up", "in_transit", "delivered", "cancelled", "failed"]),
+      pilotId: z.number().optional(),
+      estimatedArrival: z.string().optional(),
+      finalPrice: z.string().optional(),
+      cancellationReason: z.string().optional(),
+      cancelledBy: z.enum(["system", "pilot"]).optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database unavailable");
+
+      const delivery = await db.select().from(b2bDeliveries)
+        .where(eq(b2bDeliveries.id, input.deliveryId))
+        .limit(1);
+
+      if (delivery.length === 0) throw new Error("Delivery not found");
+
+      const previousStatus = delivery[0].status;
+      if (previousStatus === input.newStatus) {
+        return { success: true, message: "Status unchanged" };
+      }
+
+      // Build update payload
+      const updateData: Record<string, any> = { status: input.newStatus };
+
+      if (input.pilotId) updateData.assignedPilotId = input.pilotId;
+      if (input.estimatedArrival) updateData.estimatedArrival = new Date(input.estimatedArrival);
+      if (input.finalPrice) updateData.finalPrice = input.finalPrice;
+      if (input.cancellationReason) updateData.cancellationReason = input.cancellationReason;
+      if (input.cancelledBy) updateData.cancelledBy = input.cancelledBy;
+
+      // Set timestamps based on status
+      if (input.newStatus === "picked_up") updateData.actualPickupAt = new Date();
+      if (input.newStatus === "delivered") updateData.actualDeliveryAt = new Date();
+      if (input.newStatus === "assigned" && input.pilotId) {
+        updateData.deliveryMode = delivery[0].preferredMode === "drone" ? "drone" : "terrestrial";
+      }
+
+      await db.update(b2bDeliveries)
+        .set(updateData)
+        .where(eq(b2bDeliveries.id, input.deliveryId));
+
+      // Trigger webhooks
+      const events = getWebhookEvents(input.newStatus);
+      const webhookPayload = buildWebhookPayload(
+        events[0], // Primary event
+        {
+          id: delivery[0].id,
+          externalOrderId: delivery[0].externalOrderId,
+          trackingCode: delivery[0].trackingCode,
+          status: input.newStatus,
+        },
+        previousStatus,
+        {
+          estimatedArrival: input.estimatedArrival || delivery[0].estimatedArrival?.toISOString(),
+          pilotId: input.pilotId || delivery[0].assignedPilotId,
+          deliveryMode: updateData.deliveryMode || delivery[0].deliveryMode,
+        }
+      );
+
+      for (const event of events) {
+        triggerWebhooks(delivery[0].storeId, delivery[0].id, event, { ...webhookPayload, event });
+      }
+
+      return {
+        success: true,
+        message: `Delivery status updated: ${previousStatus} → ${input.newStatus}`,
+        webhooksTriggered: events.length,
       };
     }),
 });

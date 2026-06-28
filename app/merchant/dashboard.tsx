@@ -180,17 +180,30 @@ export default function MerchantDashboardScreen() {
           </TouchableOpacity>
 
           {store?.type === "external" && (
-            <TouchableOpacity
-              className="bg-surface border border-border rounded-xl p-4 flex-row items-center"
-              activeOpacity={0.7}
-              onPress={() => router.push("/merchant/api-integration")}
-            >
-              <Text style={{ fontSize: 20, marginRight: 12 }}>🔗</Text>
-              <View className="flex-1">
-                <Text className="text-foreground font-semibold">API Integration</Text>
-                <Text className="text-muted text-xs">Manage your Logistic API key & webhooks</Text>
-              </View>
-            </TouchableOpacity>
+            <>
+              <TouchableOpacity
+                className="bg-surface border border-border rounded-xl p-4 flex-row items-center"
+                activeOpacity={0.7}
+                onPress={() => router.push("/merchant/partner-card" as any)}
+              >
+                <Text style={{ fontSize: 20, marginRight: 12 }}>🏢</Text>
+                <View className="flex-1">
+                  <Text className="text-foreground font-semibold">Partner Card</Text>
+                  <Text className="text-muted text-xs">Your B2B profile, health score & redirect URL</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="bg-surface border border-border rounded-xl p-4 flex-row items-center"
+                activeOpacity={0.7}
+                onPress={() => router.push("/merchant/api-integration")}
+              >
+                <Text style={{ fontSize: 20, marginRight: 12 }}>🔗</Text>
+                <View className="flex-1">
+                  <Text className="text-foreground font-semibold">API Integration</Text>
+                  <Text className="text-muted text-xs">Manage your Logistic API key & webhooks</Text>
+                </View>
+              </TouchableOpacity>
+            </>
           )}
         </View>
 
