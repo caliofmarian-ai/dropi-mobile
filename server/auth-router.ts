@@ -152,6 +152,24 @@ export const dropiAuthRouter = router({
     // Hash password
     const passwordHash = await bcrypt.hash(input.password, 12);
 
+    // Determine activation and verification status based on role
+    const ROLES_REQUIRING_ADMIN_APPROVAL = [
+      "operations_manager", "logistics_coordinator", "fleet_manager",
+      "c2_compliance_officer", "c2_performance_monitor", "c2_incident_responder",
+      "data_analyst", "quality_assurance",
+      "emergency_coordinator", "dispatch_manager", "resource_allocator",
+      "communication_officer", "c3_data_analyst", "incident_commander",
+      "system_administrator", "security_officer", "audit_manager",
+      "configuration_manager", "analytics_manager", "support_coordinator",
+    ];
+    const requiresApproval = ROLES_REQUIRING_ADMIN_APPROVAL.includes(input.dropiRole);
+    const isDeliveryPartner = input.dropiRole === "delivery_partner";
+
+    // Delivery partners start as unverified (cannot operate until documents approved)
+    // Operational roles start as inactive (cannot login until admin approves)
+    const isActive = requiresApproval ? false : true;
+    const isVerified = isDeliveryPartner ? false : true;
+
     // Create user
     const { id, openId } = await db.createUser({
       email: input.email,
@@ -160,6 +178,8 @@ export const dropiAuthRouter = router({
       dropiRole: input.dropiRole,
       channel: input.channel,
       zone: input.zone,
+      isActive,
+      isVerified,
     });
 
     // Generate email verification code
@@ -202,8 +222,37 @@ export const dropiAuthRouter = router({
       details: { email: input.email, role: input.dropiRole, channel: input.channel, emailVerificationSent: emailSent },
     });
 
+    // Auto-create role application for operational roles requiring approval
+    if (requiresApproval) {
+      const dbConn = await (await import("./db")).getDb();
+      if (dbConn) {
+        const { roleApplications } = await import("../drizzle/schema");
+        await dbConn.insert(roleApplications).values({
+          userId: id,
+          requestedRole: input.dropiRole as any,
+          requestedChannel: input.channel as any,
+          motivation: "Auto-generated on registration. Awaiting admin approval.",
+          status: "pending",
+        });
+      }
+      // Notify admin about pending approval
+      try {
+        const { notifyOwner } = await import("./_core/notification");
+        await notifyOwner({
+          title: "New Role Application",
+          content: `${input.name} (${input.email}) registered as ${input.dropiRole} on ${input.channel}. Requires admin approval.`,
+        });
+      } catch (e) { /* notification is best-effort */ }
+    }
+
     const user = await db.getUserById(id);
-    return { user, token, emailVerificationRequired: true };
+    return {
+      user,
+      token: requiresApproval ? null : token, // Don't give session token if account is inactive
+      emailVerificationRequired: !requiresApproval,
+      accountPendingApproval: requiresApproval,
+      verificationRequired: isDeliveryPartner,
+    };
   }),
 
   login: publicProcedure.input(loginSchema).mutation(async ({ input, ctx }) => {

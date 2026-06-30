@@ -95,6 +95,8 @@ export async function createUser(data: {
   dropiRole: string;
   channel: string;
   zone?: string;
+  isActive?: boolean;
+  isVerified?: boolean;
   isAIAgent?: boolean;
   agentMode?: "autonomous" | "assistant" | null;
   humanPairId?: number | null;
@@ -110,6 +112,8 @@ export async function createUser(data: {
     dropiRole: data.dropiRole as any,
     channel: data.channel as any,
     zone: data.zone || null,
+    isActive: data.isActive ?? true,
+    isVerified: data.isVerified ?? true,
     isAIAgent: data.isAIAgent || false,
     agentMode: data.agentMode || null,
     humanPairId: data.humanPairId || null,

@@ -142,12 +142,27 @@ function MerchantDashboard() {
 
 function DeliveryPartnerDashboard() {
   const router = useRouter();
+  const { user } = useDropiAuth();
   const [refreshing, setRefreshing] = useState(false);
   const availableMissions = PILOT_MISSIONS.filter((m) => m.status === "available");
   const onRefresh = useCallback(() => { setRefreshing(true); setTimeout(() => setRefreshing(false), 1000); }, []);
 
+  // Sprint 6A: Check if delivery partner is verified
+  const isUnverified = user && !(user as any).isVerified;
+
   return (
     <ScreenContainer className="px-4 pt-4">
+      {isUnverified && (
+        <View style={{ backgroundColor: '#FEF3C7', borderWidth: 1, borderColor: '#F59E0B', borderRadius: 12, padding: 14, marginBottom: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+            <Text style={{ fontSize: 16, marginRight: 8 }}>⚠️</Text>
+            <Text style={{ fontSize: 14, fontWeight: '700', color: '#92400E' }}>Verification Required</Text>
+          </View>
+          <Text style={{ fontSize: 12, color: '#78350F', lineHeight: 18 }}>
+            Your account is not yet verified. Please submit your documents (ID, driving license, insurance) from Profile → Documents to start accepting missions.
+          </Text>
+        </View>
+      )}
       <OnboardingNudgeBanner />
       <View className="flex-row justify-between items-center mb-1">
         <Text className="text-2xl font-bold text-foreground">Mission Radar</Text>

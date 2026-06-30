@@ -227,6 +227,12 @@ export const pilotSelectionRouter = router({
       const userId = (ctx.user as any)?.id;
       if (!userId) return { success: false };
 
+      // Sprint 6A Guard: Block unverified pilots
+      const user = ctx.user as any;
+      if (!user.isVerified) {
+        throw new Error("Your account is not yet verified. Submit documents and wait for approval before going online.");
+      }
+
       // Ensure profile exists
       await ensurePilotProfile(userId);
 
@@ -251,6 +257,12 @@ export const pilotSelectionRouter = router({
     .mutation(async ({ ctx, input }) => {
       const userId = (ctx.user as any)?.id;
       if (!userId) return { success: false };
+
+      // Sprint 6A Guard: Block unverified pilots
+      const user = ctx.user as any;
+      if (!user.isVerified) {
+        throw new Error("Account not verified. Cannot update position.");
+      }
 
       const db = await getDb();
       if (!db) return { success: false };

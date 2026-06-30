@@ -513,6 +513,14 @@ export const b2bDeliveryRouter = router({
       const user = ctx.user as any;
       if (!user) throw new Error("Authentication required");
 
+      // Sprint 6A Guard: Block unverified delivery partners from mission operations
+      if (!user.isVerified) {
+        throw new Error("Your account is not yet verified. Please submit your documents and wait for admin approval before accepting missions.");
+      }
+      if (!user.isActive) {
+        throw new Error("Your account is inactive. Please contact support.");
+      }
+
       const delivery = await db.select().from(b2bDeliveries)
         .where(eq(b2bDeliveries.id, input.deliveryId))
         .limit(1);

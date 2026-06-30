@@ -34,6 +34,8 @@ export const users = mysqlTable("users", {
   channel: mysqlEnum("channel", ["C1", "C2", "C3", "ADMIN"]).default("C1").notNull(),
   zone: varchar("zone", { length: 100 }),
   isActive: boolean("isActive").default(true).notNull(),
+  // Verification status (delivery partners start as unverified)
+  isVerified: boolean("isVerified").default(true).notNull(),
   // Real Auth fields
   passwordHash: varchar("passwordHash", { length: 255 }),
   resetToken: varchar("resetToken", { length: 255 }),

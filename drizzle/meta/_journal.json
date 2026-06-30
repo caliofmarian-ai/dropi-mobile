@@ -71,6 +71,13 @@
       "when": 1782658193906,
       "tag": "0009_melted_excalibur",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1782804777193,
+      "tag": "0010_mean_supreme_intelligence",
+      "breakpoints": true
     }
   ]
 }

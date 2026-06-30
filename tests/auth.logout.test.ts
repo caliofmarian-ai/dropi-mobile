@@ -24,6 +24,7 @@ function createAuthContext(): { ctx: TrpcContext; clearedCookies: CookieCall[] }
     channel: "C1",
     zone: null,
     isActive: true,
+    isVerified: true,
     createdAt: new Date(),
     updatedAt: new Date(),
     lastSignedIn: new Date(),

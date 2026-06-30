@@ -320,3 +320,8 @@
 - [x] Verify pilots display with real names and stats (curl test confirmed 12 pilots returned)
 - [x] Fix: item.rating.toFixed crash — DB returns rating as string, added parseFloat() wrapper
 - [x] Save BLUEPRINT_SPRINT_ROADMAP.md — permanent prioritization strategy, Sprint 6A–8+ execution plan, scoring methodology
+
+## Sprint 6A — Securitate Operațională (CRITIC)
+- [x] Task 1: Delivery Partner "unverified" status at registration (isVerified = false, banner on dashboard)
+- [x] Task 2: Guard on mission endpoints (block unverified delivery partners from accepting/updating missions)
+- [x] Task 3: Admin approval gate for operational roles (auto-deactivate + create roleApplication on register)
