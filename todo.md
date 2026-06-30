@@ -342,3 +342,4 @@
 - [x] Created server/notification-router.ts (registerPushToken, unregisterPushToken endpoints)
 - [x] Created hooks/use-push-notifications.ts (client-side token registration with SDK 54 API)
 - [x] Mounted PushNotificationRegistrar in app/_layout.tsx (inside AuthProvider + trpc.Provider)
+- [x] Save BLUEPRINT_INDEPENDENT_DEPLOYMENT.md — deployment pe server propriu, independență completă de terți, migrare FCM, checklist pre-deployment
