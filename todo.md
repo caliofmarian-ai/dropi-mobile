@@ -332,3 +332,13 @@
 - [x] On approve: set user isActive=true (operational roles) or isVerified=true (delivery partners) — FIXED in verification-router.ts
 - [x] On reject: set roleApplication status to 'rejected' with reason (already worked)
 - [x] Audit log for all approval/rejection actions (notifyOwner + console.log + email notification)
+
+## Push Notifications — Pilot Verification
+- [x] Send push notification to pilot when document verification is approved (isVerified=true)
+- [x] Send push notification to pilot when role application is approved (isActive=true)
+- [x] Send push notification on rejection with reason
+- [x] Created pushTokens DB table and migration
+- [x] Created server/push-notifications.ts (Expo Push API integration with auto-deactivation of invalid tokens)
+- [x] Created server/notification-router.ts (registerPushToken, unregisterPushToken endpoints)
+- [x] Created hooks/use-push-notifications.ts (client-side token registration with SDK 54 API)
+- [x] Mounted PushNotificationRegistrar in app/_layout.tsx (inside AuthProvider + trpc.Provider)

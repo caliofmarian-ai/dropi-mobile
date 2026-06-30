@@ -8,7 +8,8 @@ import "react-native-reanimated";
 import { Platform } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
-import { AuthProvider } from "@/lib/auth-context";
+import { AuthProvider, useDropiAuth } from "@/lib/auth-context";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -26,6 +27,16 @@ const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
 export const unstable_settings = {
   anchor: "(tabs)",
 };
+
+/**
+ * Registers push notification token when user is authenticated (non-demo).
+ * Must be rendered inside AuthProvider + trpc.Provider.
+ */
+function PushNotificationRegistrar() {
+  const { user, isDemo } = useDropiAuth();
+  usePushNotifications(!!user, isDemo);
+  return null;
+}
 
 export default function RootLayout() {
   const initialInsets = initialWindowMetrics?.insets ?? DEFAULT_WEB_INSETS;
@@ -90,6 +101,7 @@ export default function RootLayout() {
               <Stack.Screen name="mission/[id]" />
               <Stack.Screen name="oauth/callback" />
             </Stack>
+            <PushNotificationRegistrar />
             <StatusBar style="auto" />
           </QueryClientProvider>
         </trpc.Provider>

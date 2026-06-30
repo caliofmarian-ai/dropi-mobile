@@ -1,0 +1,116 @@
+/**
+ * Push Notification Hook — Sprint 6A+
+ * Registers for push notifications and sends the token to the server.
+ * Handles permission requests and notification listeners.
+ * 
+ * NOTE: Remote push notifications are unavailable in Expo Go on Android from SDK 53+.
+ * A development build is required for full push notification testing on Android.
+ */
+import { useEffect, useRef } from "react";
+import { Platform } from "react-native";
+import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
+import { trpc } from "@/lib/trpc";
+
+// Configure notification handler (show notifications when app is in foreground)
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
+
+/**
+ * Register for push notifications and send token to server.
+ * Call this hook in the main layout after user is authenticated.
+ * Skips registration for demo mode users (no valid server session).
+ */
+export function usePushNotifications(isAuthenticated: boolean, isDemo?: boolean) {
+  const tokenRef = useRef<string | null>(null);
+  const registerMutation = trpc.notifications.registerPushToken.useMutation();
+
+  useEffect(() => {
+    if (!isAuthenticated || isDemo) return;
+    if (Platform.OS === "web") return; // Push not supported on web
+
+    registerForPushNotifications().then((token) => {
+      if (token && token !== tokenRef.current) {
+        tokenRef.current = token;
+        const platform: "ios" | "android" | "web" = Platform.OS === "ios" ? "ios" : "android";
+        registerMutation.mutate({ token, platform });
+      }
+    });
+  }, [isAuthenticated, isDemo]);
+
+  // Listen for incoming notifications
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (Platform.OS === "web") return;
+
+    const notificationListener = Notifications.addNotificationReceivedListener((notification) => {
+      console.log("[PUSH] Notification received:", notification.request.content.title);
+    });
+
+    const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data;
+      console.log("[PUSH] Notification tapped, data:", data);
+      // Navigation based on data.screen can be added here
+    });
+
+    return () => {
+      notificationListener.remove();
+      responseListener.remove();
+    };
+  }, [isAuthenticated]);
+
+  return { token: tokenRef.current };
+}
+
+async function registerForPushNotifications(): Promise<string | null> {
+  try {
+    // Set up Android notification channels first (required for permission prompt)
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "Default",
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#0a7ea4",
+      });
+
+      await Notifications.setNotificationChannelAsync("verification", {
+        name: "Verification Updates",
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#22C55E",
+      });
+    }
+
+    // Check/request permissions
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== "granted") {
+      console.log("[PUSH] Permission not granted");
+      return null;
+    }
+
+    // Get Expo push token
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    const tokenData = await Notifications.getExpoPushTokenAsync({
+      projectId: projectId || undefined,
+    });
+
+    console.log("[PUSH] Token obtained:", tokenData.data.substring(0, 30) + "...");
+    return tokenData.data;
+  } catch (error) {
+    console.error("[PUSH] Failed to register:", error);
+    return null;
+  }
+}

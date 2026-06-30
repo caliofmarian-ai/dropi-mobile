@@ -626,3 +626,20 @@ export const pilotRatingHistory = mysqlTable("pilotRatingHistory", {
 });
 export type PilotRatingHistoryEntry = typeof pilotRatingHistory.$inferSelect;
 export type InsertPilotRatingHistoryEntry = typeof pilotRatingHistory.$inferInsert;
+
+// ===== PUSH NOTIFICATION TOKENS =====
+/**
+ * Stores Expo push tokens for each user device.
+ * A user can have multiple tokens (multiple devices).
+ */
+export const pushTokens = mysqlTable("pushTokens", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  token: varchar("token", { length: 512 }).notNull(),
+  platform: mysqlEnum("platform", ["ios", "android", "web"]).default("android").notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PushToken = typeof pushTokens.$inferSelect;
+export type InsertPushToken = typeof pushTokens.$inferInsert;

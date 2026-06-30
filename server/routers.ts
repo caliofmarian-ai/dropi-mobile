@@ -9,6 +9,7 @@ import { trustRouter } from "./trust-router";
 import { apiKeyRouter, b2bDeliveryRouter, webhookRouter, apiAnalyticsRouter } from "./b2b-router";
 import { pilotSelectionRouter } from "./pilot-selection-router";
 import { pilotRatingAdminRouter } from "./pilot-rating-admin";
+import { notificationRouter } from "./notification-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -57,6 +58,9 @@ export const appRouter = router({
 
   // Pilot Rating Admin — Real-time Recalculation
   pilotRatingAdmin: pilotRatingAdminRouter,
+
+  // Push Notifications — Token registration
+  notifications: notificationRouter,
 });
 
 export type AppRouter = typeof appRouter;

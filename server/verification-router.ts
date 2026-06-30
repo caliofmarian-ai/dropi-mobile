@@ -216,6 +216,19 @@ export const verificationRouter = router({
             .set({ isVerified: true })
             .where(eq(users.id, verification.userId));
           console.log(`[VERIFICATION] User ${verification.userId} is now VERIFIED (isVerified=true)`);
+
+          // Sprint 6A+: Send push notification to pilot
+          try {
+            const { sendPushToUser } = await import("./push-notifications");
+            await sendPushToUser(verification.userId, {
+              title: "✅ Account Verified!",
+              body: "Your documents have been approved. You can now accept delivery missions on DROPi!",
+              data: { type: "verification_approved", screen: "/(tabs)" },
+              channelId: "verification",
+            });
+          } catch (pushErr) {
+            console.warn("[PUSH] Failed to send verification push:", pushErr);
+          }
         }
       }
 
@@ -241,6 +254,22 @@ export const verificationRouter = router({
           });
         } catch (err) {
           console.error("[SMTP] Failed to send verification notification:", err);
+        }
+      }
+
+      // Sprint 6A+: Send push notification on verification rejection
+      if (input.decision === "rejected") {
+        try {
+          const { sendPushToUser } = await import("./push-notifications");
+          const docType = verification.documentType.replace(/_/g, " ");
+          await sendPushToUser(verification.userId, {
+            title: "❌ Document Verification Update",
+            body: `Your ${docType} verification was not approved. Reason: ${input.rejectionReason || "Not specified"}. Please submit updated documents.`,
+            data: { type: "verification_rejected", screen: "/verification/submit" },
+            channelId: "verification",
+          });
+        } catch (pushErr) {
+          console.warn("[PUSH] Failed to send verification rejection push:", pushErr);
         }
       }
 
@@ -414,6 +443,36 @@ export const roleApplicationRouter = router({
           .where(eq(users.id, application.userId));
 
         console.log(`[ROLE] User ${application.userId} promoted to ${application.requestedRole} on ${application.requestedChannel} (isActive=true, isVerified=true)`);
+
+        // Sprint 6A+: Send push notification on role approval
+        try {
+          const { sendPushToUser } = await import("./push-notifications");
+          const roleName = application.requestedRole.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+          await sendPushToUser(application.userId, {
+            title: "✅ Role Approved!",
+            body: `Your application for ${roleName} on ${application.requestedChannel} has been approved. Welcome aboard!`,
+            data: { type: "role_approved", role: application.requestedRole, channel: application.requestedChannel, screen: "/(tabs)" },
+            channelId: "verification",
+          });
+        } catch (pushErr) {
+          console.warn("[PUSH] Failed to send role approval push:", pushErr);
+        }
+      }
+
+      // Sprint 6A+: Send push notification on rejection
+      if (input.decision === "rejected") {
+        try {
+          const { sendPushToUser } = await import("./push-notifications");
+          const roleName = application.requestedRole.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+          await sendPushToUser(application.userId, {
+            title: "❌ Application Update",
+            body: `Your application for ${roleName} was not approved. Reason: ${input.rejectionReason || "Not specified"}. You may reapply after addressing the feedback.`,
+            data: { type: "role_rejected", screen: "/profile" },
+            channelId: "verification",
+          });
+        } catch (pushErr) {
+          console.warn("[PUSH] Failed to send role rejection push:", pushErr);
+        }
       }
 
       // Send email notification
