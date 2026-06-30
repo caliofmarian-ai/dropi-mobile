@@ -340,7 +340,7 @@ export default function PartnerCardScreen() {
               onPress={() => router.push("/merchant/webhook-config" as any)}
             >
               <Text style={{ fontSize: 18, marginRight: 12 }}>🔔</Text>
-              <Text className="text-sm font-medium text-foreground flex-1">Webhook Configuration</Text>
+              <Text className="text-sm font-medium text-foreground flex-1">Webhook Configuredion</Text>
               <Text className="text-muted">→</Text>
             </TouchableOpacity>
             <TouchableOpacity

@@ -298,7 +298,7 @@ export const b2bDeliveryRouter = router({
         const { createInAppNotification } = await import("./create-notification");
         await createInAppNotification({
           userId: user.id,
-          title: "\uD83D\uDCE6 Livrare Nou\u0103 Creat\u0103",
+          title: "\uD83D\uDCE6 Delivery Nou\u0103 Creat\u0103",
           body: `Comanda ${trackingCode} a fost \xeenregistrat\u0103. Pre\u021b estimat: ${estimate.estimatedPrice} RON. Mod: ${estimate.mode}.`,
           category: "orders",
           metadata: { deliveryId: result[0].insertId, trackingCode, mode: estimate.mode },
@@ -617,7 +617,7 @@ export const b2bDeliveryRouter = router({
           const { createInAppNotification } = await import("./create-notification");
           await createInAppNotification({
             userId: storeResult[0].ownerId,
-            title: `\uD83D\uDE9A Livrare: ${input.newStatus.replace(/_/g, " ")}`,
+            title: `\uD83D\uDE9A Delivery: ${input.newStatus.replace(/_/g, " ")}`,
             body: `Comanda ${delivery[0].trackingCode} a trecut de la ${previousStatus.replace(/_/g, " ")} la ${input.newStatus.replace(/_/g, " ")}.`,
             category: "missions",
             metadata: { deliveryId: delivery[0].id, trackingCode: delivery[0].trackingCode, status: input.newStatus },

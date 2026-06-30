@@ -354,7 +354,7 @@ export default function ApiIntegrationScreen() {
             >
               <Text style={{ fontSize: 20, marginRight: 12 }}>🔔</Text>
               <View className="flex-1">
-                <Text className="text-sm font-medium text-foreground">Webhook Configuration</Text>
+                <Text className="text-sm font-medium text-foreground">Webhook Configuredion</Text>
                 <Text className="text-xs text-muted">Manage endpoints, test webhooks, view logs</Text>
               </View>
               <Text className="text-muted">→</Text>

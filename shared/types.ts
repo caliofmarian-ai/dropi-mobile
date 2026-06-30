@@ -170,7 +170,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
   { role: "system_administrator", channel: "ADMIN", label: "System Administrator", description: "Manage platform systems", permissions: ["manage_users", "manage_settings", "monitor_system", "handle_support", "phantom_mode"] },
   { role: "security_officer", channel: "ADMIN", label: "Security Officer", description: "Monitor platform security", permissions: ["monitor_security", "manage_access", "investigate_threats", "enforce_policies"] },
   { role: "audit_manager", channel: "ADMIN", label: "Audit Manager", description: "Oversee platform auditing", permissions: ["view_all_logs", "generate_audit_reports", "investigate_actions", "compliance_review"] },
-  { role: "configuration_manager", channel: "ADMIN", label: "Configuration Manager", description: "Manage platform configuration", permissions: ["manage_config", "deploy_changes", "version_control", "rollback"] },
+  { role: "configuration_manager", channel: "ADMIN", label: "Configuredion Manager", description: "Manage platform configuration", permissions: ["manage_config", "deploy_changes", "version_control", "rollback"] },
   { role: "analytics_manager", channel: "ADMIN", label: "Analytics Manager", description: "Platform-wide analytics", permissions: ["view_all_data", "create_dashboards", "generate_insights", "predict_trends"] },
   { role: "support_coordinator", channel: "ADMIN", label: "Support Coordinator", description: "Coordinate support operations", permissions: ["manage_agents", "view_tickets", "escalate_issues", "generate_reports"] },
 ];

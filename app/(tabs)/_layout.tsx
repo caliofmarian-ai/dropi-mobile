@@ -10,7 +10,7 @@ import type { Channel, DropiRole } from "@/shared/types";
 
 function getHomeTitle(role: DropiRole, channel: Channel): string {
   if (role === "customer") return "Ordersle Mele";
-  if (role === "merchant") return "Magazin";
+  if (role === "merchant") return "Store";
   if (role === "delivery_partner") return "Missions";
   switch (channel) {
     case "C1": return "Dashboard";
@@ -194,7 +194,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="notifications"
         options={{
-          title: "Notificări",
+          title: "Notifications",
           tabBarIcon: ({ color }) => <NotificationBadgeTab color={color} size={24} />,
         }}
       />

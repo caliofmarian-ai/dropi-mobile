@@ -58,18 +58,18 @@ interface ImprovementTip {
 }
 
 const BADGE_CONFIG = {
-  high_trust: { label: "Încredere Ridicată", color: "#22C55E", icon: "✓", bgColor: "#DCFCE7" },
-  new_activity: { label: "Activitate Nouă", color: "#3B82F6", icon: "★", bgColor: "#DBEAFE" },
-  high_risk: { label: "Risc Crescut", color: "#F59E0B", icon: "⚠", bgColor: "#FEF3C7" },
-  restricted: { label: "Restricționat", color: "#EF4444", icon: "✕", bgColor: "#FEE2E2" },
+  high_trust: { label: "High Trust", color: "#22C55E", icon: "✓", bgColor: "#DCFCE7" },
+  new_activity: { label: "New Activity", color: "#3B82F6", icon: "★", bgColor: "#DBEAFE" },
+  high_risk: { label: "High Risk", color: "#F59E0B", icon: "⚠", bgColor: "#FEF3C7" },
+  restricted: { label: "Restricted", color: "#EF4444", icon: "✕", bgColor: "#FEE2E2" },
 };
 
 const COMPONENT_LABELS: Record<keyof TrustScoreComponents, { label: string; weight: string }> = {
-  postDeliveryRating: { label: "Evaluări post-livrare", weight: "35%" },
+  postDeliveryRating: { label: "Post-delivery ratings", weight: "35%" },
   qualityVsDescription: { label: "Calitate vs. Descriere", weight: "20%" },
   orderCompletionRate: { label: "Rata comenzi finalizate", weight: "20%" },
   ruleCompliance: { label: "Conformitate reguli", weight: "15%" },
-  absenceOfComplaints: { label: "Absența reclamațiilor", weight: "10%" },
+  absenceOfComplaints: { label: "Absence of complaints", weight: "10%" },
 };
 
 export default function MerchantTrustScreen() {
@@ -128,7 +128,7 @@ export default function MerchantTrustScreen() {
               <Text className="text-lg mr-2">⚠️</Text>
               <Text className="text-error font-bold text-base">
                 {trustData.eliminationLevel === 1 && "Nivel 1 — Avertisment"}
-                {trustData.eliminationLevel === 2 && "Nivel 2 — Vizibilitate Redusă"}
+                {trustData.eliminationLevel === 2 && "Level 2 — Reduced Visibility"}
                 {trustData.eliminationLevel === 3 && "Nivel 3 — Suspendare"}
                 {trustData.eliminationLevel === 4 && "Nivel 4 — Eliminare"}
               </Text>
@@ -136,7 +136,7 @@ export default function MerchantTrustScreen() {
             <Text className="text-error/80 text-sm">{trustData.eliminationReason}</Text>
             {trustData.eliminationLevel <= 2 && (
               <Text className="text-muted text-xs mt-2">
-                Îmbunătățiți scorul de încredere pentru a reveni la normal. Consultați sfaturile de mai jos.
+                Improve your trust score to return to normal. See tips below.
               </Text>
             )}
           </View>
@@ -173,10 +173,10 @@ export default function MerchantTrustScreen() {
                   {BADGE_CONFIG[trustData.badge].label}
                 </Text>
                 <Text className="text-muted text-xs mt-1">
-                  {trustData.badge === "high_trust" && "Scor ≥ 85, ≥ 20 comenzi, 0 reclamații în 90 zile"}
-                  {trustData.badge === "new_activity" && "Mai puțin de 5 comenzi completate"}
-                  {trustData.badge === "high_risk" && "Scor < 40 sau ≥ 3 reclamații validate"}
-                  {trustData.badge === "restricted" && "Magazin suspendat — produse invizibile"}
+                  {trustData.badge === "high_trust" && "Score ≥ 85, ≥ 20 orders, 0 complaints in 90 days"}
+                  {trustData.badge === "new_activity" && "Less than 5 completed orders"}
+                  {trustData.badge === "high_risk" && "Score < 40 or ≥ 3 validated complaints"}
+                  {trustData.badge === "restricted" && "Store suspendat — produse invizibile"}
                 </Text>
               </View>
             </View>
@@ -208,7 +208,7 @@ export default function MerchantTrustScreen() {
         {/* Improvement Tips */}
         {tips.length > 0 && (
           <View className="bg-surface rounded-2xl p-4 mb-6 border border-border">
-            <Text className="text-foreground font-semibold text-base mb-3">Sfaturi de Îmbunătățire</Text>
+            <Text className="text-foreground font-semibold text-base mb-3">Improvement Tips</Text>
             {tips.map((tip, idx) => (
               <View key={idx} className="flex-row mb-3">
                 <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: tip.impact === "high" ? "#FEE2E2" : "#FEF3C7", alignItems: "center", justifyContent: "center", marginRight: 10, marginTop: 2 }}>
@@ -219,7 +219,7 @@ export default function MerchantTrustScreen() {
                 <View className="flex-1">
                   <Text className="text-foreground text-sm">{tip.tip}</Text>
                   <Text className="text-muted text-xs mt-1">
-                    Impact: {tip.impact === "high" ? "Ridicat" : "Mediu"} • Zonă: {tip.area}
+                    Impact: {tip.impact === "high" ? "High" : "Medium"} • Area: {tip.area}
                   </Text>
                 </View>
               </View>
@@ -253,17 +253,17 @@ export default function MerchantTrustScreen() {
 
         {/* Info Section */}
         <View className="bg-surface rounded-2xl p-4 border border-border">
-          <Text className="text-foreground font-semibold text-base mb-2">Despre Sistemul de Încredere</Text>
+          <Text className="text-foreground font-semibold text-base mb-2">About the Trust System</Text>
           <Text className="text-muted text-sm leading-relaxed">
-            Scorul de încredere DROPi este un indicator informativ și preventiv, calculat automat pe baza a 5 componente ponderate. 
-            Nu poate fi modificat manual și se actualizează la fiecare eveniment relevant (nouă evaluare, comandă completată, reclamație).
+            The DROPi trust score is an informative and preventive indicator, automatically calculated based on 5 weighted components. 
+            It cannot be manually modified and updates with each relevant event (new rating, completed order, complaint).
           </Text>
           <Text className="text-muted text-sm leading-relaxed mt-2">
-            Badge-urile sunt atribuite automat și vizibile public pe cardurile produselor și pagina magazinului. 
+            Badges are automatically assigned and publicly visible on product cards and the store page. 
             Un singur badge activ la un moment dat (cel cu prioritatea cea mai mare).
           </Text>
           <Text className="text-muted text-sm leading-relaxed mt-2">
-            Prioritate: Restricționat {">"} Risc Crescut {">"} Activitate Nouă {">"} Încredere Ridicată
+            Prioritate: Restricted {">"} High Risk {">"} New Activity {">"} High Trust
           </Text>
         </View>
       </ScrollView>

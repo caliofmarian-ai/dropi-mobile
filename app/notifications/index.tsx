@@ -26,13 +26,13 @@ function formatTimeAgo(dateStr: string): string {
   const date = new Date(dateStr);
   const diffMs = now.getTime() - date.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "Acum";
+  if (diffMin < 1) return "Now";
   if (diffMin < 60) return `${diffMin}m`;
   const diffHours = Math.floor(diffMin / 60);
   if (diffHours < 24) return `${diffHours}h`;
   const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 7) return `${diffDays}z`;
-  return date.toLocaleDateString("ro-RO", { day: "numeric", month: "short" });
+  if (diffDays < 7) return `${diffDays}d`;
+  return date.toLocaleDateString("en-US", { day: "numeric", month: "short" });
 }
 
 export default function NotificationCenterScreen() {
@@ -142,13 +142,13 @@ export default function NotificationCenterScreen() {
         >
           <IconSymbol name="chevron.left.forwardslash.chevron.right" size={24} color={colors.foreground} />
         </Pressable>
-        <Text className="text-lg font-bold text-foreground">Notificări</Text>
+        <Text className="text-lg font-bold text-foreground">Notifications</Text>
         {unreadCount > 0 ? (
           <Pressable
             onPress={handleMarkAllRead}
             style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
           >
-            <Text className="text-sm text-primary font-medium">Citește tot</Text>
+            <Text className="text-sm text-primary font-medium">Read all</Text>
           </Pressable>
         ) : (
           <View style={{ width: 70 }} />
@@ -159,7 +159,7 @@ export default function NotificationCenterScreen() {
       {unreadCount > 0 && (
         <View className="px-4 py-2 bg-surface">
           <Text className="text-xs text-muted">
-            {unreadCount} {unreadCount === 1 ? "notificare necitită" : "notificări necitite"}
+            {unreadCount} {unreadCount === 1 ? "unread notification" : "unread notifications"}
           </Text>
         </View>
       )}
@@ -173,10 +173,10 @@ export default function NotificationCenterScreen() {
         <View className="flex-1 items-center justify-center p-8">
           <IconSymbol name="bell.fill" size={48} color={colors.muted} />
           <Text className="text-muted text-base mt-4 text-center">
-            Nicio notificare încă
+            No notifications yet
           </Text>
           <Text className="text-muted text-sm mt-1 text-center">
-            Vei primi notificări despre verificări, misiuni și comenzi aici.
+            You will receive notifications about verifications, missions and orders here.
           </Text>
         </View>
       ) : (

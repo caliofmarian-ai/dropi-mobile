@@ -121,13 +121,13 @@ function EndpointsSection() {
         requestBody={`{
   "externalOrderId": "PARTNER-ORD-12345",
   "pickup": {
-    "address": "Str. Exemplu 10, București",
+    "address": "10 Example St, Dublin",
     "contactName": "Depozit Central",
     "contactPhone": "+40700000000",
     "readyAt": "2026-06-28T14:00:00Z"
   },
   "delivery": {
-    "address": "Str. Destinație 5, București",
+    "address": "5 Destination St, Dublin",
     "contactName": "Ion Popescu",
     "contactPhone": "+40711111111",
     "notes": "Etaj 3, interfon 12"
@@ -151,7 +151,7 @@ function EndpointsSection() {
   "currency": "RON",
   "estimatedMinutes": 60,
   "mode": "terrestrial",
-  "disclaimer": "Estimare informativă, non-contractuală..."
+  "disclaimer": "Informative, non-contractual estimate..."
 }`}
       />
 
@@ -196,8 +196,8 @@ function EndpointsSection() {
         path="/api/v1/delivery/estimate"
         description="Get a non-contractual delivery estimate. Use before creating a delivery to show the customer an approximate cost and time."
         requestBody={`{
-  "pickupAddress": "Str. Exemplu 10, București",
-  "deliveryAddress": "Str. Destinație 5, București",
+  "pickupAddress": "10 Example St, Dublin",
+  "deliveryAddress": "5 Destination St, Dublin",
   "packageWeight": 2500,
   "preferredMode": "any",
   "urgency": "standard"
@@ -207,8 +207,8 @@ function EndpointsSection() {
   "estimatedPrice": 15.00,
   "currency": "RON",
   "mode": "terrestrial",
-  "disclaimer": "Estimare informativă, non-contractuală...",
-  "note": "Această estimare este informativă și non-contractuală."
+  "disclaimer": "Informative, non-contractual estimate...",
+  "note": "This estimate is informative and non-contractual."
 }`}
       />
 

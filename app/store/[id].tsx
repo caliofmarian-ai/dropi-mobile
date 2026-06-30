@@ -119,7 +119,7 @@ export default function StoreScreen() {
                 </View>
                 <View style={{ alignItems: "center" }}>
                   <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground }}>{merchant.totalOrders}</Text>
-                  <Text style={{ fontSize: 10, color: colors.muted }}>Comenzi</Text>
+                  <Text style={{ fontSize: 10, color: colors.muted }}>Orders</Text>
                 </View>
                 <View style={{ alignItems: "center" }}>
                   <Text style={{ fontSize: 16, fontWeight: "700", color: merchant.isOpen ? "#10B981" : colors.error }}>

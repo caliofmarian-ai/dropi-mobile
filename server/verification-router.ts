@@ -290,7 +290,7 @@ export const verificationRouter = router({
           const docType = verification.documentType.replace(/_/g, " ");
           await createInAppNotification({
             userId: verification.userId,
-            title: "\u274c Verificare Respins\u0103",
+            title: "\u274c Verification Respins\u0103",
             body: `Documentul ${docType} nu a fost aprobat. Motiv: ${input.rejectionReason || "Nespecificat"}. Retrimite documente actualizate.`,
             category: "verification",
             metadata: { verificationId: verification.id, decision: "rejected", reason: input.rejectionReason },

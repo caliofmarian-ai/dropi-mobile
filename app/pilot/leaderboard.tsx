@@ -30,9 +30,9 @@ const ZONES = [
   { id: "all", label: "All Zones" },
   { id: "bucharest", label: "Bucharest" },
   { id: "cluj", label: "Cluj-Napoca" },
-  { id: "timisoara", label: "Timișoara" },
-  { id: "iasi", label: "Iași" },
-  { id: "constanta", label: "Constanța" },
+  { id: "timisoara", label: "Timisoara" },
+  { id: "iasi", label: "Iasi" },
+  { id: "constanta", label: "Constanta" },
 ];
 
 const SORT_OPTIONS: { value: SortBy; label: string }[] = [

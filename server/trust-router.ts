@@ -2,7 +2,7 @@
  * DROPi Trust & Badge Router — Sprint C
  * 
  * Endpoints for trust score calculation, badge management, and elimination mechanism.
- * Conforms to Blueprint Section 7 (Stratul 2 — Sistem de Încredere și Badge-uri).
+ * Conforms to Blueprint Section 7 (Stratul 2 — System de Încredere și Badge-uri).
  */
 
 import { router, protectedProcedure, adminProcedure } from "./_core/trpc";
@@ -85,7 +85,7 @@ export const trustRouter = router({
 
   /**
    * Admin override badge for a store (with mandatory justification).
-   * Blueprint: "Override manual posibil DOAR de Admin Sistem, cu justificare obligatorie (logată în audit)"
+   * Blueprint: "Override manual posibil DOAR de Admin System, cu justificare obligatorie (logată în audit)"
    */
   overrideBadge: adminProcedure
     .input(z.object({

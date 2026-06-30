@@ -1,5 +1,5 @@
 /**
- * Webhook Configuration Screen — Sprint E
+ * Webhook Configuredion Screen — Sprint E
  *
  * Manage webhook endpoints: add, test, view logs, and delete.
  * Webhook signature verification uses HMAC-SHA256.
@@ -130,7 +130,7 @@ export default function WebhookConfigScreen() {
             <Text style={{ fontSize: 24 }}>←</Text>
           </TouchableOpacity>
           <View className="flex-1">
-            <Text className="text-2xl font-bold text-foreground">Webhook Configuration</Text>
+            <Text className="text-2xl font-bold text-foreground">Webhook Configuredion</Text>
             <Text className="text-xs text-muted">Receive real-time delivery status updates</Text>
           </View>
         </View>

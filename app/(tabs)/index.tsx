@@ -990,8 +990,8 @@ function AuditManagerDashboard() {
 function ConfigManagerDashboard() {
   return (
     <ScreenContainer className="px-4 pt-4">
-      <Text className="text-2xl font-bold text-foreground mb-1">Configuration</Text>
-      <Text className="text-sm text-muted mb-4">Platform Configuration</Text>
+      <Text className="text-2xl font-bold text-foreground mb-1">Configuredion</Text>
+      <Text className="text-sm text-muted mb-4">Platform Configuredion</Text>
       <StatCard title="Active Version" value="v2.4.1" color="#0066FF" />
       <StatCard title="Pending Changes" value="2" color="#F59E0B" />
       <StatCard title="Last Deploy" value="2h ago" color="#10B981" />

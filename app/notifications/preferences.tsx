@@ -26,8 +26,8 @@ interface PreferenceCategory {
 const CATEGORIES: PreferenceCategory[] = [
   {
     key: "verification",
-    label: "Verificare",
-    description: "Aprobări/respingeri documente și cont",
+    label: "Verification",
+    description: "Document and account approvals/rejections",
     icon: "checkmark.shield.fill",
     color: "#22C55E",
     pushKey: "pushVerification",
@@ -35,8 +35,8 @@ const CATEGORIES: PreferenceCategory[] = [
   },
   {
     key: "missions",
-    label: "Misiuni",
-    description: "Misiuni noi, actualizări status livrare",
+    label: "Missions",
+    description: "New missions, delivery status updates",
     icon: "airplane",
     color: "#3B82F6",
     pushKey: "pushMissions",
@@ -44,8 +44,8 @@ const CATEGORIES: PreferenceCategory[] = [
   },
   {
     key: "orders",
-    label: "Comenzi",
-    description: "Comenzi noi, confirmări, anulări",
+    label: "Orders",
+    description: "New orders, confirmations, cancellations",
     icon: "cart.fill",
     color: "#8B5CF6",
     pushKey: "pushOrders",
@@ -53,8 +53,8 @@ const CATEGORIES: PreferenceCategory[] = [
   },
   {
     key: "system",
-    label: "Sistem",
-    description: "Actualizări platformă, mentenanță",
+    label: "System",
+    description: "Platform updates, maintenance",
     icon: "gear",
     color: "#6B7280",
     pushKey: "pushSystem",
@@ -62,8 +62,8 @@ const CATEGORIES: PreferenceCategory[] = [
   },
   {
     key: "promotions",
-    label: "Promoții",
-    description: "Oferte speciale, bonusuri, campanii",
+    label: "Promotions",
+    description: "Special offers, bonuses, campaigns",
     icon: "tag.fill",
     color: "#F59E0B",
     pushKey: "pushPromotions",
@@ -71,8 +71,8 @@ const CATEGORIES: PreferenceCategory[] = [
   },
   {
     key: "security",
-    label: "Securitate",
-    description: "Login-uri noi, alerte de securitate",
+    label: "Security",
+    description: "New logins, security alerts",
     icon: "shield.fill",
     color: "#EF4444",
     pushKey: "pushSecurity",
@@ -125,17 +125,17 @@ export default function NotificationPreferencesScreen() {
         >
           <IconSymbol name="chevron.right" size={24} color={colors.foreground} />
         </Pressable>
-        <Text className="text-lg font-bold text-foreground">Preferințe Notificări</Text>
+        <Text className="text-lg font-bold text-foreground">Notification Preferences</Text>
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Push Notifications Section */}
         <View className="px-4 pt-6 pb-2">
           <Text className="text-xs font-semibold text-muted uppercase tracking-wider">
-            Notificări Push
+            Push Notifications
           </Text>
           <Text className="text-xs text-muted mt-1">
-            Apar pe ecranul de blocare și în bara de notificări
+            Appear on lock screen and notification bar
           </Text>
         </View>
 
@@ -171,10 +171,10 @@ export default function NotificationPreferencesScreen() {
         {/* In-App Notifications Section */}
         <View className="px-4 pt-8 pb-2">
           <Text className="text-xs font-semibold text-muted uppercase tracking-wider">
-            Notificări In-App
+            In-App Notifications
           </Text>
           <Text className="text-xs text-muted mt-1">
-            Apar în centrul de notificări din aplicație
+            Appear in the app notification center
           </Text>
         </View>
 
@@ -211,7 +211,7 @@ export default function NotificationPreferencesScreen() {
         <View className="px-4 pt-6">
           <View className="bg-surface rounded-xl p-4">
             <Text className="text-xs text-muted leading-relaxed">
-              Notificările de securitate nu pot fi dezactivate complet — vei primi întotdeauna alerte critice de securitate în aplicație, indiferent de setări.
+              Security notifications cannot be fully disabled — you will always receive critical security alerts in the app, regardless of settings.
             </Text>
           </View>
         </View>

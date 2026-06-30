@@ -396,3 +396,7 @@
 ## Bugfix: Notifications back button exits app
 - [x] Fix: Notifications screen back button now navigates to /(tabs) instead of exiting app (caused by Redirect losing navigation history)
 - [x] Fix: Preferences screen back button navigates to /notifications
+
+## Bugfix: Full English translation + Notifications swipe-back
+- [x] Translate all Romanian text to English across entire app (notifications, preferences, merchant, admin, pilot screens)
+- [x] Fix Notifications swipe-back gesture exits app — restructure to embed content in tab instead of Redirect

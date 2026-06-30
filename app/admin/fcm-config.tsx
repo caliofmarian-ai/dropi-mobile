@@ -1,5 +1,5 @@
 /**
- * Admin FCM Configuration Screen
+ * Admin FCM Configuredion Screen
  * Allows admin to upload/paste Firebase Service Account JSON
  * for enabling push notifications on DROPi's own server.
  */
@@ -46,7 +46,7 @@ export default function FCMConfigScreen() {
       setTestPushResult(result);
     },
     onError: (err: any) => {
-      setTestPushResult({ success: false, message: err.message || "Eroare la trimitere" });
+      setTestPushResult({ success: false, message: err.message || "Error la trimitere" });
     },
     onSettled: () => setTestingPush(false),
   });
@@ -59,19 +59,19 @@ export default function FCMConfigScreen() {
 
   const saveMutation = trpc.notifications.saveFcmConfig.useMutation({
     onSuccess: () => {
-      Alert.alert("Succes", "Configurația FCM a fost salvată. Push notifications sunt acum active.");
+      Alert.alert("Succes", "FCM configuration saved. Push notifications sunt acum active.");
       setJsonInput("");
       refetch();
     },
     onError: (err: any) => {
-      Alert.alert("Eroare", err.message || "Nu s-a putut salva configurația FCM.");
+      Alert.alert("Error", err.message || "Could not save FCM configuration.");
     },
     onSettled: () => setSaving(false),
   });
 
   const handleSave = () => {
     if (!jsonInput.trim()) {
-      Alert.alert("Eroare", "Lipește conținutul fișierului Service Account JSON.");
+      Alert.alert("Error", "Paste the Service Account JSON file content.");
       return;
     }
 
@@ -81,22 +81,22 @@ export default function FCMConfigScreen() {
       if (!parsed.project_id || !parsed.private_key || !parsed.client_email) {
         Alert.alert(
           "Format Invalid",
-          "JSON-ul trebuie să conțină: project_id, private_key, client_email. Descarcă Service Account JSON din Firebase Console."
+          "JSON must contain: project_id, private_key, client_email. Download Service Account JSON from Firebase Console."
         );
         return;
       }
     } catch (e) {
-      Alert.alert("JSON Invalid", "Conținutul nu este un JSON valid. Verifică și încearcă din nou.");
+      Alert.alert("Invalid JSON", "Content is not valid JSON. Check and try again.");
       return;
     }
 
     Alert.alert(
-      "Confirmare",
-      "Salvezi configurația FCM? Push notifications vor fi activate pentru toți utilizatorii DROPi.",
+      "Confirm",
+      "Save FCM configuration? Push notifications will be enabled for all DROPi users.",
       [
-        { text: "Anulează", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Salvează",
+          text: "Save",
           onPress: () => {
             setSaving(true);
             saveMutation.mutate({ serviceAccountJson: jsonInput.trim() });
@@ -108,12 +108,12 @@ export default function FCMConfigScreen() {
 
   const handleRemove = () => {
     Alert.alert(
-      "Șterge Configurația FCM",
-      "Push notifications vor fi dezactivate. Ești sigur?",
+      "Remove FCM Configuration",
+      "Push notifications will be disabled. Are you sure?",
       [
-        { text: "Anulează", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Șterge",
+          text: "Remove",
           style: "destructive",
           onPress: () => {
             setSaving(true);
@@ -128,10 +128,10 @@ export default function FCMConfigScreen() {
     <ScreenContainer className="p-4" edges={["top", "left", "right", "bottom"]}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <Text className="text-2xl font-bold text-foreground mb-2">
-          Configurare FCM
+          FCM Configuredion
         </Text>
         <Text className="text-sm text-muted mb-6">
-          Firebase Cloud Messaging — notificări push independente pe serverul DROPi.
+          Firebase Cloud Messaging — independent push notifications on DROPi server.
         </Text>
 
         {/* Current Status */}
@@ -166,7 +166,7 @@ export default function FCMConfigScreen() {
                     <ActivityIndicator color="#fff" size="small" />
                   ) : (
                     <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>
-                      Trimite Test Push
+                      Send Test Push
                     </Text>
                   )}
                 </TouchableOpacity>
@@ -175,7 +175,7 @@ export default function FCMConfigScreen() {
                   style={{ paddingVertical: 8, paddingHorizontal: 16, backgroundColor: colors.error, borderRadius: 8 }}
                 >
                   <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>
-                    Șterge Configurația
+                    Remove Configuration
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -188,7 +188,7 @@ export default function FCMConfigScreen() {
           ) : (
             <View className="flex-row items-center gap-2">
               <View className="w-3 h-3 rounded-full bg-warning" />
-              <Text className="text-sm text-muted">FCM Neconfigurat — push notifications inactive</Text>
+              <Text className="text-sm text-muted">FCM Not Configured — push notifications inactive</Text>
             </View>
           )}
         </View>
@@ -196,15 +196,15 @@ export default function FCMConfigScreen() {
         {/* Instructions */}
         <View className="bg-surface rounded-xl p-4 mb-6 border border-border">
           <Text className="text-sm font-semibold text-foreground mb-2">
-            Cum obții Service Account JSON:
+            How to get Service Account JSON:
           </Text>
           <Text className="text-xs text-muted leading-5">
-            1. Accesează Firebase Console → Project Settings{"\n"}
+            1. Go to Firebase Console → Project Settings{"\n"}
             2. Tab "Service accounts" → "Generate new private key"{"\n"}
-            3. Descarcă fișierul JSON{"\n"}
-            4. Lipește conținutul complet mai jos{"\n"}
+            3. Download the JSON file{"\n"}
+            4. Paste the full content below{"\n"}
             {"\n"}
-            ⚠️ Nu partaja acest fișier. Conține cheia privată a serverului.
+            ⚠️ Do not share this file. It contains the server private key.
           </Text>
         </View>
 
@@ -249,7 +249,7 @@ export default function FCMConfigScreen() {
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>
-              Salvează Configurația FCM
+              Save FCM Configuration
             </Text>
           )}
         </TouchableOpacity>
