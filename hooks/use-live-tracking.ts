@@ -1,8 +1,8 @@
 /**
- * Live Tracking Hook — Sprint 7
+ * Live Tracking Hook — Sprint 7+
  *
  * Connects to the /ws/tracking WebSocket as a subscriber to receive
- * real-time pilot position updates for a specific delivery.
+ * real-time pilot position updates, ETA calculations, and geofence alerts.
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { AppState } from "react-native";
@@ -20,6 +20,20 @@ export interface PilotPosition {
   timestamp: string;
 }
 
+export interface ETAInfo {
+  seconds: number;
+  distanceM: number;
+}
+
+export interface GeofenceAlert {
+  deliveryId: number;
+  pilotId: number;
+  distanceM: number;
+  etaSeconds: number;
+  message: string;
+  triggeredAt: string;
+}
+
 interface UseLiveTrackingOptions {
   deliveryId: number;
   enabled?: boolean;
@@ -27,6 +41,8 @@ interface UseLiveTrackingOptions {
 
 export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingOptions) {
   const [position, setPosition] = useState<PilotPosition | null>(null);
+  const [eta, setEta] = useState<ETAInfo | null>(null);
+  const [geofenceAlert, setGeofenceAlert] = useState<GeofenceAlert | null>(null);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -53,10 +69,28 @@ export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingO
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data as string);
+
           if (data.type === "position") {
-            setPosition(data);
+            setPosition(data.data || data);
+            // Update ETA if included
+            if (data.eta) {
+              setEta(data.eta);
+            }
+          } else if (data.type === "geofence_entered") {
+            setGeofenceAlert({
+              deliveryId: data.deliveryId,
+              pilotId: data.pilotId,
+              distanceM: data.distanceM,
+              etaSeconds: data.etaSeconds,
+              message: data.message,
+              triggeredAt: new Date().toISOString(),
+            });
+          } else if (data.type === "pilot_disconnected") {
+            setPosition(null);
+            setEta(null);
           } else if (data.type === "delivery_complete") {
             setPosition(null);
+            setEta(null);
             ws.close();
           } else if (data.type === "error") {
             setError(data.message);
@@ -115,5 +149,5 @@ export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingO
     return () => sub.remove();
   }, [connect, disconnect, enabled]);
 
-  return { position, connected, error, disconnect };
+  return { position, eta, geofenceAlert, connected, error, disconnect };
 }

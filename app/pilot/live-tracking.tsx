@@ -36,7 +36,7 @@ export default function LiveTrackingScreen() {
   const deliveryId = parseInt(params.deliveryId || "0");
   const [trail, setTrail] = useState<{ latitude: number; longitude: number }[]>([]);
 
-  const { position, connected, error } = useLiveTracking({
+  const { position, eta, geofenceAlert, connected, error } = useLiveTracking({
     deliveryId,
     enabled: deliveryId > 0,
   });
@@ -142,9 +142,40 @@ export default function LiveTrackingScreen() {
         )}
       </View>
 
-      {/* Bottom Info Panel */}
+      {/* Geofence Alert Banner */}
+      {geofenceAlert && (
+        <View style={{ backgroundColor: colors.warning + '20', borderTopWidth: 1, borderTopColor: colors.warning, paddingHorizontal: 16, paddingVertical: 10 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text style={{ fontSize: 20 }}>⚠️</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 12, fontWeight: '700', color: colors.warning }}>GEOFENCE ALERT</Text>
+              <Text style={{ fontSize: 11, color: colors.foreground }}>{geofenceAlert.message}</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Bottom Info Panel with ETA */}
       {position && (
         <View className="px-4 py-3 bg-surface border-t border-border">
+          {/* ETA Row */}
+          {eta && (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+              <View>
+                <Text style={{ fontSize: 10, color: colors.muted }}>ETA</Text>
+                <Text style={{ fontSize: 18, fontWeight: '800', color: colors.primary }}>
+                  {eta.seconds < 60 ? `${eta.seconds}s` : `${Math.ceil(eta.seconds / 60)} min`}
+                </Text>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={{ fontSize: 10, color: colors.muted }}>Distance</Text>
+                <Text style={{ fontSize: 16, fontWeight: '700', color: colors.foreground }}>
+                  {eta.distanceM >= 1000 ? `${(eta.distanceM / 1000).toFixed(1)} km` : `${eta.distanceM} m`}
+                </Text>
+              </View>
+            </View>
+          )}
+          {/* Speed / Heading / Altitude Row */}
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
             <View>
               <Text style={{ fontSize: 10, color: colors.muted }}>Speed</Text>
@@ -156,7 +187,7 @@ export default function LiveTrackingScreen() {
             </View>
             <View style={{ alignItems: "flex-end" }}>
               <Text style={{ fontSize: 10, color: colors.muted }}>Altitude</Text>
-              <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground }}>{position.altitude != null ? `${position.altitude.toFixed(0)}m` : "—"}</Text>
+              <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground }}>{position.altitude != null ? `${position.altitude.toFixed(0)}m` : "\u2014"}</Text>
             </View>
           </View>
         </View>

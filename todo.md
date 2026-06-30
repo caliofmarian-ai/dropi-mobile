@@ -377,3 +377,8 @@
 - [x] Notification analytics chart (7-day volume breakdown) on admin monitoring screen
 - [x] Send Test Push button on FCM Config screen for admin verification
 - [x] Sprint 7: Live Delivery Tracking UI — pilot map with real-time position updates via WebSocket
+
+## Upgrade: Pilot Broadcasting + ETA + Geofence Alerts
+- [x] Pilot Position Broadcasting — Start/Stop GPS broadcasting hook + UI button during active delivery
+- [x] Server-side ETA Calculation — distance-based ETA estimation broadcast to subscribers
+- [x] Geofence Alerts — automatic notification when pilot enters 500m radius of dropoff

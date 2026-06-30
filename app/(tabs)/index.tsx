@@ -172,6 +172,12 @@ function DeliveryPartnerDashboard() {
         <Text className="text-2xl font-bold text-foreground">Mission Radar</Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <TouchableOpacity
+            style={{ backgroundColor: '#EF444415', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 }}
+            onPress={() => router.push({ pathname: '/pilot/broadcast', params: { deliveryId: '1', pilotId: '1', vehicleType: 'drone' } } as any)}
+          >
+            <Text style={{ color: '#EF4444', fontSize: 12, fontWeight: '600' }}>📶 Broadcast</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             style={{ backgroundColor: '#22C55E15', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 }}
             onPress={() => router.push({ pathname: '/pilot/live-tracking', params: { deliveryId: '1' } } as any)}
           >

@@ -29,11 +29,48 @@ interface PositionUpdate {
 interface TrackedDelivery {
   lastPosition: PositionUpdate;
   subscribers: Set<WebSocket>;
+  dropoff?: { lat: number; lng: number };
+  geofenceTriggered?: boolean;
+  etaSeconds?: number;
 }
 
 // In-memory tracking state
 const activeDeliveries = new Map<number, TrackedDelivery>();
 const pilotConnections = new Map<WebSocket, { pilotId: number; deliveryId: number }>();
+
+// Geofence radius in meters
+const GEOFENCE_RADIUS_M = 500;
+
+/**
+ * Calculate distance between two coordinates using Haversine formula.
+ * Returns distance in meters.
+ */
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000; // Earth radius in meters
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+/**
+ * Calculate ETA in seconds based on distance and current speed.
+ * If speed is 0, uses a default average speed for the vehicle type.
+ */
+function calculateETA(distanceM: number, speedMs: number, vehicleType: string): number {
+  // Default speeds (m/s) if pilot is stationary
+  const defaultSpeeds: Record<string, number> = {
+    drone: 15,   // ~54 km/h
+    auto: 8.3,   // ~30 km/h (urban)
+    van: 6.9,    // ~25 km/h (urban)
+    ebike: 5.6,  // ~20 km/h
+  };
+  const effectiveSpeed = speedMs > 1 ? speedMs : (defaultSpeeds[vehicleType] || 8.3);
+  return Math.round(distanceM / effectiveSpeed);
+}
 
 /**
  * Initialize WebSocket server on the existing HTTP server.
@@ -85,8 +122,18 @@ export function initLiveTracking(server: HttpServer): void {
 
       pilotConnections.set(ws, { pilotId, deliveryId });
 
+      // Parse optional dropoff coordinates for ETA + geofence
+      const dropoffLat = parseFloat(url.searchParams.get("dropoffLat") || "0");
+      const dropoffLng = parseFloat(url.searchParams.get("dropoffLng") || "0");
+
       if (!activeDeliveries.has(deliveryId)) {
         activeDeliveries.set(deliveryId, { lastPosition: null as any, subscribers: new Set() });
+      }
+
+      const deliveryEntry = activeDeliveries.get(deliveryId)!;
+      if (dropoffLat && dropoffLng) {
+        deliveryEntry.dropoff = { lat: dropoffLat, lng: dropoffLng };
+        deliveryEntry.geofenceTriggered = false;
       }
 
       ws.send(JSON.stringify({ type: "connected", message: "Pilot tracking active", deliveryId }));
@@ -110,8 +157,40 @@ export function initLiveTracking(server: HttpServer): void {
             const delivery = activeDeliveries.get(deliveryId);
             if (delivery) {
               delivery.lastPosition = position;
-              // Broadcast to all subscribers
-              const payload = JSON.stringify({ type: "position", data: position });
+
+              // Calculate ETA if dropoff is known
+              let etaSeconds: number | null = null;
+              let distanceM: number | null = null;
+              if (delivery.dropoff) {
+                distanceM = haversineDistance(position.lat, position.lng, delivery.dropoff.lat, delivery.dropoff.lng);
+                etaSeconds = calculateETA(distanceM, position.speed, position.vehicleType);
+                delivery.etaSeconds = etaSeconds;
+
+                // Geofence check: trigger once when entering 500m radius
+                if (!delivery.geofenceTriggered && distanceM <= GEOFENCE_RADIUS_M) {
+                  delivery.geofenceTriggered = true;
+                  const geofencePayload = JSON.stringify({
+                    type: "geofence_entered",
+                    deliveryId,
+                    pilotId,
+                    distanceM: Math.round(distanceM),
+                    etaSeconds,
+                    message: `Pilot is within ${GEOFENCE_RADIUS_M}m of delivery point. Estimated arrival: ${Math.ceil(etaSeconds / 60)} min.`,
+                  });
+                  delivery.subscribers.forEach((sub) => {
+                    if (sub.readyState === WebSocket.OPEN) {
+                      sub.send(geofencePayload);
+                    }
+                  });
+                }
+              }
+
+              // Broadcast position + ETA to all subscribers
+              const payload = JSON.stringify({
+                type: "position",
+                data: position,
+                eta: etaSeconds != null ? { seconds: etaSeconds, distanceM: Math.round(distanceM!) } : undefined,
+              });
               delivery.subscribers.forEach((sub) => {
                 if (sub.readyState === WebSocket.OPEN) {
                   sub.send(payload);
