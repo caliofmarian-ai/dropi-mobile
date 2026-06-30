@@ -372,3 +372,8 @@
 - [x] Mount useWSNotifications in _layout.tsx with tRPC cache invalidation for badge
 - [x] Custom DROPi notification sound on new notification received
 - [x] Admin monitoring panel with WebSocket stats (connected users, active connections)
+
+## Upgrade: Notification Analytics + Test Push + Live Tracking UI
+- [x] Notification analytics chart (7-day volume breakdown) on admin monitoring screen
+- [x] Send Test Push button on FCM Config screen for admin verification
+- [x] Sprint 7: Live Delivery Tracking UI — pilot map with real-time position updates via WebSocket

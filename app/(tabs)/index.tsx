@@ -77,11 +77,15 @@ function CustomerDashboard() {
               )}
             </View>
             {item.status === "in_execution" && (
-              <View className="mt-3 bg-primary/10 rounded-lg px-3 py-2">
+              <TouchableOpacity
+                className="mt-3 bg-primary/10 rounded-lg px-3 py-2"
+                activeOpacity={0.7}
+                onPress={() => router.push({ pathname: '/pilot/live-tracking', params: { deliveryId: String(item.id) } } as any)}
+              >
                 <Text className="text-primary text-sm font-medium">
-                  {VEHICLE_ICONS[item.vehicleType || "drone"]} Live Tracking — ETA {item.estimatedTime} min
+                  {VEHICLE_ICONS[item.vehicleType || "drone"]} Live Tracking — ETA {item.estimatedTime} min →
                 </Text>
-              </View>
+              </TouchableOpacity>
             )}
           </TouchableOpacity>
         )}
@@ -166,12 +170,20 @@ function DeliveryPartnerDashboard() {
       <OnboardingNudgeBanner />
       <View className="flex-row justify-between items-center mb-1">
         <Text className="text-2xl font-bold text-foreground">Mission Radar</Text>
-        <TouchableOpacity
-          style={{ backgroundColor: '#0066FF15', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}
-          onPress={() => router.push('/pilot/leaderboard')}
-        >
-          <Text style={{ color: '#0066FF', fontSize: 12, fontWeight: '600' }}>🏆 Leaderboard</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <TouchableOpacity
+            style={{ backgroundColor: '#22C55E15', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 }}
+            onPress={() => router.push({ pathname: '/pilot/live-tracking', params: { deliveryId: '1' } } as any)}
+          >
+            <Text style={{ color: '#22C55E', fontSize: 12, fontWeight: '600' }}>📡 Live Track</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ backgroundColor: '#0066FF15', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 }}
+            onPress={() => router.push('/pilot/leaderboard')}
+          >
+            <Text style={{ color: '#0066FF', fontSize: 12, fontWeight: '600' }}>🏆 Leaderboard</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <Text className="text-sm text-muted mb-4">{availableMissions.length} missions available in your area</Text>
       <FlatList

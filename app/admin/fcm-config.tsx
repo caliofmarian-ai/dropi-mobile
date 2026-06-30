@@ -3,7 +3,7 @@
  * Allows admin to upload/paste Firebase Service Account JSON
  * for enabling push notifications on DROPi's own server.
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Text,
   View,
@@ -21,6 +21,8 @@ export default function FCMConfigScreen() {
   const colors = useColors();
   const [jsonInput, setJsonInput] = useState("");
   const [saving, setSaving] = useState(false);
+  const [testingPush, setTestingPush] = useState(false);
+  const [testPushResult, setTestPushResult] = useState<{ success: boolean; message: string } | null>(null);
   const [currentConfig, setCurrentConfig] = useState<{
     configured: boolean;
     projectId?: string;
@@ -38,6 +40,22 @@ export default function FCMConfigScreen() {
       setCurrentConfig(configStatus);
     }
   }, [configStatus]);
+
+  const testPushMutation = trpc.notifications.sendTestPush.useMutation({
+    onSuccess: (result) => {
+      setTestPushResult(result);
+    },
+    onError: (err: any) => {
+      setTestPushResult({ success: false, message: err.message || "Eroare la trimitere" });
+    },
+    onSettled: () => setTestingPush(false),
+  });
+
+  const handleTestPush = useCallback(() => {
+    setTestingPush(true);
+    setTestPushResult(null);
+    testPushMutation.mutate();
+  }, [testPushMutation]);
 
   const saveMutation = trpc.notifications.saveFcmConfig.useMutation({
     onSuccess: () => {
@@ -138,14 +156,34 @@ export default function FCMConfigScreen() {
                   Ultima actualizare: {currentConfig.lastUpdated}
                 </Text>
               )}
-              <TouchableOpacity
-                onPress={handleRemove}
-                style={{ marginTop: 12, paddingVertical: 8, paddingHorizontal: 16, backgroundColor: colors.error, borderRadius: 8, alignSelf: "flex-start" }}
-              >
-                <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>
-                  Șterge Configurația
+              <View style={{ flexDirection: "row", gap: 12, marginTop: 12 }}>
+                <TouchableOpacity
+                  onPress={handleTestPush}
+                  disabled={testingPush}
+                  style={{ paddingVertical: 8, paddingHorizontal: 16, backgroundColor: colors.primary, borderRadius: 8 }}
+                >
+                  {testingPush ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>
+                      Trimite Test Push
+                    </Text>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleRemove}
+                  style={{ paddingVertical: 8, paddingHorizontal: 16, backgroundColor: colors.error, borderRadius: 8 }}
+                >
+                  <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>
+                    Șterge Configurația
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              {testPushResult && (
+                <Text style={{ marginTop: 8, fontSize: 12, color: testPushResult.success ? colors.success : colors.error }}>
+                  {testPushResult.message}
                 </Text>
-              </TouchableOpacity>
+              )}
             </View>
           ) : (
             <View className="flex-row items-center gap-2">

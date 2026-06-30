@@ -359,4 +359,71 @@ export const notificationRouter = router({
       },
     };
   }),
+
+  /** Get notification volume by day for the past 7 days */
+  getNotificationAnalytics: adminProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) throw new Error("Database unavailable");
+    const { sql } = await import("drizzle-orm");
+
+    // Get daily counts for the past 7 days
+    const rows = await db.select({
+      day: sql<string>`DATE(${inAppNotifications.createdAt})`,
+      count: sql<number>`count(*)`,
+    })
+      .from(inAppNotifications)
+      .where(sql`${inAppNotifications.createdAt} > NOW() - INTERVAL 7 DAY`)
+      .groupBy(sql`DATE(${inAppNotifications.createdAt})`)
+      .orderBy(sql`DATE(${inAppNotifications.createdAt})`);
+
+    // Fill in missing days with 0
+    const result: { day: string; count: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayStr = d.toISOString().split("T")[0];
+      const found = rows.find((r) => String(r.day) === dayStr);
+      result.push({ day: dayStr, count: found ? Number(found.count) : 0 });
+    }
+
+    return { days: result };
+  }),
+
+  /** Send a test push notification to the current admin's devices */
+  sendTestPush: adminProcedure.mutation(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) throw new Error("Database unavailable");
+    const userId = ctx.user!.id;
+
+    // Get admin's push tokens
+    const tokens = await db.select()
+      .from(pushTokens)
+      .where(and(
+        eq(pushTokens.userId, userId),
+        eq(pushTokens.isActive, true)
+      ));
+
+    if (tokens.length === 0) {
+      return { success: false, message: "No registered push tokens for your account. Open the app on a device to register." };
+    }
+
+    // Try to send via FCM using sendPushToUser
+    try {
+      const pushModule = await import("./push-notifications");
+      const sent = await pushModule.sendPushToUser(userId, {
+        title: "DROPi Test Push",
+        body: "If you see this, push notifications are working correctly!",
+        data: { type: "test", timestamp: new Date().toISOString() },
+        priority: "high",
+      });
+      return {
+        success: sent > 0,
+        message: sent > 0 ? `Test push sent to ${sent} device(s)` : "No devices received the push (FCM may not be configured)",
+        sent,
+        failed: tokens.length - sent,
+      };
+    } catch (e: any) {
+      return { success: false, message: `FCM error: ${e.message || "Unknown error"}` };
+    }
+  }),
 });

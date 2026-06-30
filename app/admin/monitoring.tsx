@@ -3,31 +3,79 @@
  *
  * Displays real-time system stats including:
  * - WebSocket connections (tracking + notifications)
- * - Server uptime and health
- * - Active users and sessions
+ * - 7-day notification volume chart
  * - Push notification delivery stats
+ * - In-app notification metrics
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Text, View, ScrollView, Pressable, RefreshControl } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { useRouter } from "expo-router";
 import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
 
+/** Simple bar chart component for 7-day notification volume */
+function NotificationChart({ data }: { data?: { day: string; count: number }[] }) {
+  const colors = useColors();
+  if (!data || data.length === 0) {
+    return (
+      <View className="bg-surface rounded-2xl p-4 border border-border items-center justify-center" style={{ height: 160 }}>
+        <Text className="text-sm text-muted">No data available</Text>
+      </View>
+    );
+  }
+
+  const maxCount = Math.max(...data.map((d) => d.count), 1);
+  const barMaxHeight = 100;
+
+  return (
+    <View className="bg-surface rounded-2xl p-4 border border-border">
+      <View style={{ flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", height: barMaxHeight + 30 }}>
+        {data.map((item) => {
+          const barHeight = Math.max((item.count / maxCount) * barMaxHeight, 4);
+          const dayLabel = item.day.slice(5); // "MM-DD"
+          return (
+            <View key={item.day} style={{ alignItems: "center", flex: 1 }}>
+              <Text style={{ fontSize: 10, color: colors.foreground, marginBottom: 4 }}>
+                {item.count}
+              </Text>
+              <View
+                style={{
+                  width: 24,
+                  height: barHeight,
+                  backgroundColor: colors.primary,
+                  borderRadius: 4,
+                }}
+              />
+              <Text style={{ fontSize: 9, color: colors.muted, marginTop: 4 }}>
+                {dayLabel}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 export default function AdminMonitoringScreen() {
   const router = useRouter();
   const colors = useColors();
   const [refreshing, setRefreshing] = useState(false);
 
-  const { data: stats, refetch } = trpc.notifications.getSystemStats.useQuery(undefined, {
-    refetchInterval: 10000, // Auto-refresh every 10s
+  const { data: stats, refetch: refetchStats } = trpc.notifications.getSystemStats.useQuery(undefined, {
+    refetchInterval: 10000,
+  });
+
+  const { data: analytics, refetch: refetchAnalytics } = trpc.notifications.getNotificationAnalytics.useQuery(undefined, {
+    refetchInterval: 30000, // Refresh chart every 30s
   });
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refetch();
+    await Promise.all([refetchStats(), refetchAnalytics()]);
     setRefreshing(false);
-  }, [refetch]);
+  }, [refetchStats, refetchAnalytics]);
 
   return (
     <ScreenContainer className="p-4">
@@ -61,6 +109,11 @@ export default function AdminMonitoringScreen() {
             </View>
           </View>
         </View>
+
+        {/* 7-Day Notification Volume Chart */}
+        <Text className="text-lg font-bold text-foreground mb-3">Notification Volume (7 Days)</Text>
+        <NotificationChart data={analytics?.days} />
+        <View className="mb-6" />
 
         {/* WebSocket Stats */}
         <Text className="text-lg font-bold text-foreground mb-3">WebSocket Connections</Text>
