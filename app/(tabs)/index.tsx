@@ -896,6 +896,14 @@ function SecurityOfficerDashboard() {
           </View>
           <Text className="text-muted">→</Text>
         </TouchableOpacity>
+        <TouchableOpacity className="bg-surface border border-border rounded-xl p-3 mb-2 flex-row items-center" activeOpacity={0.7} onPress={() => router.push("/admin/fcm-config" as any)}>
+          <Text style={{ fontSize: 16, marginRight: 8 }}>🔔</Text>
+          <View style={{ flex: 1 }}>
+            <Text className="text-sm font-medium text-foreground">FCM Push Config</Text>
+            <Text className="text-xs text-muted">Firebase Cloud Messaging setup</Text>
+          </View>
+          <Text className="text-muted">→</Text>
+        </TouchableOpacity>
 
         <AlertList alerts={[
           { title: "Brute force attempt — IP 192.168.x.x", severity: "warning", time: "1h ago" },

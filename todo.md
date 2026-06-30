@@ -358,3 +358,12 @@
 - [x] Admin FCM configuration screen (app/admin/fcm-config.tsx — upload/paste Service Account JSON, status display, remove config)
 - [x] Created server/create-notification.ts helper (createInAppNotification + createBulkNotifications)
 - [x] Added getFcmStatus + saveFcmConfig admin endpoints to notification-router
+
+## Upgrade: Token Cleanup + FCM Link + WebSocket Notifications
+- [x] Unregister push token at logout (call unregisterPushToken before clearing session + store token in AsyncStorage)
+- [x] Add FCM Config link/card on Admin Dashboard ("FCM Push Config" card with bell icon)
+- [x] WebSocket real-time notifications (server/ws-notifications.ts + hooks/use-ws-notifications.ts)
+  - Server: /ws/notifications channel with per-user connection map, heartbeat, auto-cleanup
+  - Client: useWSNotifications hook with exponential backoff reconnect, AppState awareness
+  - Integration: createInAppNotification now broadcasts via WS after DB insert
+  - Multi-device support: all connected devices receive notifications simultaneously

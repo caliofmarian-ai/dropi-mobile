@@ -10,6 +10,7 @@ import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { trpc } from "@/lib/trpc";
 
 // Configure notification handler (show notifications when app is in foreground)
@@ -40,6 +41,8 @@ export function usePushNotifications(isAuthenticated: boolean, isDemo?: boolean)
         tokenRef.current = token;
         const platform: "ios" | "android" | "web" = Platform.OS === "ios" ? "ios" : "android";
         registerMutation.mutate({ token, platform });
+        // Store token locally for cleanup on logout
+        AsyncStorage.setItem("@dropi_push_token", token).catch(() => {});
       }
     });
   }, [isAuthenticated, isDemo]);

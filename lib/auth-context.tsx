@@ -214,6 +214,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     if (!isDemo && token) {
       try {
+        // Unregister push token before logout to stop receiving notifications on this device
+        const storedPushToken = await AsyncStorage.getItem("@dropi_push_token");
+        if (storedPushToken) {
+          await apiCall("notifications.unregisterPushToken", { token: storedPushToken }, token);
+          await AsyncStorage.removeItem("@dropi_push_token");
+        }
+      } catch { /* silent — don't block logout */ }
+      try {
         await apiCall("dropiAuth.logout", {}, token);
       } catch {}
     }

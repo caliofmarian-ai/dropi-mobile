@@ -7,6 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { createRestGateway } from "../rest-gateway";
 import { initLiveTracking, getTrackingStats } from "../live-tracking";
+import { initNotificationWS, getNotificationWSStats } from "../ws-notifications";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 
@@ -89,6 +90,9 @@ async function startServer() {
 
   // Initialize WebSocket live tracking on the HTTP server
   initLiveTracking(server);
+
+  // Initialize WebSocket notification channel
+  initNotificationWS(server);
 
   server.listen(port, () => {
     console.log(`[api] server listening on port ${port}`);
