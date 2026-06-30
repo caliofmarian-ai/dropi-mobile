@@ -3,32 +3,19 @@
  *
  * Shows a real-time map with the pilot's position during an active delivery.
  * Connects to /ws/tracking as a subscriber and displays:
- * - Pilot marker on map (updates in real-time)
- * - Speed, heading, altitude info
+ * - Pilot marker on map (updates in real-time) — native only
+ * - Speed, heading, altitude info panel
  * - Delivery status indicators
  * - Connection status
+ *
+ * NOTE: react-native-maps is native-only. On web, we show a text-based position display.
  */
-import { useState, useEffect, useRef } from "react";
-import { Text, View, Pressable, Platform, StyleSheet, Dimensions } from "react-native";
+import { useState, useEffect } from "react";
+import { Text, View, Pressable, Platform, StyleSheet } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useColors } from "@/hooks/use-colors";
-import { useLiveTracking, PilotPosition } from "@/hooks/use-live-tracking";
-
-// Conditionally import MapView for native only
-let MapView: any = null;
-let Marker: any = null;
-let Polyline: any = null;
-if (Platform.OS !== "web") {
-  try {
-    const maps = require("react-native-maps");
-    MapView = maps.default;
-    Marker = maps.Marker;
-    Polyline = maps.Polyline;
-  } catch { /* not available */ }
-}
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+import { useLiveTracking } from "@/hooks/use-live-tracking";
 
 /** Format speed from m/s to km/h */
 function formatSpeed(speedMs: number): string {
@@ -47,7 +34,6 @@ export default function LiveTrackingScreen() {
   const colors = useColors();
   const params = useLocalSearchParams<{ deliveryId: string }>();
   const deliveryId = parseInt(params.deliveryId || "0");
-  const mapRef = useRef<any>(null);
   const [trail, setTrail] = useState<{ latitude: number; longitude: number }[]>([]);
 
   const { position, connected, error } = useLiveTracking({
@@ -60,30 +46,11 @@ export default function LiveTrackingScreen() {
     if (position) {
       setTrail((prev) => {
         const newPoint = { latitude: position.lat, longitude: position.lng };
-        // Keep last 100 points for trail
         const updated = [...prev, newPoint];
         return updated.length > 100 ? updated.slice(-100) : updated;
       });
-
-      // Animate map to new position
-      if (mapRef.current && Platform.OS !== "web") {
-        mapRef.current.animateToRegion({
-          latitude: position.lat,
-          longitude: position.lng,
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
-        }, 500);
-      }
     }
   }, [position]);
-
-  // Default center (Bucharest) if no position yet
-  const defaultRegion = {
-    latitude: position?.lat ?? 44.4268,
-    longitude: position?.lng ?? 26.1025,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-  };
 
   return (
     <ScreenContainer edges={["top", "left", "right"]}>
@@ -110,70 +77,67 @@ export default function LiveTrackingScreen() {
         </View>
       </View>
 
-      {/* Map Area */}
-      <View style={{ flex: 1 }}>
-        {Platform.OS !== "web" && MapView ? (
-          <MapView
-            ref={mapRef}
-            style={StyleSheet.absoluteFillObject}
-            initialRegion={defaultRegion}
-            showsUserLocation={false}
-            showsCompass={true}
-            showsScale={true}
-          >
-            {/* Pilot Marker */}
-            {position && (
-              <Marker
-                coordinate={{ latitude: position.lat, longitude: position.lng }}
-                title={`Pilot #${position.pilotId}`}
-                description={`${formatSpeed(position.speed)} • ${headingToCompass(position.heading)}`}
-                anchor={{ x: 0.5, y: 0.5 }}
-              >
-                <View style={[styles.droneMarker, { backgroundColor: colors.primary }]}>
-                  <Text style={styles.droneIcon}>🛸</Text>
-                </View>
-              </Marker>
-            )}
+      {/* Position Display (web-safe — no react-native-maps) */}
+      <View style={{ flex: 1, backgroundColor: colors.surface, justifyContent: "center", alignItems: "center", padding: 20 }}>
+        {position ? (
+          <View style={{ alignItems: "center", gap: 16 }}>
+            <Text style={{ fontSize: 56 }}>🛸</Text>
+            <Text className="text-lg font-bold text-foreground">Pilot in Flight</Text>
 
-            {/* Flight trail */}
-            {trail.length > 1 && Polyline && (
-              <Polyline
-                coordinates={trail}
-                strokeColor={colors.primary}
-                strokeWidth={3}
-                lineDashPattern={[5, 5]}
-              />
-            )}
-          </MapView>
-        ) : (
-          /* Web fallback — text-based position display */
-          <View style={{ flex: 1, backgroundColor: colors.surface, justifyContent: "center", alignItems: "center", padding: 20 }}>
-            {position ? (
-              <View className="items-center gap-4">
-                <Text style={{ fontSize: 48 }}>🛸</Text>
-                <Text className="text-lg font-bold text-foreground">Pilot Position</Text>
-                <View className="bg-background rounded-xl p-4 w-full" style={{ maxWidth: 300 }}>
-                  <Text className="text-sm text-muted mb-1">Latitude: <Text className="text-foreground font-semibold">{position.lat.toFixed(6)}</Text></Text>
-                  <Text className="text-sm text-muted mb-1">Longitude: <Text className="text-foreground font-semibold">{position.lng.toFixed(6)}</Text></Text>
-                  <Text className="text-sm text-muted mb-1">Speed: <Text className="text-foreground font-semibold">{formatSpeed(position.speed)}</Text></Text>
-                  <Text className="text-sm text-muted mb-1">Heading: <Text className="text-foreground font-semibold">{position.heading}° ({headingToCompass(position.heading)})</Text></Text>
-                  {position.altitude != null && (
-                    <Text className="text-sm text-muted">Altitude: <Text className="text-foreground font-semibold">{position.altitude.toFixed(1)}m</Text></Text>
-                  )}
+            {/* Position card */}
+            <View style={{ backgroundColor: colors.background, borderRadius: 16, padding: 16, width: "100%", maxWidth: 320, borderWidth: 1, borderColor: colors.border }}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 12 }}>
+                <View>
+                  <Text style={{ fontSize: 10, color: colors.muted }}>LAT</Text>
+                  <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground }}>{position.lat.toFixed(6)}</Text>
                 </View>
-                <Text className="text-xs text-muted">Map view available on native device</Text>
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text style={{ fontSize: 10, color: colors.muted }}>LNG</Text>
+                  <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground }}>{position.lng.toFixed(6)}</Text>
+                </View>
               </View>
-            ) : (
-              <View className="items-center gap-3">
-                <Text style={{ fontSize: 48 }}>📡</Text>
-                <Text className="text-base font-semibold text-foreground">
-                  {error ? "Connection Error" : "Waiting for pilot position..."}
-                </Text>
-                <Text className="text-sm text-muted text-center">
-                  {error || "The pilot has not started transmitting yet. Position will appear automatically."}
-                </Text>
+
+              <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 12 }}>
+                <View>
+                  <Text style={{ fontSize: 10, color: colors.muted }}>SPEED</Text>
+                  <Text style={{ fontSize: 14, fontWeight: "600", color: colors.primary }}>{formatSpeed(position.speed)}</Text>
+                </View>
+                <View style={{ alignItems: "center" }}>
+                  <Text style={{ fontSize: 10, color: colors.muted }}>HEADING</Text>
+                  <Text style={{ fontSize: 14, fontWeight: "600", color: colors.foreground }}>{position.heading}° {headingToCompass(position.heading)}</Text>
+                </View>
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text style={{ fontSize: 10, color: colors.muted }}>ALT</Text>
+                  <Text style={{ fontSize: 14, fontWeight: "600", color: colors.foreground }}>{position.altitude != null ? `${position.altitude.toFixed(0)}m` : "—"}</Text>
+                </View>
               </View>
-            )}
+
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <View>
+                  <Text style={{ fontSize: 10, color: colors.muted }}>VEHICLE</Text>
+                  <Text style={{ fontSize: 12, fontWeight: "600", color: colors.foreground }}>{position.vehicleType || "Drone"}</Text>
+                </View>
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text style={{ fontSize: 10, color: colors.muted }}>LAST UPDATE</Text>
+                  <Text style={{ fontSize: 12, color: colors.foreground }}>{new Date(position.timestamp).toLocaleTimeString()}</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Trail info */}
+            <Text style={{ fontSize: 11, color: colors.muted }}>
+              {trail.length} position updates received • Map view on native device
+            </Text>
+          </View>
+        ) : (
+          <View style={{ alignItems: "center", gap: 12 }}>
+            <Text style={{ fontSize: 56 }}>📡</Text>
+            <Text className="text-base font-semibold text-foreground">
+              {error ? "Connection Error" : "Waiting for pilot position..."}
+            </Text>
+            <Text className="text-sm text-muted text-center" style={{ maxWidth: 280 }}>
+              {error || "The pilot has not started transmitting yet. Position will appear automatically when the delivery is in execution."}
+            </Text>
           </View>
         )}
       </View>
@@ -181,30 +145,18 @@ export default function LiveTrackingScreen() {
       {/* Bottom Info Panel */}
       {position && (
         <View className="px-4 py-3 bg-surface border-t border-border">
-          <View className="flex-row justify-between items-center">
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
             <View>
-              <Text className="text-xs text-muted">Speed</Text>
-              <Text className="text-base font-bold text-foreground">{formatSpeed(position.speed)}</Text>
+              <Text style={{ fontSize: 10, color: colors.muted }}>Speed</Text>
+              <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground }}>{formatSpeed(position.speed)}</Text>
             </View>
-            <View className="items-center">
-              <Text className="text-xs text-muted">Heading</Text>
-              <Text className="text-base font-bold text-foreground">{headingToCompass(position.heading)} ({position.heading}°)</Text>
+            <View style={{ alignItems: "center" }}>
+              <Text style={{ fontSize: 10, color: colors.muted }}>Heading</Text>
+              <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground }}>{headingToCompass(position.heading)}</Text>
             </View>
-            <View className="items-end">
-              <Text className="text-xs text-muted">Altitude</Text>
-              <Text className="text-base font-bold text-foreground">{position.altitude != null ? `${position.altitude.toFixed(0)}m` : "—"}</Text>
-            </View>
-          </View>
-          <View className="flex-row justify-between items-center mt-2">
-            <View>
-              <Text className="text-xs text-muted">Vehicle</Text>
-              <Text className="text-sm font-semibold text-foreground">{position.vehicleType || "Drone"}</Text>
-            </View>
-            <View className="items-end">
-              <Text className="text-xs text-muted">Last Update</Text>
-              <Text className="text-xs text-foreground">
-                {new Date(position.timestamp).toLocaleTimeString()}
-              </Text>
+            <View style={{ alignItems: "flex-end" }}>
+              <Text style={{ fontSize: 10, color: colors.muted }}>Altitude</Text>
+              <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground }}>{position.altitude != null ? `${position.altitude.toFixed(0)}m` : "—"}</Text>
             </View>
           </View>
         </View>
@@ -212,21 +164,3 @@ export default function LiveTrackingScreen() {
     </ScreenContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  droneMarker: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  droneIcon: {
-    fontSize: 20,
-  },
-});
