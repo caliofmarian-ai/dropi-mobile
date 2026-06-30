@@ -319,3 +319,4 @@
 - [x] Fix: Bridged DROPi login token to canonical auth store (tRPC now works for all protected endpoints)
 - [x] Verify pilots display with real names and stats (curl test confirmed 12 pilots returned)
 - [x] Fix: item.rating.toFixed crash — DB returns rating as string, added parseFloat() wrapper
+- [x] Save BLUEPRINT_SPRINT_ROADMAP.md — permanent prioritization strategy, Sprint 6A–8+ execution plan, scoring methodology
