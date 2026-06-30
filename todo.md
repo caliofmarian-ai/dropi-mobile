@@ -367,3 +367,8 @@
   - Client: useWSNotifications hook with exponential backoff reconnect, AppState awareness
   - Integration: createInAppNotification now broadcasts via WS after DB insert
   - Multi-device support: all connected devices receive notifications simultaneously
+
+## Upgrade: WS Global Mount + Notification Sound + Admin Monitoring
+- [x] Mount useWSNotifications in _layout.tsx with tRPC cache invalidation for badge
+- [x] Custom DROPi notification sound on new notification received
+- [x] Admin monitoring panel with WebSocket stats (connected users, active connections)

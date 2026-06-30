@@ -10,6 +10,8 @@ import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { AuthProvider, useDropiAuth } from "@/lib/auth-context";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
+import { useWSNotifications } from "@/hooks/use-ws-notifications";
+import { useNotificationSound } from "@/lib/notification-sound";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -35,6 +37,39 @@ export const unstable_settings = {
 function PushNotificationRegistrar() {
   const { user, isDemo } = useDropiAuth();
   usePushNotifications(!!user, isDemo);
+  return null;
+}
+
+/**
+ * Manages WebSocket notification connection and invalidates tRPC cache on new notifications.
+ * Must be rendered inside AuthProvider + trpc.Provider + QueryClientProvider.
+ */
+function WSNotificationManager({ queryClient }: { queryClient: QueryClient }) {
+  const { user, isDemo, token } = useDropiAuth();
+  const { playNotificationSound } = useNotificationSound();
+
+  const handleNewNotification = useCallback(() => {
+    // Play DROPi notification chime
+    playNotificationSound();
+    // Invalidate the unread count query so badge updates instantly
+    queryClient.invalidateQueries({ queryKey: [["notifications", "getUnreadCount"]] });
+    // Also invalidate the notification list if it's open
+    queryClient.invalidateQueries({ queryKey: [["notifications", "getNotifications"]] });
+  }, [queryClient, playNotificationSound]);
+
+  const handleUnreadCountUpdate = useCallback((_count: number) => {
+    // Force refetch unread count for badge
+    queryClient.invalidateQueries({ queryKey: [["notifications", "getUnreadCount"]] });
+  }, [queryClient]);
+
+  useWSNotifications({
+    userId: user?.id ?? null,
+    token: token,
+    isDemo,
+    onNewNotification: handleNewNotification,
+    onUnreadCountUpdate: handleUnreadCountUpdate,
+  });
+
   return null;
 }
 
@@ -102,6 +137,7 @@ export default function RootLayout() {
               <Stack.Screen name="oauth/callback" />
             </Stack>
             <PushNotificationRegistrar />
+            <WSNotificationManager queryClient={queryClient} />
             <StatusBar style="auto" />
           </QueryClientProvider>
         </trpc.Provider>

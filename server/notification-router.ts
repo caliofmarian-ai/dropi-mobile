@@ -311,4 +311,52 @@ export const notificationRouter = router({
         projectId: parsed.project_id,
       };
     }),
+
+  // ============================================================
+  // SYSTEM MONITORING STATS (Admin only)
+  // ============================================================
+
+  getSystemStats: adminProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) throw new Error("Database unavailable");
+    const { sql } = await import("drizzle-orm");
+
+    // Push token stats
+    const tokenResult = await db.select({ count: sql<number>`count(*)` }).from(pushTokens);
+    const activeTokens = await db.select({ count: sql<number>`count(*)` }).from(pushTokens).where(eq(pushTokens.isActive, true));
+
+    // In-app notification stats
+    const totalNotifs = await db.select({ count: sql<number>`count(*)` }).from(inAppNotifications);
+    const unreadNotifs = await db.select({ count: sql<number>`count(*)` }).from(inAppNotifications).where(eq(inAppNotifications.isRead, false));
+    const last24h = await db.select({ count: sql<number>`count(*)` }).from(inAppNotifications).where(sql`${inAppNotifications.createdAt} > NOW() - INTERVAL 24 HOUR`);
+
+    // FCM config status
+    const configPath = path.join(process.cwd(), ".config", "fcm-service-account.json");
+    const fcmConfigured = fs.existsSync(configPath);
+
+    // WebSocket stats (from global tracking)
+    const wsNotifModule = await import("./ws-notifications");
+    const wsNotifStats = wsNotifModule.getNotificationWSStats?.() ?? { connectedUsers: 0, totalConnections: 0 };
+
+    let wsTrackingStats = { activeDeliveries: 0, activePilots: 0 };
+    try {
+      const wsTrackingModule = await import("./live-tracking");
+      wsTrackingStats = wsTrackingModule.getTrackingStats?.() ?? wsTrackingStats;
+    } catch { /* live-tracking may not export stats */ }
+
+    return {
+      wsNotifications: wsNotifStats,
+      wsTracking: wsTrackingStats,
+      push: {
+        registeredTokens: Number(tokenResult[0]?.count ?? 0),
+        activeDevices: Number(activeTokens[0]?.count ?? 0),
+        fcmConfigured,
+      },
+      inApp: {
+        total: Number(totalNotifs[0]?.count ?? 0),
+        totalUnread: Number(unreadNotifs[0]?.count ?? 0),
+        last24h: Number(last24h[0]?.count ?? 0),
+      },
+    };
+  }),
 });
