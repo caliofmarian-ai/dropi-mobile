@@ -45,6 +45,7 @@ export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingO
   const [geofenceAlert, setGeofenceAlert] = useState<GeofenceAlert | null>(null);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deliveryCompleted, setDeliveryCompleted] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const attemptRef = useRef(0);
@@ -88,9 +89,10 @@ export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingO
           } else if (data.type === "pilot_disconnected") {
             setPosition(null);
             setEta(null);
-          } else if (data.type === "delivery_complete") {
+          } else if (data.type === "delivery_completed" || data.type === "delivery_complete") {
             setPosition(null);
             setEta(null);
+            setDeliveryCompleted(true);
             ws.close();
           } else if (data.type === "error") {
             setError(data.message);
@@ -149,5 +151,5 @@ export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingO
     return () => sub.remove();
   }, [connect, disconnect, enabled]);
 
-  return { position, eta, geofenceAlert, connected, error, disconnect };
+  return { position, eta, geofenceAlert, connected, error, deliveryCompleted, disconnect };
 }

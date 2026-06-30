@@ -22,6 +22,7 @@ export interface BroadcastState {
   error: string | null;
   connected: boolean;
   updateCount: number;
+  deliveryCompleted: boolean;
 }
 
 interface UsePilotBroadcastingOptions {
@@ -30,15 +31,17 @@ interface UsePilotBroadcastingOptions {
   vehicleType?: string;
   dropoffLat?: number;
   dropoffLng?: number;
+  customerId?: number;
 }
 
-export function usePilotBroadcasting({ deliveryId, pilotId, vehicleType = "drone", dropoffLat, dropoffLng }: UsePilotBroadcastingOptions) {
+export function usePilotBroadcasting({ deliveryId, pilotId, vehicleType = "drone", dropoffLat, dropoffLng, customerId }: UsePilotBroadcastingOptions) {
   const [state, setState] = useState<BroadcastState>({
     isBroadcasting: false,
     lastPosition: null,
     error: null,
     connected: false,
     updateCount: 0,
+    deliveryCompleted: false,
   });
 
   const wsRef = useRef<WebSocket | null>(null);
@@ -90,6 +93,13 @@ export function usePilotBroadcasting({ deliveryId, pilotId, vehicleType = "drone
           const data = JSON.parse(event.data as string);
           if (data.type === "error") {
             setState((s) => ({ ...s, error: data.message }));
+          } else if (data.type === "completion_confirmed") {
+            setState((s) => ({ ...s, deliveryCompleted: true, isBroadcasting: false, connected: false }));
+            // Stop location after confirmation
+            if (locationSubRef.current) {
+              locationSubRef.current.remove();
+              locationSubRef.current = null;
+            }
           }
         } catch { /* ignore */ }
       };
@@ -170,9 +180,22 @@ export function usePilotBroadcasting({ deliveryId, pilotId, vehicleType = "drone
     }));
   }, []);
 
+  const completeDelivery = useCallback(() => {
+    // Send delivery_complete event via WebSocket (include customerId for notification)
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: "delivery_complete", customerId }));
+    }
+    // Stop location subscription immediately
+    if (locationSubRef.current) {
+      locationSubRef.current.remove();
+      locationSubRef.current = null;
+    }
+  }, []);
+
   return {
     ...state,
     startBroadcasting,
     stopBroadcasting,
+    completeDelivery,
   };
 }

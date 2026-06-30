@@ -13,6 +13,7 @@
 import { Server as HttpServer } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { URL } from "url";
+import { createInAppNotification } from "./create-notification";
 
 interface PositionUpdate {
   deliveryId: number;
@@ -141,6 +142,49 @@ export function initLiveTracking(server: HttpServer): void {
       ws.on("message", (raw) => {
         try {
           const msg = JSON.parse(raw.toString());
+
+          // Handle delivery completion
+          if (msg.type === "delivery_complete") {
+            const delivery = activeDeliveries.get(deliveryId);
+            if (delivery) {
+              const completionPayload = JSON.stringify({
+                type: "delivery_completed",
+                deliveryId,
+                pilotId,
+                completedAt: new Date().toISOString(),
+                message: "Delivery has been completed successfully!",
+              });
+              // Notify all subscribers via WebSocket
+              delivery.subscribers.forEach((sub) => {
+                if (sub.readyState === WebSocket.OPEN) {
+                  sub.send(completionPayload);
+                }
+              });
+              // Clean up delivery tracking state
+              activeDeliveries.delete(deliveryId);
+              console.log(`[ws] Delivery #${deliveryId} completed by pilot #${pilotId}`);
+            }
+
+            // Send in-app notification to customer (using customerId from msg or deliveryId lookup)
+            const customerId = msg.customerId;
+            if (customerId) {
+              createInAppNotification({
+                userId: customerId,
+                title: "Delivery Completed! 🎉",
+                body: `Your delivery #${deliveryId} has been successfully completed. Thank you for using DROPi!`,
+                category: "orders",
+                metadata: { deliveryId, pilotId, completedAt: new Date().toISOString() },
+              }).catch(() => {});
+            }
+
+            // Confirm to pilot
+            ws.send(JSON.stringify({ type: "completion_confirmed", deliveryId }));
+            // Close pilot connection gracefully
+            pilotConnections.delete(ws);
+            ws.close(1000, "Delivery completed");
+            return;
+          }
+
           if (msg.type === "position") {
             const position: PositionUpdate = {
               deliveryId,

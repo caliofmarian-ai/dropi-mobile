@@ -386,3 +386,9 @@
 ## Bugfix: Device errors reported
 - [x] Fix GO_BACK not handled error on pilot screens (fallback to tabs when no history)
 - [x] Fix PUSH registration error — guard against missing projectId in Expo Go
+
+## Upgrade: Delivery Completion Flow
+- [x] Server: Handle delivery_complete event in live-tracking WebSocket (broadcast to subscribers, cleanup)
+- [x] Pilot broadcast hook: Add completeDelivery() method that sends event and stops GPS
+- [x] Pilot broadcast screen: Add "Complete Delivery" button with confirmation
+- [x] Customer notification on delivery completion (in-app + push)

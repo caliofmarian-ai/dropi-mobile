@@ -3,8 +3,10 @@
  *
  * Allows pilots to start/stop GPS position broadcasting during an active delivery.
  * Shows real-time position data, connection status, and update counter.
+ * Includes "Complete Delivery" button that stops broadcasting and notifies customer.
  */
-import { Text, View, Pressable, Platform } from "react-native";
+import { useState } from "react";
+import { Text, View, Pressable, Platform, Alert } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useColors } from "@/hooks/use-colors";
@@ -18,6 +20,7 @@ export default function PilotBroadcastScreen() {
   const deliveryId = parseInt(params.deliveryId || "1");
   const pilotId = parseInt(params.pilotId || "1");
   const vehicleType = params.vehicleType || "drone";
+  const [showConfirmComplete, setShowConfirmComplete] = useState(false);
 
   const {
     isBroadcasting,
@@ -25,9 +28,67 @@ export default function PilotBroadcastScreen() {
     error,
     connected,
     updateCount,
+    deliveryCompleted,
     startBroadcasting,
     stopBroadcasting,
+    completeDelivery,
   } = usePilotBroadcasting({ deliveryId, pilotId, vehicleType });
+
+  const handleCompleteDelivery = () => {
+    if (Platform.OS === "web") {
+      // On web, use simple confirmation
+      setShowConfirmComplete(true);
+    } else {
+      Alert.alert(
+        "Complete Delivery",
+        "Are you sure you want to mark this delivery as completed? This will stop position broadcasting and notify the customer.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Complete",
+            style: "default",
+            onPress: () => completeDelivery(),
+          },
+        ]
+      );
+    }
+  };
+
+  const confirmComplete = () => {
+    setShowConfirmComplete(false);
+    completeDelivery();
+  };
+
+  // Delivery completed success screen
+  if (deliveryCompleted) {
+    return (
+      <ScreenContainer className="p-4" edges={["top", "left", "right", "bottom"]}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 16 }}>
+          <Text style={{ fontSize: 72 }}>✅</Text>
+          <Text style={{ fontSize: 22, fontWeight: "800", color: colors.success }}>
+            Delivery Completed!
+          </Text>
+          <Text style={{ fontSize: 14, color: colors.muted, textAlign: "center", maxWidth: 280 }}>
+            Delivery #{deliveryId} has been marked as completed. The customer has been notified.
+          </Text>
+          <View style={{ marginTop: 24 }}>
+            <Pressable
+              onPress={() => safeGoBack(router)}
+              style={({ pressed }) => [{
+                backgroundColor: colors.primary,
+                paddingHorizontal: 32,
+                paddingVertical: 14,
+                borderRadius: 12,
+                opacity: pressed ? 0.85 : 1,
+              }]}
+            >
+              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}>Back to Dashboard</Text>
+            </Pressable>
+          </View>
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   return (
     <ScreenContainer className="p-4" edges={["top", "left", "right", "bottom"]}>
@@ -53,13 +114,13 @@ export default function PilotBroadcastScreen() {
       </View>
 
       {/* Main Control Button */}
-      <View className="items-center mb-8">
+      <View className="items-center mb-6">
         <Pressable
           onPress={isBroadcasting ? stopBroadcasting : startBroadcasting}
           style={({ pressed }) => [{
-            width: 160,
-            height: 160,
-            borderRadius: 80,
+            width: 140,
+            height: 140,
+            borderRadius: 70,
             backgroundColor: isBroadcasting ? colors.error : colors.success,
             justifyContent: "center",
             alignItems: "center",
@@ -71,15 +132,104 @@ export default function PilotBroadcastScreen() {
             elevation: 8,
           }]}
         >
-          <Text style={{ fontSize: 40 }}>{isBroadcasting ? "⏹" : "📡"}</Text>
-          <Text style={{ color: "#fff", fontWeight: "700", fontSize: 14, marginTop: 8 }}>
+          <Text style={{ fontSize: 36 }}>{isBroadcasting ? "⏹" : "📡"}</Text>
+          <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13, marginTop: 6 }}>
             {isBroadcasting ? "STOP" : "START"}
           </Text>
           <Text style={{ color: "#ffffffCC", fontSize: 10, marginTop: 2 }}>
-            {isBroadcasting ? "Broadcasting" : "Broadcasting"}
+            Broadcasting
           </Text>
         </Pressable>
       </View>
+
+      {/* Complete Delivery Button — shown only when broadcasting */}
+      {isBroadcasting && (
+        <View className="items-center mb-6">
+          <Pressable
+            onPress={handleCompleteDelivery}
+            style={({ pressed }) => [{
+              backgroundColor: colors.success,
+              paddingHorizontal: 28,
+              paddingVertical: 14,
+              borderRadius: 14,
+              opacity: pressed ? 0.85 : 1,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+              shadowColor: colors.success,
+              shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 4,
+            }]}
+          >
+            <Text style={{ fontSize: 18 }}>🏁</Text>
+            <Text style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}>Complete Delivery</Text>
+          </Pressable>
+          <Text style={{ fontSize: 10, color: colors.muted, marginTop: 6, textAlign: "center" }}>
+            Stops broadcasting and notifies the customer
+          </Text>
+        </View>
+      )}
+
+      {/* Web Confirmation Modal */}
+      {showConfirmComplete && (
+        <View style={{
+          position: "absolute",
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.5)",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 100,
+          padding: 20,
+        }}>
+          <View style={{
+            backgroundColor: colors.background,
+            borderRadius: 16,
+            padding: 24,
+            maxWidth: 320,
+            width: "100%",
+            borderWidth: 1,
+            borderColor: colors.border,
+          }}>
+            <Text style={{ fontSize: 18, fontWeight: "700", color: colors.foreground, marginBottom: 8 }}>
+              Complete Delivery?
+            </Text>
+            <Text style={{ fontSize: 13, color: colors.muted, marginBottom: 20 }}>
+              This will stop position broadcasting and notify the customer that their delivery has arrived.
+            </Text>
+            <View style={{ flexDirection: "row", gap: 12 }}>
+              <Pressable
+                onPress={() => setShowConfirmComplete(false)}
+                style={({ pressed }) => [{
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  alignItems: "center",
+                  opacity: pressed ? 0.7 : 1,
+                }]}
+              >
+                <Text style={{ color: colors.muted, fontWeight: "600" }}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={confirmComplete}
+                style={({ pressed }) => [{
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 10,
+                  backgroundColor: colors.success,
+                  alignItems: "center",
+                  opacity: pressed ? 0.85 : 1,
+                }]}
+              >
+                <Text style={{ color: "#fff", fontWeight: "700" }}>Complete</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      )}
 
       {/* Connection Status */}
       <View className="bg-surface rounded-2xl p-4 mb-4 border border-border">
