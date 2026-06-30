@@ -2,6 +2,7 @@ import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { NotificationBadgeTab } from "@/components/notification-badge-tab";
 import { Platform } from "react-native";
 import { useColors } from "@/hooks/use-colors";
 import { useDropiAuth } from "@/lib/auth-context";
@@ -186,6 +187,15 @@ export default function TabLayout() {
           title: "Finance",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />,
           href: ACCOUNTING_ROLES.includes(role) ? "/accounting" : null,
+        }}
+      />
+
+      {/* Notifications - visible to all authenticated users */}
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          title: "Notificări",
+          tabBarIcon: ({ color }) => <NotificationBadgeTab color={color} size={24} />,
         }}
       />
 

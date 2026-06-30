@@ -4,9 +4,11 @@
  */
 import { z } from "zod";
 import { eq, and, desc } from "drizzle-orm";
-import { router, protectedProcedure } from "./_core/trpc";
+import { router, protectedProcedure, adminProcedure } from "./_core/trpc";
 import { getDb } from "./db";
 import { pushTokens, inAppNotifications, notificationPreferences } from "../drizzle/schema";
+import * as fs from "fs";
+import * as path from "path";
 
 export const notificationRouter = router({
   // ============================================================
@@ -240,5 +242,73 @@ export const notificationRouter = router({
       }
 
       return { success: true };
+    }),
+
+  // ============================================================
+  // FCM CONFIGURATION (Admin only)
+  // ============================================================
+
+  getFcmStatus: adminProcedure
+    .query(async () => {
+      const configPath = path.join(process.cwd(), "config", "fcm-service-account.json");
+      try {
+        if (fs.existsSync(configPath)) {
+          const content = fs.readFileSync(configPath, "utf-8");
+          const parsed = JSON.parse(content);
+          const stat = fs.statSync(configPath);
+          return {
+            configured: true,
+            projectId: parsed.project_id || "unknown",
+            clientEmail: parsed.client_email || "unknown",
+            lastUpdated: stat.mtime.toISOString(),
+          };
+        }
+      } catch (e) {
+        // File doesn't exist or is invalid
+      }
+      return { configured: false };
+    }),
+
+  saveFcmConfig: adminProcedure
+    .input(z.object({
+      serviceAccountJson: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      const configDir = path.join(process.cwd(), "config");
+      const configPath = path.join(configDir, "fcm-service-account.json");
+
+      if (!input.serviceAccountJson.trim()) {
+        // Remove config
+        try {
+          if (fs.existsSync(configPath)) fs.unlinkSync(configPath);
+        } catch (e) { /* ignore */ }
+        return { success: true, message: "FCM configuration removed. Push notifications disabled." };
+      }
+
+      // Validate JSON
+      let parsed: any;
+      try {
+        parsed = JSON.parse(input.serviceAccountJson);
+      } catch (e) {
+        throw new Error("Invalid JSON format");
+      }
+
+      if (!parsed.project_id || !parsed.private_key || !parsed.client_email) {
+        throw new Error("Missing required fields: project_id, private_key, client_email");
+      }
+
+      // Save to config directory
+      if (!fs.existsSync(configDir)) {
+        fs.mkdirSync(configDir, { recursive: true });
+      }
+      fs.writeFileSync(configPath, JSON.stringify(parsed, null, 2), "utf-8");
+
+      console.log(`[FCM] Service account configured: ${parsed.project_id} (${parsed.client_email})`);
+
+      return {
+        success: true,
+        message: `FCM configured for project: ${parsed.project_id}`,
+        projectId: parsed.project_id,
+      };
     }),
 });

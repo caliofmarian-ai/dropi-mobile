@@ -293,6 +293,18 @@ export const b2bDeliveryRouter = router({
         currency: "RON",
       });
 
+      // Create in-app notification for store owner about new delivery
+      try {
+        const { createInAppNotification } = await import("./create-notification");
+        await createInAppNotification({
+          userId: user.id,
+          title: "\uD83D\uDCE6 Livrare Nou\u0103 Creat\u0103",
+          body: `Comanda ${trackingCode} a fost \xeenregistrat\u0103. Pre\u021b estimat: ${estimate.estimatedPrice} RON. Mod: ${estimate.mode}.`,
+          category: "orders",
+          metadata: { deliveryId: result[0].insertId, trackingCode, mode: estimate.mode },
+        });
+      } catch (e) { /* silent */ }
+
       return {
         deliveryId: result[0].insertId,
         trackingCode,
@@ -597,8 +609,20 @@ export const b2bDeliveryRouter = router({
       if (storeResult.length > 0) {
         notifyOwner({
           title: "B2B Delivery Update",
-          content: `Delivery ${delivery[0].trackingCode}: ${previousStatus} → ${input.newStatus} (Store: ${storeResult[0].name})`,
+          content: `Delivery ${delivery[0].trackingCode}: ${previousStatus} \u2192 ${input.newStatus} (Store: ${storeResult[0].name})`,
         });
+
+        // Create in-app notification for store owner
+        try {
+          const { createInAppNotification } = await import("./create-notification");
+          await createInAppNotification({
+            userId: storeResult[0].ownerId,
+            title: `\uD83D\uDE9A Livrare: ${input.newStatus.replace(/_/g, " ")}`,
+            body: `Comanda ${delivery[0].trackingCode} a trecut de la ${previousStatus.replace(/_/g, " ")} la ${input.newStatus.replace(/_/g, " ")}.`,
+            category: "missions",
+            metadata: { deliveryId: delivery[0].id, trackingCode: delivery[0].trackingCode, status: input.newStatus },
+          });
+        } catch (e) { /* silent */ }
       }
 
       return {

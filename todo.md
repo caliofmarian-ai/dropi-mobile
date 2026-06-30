@@ -351,3 +351,10 @@
 - [x] Sprint 6B: Notification preferences screen (app/notifications/preferences.tsx — toggle per category, push + in-app)
 - [x] DB: Created inAppNotifications and notificationPreferences tables
 - [x] Server: Extended notification-router with getNotifications, getUnreadCount, markAsRead, markAllAsRead, getPreferences, updatePreferences
+
+## Upgrade: Bell Badge + In-App Notifications Integration + FCM Config
+- [x] Bell icon with unread count badge on tab bar (NotificationBadgeTab component + notifications tab in layout)
+- [x] Auto-create in-app notifications on key actions (verification approve/reject, role approve/reject, delivery status updates, new delivery creation)
+- [x] Admin FCM configuration screen (app/admin/fcm-config.tsx — upload/paste Service Account JSON, status display, remove config)
+- [x] Created server/create-notification.ts helper (createInAppNotification + createBulkNotifications)
+- [x] Added getFcmStatus + saveFcmConfig admin endpoints to notification-router

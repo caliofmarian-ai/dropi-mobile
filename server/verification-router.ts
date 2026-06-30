@@ -229,6 +229,18 @@ export const verificationRouter = router({
           } catch (pushErr) {
             console.warn("[PUSH] Failed to send verification push:", pushErr);
           }
+
+          // Create in-app notification
+          try {
+            const { createInAppNotification } = await import("./create-notification");
+            await createInAppNotification({
+              userId: verification.userId,
+              title: "\u2705 Cont Verificat!",
+              body: "Documentele tale au fost aprobate. Po\u021bi accepta misiuni de livrare pe DROPi!",
+              category: "verification",
+              metadata: { verificationId: verification.id, decision: "approved" },
+            });
+          } catch (e) { /* silent */ }
         }
       }
 
@@ -271,6 +283,19 @@ export const verificationRouter = router({
         } catch (pushErr) {
           console.warn("[PUSH] Failed to send verification rejection push:", pushErr);
         }
+
+        // Create in-app notification for rejection
+        try {
+          const { createInAppNotification } = await import("./create-notification");
+          const docType = verification.documentType.replace(/_/g, " ");
+          await createInAppNotification({
+            userId: verification.userId,
+            title: "\u274c Verificare Respins\u0103",
+            body: `Documentul ${docType} nu a fost aprobat. Motiv: ${input.rejectionReason || "Nespecificat"}. Retrimite documente actualizate.`,
+            category: "verification",
+            metadata: { verificationId: verification.id, decision: "rejected", reason: input.rejectionReason },
+          });
+        } catch (e) { /* silent */ }
       }
 
       // Push notification to project owner about the review action
@@ -457,6 +482,19 @@ export const roleApplicationRouter = router({
         } catch (pushErr) {
           console.warn("[PUSH] Failed to send role approval push:", pushErr);
         }
+
+        // Create in-app notification for role approval
+        try {
+          const { createInAppNotification } = await import("./create-notification");
+          const roleName = application.requestedRole.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+          await createInAppNotification({
+            userId: application.userId,
+            title: "\u2705 Rol Aprobat!",
+            body: `Aplica\u021bia ta pentru ${roleName} pe ${application.requestedChannel} a fost aprobat\u0103. Bine ai venit!`,
+            category: "verification",
+            metadata: { applicationId: application.id, role: application.requestedRole, decision: "approved" },
+          });
+        } catch (e) { /* silent */ }
       }
 
       // Sprint 6A+: Send push notification on rejection
@@ -473,6 +511,19 @@ export const roleApplicationRouter = router({
         } catch (pushErr) {
           console.warn("[PUSH] Failed to send role rejection push:", pushErr);
         }
+
+        // Create in-app notification for role rejection
+        try {
+          const { createInAppNotification } = await import("./create-notification");
+          const roleName = application.requestedRole.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+          await createInAppNotification({
+            userId: application.userId,
+            title: "\u274c Aplica\u021bie Respins\u0103",
+            body: `Aplica\u021bia ta pentru ${roleName} nu a fost aprobat\u0103. Motiv: ${input.rejectionReason || "Nespecificat"}.`,
+            category: "verification",
+            metadata: { applicationId: application.id, decision: "rejected", reason: input.rejectionReason },
+          });
+        } catch (e) { /* silent */ }
       }
 
       // Send email notification
