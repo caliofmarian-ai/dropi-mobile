@@ -392,3 +392,7 @@
 - [x] Pilot broadcast hook: Add completeDelivery() method that sends event and stops GPS
 - [x] Pilot broadcast screen: Add "Complete Delivery" button with confirmation
 - [x] Customer notification on delivery completion (in-app + push)
+
+## Bugfix: Notifications back button exits app
+- [x] Fix: Notifications screen back button now navigates to /(tabs) instead of exiting app (caused by Redirect losing navigation history)
+- [x] Fix: Preferences screen back button navigates to /notifications

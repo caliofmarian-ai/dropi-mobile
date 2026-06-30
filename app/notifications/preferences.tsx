@@ -120,7 +120,7 @@ export default function NotificationPreferencesScreen() {
       {/* Header */}
       <View className="flex-row items-center px-4 py-3 border-b border-border">
         <Pressable
-          onPress={() => safeGoBack(router)}
+          onPress={() => router.replace("/notifications")}
           style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1, marginRight: 12 }]}
         >
           <IconSymbol name="chevron.right" size={24} color={colors.foreground} />

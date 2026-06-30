@@ -137,7 +137,7 @@ export default function NotificationCenterScreen() {
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
         <Pressable
-          onPress={() => safeGoBack(router)}
+          onPress={() => router.replace("/(tabs)")}
           style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
         >
           <IconSymbol name="chevron.left.forwardslash.chevron.right" size={24} color={colors.foreground} />
