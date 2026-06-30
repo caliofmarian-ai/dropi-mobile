@@ -343,3 +343,11 @@
 - [x] Created hooks/use-push-notifications.ts (client-side token registration with SDK 54 API)
 - [x] Mounted PushNotificationRegistrar in app/_layout.tsx (inside AuthProvider + trpc.Provider)
 - [x] Save BLUEPRINT_INDEPENDENT_DEPLOYMENT.md — deployment pe server propriu, independență completă de terți, migrare FCM, checklist pre-deployment
+
+## Migrare FCM Direct + Deployment Script + Sprint 6B
+- [x] Migrate push notifications from Expo Push API to FCM HTTP v1 (server/push-notifications.ts)
+- [x] Create scripts/deploy.sh automated deployment script for server propriu
+- [x] Sprint 6B: In-app notification center screen (app/notifications/index.tsx — full list, mark read, pull-to-refresh)
+- [x] Sprint 6B: Notification preferences screen (app/notifications/preferences.tsx — toggle per category, push + in-app)
+- [x] DB: Created inAppNotifications and notificationPreferences tables
+- [x] Server: Extended notification-router with getNotifications, getUnreadCount, markAsRead, markAllAsRead, getPreferences, updatePreferences

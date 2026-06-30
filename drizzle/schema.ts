@@ -643,3 +643,49 @@ export const pushTokens = mysqlTable("pushTokens", {
 });
 export type PushToken = typeof pushTokens.$inferSelect;
 export type InsertPushToken = typeof pushTokens.$inferInsert;
+
+
+// ============================================================
+// IN-APP NOTIFICATIONS (Sprint 6B)
+// ============================================================
+
+export const inAppNotifications = mysqlTable("inAppNotifications", {
+  id: int("id").primaryKey().autoincrement(),
+  userId: int("userId").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  body: text("body").notNull(),
+  category: varchar("category", { length: 50 }).notNull().default("general"),
+  // Categories: verification, mission, order, system, promotion, security
+  isRead: boolean("isRead").notNull().default(false),
+  data: text("data"), // JSON string with extra payload
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type InAppNotification = typeof inAppNotifications.$inferSelect;
+export type InsertInAppNotification = typeof inAppNotifications.$inferInsert;
+
+// ============================================================
+// NOTIFICATION PREFERENCES (Sprint 6B)
+// ============================================================
+
+export const notificationPreferences = mysqlTable("notificationPreferences", {
+  id: int("id").primaryKey().autoincrement(),
+  userId: int("userId").notNull(),
+  // Push notification toggles per category
+  pushVerification: boolean("pushVerification").notNull().default(true),
+  pushMissions: boolean("pushMissions").notNull().default(true),
+  pushOrders: boolean("pushOrders").notNull().default(true),
+  pushSystem: boolean("pushSystem").notNull().default(true),
+  pushPromotions: boolean("pushPromotions").notNull().default(false),
+  pushSecurity: boolean("pushSecurity").notNull().default(true),
+  // In-app notification toggles
+  inAppVerification: boolean("inAppVerification").notNull().default(true),
+  inAppMissions: boolean("inAppMissions").notNull().default(true),
+  inAppOrders: boolean("inAppOrders").notNull().default(true),
+  inAppSystem: boolean("inAppSystem").notNull().default(true),
+  inAppPromotions: boolean("inAppPromotions").notNull().default(true),
+  inAppSecurity: boolean("inAppSecurity").notNull().default(true),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type NotificationPreference = typeof notificationPreferences.$inferSelect;
+export type InsertNotificationPreference = typeof notificationPreferences.$inferInsert;
