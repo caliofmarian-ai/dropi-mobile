@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import type { DropiRole, Channel, DropiUser } from "@/shared/types";
 import { getApiBaseUrl } from "@/constants/oauth";
+import * as Auth from "@/lib/_core/auth";
 
 // ===== AUTH CONTEXT TYPE =====
 interface AuthContextType {
@@ -124,6 +125,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(JSON.parse(storedUser));
           setIsDemo(storedDemo === "true");
           setToken(storedToken);
+          // Bridge existing token to canonical auth store for tRPC
+          if (storedToken && storedDemo !== "true") {
+            await Auth.setSessionToken(storedToken);
+          }
         }
       } catch {}
       setLoading(false);
@@ -150,6 +155,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dropiUser));
       await AsyncStorage.setItem(TOKEN_KEY, result.token);
       await AsyncStorage.setItem(DEMO_KEY, "false");
+      // Bridge token to canonical auth store so tRPC client can use it
+      await Auth.setSessionToken(result.token);
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message || "Login failed" };
@@ -183,6 +190,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dropiUser));
       await AsyncStorage.setItem(TOKEN_KEY, result.token);
       await AsyncStorage.setItem(DEMO_KEY, "false");
+      // Bridge token to canonical auth store so tRPC client can use it
+      await Auth.setSessionToken(result.token);
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message || "Registration failed" };
@@ -212,6 +221,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setIsDemo(false);
     await AsyncStorage.multiRemove([STORAGE_KEY, TOKEN_KEY, DEMO_KEY]);
+    // Clear canonical auth store
+    await Auth.removeSessionToken();
   }, [isDemo, token]);
 
   const switchRole = useCallback(async (role: DropiRole, channel: Channel) => {

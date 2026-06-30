@@ -15,7 +15,7 @@
  * - getLeaderboard: admin — top pilots per zone
  */
 
-import { router, protectedProcedure, adminProcedure } from "./_core/trpc";
+import { router, publicProcedure, protectedProcedure, adminProcedure } from "./_core/trpc";
 import { getDb } from "./db";
 import { pilotProfiles, pilotRatingHistory, users, b2bDeliveries, auditLogs } from "../drizzle/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -322,9 +322,9 @@ export const pilotSelectionRouter = router({
 
   /**
    * Get pilot leaderboard (top pilots by rating).
-   * Access: admin only.
+   * Access: public (leaderboard is visible to all users including demo mode).
    */
-  getLeaderboard: protectedProcedure
+  getLeaderboard: publicProcedure
     .input(z.object({
       limit: z.number().min(1).max(100).default(50),
       offset: z.number().min(0).default(0),
@@ -344,7 +344,7 @@ export const pilotSelectionRouter = router({
       // Build where conditions
       const conditions = [
         eq(users.isActive, true),
-        sql`cast(${pilotProfiles.totalDeliveries} as integer) >= ${minDeliveries}`,
+        sql`${pilotProfiles.totalDeliveries} >= ${minDeliveries}`,
       ];
       if (zone) {
         conditions.push(eq(users.zone, zone));
@@ -352,7 +352,7 @@ export const pilotSelectionRouter = router({
 
       // Get total count
       const countResult = await db
-        .select({ count: sql<number>`cast(count(*) as integer)` })
+        .select({ count: sql<number>`cast(count(*) as unsigned)` })
         .from(pilotProfiles)
         .innerJoin(users, eq(users.id, pilotProfiles.userId))
         .where(and(...conditions));
@@ -407,9 +407,9 @@ export const pilotSelectionRouter = router({
   /**
    * Get detailed pilot profile by userId (for leaderboard drill-down).
    * Returns full profile, user info, rating history, and delivery stats.
-   * Access: any authenticated user.
+   * Access: public (accessible from leaderboard drill-down).
    */
-  getPilotDetail: protectedProcedure
+  getPilotDetail: publicProcedure
     .input(z.object({ userId: z.number() }))
     .query(async ({ input }) => {
       const db = await getDb();

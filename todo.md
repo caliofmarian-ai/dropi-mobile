@@ -310,3 +310,11 @@
 
 ## Blueprint Documents
 - [x] Save BLUEPRINT_TESTING_FORMAT.md — permanent rule for post-checkpoint test delivery format (title, numbered tests, ✅/❌ choice)
+
+## Bug Fix: Pilot Leaderboard Not Populating
+- [x] Diagnose why pilot list is empty in leaderboard screen
+  - Root cause 1: getLeaderboard was protectedProcedure but Demo Mode has no server token
+  - Root cause 2: SQL used `cast(... as integer)` which is invalid in MySQL (fixed to `as unsigned`)
+- [x] Fix: Made getLeaderboard and getPilotDetail public procedures (leaderboard is public data)
+- [x] Fix: Bridged DROPi login token to canonical auth store (tRPC now works for all protected endpoints)
+- [x] Verify pilots display with real names and stats (curl test confirmed 12 pilots returned)
