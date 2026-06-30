@@ -166,7 +166,7 @@ export default function PilotLeaderboardScreen() {
         {/* Main Rating */}
         <View className="items-center">
           <Text className="text-2xl font-bold text-primary">
-            {item.rating.toFixed(2)}
+            {(parseFloat(item.rating as any) || 0).toFixed(2)}
           </Text>
           <Text className="text-xs text-muted">rating</Text>
         </View>
