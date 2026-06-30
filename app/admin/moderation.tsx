@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useDropiAuth } from "@/lib/auth-context";
+import { safeGoBack } from "@/lib/safe-back";
 
 const API_BASE = "http://127.0.0.1:3000";
 
@@ -123,7 +124,7 @@ export default function AdminModerationPanel() {
             Only administrators and marketplace moderators can access this panel.
           </Text>
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => safeGoBack(router)}
             style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, marginTop: 24 }]}
           >
             <View className="bg-primary px-6 py-3 rounded-xl">
@@ -144,7 +145,7 @@ export default function AdminModerationPanel() {
         {/* Header */}
         <View className="px-6 pt-6 pb-4">
           <View className="flex-row items-center justify-between">
-            <Pressable onPress={() => router.back()} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
+            <Pressable onPress={() => safeGoBack(router)} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
               <Text className="text-primary text-base">← Back</Text>
             </Pressable>
             <Text className="text-xl font-bold text-foreground">Product Moderation</Text>

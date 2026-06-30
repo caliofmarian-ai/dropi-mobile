@@ -15,6 +15,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
 import { getApiBaseUrl } from "@/constants/oauth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { safeGoBack } from "@/lib/safe-back";
 // Document upload: uses web file input on web, expo-image-picker on native (lazy-loaded)
 
 const TOKEN_KEY = "@dropi_token";
@@ -328,7 +329,7 @@ export default function VerifyDocumentsScreen() {
         {/* Header */}
         <View className="flex-row items-center mb-6">
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => safeGoBack(router)}
             style={{ padding: 8, marginRight: 12 }}
           >
             <Text className="text-primary text-lg">← Back</Text>

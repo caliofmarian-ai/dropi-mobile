@@ -9,6 +9,7 @@ import { Text, View, TouchableOpacity, FlatList, RefreshControl, ActivityIndicat
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 const STATUS_COLORS: Record<string, string> = {
   approved: "#10B981",
@@ -59,7 +60,7 @@ export default function MerchantProductsScreen() {
       {/* Header */}
       <View className="flex-row items-center justify-between mb-4">
         <View className="flex-row items-center">
-          <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12 }}>
+          <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginRight: 12 }}>
             <Text style={{ fontSize: 24 }}>←</Text>
           </TouchableOpacity>
           <View>

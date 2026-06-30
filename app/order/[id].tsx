@@ -8,6 +8,7 @@ import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/shared/types";
 import type { OrderStatus } from "@/shared/types";
 import { DeliveryMap, createDemoRoute } from "@/components/delivery-map";
 import type { VehicleType, DeliveryStatus } from "@/components/delivery-map";
+import { safeGoBack } from "@/lib/safe-back";
 
 const TIMELINE_STEPS: OrderStatus[] = ["initiated", "validated", "preparing", "ready", "accepted", "in_execution", "completed"];
 
@@ -54,7 +55,7 @@ export default function OrderDetailScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Header */}
         <View className="px-4 pt-4 pb-3 flex-row items-center">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3 p-2">
+          <TouchableOpacity onPress={() => safeGoBack(router)} className="mr-3 p-2">
             <Text className="text-primary text-base">← Back</Text>
           </TouchableOpacity>
           <Text className="text-lg font-bold text-foreground flex-1">{order.orderUid}</Text>

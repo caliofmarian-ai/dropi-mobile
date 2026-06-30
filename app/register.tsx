@@ -3,6 +3,7 @@ import { Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator,
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
+import { safeGoBack } from "@/lib/safe-back";
 
 type AccountType = "customer" | "merchant" | "delivery_partner";
 type MerchantSubType = "verified_business" | "community_seller" | "artisan" | "p2p_seller";
@@ -94,7 +95,7 @@ export default function RegisterScreen() {
           <View className="flex-1 max-w-sm w-full self-center">
             {/* Header */}
             <View className="mb-6 mt-4">
-              <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 16 }}>
+              <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginBottom: 16 }}>
                 <Text className="text-primary text-base font-medium">← Back</Text>
               </TouchableOpacity>
               <Text className="text-3xl font-bold text-foreground">Create Account</Text>
@@ -266,7 +267,7 @@ export default function RegisterScreen() {
             {/* Login Link */}
             <View className="flex-row justify-center mt-4">
               <Text className="text-muted text-sm">Already have an account? </Text>
-              <TouchableOpacity onPress={() => router.back()}>
+              <TouchableOpacity onPress={() => safeGoBack(router)}>
                 <Text className="text-primary text-sm font-medium">Login</Text>
               </TouchableOpacity>
             </View>

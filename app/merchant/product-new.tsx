@@ -28,6 +28,7 @@ import { Text, View, TouchableOpacity, ScrollView, TextInput, ActivityIndicator,
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 const CATEGORIES = [
   "Food & Groceries",
@@ -111,13 +112,13 @@ export default function ProductNewScreen() {
           Alert.alert(
             "✓ Auto-Approved!",
             "Your product passed all checks and has been automatically approved. It is now live in the marketplace.",
-            [{ text: "Great!", onPress: () => router.back() }]
+            [{ text: "Great!", onPress: () => safeGoBack(router) }]
           );
         } else if (modResult.autoModerated && modResult.action === "rejected") {
           Alert.alert(
             "⚠️ Auto-Rejected",
             `Your product was automatically rejected:\n\n${modResult.reason}\n\nPlease fix the issues and resubmit.`,
-            [{ text: "OK", onPress: () => router.back() }]
+            [{ text: "OK", onPress: () => safeGoBack(router) }]
           );
         } else {
           // Pending manual review
@@ -127,14 +128,14 @@ export default function ProductNewScreen() {
             warnings > 0
               ? `Product submitted. ${warnings} warning(s) detected — our team will review within 24h.`
               : "Product submitted for review! Our team will check it within 24h.",
-            [{ text: "OK", onPress: () => router.back() }]
+            [{ text: "OK", onPress: () => safeGoBack(router) }]
           );
         }
       } else {
         Alert.alert(
           "Saved",
           "Product saved as draft. You can edit and submit it for review later.",
-          [{ text: "OK", onPress: () => router.back() }]
+          [{ text: "OK", onPress: () => safeGoBack(router) }]
         );
       }
     } catch (err: any) {
@@ -149,7 +150,7 @@ export default function ProductNewScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Header */}
         <View className="flex-row items-center mb-6">
-          <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12 }}>
+          <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginRight: 12 }}>
             <Text style={{ fontSize: 24 }}>←</Text>
           </TouchableOpacity>
           <Text className="text-2xl font-bold text-foreground">New Product</Text>

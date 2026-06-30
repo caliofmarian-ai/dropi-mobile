@@ -382,3 +382,7 @@
 - [x] Pilot Position Broadcasting — Start/Stop GPS broadcasting hook + UI button during active delivery
 - [x] Server-side ETA Calculation — distance-based ETA estimation broadcast to subscribers
 - [x] Geofence Alerts — automatic notification when pilot enters 500m radius of dropoff
+
+## Bugfix: Device errors reported
+- [x] Fix GO_BACK not handled error on pilot screens (fallback to tabs when no history)
+- [x] Fix PUSH registration error — guard against missing projectId in Expo Go

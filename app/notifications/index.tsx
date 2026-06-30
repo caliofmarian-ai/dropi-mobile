@@ -9,6 +9,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { safeGoBack } from "@/lib/safe-back";
 
 const CATEGORY_ICONS: Record<string, { icon: string; color: string }> = {
   verification: { icon: "checkmark.shield.fill", color: "#22C55E" },
@@ -136,7 +137,7 @@ export default function NotificationCenterScreen() {
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => safeGoBack(router)}
           style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
         >
           <IconSymbol name="chevron.left.forwardslash.chevron.right" size={24} color={colors.foreground} />

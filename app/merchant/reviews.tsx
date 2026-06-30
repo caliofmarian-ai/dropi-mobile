@@ -9,6 +9,7 @@ import { Text, View, TouchableOpacity, FlatList, RefreshControl, ActivityIndicat
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -41,7 +42,7 @@ export default function MerchantReviewsScreen() {
     <ScreenContainer className="px-4 pt-4">
       {/* Header */}
       <View className="flex-row items-center mb-4">
-        <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12 }}>
+        <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginRight: 12 }}>
           <Text style={{ fontSize: 24 }}>←</Text>
         </TouchableOpacity>
         <View>

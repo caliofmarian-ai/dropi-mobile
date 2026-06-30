@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 type SeverityFilter = "all" | "info" | "warning" | "critical";
 type ChannelFilter = "all" | "C1" | "C2" | "C3" | "ADMIN";
@@ -63,7 +64,7 @@ export default function AuditLogsScreen() {
             <Text className="text-sm text-muted">{totalCount} total entries</Text>
           </View>
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => safeGoBack(router)}
             style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 }]}
           >
             <Text className="text-primary text-sm font-medium">← Back</Text>

@@ -9,6 +9,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useColors } from "@/hooks/use-colors";
 import { usePilotBroadcasting } from "@/hooks/use-pilot-broadcasting";
+import { safeGoBack } from "@/lib/safe-back";
 
 export default function PilotBroadcastScreen() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function PilotBroadcastScreen() {
       {/* Header */}
       <View className="flex-row items-center mb-6">
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => safeGoBack(router)}
           style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1, marginRight: 12 }]}
         >
           <Text className="text-2xl text-primary">←</Text>

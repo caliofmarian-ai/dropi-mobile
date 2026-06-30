@@ -9,6 +9,7 @@ import {
   type Product,
   type DeliveryBadge,
 } from "@/lib/marketplace-data";
+import { safeGoBack } from "@/lib/safe-back";
 
 function DeliveryBadgeChip({ badge }: { badge: DeliveryBadge }) {
   const modeInfo = DELIVERY_MODE_INFO[badge.mode];
@@ -46,7 +47,7 @@ export default function StoreScreen() {
     return (
       <ScreenContainer className="p-6">
         <Text style={{ color: colors.foreground, fontSize: 16 }}>Store not found</Text>
-        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 16 }}>
+        <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginTop: 16 }}>
           <Text style={{ color: colors.primary }}>← Back</Text>
         </TouchableOpacity>
       </ScreenContainer>
@@ -70,7 +71,7 @@ export default function StoreScreen() {
           <View>
             {/* Back Button */}
             <TouchableOpacity
-              onPress={() => router.back()}
+              onPress={() => safeGoBack(router)}
               style={{ paddingHorizontal: 20, paddingTop: 12 }}
             >
               <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "600" }}>← Back la Marketplace</Text>

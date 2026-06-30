@@ -11,6 +11,7 @@ import { trpc } from "@/lib/trpc";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Platform } from "react-native";
 import * as Haptics from "expo-haptics";
+import { safeGoBack } from "@/lib/safe-back";
 
 interface PreferenceCategory {
   key: string;
@@ -119,7 +120,7 @@ export default function NotificationPreferencesScreen() {
       {/* Header */}
       <View className="flex-row items-center px-4 py-3 border-b border-border">
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => safeGoBack(router)}
           style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1, marginRight: 12 }]}
         >
           <IconSymbol name="chevron.right" size={24} color={colors.foreground} />

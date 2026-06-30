@@ -11,6 +11,7 @@ import type { VehicleType } from "@/components/delivery-map";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApiBaseUrl } from "@/constants/oauth";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 type MissionPhase = "detail" | "preflight" | "inflight" | "complete";
 
@@ -193,7 +194,7 @@ export default function MissionDetailScreen() {
 
   const handleComplete = () => {
     Alert.alert("Mission Complete", "Post-mission report has been recorded.");
-    router.back();
+    safeGoBack(router);
   };
 
   // DETAIL PHASE
@@ -202,7 +203,7 @@ export default function MissionDetailScreen() {
       <ScreenContainer edges={["top", "bottom", "left", "right"]}>
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
           <View className="px-4 pt-4 pb-3 flex-row items-center">
-            <TouchableOpacity onPress={() => router.back()} className="mr-3 p-2">
+            <TouchableOpacity onPress={() => safeGoBack(router)} className="mr-3 p-2">
               <Text className="text-primary text-base">← Back</Text>
             </TouchableOpacity>
             <Text className="text-lg font-bold text-foreground">Mission Details</Text>

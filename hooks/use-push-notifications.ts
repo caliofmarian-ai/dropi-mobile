@@ -104,16 +104,26 @@ async function registerForPushNotifications(): Promise<string | null> {
       return null;
     }
 
-    // Get Expo push token
+    // Get Expo push token — requires a valid projectId
     const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-    const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId: projectId || undefined,
-    });
+    if (!projectId) {
+      // In Expo Go (SDK 53+), projectId is not available and remote push
+      // notifications are not supported. Silently skip registration.
+      console.log("[PUSH] Skipped: No projectId found (Expo Go limitation). Use a development build for push notifications.");
+      return null;
+    }
+
+    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
 
     console.log("[PUSH] Token obtained:", tokenData.data.substring(0, 30) + "...");
     return tokenData.data;
-  } catch (error) {
-    console.error("[PUSH] Failed to register:", error);
+  } catch (error: any) {
+    // Suppress known Expo Go limitation errors silently
+    if (error?.message?.includes("projectId") || error?.message?.includes("remote notifications")) {
+      console.log("[PUSH] Skipped: Not supported in current environment.");
+      return null;
+    }
+    console.warn("[PUSH] Registration warning:", error?.message || error);
     return null;
   }
 }

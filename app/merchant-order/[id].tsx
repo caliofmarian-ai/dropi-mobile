@@ -6,6 +6,7 @@ import { useColors } from "@/hooks/use-colors";
 import { MERCHANT_ORDERS } from "@/lib/mock-data";
 import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/shared/types";
+import { safeGoBack } from "@/lib/safe-back";
 
 const VEHICLE_ICONS: Record<string, string> = {
   drone: "🚁",
@@ -50,7 +51,7 @@ export default function MerchantOrderDetailScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Header */}
         <View className="px-4 pt-4 pb-3 flex-row items-center">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3 p-2">
+          <TouchableOpacity onPress={() => safeGoBack(router)} className="mr-3 p-2">
             <Text className="text-primary text-base">← Back</Text>
           </TouchableOpacity>
           <Text className="text-lg font-bold text-foreground flex-1">{order.orderUid}</Text>

@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 // Trust Score types (mirroring server)
 interface TrustScoreComponents {
@@ -114,7 +115,7 @@ export default function MerchantTrustScreen() {
       >
         {/* Header */}
         <View className="flex-row items-center mb-6">
-          <Pressable onPress={() => router.back()} style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1, marginRight: 12 }]}>
+          <Pressable onPress={() => safeGoBack(router)} style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1, marginRight: 12 }]}>
             <Text className="text-primary text-lg">← Back</Text>
           </Pressable>
           <Text className="text-2xl font-bold text-foreground flex-1">Trust Score</Text>

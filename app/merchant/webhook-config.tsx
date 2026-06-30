@@ -9,6 +9,7 @@ import { Text, View, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Pla
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 const AVAILABLE_EVENTS = [
   { id: "delivery.status_changed", label: "Status Changed", description: "Any delivery status update" },
@@ -125,7 +126,7 @@ export default function WebhookConfigScreen() {
       >
         {/* Header */}
         <View className="flex-row items-center mb-6">
-          <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12 }}>
+          <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginRight: 12 }}>
             <Text style={{ fontSize: 24 }}>←</Text>
           </TouchableOpacity>
           <View className="flex-1">

@@ -10,6 +10,7 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 type StoreType = "internal" | "external";
 
@@ -82,7 +83,7 @@ export default function StoreSetupScreen() {
       }
 
       Alert.alert("Success", isEditing ? "Store updated!" : "Store created! It will be reviewed by our team.", [
-        { text: "OK", onPress: () => router.back() },
+        { text: "OK", onPress: () => safeGoBack(router) },
       ]);
     } catch (err: any) {
       Alert.alert("Error", err.message || "Failed to save store");
@@ -104,7 +105,7 @@ export default function StoreSetupScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Header */}
         <View className="flex-row items-center mb-6">
-          <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12 }}>
+          <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginRight: 12 }}>
             <Text style={{ fontSize: 24 }}>←</Text>
           </TouchableOpacity>
           <Text className="text-2xl font-bold text-foreground">{isEditing ? "Edit Store" : "Create Store"}</Text>

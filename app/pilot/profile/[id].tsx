@@ -3,6 +3,7 @@ import { ScrollView, Text, View, Pressable, ActivityIndicator, FlatList } from "
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 // Rating reason labels
 const REASON_LABELS: Record<string, string> = {
@@ -56,7 +57,7 @@ export default function PilotProfileDetailScreen() {
           This pilot profile could not be loaded.
         </Text>
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => safeGoBack(router)}
           style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
         >
           <View className="bg-primary px-6 py-3 rounded-xl">
@@ -80,7 +81,7 @@ export default function PilotProfileDetailScreen() {
         {/* Header */}
         <View className="p-4 flex-row items-center">
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => safeGoBack(router)}
             style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
           >
             <Text className="text-primary text-lg">← Back</Text>

@@ -10,6 +10,7 @@ import { Text, View, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Pla
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 export default function ApiIntegrationScreen() {
   const router = useRouter();
@@ -49,7 +50,7 @@ export default function ApiIntegrationScreen() {
         <Text className="text-sm text-muted text-center mt-2">
           API integration is only available for external stores.
         </Text>
-        <TouchableOpacity className="mt-4" onPress={() => router.back()}>
+        <TouchableOpacity className="mt-4" onPress={() => safeGoBack(router)}>
           <Text className="text-primary font-medium">Go Back</Text>
         </TouchableOpacity>
       </ScreenContainer>
@@ -115,7 +116,7 @@ export default function ApiIntegrationScreen() {
       >
         {/* Header */}
         <View className="flex-row items-center mb-6">
-          <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12 }}>
+          <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginRight: 12 }}>
             <Text style={{ fontSize: 24 }}>←</Text>
           </TouchableOpacity>
           <View className="flex-1">

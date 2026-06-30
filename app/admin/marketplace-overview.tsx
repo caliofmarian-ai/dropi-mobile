@@ -10,6 +10,7 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 interface MarketplaceStats {
   pendingModeration: number;
@@ -77,7 +78,7 @@ export default function MarketplaceOverviewScreen() {
             <Text className="text-sm text-muted">Admin Overview Panel</Text>
           </View>
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => safeGoBack(router)}
             style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 }]}
           >
             <Text className="text-primary text-sm font-medium">← Back</Text>

@@ -11,6 +11,7 @@ import {
   type DeliveryMode,
   type DeliveryBadge,
 } from "@/lib/marketplace-data";
+import { safeGoBack } from "@/lib/safe-back";
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -29,7 +30,7 @@ export default function ProductDetailScreen() {
     return (
       <ScreenContainer className="p-6">
         <Text style={{ color: colors.foreground, fontSize: 16 }}>Product not found</Text>
-        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 16 }}>
+        <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginTop: 16 }}>
           <Text style={{ color: colors.primary }}>← Back</Text>
         </TouchableOpacity>
       </ScreenContainer>
@@ -63,7 +64,7 @@ export default function ProductDetailScreen() {
       "Added to cart ✓",
       `${product!.name} x${quantity}\nDelivery: ${DELIVERY_MODE_INFO[selectedMode].label}\nTotal: ₱${totalPrice}`,
       [
-        { text: "Continue shopping", onPress: () => router.back() },
+        { text: "Continue shopping", onPress: () => safeGoBack(router) },
         { text: "View cart", onPress: () => router.push("/cart" as any) },
       ]
     );
@@ -74,7 +75,7 @@ export default function ProductDetailScreen() {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }}>
         {/* Back Button */}
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => safeGoBack(router)}
           style={{ paddingHorizontal: 20, paddingTop: 12 }}
         >
           <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "600" }}>← Back</Text>

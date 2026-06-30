@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Text, View, TouchableOpacity, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { safeGoBack } from "@/lib/safe-back";
 
 type Section = "auth" | "endpoints" | "webhooks" | "errors";
 
@@ -21,7 +22,7 @@ export default function ApiDocsScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Header */}
         <View className="flex-row items-center mb-4">
-          <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12 }}>
+          <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginRight: 12 }}>
             <Text style={{ fontSize: 24 }}>←</Text>
           </TouchableOpacity>
           <View className="flex-1">

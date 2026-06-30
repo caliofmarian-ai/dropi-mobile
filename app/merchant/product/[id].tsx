@@ -9,6 +9,7 @@ import { Text, View, TouchableOpacity, ScrollView, ActivityIndicator, Alert } fr
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 const STATUS_COLORS: Record<string, string> = {
   approved: "#10B981",
@@ -55,7 +56,7 @@ export default function MerchantProductDetailScreen() {
       <ScreenContainer className="items-center justify-center px-6">
         <Text style={{ fontSize: 48, marginBottom: 12 }}>🔍</Text>
         <Text className="text-lg font-semibold text-foreground">Product Not Found</Text>
-        <TouchableOpacity className="mt-4" onPress={() => router.back()}>
+        <TouchableOpacity className="mt-4" onPress={() => safeGoBack(router)}>
           <Text className="text-primary font-medium">Go Back</Text>
         </TouchableOpacity>
       </ScreenContainer>
@@ -76,7 +77,7 @@ export default function MerchantProductDetailScreen() {
             try {
               await removeMutation.mutateAsync({ productId: product.id });
               Alert.alert("Deleted", "Product has been deactivated.", [
-                { text: "OK", onPress: () => router.back() },
+                { text: "OK", onPress: () => safeGoBack(router) },
               ]);
             } catch (err: any) {
               Alert.alert("Error", err.message || "Failed to delete");
@@ -102,7 +103,7 @@ export default function MerchantProductDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Header */}
         <View className="flex-row items-center mb-6">
-          <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12 }}>
+          <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginRight: 12 }}>
             <Text style={{ fontSize: 24 }}>←</Text>
           </TouchableOpacity>
           <View className="flex-1">

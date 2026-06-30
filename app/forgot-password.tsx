@@ -3,6 +3,7 @@ import { Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator,
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
+import { safeGoBack } from "@/lib/safe-back";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -102,7 +103,7 @@ export default function ForgotPasswordScreen() {
           <View className="flex-1 justify-center max-w-sm w-full self-center">
             {/* Header */}
             <View className="mb-8">
-              <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 16 }}>
+              <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginBottom: 16 }}>
                 <Text className="text-primary text-base font-medium">← Back to Login</Text>
               </TouchableOpacity>
               <Text className="text-3xl font-bold text-foreground">

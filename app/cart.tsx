@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { DELIVERY_MODE_INFO, type DeliveryMode } from "@/lib/marketplace-data";
+import { safeGoBack } from "@/lib/safe-back";
 
 // Simulated cart items (in a real app this would be a global store)
 interface CartItemDisplay {
@@ -84,7 +85,7 @@ export default function CartScreen() {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 140 }}>
         {/* Header */}
         <View style={{ paddingHorizontal: 20, paddingTop: 16, flexDirection: "row", alignItems: "center" }}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity onPress={() => safeGoBack(router)}>
             <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "600" }}>← Back</Text>
           </TouchableOpacity>
           <Text style={{ fontSize: 22, fontWeight: "800", color: colors.foreground, marginLeft: 16 }}>

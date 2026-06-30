@@ -9,6 +9,7 @@ import { Text, View, TouchableOpacity, ScrollView, RefreshControl, ActivityIndic
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 type DeliveryStatus = "pending" | "assigned" | "pickup_enroute" | "picked_up" | "in_transit" | "delivered" | "cancelled" | "failed";
 
@@ -164,7 +165,7 @@ export default function MerchantOrdersScreen() {
       <View className="flex-1">
         {/* Header */}
         <View className="px-4 pt-4 pb-2 flex-row items-center">
-          <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12, padding: 4 }}>
+          <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginRight: 12, padding: 4 }}>
             <Text className="text-primary text-base">← Back</Text>
           </TouchableOpacity>
           <Text className="text-lg font-bold text-foreground flex-1">B2B Orders</Text>

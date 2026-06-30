@@ -13,6 +13,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useRouter } from "expo-router";
 import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
+import { safeGoBack } from "@/lib/safe-back";
 
 /** Simple bar chart component for 7-day notification volume */
 function NotificationChart({ data }: { data?: { day: string; count: number }[] }) {
@@ -86,7 +87,7 @@ export default function AdminMonitoringScreen() {
         {/* Header */}
         <View className="flex-row items-center mb-6">
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => safeGoBack(router)}
             style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1, marginRight: 12 }]}
           >
             <Text className="text-2xl text-primary">←</Text>

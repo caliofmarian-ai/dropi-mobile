@@ -16,6 +16,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useColors } from "@/hooks/use-colors";
 import { useLiveTracking } from "@/hooks/use-live-tracking";
+import { safeGoBack } from "@/lib/safe-back";
 
 /** Format speed from m/s to km/h */
 function formatSpeed(speedMs: number): string {
@@ -58,7 +59,7 @@ export default function LiveTrackingScreen() {
       <View className="px-4 pt-2 pb-3 flex-row items-center justify-between">
         <View className="flex-row items-center">
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => safeGoBack(router)}
             style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1, marginRight: 12 }]}
           >
             <Text className="text-2xl text-primary">←</Text>
