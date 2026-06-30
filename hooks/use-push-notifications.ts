@@ -5,23 +5,51 @@
  * 
  * NOTE: Remote push notifications are unavailable in Expo Go on Android from SDK 53+.
  * A development build is required for full push notification testing on Android.
+ * 
+ * The expo-notifications module is lazy-loaded to prevent the Expo Go warning
+ * from appearing on import. The warning "Android Push notifications... was removed
+ * from Expo Go" is suppressed by deferring the import until actually needed.
  */
 import { useEffect, useRef } from "react";
-import { Platform } from "react-native";
-import * as Notifications from "expo-notifications";
+import { Platform, LogBox } from "react-native";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { trpc } from "@/lib/trpc";
 
-// Configure notification handler (show notifications when app is in foreground)
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// Suppress the known Expo Go push notification warning
+LogBox.ignoreLogs([
+  "expo-notifications: Android Push notifications",
+  "expo-notifications:",
+]);
+
+// Lazy reference to the notifications module
+let Notifications: typeof import("expo-notifications") | null = null;
+let notificationsConfigured = false;
+
+async function getNotificationsModule() {
+  if (!Notifications) {
+    Notifications = await import("expo-notifications");
+  }
+  return Notifications;
+}
+
+async function configureNotificationHandler() {
+  if (notificationsConfigured) return;
+  try {
+    const N = await getNotificationsModule();
+    N.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+    notificationsConfigured = true;
+  } catch {
+    // Silently fail in Expo Go
+  }
+}
 
 /**
  * Register for push notifications and send token to server.
@@ -35,6 +63,15 @@ export function usePushNotifications(isAuthenticated: boolean, isDemo?: boolean)
   useEffect(() => {
     if (!isAuthenticated || isDemo) return;
     if (Platform.OS === "web") return; // Push not supported on web
+
+    // Check if we're in Expo Go (no projectId = no push support)
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    if (!projectId) {
+      // Silently skip — Expo Go doesn't support remote push from SDK 53+
+      return;
+    }
+
+    configureNotificationHandler();
 
     registerForPushNotifications().then((token) => {
       if (token && token !== tokenRef.current) {
@@ -52,19 +89,29 @@ export function usePushNotifications(isAuthenticated: boolean, isDemo?: boolean)
     if (!isAuthenticated) return;
     if (Platform.OS === "web") return;
 
-    const notificationListener = Notifications.addNotificationReceivedListener((notification) => {
-      console.log("[PUSH] Notification received:", notification.request.content.title);
-    });
+    // Skip listeners in Expo Go
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    if (!projectId) return;
 
-    const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
-      const data = response.notification.request.content.data;
-      console.log("[PUSH] Notification tapped, data:", data);
-      // Navigation based on data.screen can be added here
-    });
+    let notificationListener: any;
+    let responseListener: any;
+
+    (async () => {
+      const N = await getNotificationsModule();
+
+      notificationListener = N.addNotificationReceivedListener((notification) => {
+        console.log("[PUSH] Notification received:", notification.request.content.title);
+      });
+
+      responseListener = N.addNotificationResponseReceivedListener((response) => {
+        const data = response.notification.request.content.data;
+        console.log("[PUSH] Notification tapped, data:", data);
+      });
+    })();
 
     return () => {
-      notificationListener.remove();
-      responseListener.remove();
+      notificationListener?.remove();
+      responseListener?.remove();
     };
   }, [isAuthenticated]);
 
@@ -73,29 +120,31 @@ export function usePushNotifications(isAuthenticated: boolean, isDemo?: boolean)
 
 async function registerForPushNotifications(): Promise<string | null> {
   try {
-    // Set up Android notification channels first (required for permission prompt)
+    const N = await getNotificationsModule();
+
+    // Set up Android notification channels first
     if (Platform.OS === "android") {
-      await Notifications.setNotificationChannelAsync("default", {
+      await N.setNotificationChannelAsync("default", {
         name: "Default",
-        importance: Notifications.AndroidImportance.HIGH,
+        importance: N.AndroidImportance.HIGH,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: "#0a7ea4",
       });
 
-      await Notifications.setNotificationChannelAsync("verification", {
+      await N.setNotificationChannelAsync("verification", {
         name: "Verification Updates",
-        importance: Notifications.AndroidImportance.HIGH,
+        importance: N.AndroidImportance.HIGH,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: "#22C55E",
       });
     }
 
     // Check/request permissions
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    const { status: existingStatus } = await N.getPermissionsAsync();
     let finalStatus = existingStatus;
 
     if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
+      const { status } = await N.requestPermissionsAsync();
       finalStatus = status;
     }
 
@@ -107,20 +156,16 @@ async function registerForPushNotifications(): Promise<string | null> {
     // Get Expo push token — requires a valid projectId
     const projectId = Constants.expoConfig?.extra?.eas?.projectId;
     if (!projectId) {
-      // In Expo Go (SDK 53+), projectId is not available and remote push
-      // notifications are not supported. Silently skip registration.
-      console.log("[PUSH] Skipped: No projectId found (Expo Go limitation). Use a development build for push notifications.");
       return null;
     }
 
-    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+    const tokenData = await N.getExpoPushTokenAsync({ projectId });
 
     console.log("[PUSH] Token obtained:", tokenData.data.substring(0, 30) + "...");
     return tokenData.data;
   } catch (error: any) {
     // Suppress known Expo Go limitation errors silently
     if (error?.message?.includes("projectId") || error?.message?.includes("remote notifications")) {
-      console.log("[PUSH] Skipped: Not supported in current environment.");
       return null;
     }
     console.warn("[PUSH] Registration warning:", error?.message || error);

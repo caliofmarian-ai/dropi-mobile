@@ -1,11 +1,19 @@
 import "@/global.css";
+import { LogBox, Platform } from "react-native";
+
+// Suppress known Expo Go push notification warnings (not relevant in production builds)
+LogBox.ignoreLogs([
+  "expo-notifications: Android Push notifications",
+  "`expo-notifications` functionality is not fully supported",
+  "expo-notifications:",
+]);
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
-import { Platform } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { AuthProvider, useDropiAuth } from "@/lib/auth-context";
