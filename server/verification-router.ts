@@ -211,8 +211,11 @@ export const verificationRouter = router({
 
         // User is now verified if they have at least one approved document
         if (approvedCount[0]?.count && approvedCount[0].count >= 1) {
-          // Mark user as verified (they can now receive missions)
-          console.log(`[VERIFICATION] User ${verification.userId} is now VERIFIED`);
+          // Sprint 6A: Actually set isVerified=true so pilot can accept missions
+          await db.update(users)
+            .set({ isVerified: true })
+            .where(eq(users.id, verification.userId));
+          console.log(`[VERIFICATION] User ${verification.userId} is now VERIFIED (isVerified=true)`);
         }
       }
 
@@ -399,16 +402,18 @@ export const roleApplicationRouter = router({
         })
         .where(eq(roleApplications.id, input.applicationId));
 
-      // If approved, update user's role and channel
+      // If approved, update user's role, channel, and activate the account
       if (input.decision === "approved") {
         await db.update(users)
           .set({
             dropiRole: application.requestedRole,
             channel: application.requestedChannel,
+            isActive: true, // Sprint 6A: Activate account upon admin approval
+            isVerified: true, // Admin-approved roles are considered verified
           })
           .where(eq(users.id, application.userId));
 
-        console.log(`[ROLE] User ${application.userId} promoted to ${application.requestedRole} on ${application.requestedChannel}`);
+        console.log(`[ROLE] User ${application.userId} promoted to ${application.requestedRole} on ${application.requestedChannel} (isActive=true, isVerified=true)`);
       }
 
       // Send email notification

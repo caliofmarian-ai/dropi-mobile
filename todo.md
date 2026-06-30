@@ -325,3 +325,10 @@
 - [x] Task 1: Delivery Partner "unverified" status at registration (isVerified = false, banner on dashboard)
 - [x] Task 2: Guard on mission endpoints (block unverified delivery partners from accepting/updating missions)
 - [x] Task 3: Admin approval gate for operational roles (auto-deactivate + create roleApplication on register)
+
+## Admin Approval Screen
+- [x] Create admin/approvals.tsx screen with list of pending role applications (already existed)
+- [x] Add Approve/Reject buttons with confirmation (already existed with rejection reason input)
+- [x] On approve: set user isActive=true (operational roles) or isVerified=true (delivery partners) — FIXED in verification-router.ts
+- [x] On reject: set roleApplication status to 'rejected' with reason (already worked)
+- [x] Audit log for all approval/rejection actions (notifyOwner + console.log + email notification)
