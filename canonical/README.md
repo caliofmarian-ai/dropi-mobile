@@ -12,6 +12,7 @@
 |----------|-----------|----------|
 | `AI_AGENT_SYSTEM.md` | Sistemul dual Cont Uman + Agent AI — arhitectura fundamentală a platformei | v1.0.0 |
 | `DELIVERY_MULTIMODAL.md` | Referință livrare multimodală (dronă/terestru/mixt) + badge-uri eligibilitate | v1.0.0 |
+| `AI_DEVELOPMENT_HANDOVER_CANON.md` | Viziune strategică AI organization, reguli de cooperare, proces de decizie și roadmap de integrare | v1.0.0 |
 
 ---
 
