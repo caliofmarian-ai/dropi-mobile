@@ -48,32 +48,28 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Setup cloud de către fondator (Railway + EAS — pașii manuali rămași, vezi mai jos)
+- EAS Build Android (APK) — necesită push pe `main` pentru a declanșa GitHub Actions
+
+### ✅ Setup cloud complet (2026-07-07)
+- `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
+- `EXPO_TOKEN` adăugat în GitHub Secrets ✅
+- Railway conectat la GitHub, MySQL adăugat, variabile setate (`DATABASE_URL`, `JWT_SECRET`, `NODE_ENV`) ✅
+- Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- EAS Build și EAS Updates nu funcționează până când fondatorul completează:
-  1. Creează proiect pe expo.dev → obține Project ID real
-  2. Adaugă `EAS_PROJECT_ID` ca GitHub Actions Variable
-  3. Adaugă `EXPO_TOKEN` în GitHub Secrets
-  4. Conectează repo pe railway.app + adaugă MySQL + setează variabilele
+- Nimic blocat — toate pașii de setup cloud sunt finalizați
 
 ---
 
 ## 3. Pasul Următor Concret
 
-**Fondatorul urmează ghidul din `docs/MOBILE_FIRST_SETUP.md`** (30-45 min, totul din browser pe telefon):
+**✅ Setup cloud complet — toate pașii manuali finalizați de fondator.**
 
-```
-Pasul 1: expo.dev → creează proiect → obține Project ID
-         → GitHub → Settings → Secrets and variables → Actions → Variables → adaugă EAS_PROJECT_ID
-Pasul 2: expo.dev → Access Tokens → creează token
-         → GitHub → Settings → Secrets → Actions → adaugă EXPO_TOKEN
-Pasul 3: railway.app → New Project → Deploy from GitHub → adaugă MySQL → setează variabilele
-Pasul 4: La primul push pe main → GitHub Actions rulează automat:
-         - eas-build-android.yml → construiește APK development (~15-20 min)
-         - eas-update.yml → OTA update (~3 min)
-         → Descarcă APK din EAS dashboard → instalează pe telefon
-```
+**Următorul pas imediat:** Mergi pe GitHub → repo `dropi-mobile` → fă un push/merge pe branch-ul `main` pentru a declanșa GitHub Actions:
+- `eas-build-android.yml` → construiește APK development Android (~15-20 min)
+- `eas-update.yml` → OTA update (~3 min)
+
+Apoi: Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Client.
 
 **Următorul task de dezvoltare:** Guards pe mission endpoints (block delivery partners neverificați)
 
