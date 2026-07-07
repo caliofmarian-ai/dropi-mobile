@@ -105,8 +105,8 @@ Apoi: Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Cli
 | `copilot/update-project-views` | Branch curent de lucru Copilot | Activ |
 
 ### Probleme cunoscute / Datorie tehnică
-- `EAS_PROJECT_ID` trebuie setat de fondator ca GitHub Actions Variable
-- `EXPO_TOKEN` trebuie adăugat în GitHub Secrets de fondator
+- `EAS_PROJECT_ID` hardcodat în `app.config.ts` ca `4720acfb-4ff2-4a5d-85eb-8ff14c439ea6` ✅
+- `EXPO_TOKEN` trebuie adăugat în GitHub Secrets de fondator (dacă nu e deja)
 - Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
 
 ### Tehnologii principale
