@@ -32,6 +32,7 @@
 ### Ce s-a făcut în această sesiune:
 - Creat documentul canonic `canonical/SESSION_HANDOVER.md` pentru a facilita continuitatea între sesiunile de lucru pe platforme diferite (GitHub Copilot ↔ Manus).
 - Discutat și stabilit strategia de handover între agenți AI: repository-ul GitHub este puntea, documentele canonice sunt sursa de adevăr.
+- Configurat infrastructura cloud completă: Railway (backend 24/7) + EAS Updates (OTA pe telefon) + GitHub Actions (auto-deploy la commit).
 
 ---
 
@@ -41,27 +42,42 @@
 - Implementare sistem AI Agent Orchestrator (`feat: implement AI Agent Orchestrator system`)
 - Configurare EAS Build pentru Android APK + iOS (`eas.json`)
 - Documente canonice de bază: `AI_DEVELOPMENT_HANDOVER_CANON.md`, `AI_AGENT_SYSTEM.md`, `DELIVERY_MULTIMODAL.md`
+- Infrastructură cloud: `railway.toml`, `.github/workflows/eas-update.yml`, EAS Updates config în `app.config.ts`
 
 ### 🔄 În progres
-- *(de completat de agentul care actualizează)*
+- Setup cloud de către fondator (Railway + EAS — pașii manuali rămași de făcut de fondator, vezi mai jos)
 
 ### 🔴 Blocate
-- *(de completat de agentul care actualizează)*
+- EAS Updates nu funcționează până când fondatorul completează: `eas init` + adaugă `EXPO_TOKEN` în GitHub Secrets
 
 ---
 
 ## 3. Pasul Următor Concret
 
-> Aceasta este **prima acțiune** pe care trebuie s-o facă agentul următor.
+**Pașii manuali pe care fondatorul trebuie să îi facă (o singură dată):**
 
-**Task curent:** *(de completat de agentul care actualizează la sfârșitul sesiunii)*
+```
+1. Creează cont la https://expo.dev (dacă nu există)
+2. Loghează-te în terminal: npx eas login
+3. Inițializează proiectul EAS: npx eas init (din folderul proiectului)
+   → Va genera un projectId real, înlocuiește YOUR_EAS_PROJECT_ID în app.config.ts
+4. Adaugă EXPO_TOKEN în GitHub:
+   - Mergi la https://expo.dev/accounts/[username]/settings/access-tokens
+   - Creează un token
+   - Adaugă-l în GitHub: Settings → Secrets → Actions → New secret → EXPO_TOKEN
+5. Construiește APK-ul de development (o singură dată):
+   npx eas build --profile development --platform android
+   → Primești link APK, instalează pe telefon
+6. Creează cont Railway la https://railway.app
+   - Conectează repository-ul GitHub
+   - Adaugă plugin MySQL
+   - Setează variabilele din .env.example în Railway Dashboard → Variables
+   → Backend rulează 24/7 la URL-ul generat de Railway
 
-Exemplu de format:
+După acești pași: orice commit al agentului → EAS Update automat → telefon primește modificările.
 ```
-Implementează [funcționalitate X] în [fișierul Y].
-Contextul: [de ce este necesar, ce există deja].
-Fișiere relevante: [lista fișierelor].
-```
+
+**Următorul task de dezvoltare:** Guards pe mission endpoints (block delivery partners neverificați)
 
 ---
 
@@ -73,6 +89,7 @@ Fișiere relevante: [lista fișierelor].
 |------|---------|-------------|---------|
 | 2026-07-07 | Repository-ul GitHub este puntea între agenți AI (Copilot/Manus) | Asigură continuitate indiferent de platformă sau credite disponibile | Fondator + Copilot Agent |
 | 2026-07-07 | `SESSION_HANDOVER.md` se actualizează obligatoriu la sfârșitul oricărei sesiuni | Fără actualizare = pierdere de context la switch între platforme | Fondator + Copilot Agent |
+| 2026-07-07 | Backend pe Railway, mobile updates prin EAS Updates (OTA), auto-deploy prin GitHub Actions | Workflow 100% cloud, fără dependență de computerul fondatorului | Fondator + Copilot Agent |
 | *(data)* | *(decizie)* | *(justificare)* | *(cine)* |
 
 ---
@@ -90,12 +107,16 @@ Fișiere relevante: [lista fișierelor].
 | *(de completat)* | *(titlu)* | *(status)* |
 
 ### Probleme cunoscute / Datorie tehnică
-- *(de completat de agentul care actualizează)*
+- EAS Updates necesită `eas init` + `EXPO_TOKEN` în GitHub Secrets (pași manuali de fondator)
+- `YOUR_EAS_PROJECT_ID` în `app.config.ts` trebuie înlocuit cu ID-ul real după `eas init`
+- Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
 
 ### Tehnologii principale
-- **Framework:** React Native + Expo
-- **Preview:** Expo Dev Client (NU Expo Go)
+- **Framework:** React Native + Expo SDK 54
+- **Preview:** Expo Dev Client (NU Expo Go) + EAS Updates (OTA)
 - **Build:** EAS Build (Android APK + iOS)
+- **Backend deploy:** Railway (24/7, auto-deploy din GitHub)
+- **Mobile updates:** EAS Updates via GitHub Actions (la fiecare commit)
 - **AI Agents:** sistem intern de orchestrare implementat
 
 ---

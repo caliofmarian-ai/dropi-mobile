@@ -38,6 +38,20 @@ const config: ExpoConfig = {
   scheme: env.scheme,
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
+  // EAS Updates — Over-The-Air updates fără reconstruire APK
+  // După `eas init`, înlocuiește YOUR_EAS_PROJECT_ID cu ID-ul real
+  updates: {
+    url: "https://u.expo.dev/YOUR_EAS_PROJECT_ID",
+    checkAutomatically: "ON_LOAD",
+  },
+  runtimeVersion: {
+    policy: "appVersion",
+  },
+  extra: {
+    eas: {
+      projectId: "YOUR_EAS_PROJECT_ID",
+    },
+  },
   ios: {
     supportsTablet: true,
     bundleIdentifier: env.iosBundleId,
