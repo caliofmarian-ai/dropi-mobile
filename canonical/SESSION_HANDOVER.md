@@ -30,20 +30,14 @@
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- Investigat eșecul GitHub Actions pe `pnpm install --frozen-lockfile` pentru workflow-urile EAS.
-- Identificată cauza reală: `package.json` cerea `expo-dev-client@~5.0.28`, dar această versiune nu mai există pentru SDK 54 și nici nu era sincronizată în `pnpm-lock.yaml`.
-- Actualizat `package.json` la versiunea compatibilă `expo-dev-client@~6.0.21` și regenerat `pnpm-lock.yaml`.
-- Validat local:
-  - `pnpm install --frozen-lockfile` ✅
-  - `pnpm run check` ✅
-  - `pnpm run build` ✅
-  - `pnpm run lint` ❌ (erori/warnings preexistente în mai multe ecrane React)
-  - `pnpm run test` ❌ (`tests/smtp.test.ts` cere `GMAIL_APP_PASSWORD` în environment)
-- Reverificat GitHub Actions pe `main`:
+- Confirmat că branch-ul `copilot/dropi-feature-implementation` conține deja fixul `1a85397` și este deja push-uit pe remote.
+- Făcut `git fetch --unshallow origin` + fetch explicit pentru `origin/main`, apoi pregătit local cherry-pick-ul fixului pe `main` ca commit `8819be9`.
+- Încercat push direct pe `main`, dar GitHub a respins operația cu regula de branch protection `GH013` (`Cannot update this protected ref`).
+- Reverificate run-urile actuale din GitHub Actions pentru workflow-urile EAS:
   - `EAS Build — Android APK (development)` run `#2` (`28901651896`) ❌
   - `EAS Update (OTA)` run `#3` (`28901651907`) ❌
-  - ambele au picat exact la `pnpm install --frozen-lockfile` pe commitul vechi `cb79f1f`, unde lockfile-ul încă avea `expo-dev-client@~5.0.28`
-- Confirmat că branch-ul curent conține fixul (`1a85397`) și că local lockfile-ul este acum sincronizat corect.
+  - ambele încă rulează pe commitul vechi `cb79f1f` și pică la `pnpm install --frozen-lockfile`, exact din cauza mismatch-ului `expo-dev-client` / `pnpm-lock.yaml`
+- Confirmat că nu există run-uri noi pentru fix, deoarece workflow-urile pornesc doar pe `push` către `main` sau `workflow_dispatch`, iar `main` nu a fost actualizat din cauza protecției.
 
 ---
 
@@ -57,7 +51,8 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Verificarea finală a workflow-urilor EAS după merge/push al fixului de pe branch-ul curent
+- Promovarea fixului `1a85397` către `main` prin mecanism compatibil cu branch protection (PR/merge din GitHub)
+- Reverificarea workflow-urilor EAS imediat după ce `main` primește fixul
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -66,15 +61,15 @@
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- Nimic blocat la nivel de setup; CI-ul EAS nu este încă reconfirmat deoarece fixul validat local este încă pe branch-ul Copilot, nu pe `main`
+- Push direct pe `main` este blocat de branch protection GitHub (`GH013: Cannot update this protected ref`), deci fixul nu poate ajunge pe `main` fără PR/merge prin GitHub
 
 ---
 
 ## 3. Pasul Următor Concret
 
-**Următorul pas imediat:** fă merge/push pentru commitul `1a85397` (fix `expo-dev-client` + `pnpm-lock.yaml`), apoi verifică din GitHub Actions că:
-- `eas-build-android.yml` trece de pasul `pnpm install --frozen-lockfile`
-- `eas-update.yml` trece de pasul `pnpm install --frozen-lockfile`
+**Următorul pas imediat:** deschide și merge-uiește în GitHub un PR din `copilot/dropi-feature-implementation` (sau din branch-ul derivat din `8819be9`) către `main`, apoi verifică din GitHub Actions că:
+- `eas-build-android.yml` pornește pe noul SHA din `main` și trece de pasul `pnpm install --frozen-lockfile`
+- `eas-update.yml` pornește pe noul SHA din `main` și trece de pasul `pnpm install --frozen-lockfile`
 
 Dacă workflow-urile trec de install, continuă cu verificarea build/update EAS în dashboard. Dacă mai pică, compară noul run cu run-urile eșuate `28901651896` și `28901651907`, pentru că acelea reflectă doar starea de dinaintea fixului.
 
