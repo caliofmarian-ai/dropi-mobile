@@ -32,9 +32,9 @@
 ### Ce s-a făcut în această sesiune:
 - Implementat strategia mobile-first completă:
   - Creat `docs/MOBILE_FIRST_SETUP.md` — ghid pas-cu-pas one-time setup din browser/telefon
-  - Fixat `.github/workflows/eas-update.yml`: eliminat trigger pe `copilot/**` (OTA doar pe `main`), adăugat validare pentru placeholder `YOUR_EAS_PROJECT_ID` și pentru `EXPO_TOKEN`
-  - Îmbunătățit `app.config.ts`: `EAS_PROJECT_ID` citit din variabilă de mediu cu fallback + warning runtime dacă placeholder-ul nu e înlocuit
-- Configurat infrastructura cloud completă: Railway (backend 24/7) + EAS Updates (OTA pe telefon) + GitHub Actions (auto-deploy la commit).
+  - Fixat `.github/workflows/eas-update.yml`: eliminat trigger pe `copilot/**` (OTA doar pe `main`), adăugat validare pentru placeholder și `EXPO_TOKEN`
+  - Îmbunătățit `app.config.ts`: `EAS_PROJECT_ID` citit din env var cu fallback + warning runtime
+- Creat `.github/workflows/eas-build-android.yml` — build automat APK development Android la fiecare push pe `main` (folosește `EXPO_TOKEN` din Secrets și `EAS_PROJECT_ID` din Variables)
 
 ---
 
@@ -44,17 +44,18 @@
 - Implementare sistem AI Agent Orchestrator
 - Configurare EAS Build pentru Android APK + iOS (`eas.json`)
 - Documente canonice de bază: `AI_DEVELOPMENT_HANDOVER_CANON.md`, `AI_AGENT_SYSTEM.md`, `DELIVERY_MULTIMODAL.md`
-- Infrastructură cloud: `railway.toml`, `.github/workflows/eas-update.yml`, EAS Updates config în `app.config.ts`
+- Infrastructură cloud: `railway.toml`, `eas-update.yml` (OTA), `eas-build-android.yml` (APK), EAS config în `app.config.ts`
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
 - Setup cloud de către fondator (Railway + EAS — pașii manuali rămași, vezi mai jos)
 
 ### 🔴 Blocate
-- EAS Updates nu funcționează până când fondatorul completează pașii din `docs/MOBILE_FIRST_SETUP.md`:
+- EAS Build și EAS Updates nu funcționează până când fondatorul completează:
   1. Creează proiect pe expo.dev → obține Project ID real
-  2. Setează `EAS_PROJECT_ID` ca GitHub Actions secret **sau** editează `app.config.ts`
+  2. Adaugă `EAS_PROJECT_ID` ca GitHub Actions Variable
   3. Adaugă `EXPO_TOKEN` în GitHub Secrets
+  4. Conectează repo pe railway.app + adaugă MySQL + setează variabilele
 
 ---
 
@@ -64,11 +65,14 @@
 
 ```
 Pasul 1: expo.dev → creează proiect → obține Project ID
-         → adaugă EAS_PROJECT_ID în GitHub Actions Variables
-           SAU editează direct app.config.ts
-Pasul 2: expo.dev → Access Tokens → creează EXPO_TOKEN → adaugă în GitHub Secrets
+         → GitHub → Settings → Secrets and variables → Actions → Variables → adaugă EAS_PROJECT_ID
+Pasul 2: expo.dev → Access Tokens → creează token
+         → GitHub → Settings → Secrets → Actions → adaugă EXPO_TOKEN
 Pasul 3: railway.app → New Project → Deploy from GitHub → adaugă MySQL → setează variabilele
-Pasul 4: expo.dev → Builds → New Build (Android / development) → instalează APK pe telefon
+Pasul 4: La primul push pe main → GitHub Actions rulează automat:
+         - eas-build-android.yml → construiește APK development (~15-20 min)
+         - eas-update.yml → OTA update (~3 min)
+         → Descarcă APK din EAS dashboard → instalează pe telefon
 ```
 
 **Următorul task de dezvoltare:** Guards pe mission endpoints (block delivery partners neverificați)
@@ -84,32 +88,35 @@ Pasul 4: expo.dev → Builds → New Build (Android / development) → instaleaz
 | 2026-07-07 | Repository-ul GitHub este puntea între agenți AI (Copilot/Manus) | Asigură continuitate indiferent de platformă sau credite disponibile | Fondator + Copilot Agent |
 | 2026-07-07 | `SESSION_HANDOVER.md` se actualizează obligatoriu la sfârșitul oricărei sesiuni | Fără actualizare = pierdere de context la switch între platforme | Fondator + Copilot Agent |
 | 2026-07-07 | Backend pe Railway, mobile updates prin EAS Updates (OTA), auto-deploy prin GitHub Actions | Workflow 100% cloud, fără dependență de computerul fondatorului | Fondator + Copilot Agent |
-| 2026-07-07 | EAS OTA se publică DOAR din branch `main` (nu din `copilot/**`) | Evită update-uri OTA din branch-uri WIP/agent; telefon primește doar cod aprobat | Copilot Agent |
-| 2026-07-07 | `EAS_PROJECT_ID` se poate seta ca GitHub Actions Variable în loc de hardcodat | Permite setup fără editare manuală a codului | Copilot Agent |
+| 2026-07-07 | EAS OTA se publică DOAR din branch `main` | Evită update-uri OTA din branch-uri WIP/agent | Copilot Agent |
+| 2026-07-07 | `EAS_PROJECT_ID` ca GitHub Actions Variable (nu hardcodat) | Setup fără editare manuală a codului | Copilot Agent |
+| 2026-07-07 | APK build automat la fiecare push pe `main` via `eas-build-android.yml` | Fondatorul nu mai are nevoie de terminal local pentru build | Copilot Agent |
 
 ---
 
 ## 5. Contexte Importante
+
+### GitHub Actions Workflows
+| Workflow | Fișier | Trigger | Scop |
+|----------|--------|---------|------|
+| EAS Build Android | `eas-build-android.yml` | push main | Construiește APK development Android |
+| EAS Update OTA | `eas-update.yml` | push main | Trimite update OTA pe telefon |
+| Railway Notify | `railway-notify.yml` | push main (server/) | Confirmă deploy backend |
 
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
 | `copilot/update-project-views` | Branch curent de lucru Copilot | Activ |
 
-### PR-uri deschise
-| PR | Titlu | Status |
-|----|-------|--------|
-| *(de completat)* | *(titlu)* | *(status)* |
-
 ### Probleme cunoscute / Datorie tehnică
-- `EAS_PROJECT_ID` trebuie setat de fondator (ca env var sau direct în `app.config.ts`) — ghid în `docs/MOBILE_FIRST_SETUP.md`
+- `EAS_PROJECT_ID` trebuie setat de fondator ca GitHub Actions Variable
 - `EXPO_TOKEN` trebuie adăugat în GitHub Secrets de fondator
 - Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
 
 ### Tehnologii principale
 - **Framework:** React Native + Expo SDK 54
 - **Preview:** Expo Dev Client (NU Expo Go) + EAS Updates (OTA)
-- **Build:** EAS Build (Android APK + iOS)
+- **Build:** EAS Build (Android APK) via GitHub Actions
 - **Backend deploy:** Railway (24/7, auto-deploy din GitHub)
 - **Mobile updates:** EAS Updates via GitHub Actions (la fiecare commit pe `main`)
 - **AI Agents:** sistem intern de orchestrare implementat
@@ -142,9 +149,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.1.0**
+Acest document: **v1.2.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-07
-Actualizat de: GitHub Copilot Coding Agent — implementare strategie mobile-first.
+Actualizat de: GitHub Copilot Coding Agent — adăugat workflow EAS Build Android.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
