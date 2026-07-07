@@ -1,0 +1,63 @@
+name: EAS Build — Android APK (development)
+
+# Construiește APK-ul de development Android cu Expo EAS
+# Rulează la fiecare push pe main și manual (workflow_dispatch)
+# APK-ul rezultat este disponibil ca artifact și în dashboard-ul EAS
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android APK (development)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate EAS_PROJECT_ID
+        run: |
+          if [ -z "${{ vars.EAS_PROJECT_ID }}" ] && grep -q "YOUR_EAS_PROJECT_ID" app.config.ts; then
+            echo "❌ EROARE: EAS_PROJECT_ID nu este configurat"
+            echo "   → GitHub → Settings → Secrets and variables → Actions → Variables → adaugă EAS_PROJECT_ID"
+            echo "   → SAU editează app.config.ts și înlocuiește YOUR_EAS_PROJECT_ID cu ID-ul real"
+            exit 1
+          fi
+          echo "✅ EAS_PROJECT_ID este configurat"
+
+      - name: Validate EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "❌ EROARE: EXPO_TOKEN nu este setat în GitHub Secrets"
+            echo "   → expo.dev → Access Tokens → creează token → GitHub → Settings → Secrets → Actions → adaugă EXPO_TOKEN"
+            exit 1
+          fi
+          echo "✅ EXPO_TOKEN este configurat"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build Android APK (development)
+        run: eas build --profile development --platform android --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}

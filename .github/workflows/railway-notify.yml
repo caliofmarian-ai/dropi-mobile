@@ -1,0 +1,33 @@
+name: Railway Deploy (Backend)
+
+# Railway detectează automat push-urile și face deploy
+# Acest workflow este doar pentru notificare/verificare
+# Deploy-ul real este gestionat direct de Railway din GitHub
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'server/**'
+      - 'drizzle/**'
+      - 'package.json'
+      - 'railway.toml'
+
+jobs:
+  notify:
+    name: Backend Deploy Triggered
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify build configuration
+        run: |
+          echo "✅ Backend changes detected"
+          echo "✅ Railway va face deploy automat din GitHub"
+          echo "✅ Verifică statusul la: https://railway.app/dashboard"
+          echo ""
+          echo "Fișiere modificate în server/:"
+          git diff --name-only HEAD~1 HEAD -- server/ drizzle/ || echo "(primul commit)"

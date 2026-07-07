@@ -10,6 +10,7 @@ import { apiKeyRouter, b2bDeliveryRouter, webhookRouter, apiAnalyticsRouter } fr
 import { pilotSelectionRouter } from "./pilot-selection-router";
 import { pilotRatingAdminRouter } from "./pilot-rating-admin";
 import { notificationRouter } from "./notification-router";
+import { agentRouter } from "./agent-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -61,6 +62,9 @@ export const appRouter = router({
 
   // Push Notifications — Token registration
   notifications: notificationRouter,
+
+  // AI Agent Orchestrator — task queue, agent states, reports
+  agent: agentRouter,
 });
 
 export type AppRouter = typeof appRouter;
