@@ -26,15 +26,19 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-07 |
-| **Branch activ** | `copilot/update-project-views` |
+| **Branch activ** | `copilot/dropi-feature-implementation` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- Implementat strategia mobile-first completă:
-  - Creat `docs/MOBILE_FIRST_SETUP.md` — ghid pas-cu-pas one-time setup din browser/telefon
-  - Fixat `.github/workflows/eas-update.yml`: eliminat trigger pe `copilot/**` (OTA doar pe `main`), adăugat validare pentru placeholder și `EXPO_TOKEN`
-  - Îmbunătățit `app.config.ts`: `EAS_PROJECT_ID` citit din env var cu fallback + warning runtime
-- Creat `.github/workflows/eas-build-android.yml` — build automat APK development Android la fiecare push pe `main` (folosește `EXPO_TOKEN` din Secrets și `EAS_PROJECT_ID` din Variables)
+- Investigat eșecul GitHub Actions pe `pnpm install --frozen-lockfile` pentru workflow-urile EAS.
+- Identificată cauza reală: `package.json` cerea `expo-dev-client@~5.0.28`, dar această versiune nu mai există pentru SDK 54 și nici nu era sincronizată în `pnpm-lock.yaml`.
+- Actualizat `package.json` la versiunea compatibilă `expo-dev-client@~6.0.21` și regenerat `pnpm-lock.yaml`.
+- Validat local:
+  - `pnpm install --frozen-lockfile` ✅
+  - `pnpm run check` ✅
+  - `pnpm run build` ✅
+  - `pnpm run lint` ❌ (erori/warnings preexistente în mai multe ecrane React)
+  - `pnpm run test` ❌ (`tests/smtp.test.ts` cere `GMAIL_APP_PASSWORD` în environment)
 
 ---
 
@@ -48,7 +52,7 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- EAS Build Android (APK) — necesită push pe `main` pentru a declanșa GitHub Actions
+- Verificarea finală a workflow-urilor EAS după merge-ul fixului pentru lockfile
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -57,21 +61,19 @@
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- Nimic blocat — toate pașii de setup cloud sunt finalizați
+- Nimic blocat la nivel de setup; rămân doar eșecuri locale preexistente la `lint` și `test`
 
 ---
 
 ## 3. Pasul Următor Concret
 
-**✅ Setup cloud complet — toate pașii manuali finalizați de fondator.**
+**Următorul pas imediat:** fă merge/push pentru fixul `expo-dev-client` + `pnpm-lock.yaml`, apoi verifică din GitHub Actions că:
+- `eas-build-android.yml` trece de pasul `pnpm install --frozen-lockfile`
+- `eas-update.yml` trece de pasul `pnpm install --frozen-lockfile`
 
-**Următorul pas imediat:** Mergi pe GitHub → repo `dropi-mobile` → fă un push/merge pe branch-ul `main` pentru a declanșa GitHub Actions:
-- `eas-build-android.yml` → construiește APK development Android (~15-20 min)
-- `eas-update.yml` → OTA update (~3 min)
+Dacă workflow-urile trec de install, continuă cu verificarea build/update EAS în dashboard.
 
-Apoi: Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Client.
-
-**Următorul task de dezvoltare:** Guards pe mission endpoints (block delivery partners neverificați)
+**Următorul task de dezvoltare după validarea CI:** Guards pe mission endpoints (block delivery partners neverificați)
 
 ---
 
@@ -87,6 +89,7 @@ Apoi: Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Cli
 | 2026-07-07 | EAS OTA se publică DOAR din branch `main` | Evită update-uri OTA din branch-uri WIP/agent | Copilot Agent |
 | 2026-07-07 | `EAS_PROJECT_ID` ca GitHub Actions Variable (nu hardcodat) | Setup fără editare manuală a codului | Copilot Agent |
 | 2026-07-07 | APK build automat la fiecare push pe `main` via `eas-build-android.yml` | Fondatorul nu mai are nevoie de terminal local pentru build | Copilot Agent |
+| 2026-07-07 | `expo-dev-client` pentru Expo SDK 54 trebuie ținut pe seria `~6.0.x`, nu `~5.0.x` | `~5.0.28` nu se mai rezolvă și rupe sincronizarea `package.json` ↔ `pnpm-lock.yaml` | Copilot Agent |
 
 ---
 
@@ -102,11 +105,11 @@ Apoi: Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Cli
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
-| `copilot/update-project-views` | Branch curent de lucru Copilot | Activ |
+| `copilot/dropi-feature-implementation` | Branch curent de lucru Copilot | Activ |
 
 ### Probleme cunoscute / Datorie tehnică
-- `EAS_PROJECT_ID` hardcodat în `app.config.ts` ca `4720acfb-4ff2-4a5d-85eb-8ff14c439ea6` ✅
-- `EXPO_TOKEN` trebuie adăugat în GitHub Secrets de fondator (dacă nu e deja)
+- `pnpm run lint` are erori preexistente (`react/no-unescaped-entities`) și multe warnings în mai multe fișiere UI
+- `pnpm run test` eșuează local dacă lipsește `GMAIL_APP_PASSWORD`
 - Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
 
 ### Tehnologii principale
@@ -145,9 +148,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.2.0**
+Acest document: **v1.3.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-07
-Actualizat de: GitHub Copilot Coding Agent — adăugat workflow EAS Build Android.
+Actualizat de: GitHub Copilot Coding Agent — fix lockfile `pnpm` + versiune `expo-dev-client`.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
