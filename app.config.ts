@@ -20,6 +20,17 @@ const bundleId =
 const timestamp = bundleId.split(".").pop()?.replace(/^t/, "") ?? "";
 const schemeFromBundleId = `manus${timestamp}`;
 
+// EAS Project ID — înlocuiește YOUR_EAS_PROJECT_ID cu ID-ul real din https://expo.dev
+// Pași: expo.dev → Projects → dropi-mobile → copiază Project ID → editează acest fișier
+const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID ?? "YOUR_EAS_PROJECT_ID";
+if (EAS_PROJECT_ID === "YOUR_EAS_PROJECT_ID") {
+  console.warn(
+    "\n⚠️  [app.config.ts] EAS_PROJECT_ID nu este configurat!\n" +
+    "   EAS Updates (OTA) NU vor funcționa fără un Project ID real.\n" +
+    "   → Urmează pașii din docs/MOBILE_FIRST_SETUP.md, Pasul 1.\n"
+  );
+}
+
 const env = {
   appName: "DROPi",
   appSlug: "dropi-mobile",
@@ -39,9 +50,9 @@ const config: ExpoConfig = {
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   // EAS Updates — Over-The-Air updates fără reconstruire APK
-  // După `eas init`, înlocuiește YOUR_EAS_PROJECT_ID cu ID-ul real
+  // Înlocuiește YOUR_EAS_PROJECT_ID urmând pașii din docs/MOBILE_FIRST_SETUP.md
   updates: {
-    url: "https://u.expo.dev/YOUR_EAS_PROJECT_ID",
+    url: `https://u.expo.dev/${EAS_PROJECT_ID}`,
     checkAutomatically: "ON_LOAD",
   },
   runtimeVersion: {
@@ -49,7 +60,7 @@ const config: ExpoConfig = {
   },
   extra: {
     eas: {
-      projectId: "YOUR_EAS_PROJECT_ID",
+      projectId: EAS_PROJECT_ID,
     },
   },
   ios: {

@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - main
-      - copilot/**
   workflow_dispatch:
 
 jobs:
@@ -17,6 +16,24 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Validate EAS project ID
+        run: |
+          if grep -q "YOUR_EAS_PROJECT_ID" app.config.ts; then
+            echo "❌ EROARE: app.config.ts conține YOUR_EAS_PROJECT_ID (placeholder neînlocuit)"
+            echo "   → Mergi la https://expo.dev, creează proiectul și înlocuiește placeholder-ul."
+            exit 1
+          fi
+          echo "✅ EAS Project ID este configurat corect"
+
+      - name: Validate EXPO_TOKEN secret
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "❌ EROARE: EXPO_TOKEN nu este setat în GitHub Secrets"
+            echo "   → Mergi la GitHub → Settings → Secrets → Actions → adaugă EXPO_TOKEN"
+            exit 1
+          fi
+          echo "✅ EXPO_TOKEN este configurat"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
