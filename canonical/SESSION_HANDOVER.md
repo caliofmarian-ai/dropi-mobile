@@ -39,6 +39,11 @@
   - `pnpm run build` ✅
   - `pnpm run lint` ❌ (erori/warnings preexistente în mai multe ecrane React)
   - `pnpm run test` ❌ (`tests/smtp.test.ts` cere `GMAIL_APP_PASSWORD` în environment)
+- Reverificat GitHub Actions pe `main`:
+  - `EAS Build — Android APK (development)` run `#2` (`28901651896`) ❌
+  - `EAS Update (OTA)` run `#3` (`28901651907`) ❌
+  - ambele au picat exact la `pnpm install --frozen-lockfile` pe commitul vechi `cb79f1f`, unde lockfile-ul încă avea `expo-dev-client@~5.0.28`
+- Confirmat că branch-ul curent conține fixul (`1a85397`) și că local lockfile-ul este acum sincronizat corect.
 
 ---
 
@@ -52,7 +57,7 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Verificarea finală a workflow-urilor EAS după merge-ul fixului pentru lockfile
+- Verificarea finală a workflow-urilor EAS după merge/push al fixului de pe branch-ul curent
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -61,17 +66,17 @@
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- Nimic blocat la nivel de setup; rămân doar eșecuri locale preexistente la `lint` și `test`
+- Nimic blocat la nivel de setup; CI-ul EAS nu este încă reconfirmat deoarece fixul validat local este încă pe branch-ul Copilot, nu pe `main`
 
 ---
 
 ## 3. Pasul Următor Concret
 
-**Următorul pas imediat:** fă merge/push pentru fixul `expo-dev-client` + `pnpm-lock.yaml`, apoi verifică din GitHub Actions că:
+**Următorul pas imediat:** fă merge/push pentru commitul `1a85397` (fix `expo-dev-client` + `pnpm-lock.yaml`), apoi verifică din GitHub Actions că:
 - `eas-build-android.yml` trece de pasul `pnpm install --frozen-lockfile`
 - `eas-update.yml` trece de pasul `pnpm install --frozen-lockfile`
 
-Dacă workflow-urile trec de install, continuă cu verificarea build/update EAS în dashboard.
+Dacă workflow-urile trec de install, continuă cu verificarea build/update EAS în dashboard. Dacă mai pică, compară noul run cu run-urile eșuate `28901651896` și `28901651907`, pentru că acelea reflectă doar starea de dinaintea fixului.
 
 **Următorul task de dezvoltare după validarea CI:** Guards pe mission endpoints (block delivery partners neverificați)
 
@@ -148,9 +153,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.3.0**
+Acest document: **v1.3.1**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-07
-Actualizat de: GitHub Copilot Coding Agent — fix lockfile `pnpm` + versiune `expo-dev-client`.
+Actualizat de: GitHub Copilot Coding Agent — validare locală fix `expo-dev-client`/`pnpm-lock.yaml` + audit GitHub Actions.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
