@@ -228,10 +228,23 @@ Un task este „done” doar dacă:
 
 ---
 
-## 14. Versioning
+## 14. Session Continuity Between Agents and Platforms
 
-Acest document: **v1.0.0**  
-Data: 3 Iulie 2026  
+Fondatorul lucrează cu mai mulți agenți AI în rotație (ex: GitHub Copilot Agent, Manus), în funcție de creditele disponibile pe fiecare platformă.
+
+**Regula de continuitate:**
+- Documentul `canonical/SESSION_HANDOVER.md` este **fișierul de stare activă** al proiectului.
+- Se actualizează obligatoriu la **sfârșitul oricărei sesiuni**, indiferent de platformă.
+- Orice agent nou **citește SESSION_HANDOVER.md primul**, înainte de orice altă acțiune.
+- Repository-ul GitHub este puntea între platforme: tot ce se commitează devine vizibil pentru orice agent la sesiunea următoare.
+
+---
+
+## 15. Versioning
+
+Acest document: **v1.1.0**  
+Data ultimei actualizări: 7 Iulie 2026  
+Modificare v1.1.0: Adăugat secțiunea 14 despre continuitatea între sesiuni și platforme AI. Creat `canonical/SESSION_HANDOVER.md`.  
 Bază: Handover strategic furnizat de fondator + consolidare canonică în repository.
 
 ---
