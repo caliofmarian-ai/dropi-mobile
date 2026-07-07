@@ -175,7 +175,67 @@ Fiecare agent AI raportează periodic:
 
 ---
 
-## 7. Arhitectura Tehnică (Direcție)
+## 7. Arhitectura Tehnică
+
+### 7.1 Orchestratorul Central
+
+Serviciu cloud în `server/_core/orchestrator.ts` care:
+
+- Ține evidența tuturor agenților activi (29 roluri) prin tabela `agentState`
+- Știe starea fiecărui agent: `IDLE / RUNNING / WAITING`
+- Polling continuu (la 8s) al cozii `agentTasks` — preia taskul cu prioritatea cea mai mare
+- Execută maxim 3 agenți simultan (configurabil `MAX_CONCURRENT_TASKS`)
+- Detectează când toate taskurile dintr-un `orchestratorRunId` sunt complete și notifică adminul
+
+### 7.2 Agentul AI per Rol
+
+Implementat în `server/_core/agent-runner.ts`:
+
+- Primește un `taskId` de la orchestrator
+- Construiește un system prompt specific rolului (din `ROLE_DESCRIPTION_MAP`)
+- Apelează `invokeLLM` cu un output schema structurat (JSON)
+- Parsează răspunsul în raport canonic: `actionsExecuted`, `bugsFound`, `logicIssues`, `suggestions`, `edgeCases`, `overallStatus`, `summary`
+- Salvează raportul în `agentReports`
+- Raportează înapoi `task_done` — orchestratorul îl reactivează când e nevoie
+
+### 7.3 Flux de orchestrare (cloud)
+
+```
+Admin → POST /trpc/agent.submitRun
+  → Orchestrator polleaza agentTasks (pending, prioritate)
+  → runAgentTask(taskId)
+    → agentState: RUNNING
+    → invokeLLM(system_prompt + task_payload)
+    → agentReports.insert(raport structurat)
+    → agentState: IDLE, agentTasks: done
+  → checkRunCompletion(orchestratorRunId)
+    → dacă toate taskurile sunt done → notifyOwner(raport complet)
+Admin primește notificare pe telefon / Manus
+```
+
+Agentul rulează **în cloud** (pe server), nu pe telefon — nu depinde de conexiunea telefonului.
+
+### 7.4 Baza de date
+
+```
+agentTasks    — coada de taskuri (status: pending/running/done/failed/cancelled)
+agentState    — starea curentă a fiecărui agent (idle/running/waiting)
+agentReports  — rapoarte structurate generate după fiecare task completat
+```
+
+Migrație: `drizzle/0013_agent_orchestrator.sql`
+
+### 7.5 API Admin (tRPC — `agent.*`)
+
+```
+agent.submitTask      — trimite un singur task la orchestrator
+agent.submitRun       — trimite mai multe taskuri ca un singur run (același runId)
+agent.listTasks       — vizualizează coada de taskuri (filtrare: status, rol, runId)
+agent.cancelTask      — anulează un task pending
+agent.listAgentStates — starea live a tuturor agenților (filtrare: channel, status)
+agent.listReports     — rapoartele generate de agenți
+agent.getReport       — detalii raport individual
+```
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -190,10 +250,15 @@ Fiecare agent AI raportează periodic:
 │  ┌────▼─────┐  ┌────▼─────┐  ┌────▼─────┐     │
 │  │ Agent AI │  │ Agent AI │  │ Agent AI │     │
 │  │ Customer │  │ Merchant │  │ Pilot    │     │
-│  │ (AUTONOM) │  │(ASISTENT)│  │ (AUTONOM)│     │
-│  └──────────┘  └──────────┘  └──────────┘     │
+│  │ (AUTONOM)│  │(ASISTENT)│  │ (AUTONOM)│     │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘     │
 │       │              │              │            │
 │       └──────────────┼──────────────┘            │
+│                      │                           │
+│              ┌───────▼───────┐                   │
+│              │  ORCHESTRATOR │                   │
+│              │  (Task Queue) │                   │
+│              └───────┬───────┘                   │
 │                      │                           │
 │              ┌───────▼───────┐                   │
 │              │  AI ENGINE    │                   │
@@ -207,9 +272,9 @@ Fiecare agent AI raportează periodic:
 
 ## 8. Versioning
 
-Acest document: **v1.0.0** — Creat pe 27 Iunie 2026
-Ultima actualizare: 27 Iunie 2026
-Autor: Definit de fondator, documentat de Manus AI
+Acest document: **v2.0.0** — Actualizat pe 7 Iulie 2026
+Versiunea anterioară: v1.0.0 (27 Iunie 2026) — arhitectura era în direcție, fără implementare
+Autor v2.0.0: Implementat de Copilot Agent pe baza viziunii fondatorului
 
 ---
 

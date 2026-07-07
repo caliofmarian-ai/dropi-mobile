@@ -10,6 +10,7 @@ import { initLiveTracking, getTrackingStats } from "../live-tracking";
 import { initNotificationWS, getNotificationWSStats } from "../ws-notifications";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
+import { startOrchestrator } from "./orchestrator";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -93,6 +94,9 @@ async function startServer() {
 
   // Initialize WebSocket notification channel
   initNotificationWS(server);
+
+  // Start AI Agent Orchestrator (polls task queue every 8s)
+  startOrchestrator();
 
   server.listen(port, () => {
     console.log(`[api] server listening on port ${port}`);

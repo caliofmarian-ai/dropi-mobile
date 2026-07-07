@@ -689,3 +689,94 @@ export const notificationPreferences = mysqlTable("notificationPreferences", {
 });
 export type NotificationPreference = typeof notificationPreferences.$inferSelect;
 export type InsertNotificationPreference = typeof notificationPreferences.$inferInsert;
+
+
+// ============================================================
+// AI AGENT ORCHESTRATOR (Sprint Agent)
+// ============================================================
+
+/**
+ * Agent Tasks — queue of tasks dispatched by the orchestrator.
+ * Each task targets one of the 29 DROPi roles.
+ * Status lifecycle: pending → running → done / failed / cancelled
+ */
+export const agentTasks = mysqlTable("agentTasks", {
+  id: int("id").autoincrement().primaryKey(),
+  // Groups related tasks dispatched in one orchestrator run
+  orchestratorRunId: varchar("orchestratorRunId", { length: 36 }),
+  dropiRole: mysqlEnum("dropiRole", [...ALL_DROPI_ROLES]).notNull(),
+  channel: mysqlEnum("channel", ["C1", "C2", "C3", "ADMIN"]).notNull(),
+  // Task classification: audit, validate, simulate, report, custom
+  taskType: varchar("taskType", { length: 100 }).notNull(),
+  // Input context/instructions for the agent (JSON object)
+  payload: json("payload"),
+  status: mysqlEnum("status", ["pending", "running", "done", "failed", "cancelled"]).default("pending").notNull(),
+  // 1 = highest, 10 = lowest
+  priority: int("priority").default(5).notNull(),
+  // Output produced by the agent (JSON)
+  result: json("result"),
+  errorMessage: text("errorMessage"),
+  // Admin user who submitted this task (null = system-generated)
+  createdBy: int("createdBy"),
+  // AI agent user executing this task (FK → users.id where isAIAgent=true)
+  agentUserId: int("agentUserId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  startedAt: timestamp("startedAt"),
+  completedAt: timestamp("completedAt"),
+});
+export type AgentTask = typeof agentTasks.$inferSelect;
+export type InsertAgentTask = typeof agentTasks.$inferInsert;
+
+/**
+ * Agent State — live snapshot of each AI agent's current status.
+ * One row per AI agent user (unique on agentUserId).
+ * Updated by the orchestrator as tasks are dispatched and completed.
+ */
+export const agentState = mysqlTable("agentState", {
+  id: int("id").autoincrement().primaryKey(),
+  // FK → users.id (isAIAgent = true)
+  agentUserId: int("agentUserId").notNull().unique(),
+  dropiRole: mysqlEnum("dropiRole", [...ALL_DROPI_ROLES]).notNull(),
+  channel: mysqlEnum("channel", ["C1", "C2", "C3", "ADMIN"]).notNull(),
+  // idle: waiting for work | running: executing a task | waiting: blocked on dependency
+  status: mysqlEnum("status", ["idle", "running", "waiting"]).default("idle").notNull(),
+  // FK → agentTasks.id — populated while running
+  currentTaskId: int("currentTaskId"),
+  // Last known context passed to this agent (JSON — orchestrator-managed)
+  context: json("context"),
+  lastActiveAt: timestamp("lastActiveAt").defaultNow().notNull(),
+  lastReportAt: timestamp("lastReportAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type AgentStateRow = typeof agentState.$inferSelect;
+export type InsertAgentState = typeof agentState.$inferInsert;
+
+/**
+ * Agent Reports — structured output generated after each task execution.
+ * Immutable audit trail: one report per completed task.
+ * Mirrors the canonical report format from AI_AGENT_SYSTEM.md §5.
+ */
+export const agentReports = mysqlTable("agentReports", {
+  id: int("id").autoincrement().primaryKey(),
+  agentUserId: int("agentUserId").notNull(),
+  dropiRole: mysqlEnum("dropiRole", [...ALL_DROPI_ROLES]).notNull(),
+  // FK → agentTasks.id
+  taskId: int("taskId"),
+  channel: mysqlEnum("channel", ["C1", "C2", "C3", "ADMIN"]).notNull(),
+  mode: mysqlEnum("mode", ["autonomous", "assistant"]).default("autonomous").notNull(),
+  // Period label, e.g. "2026-07-07" or "last-24h"
+  period: varchar("period", { length: 50 }),
+  // Arrays of action/issue/suggestion objects (JSON)
+  actionsExecuted: json("actionsExecuted"),
+  bugsFound: json("bugsFound"),
+  logicIssues: json("logicIssues"),
+  suggestions: json("suggestions"),
+  edgeCases: json("edgeCases"),
+  overallStatus: mysqlEnum("overallStatus", ["ok", "attention", "critical"]).default("ok").notNull(),
+  // Plain-text executive summary
+  summary: text("summary"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AgentReport = typeof agentReports.$inferSelect;
+export type InsertAgentReport = typeof agentReports.$inferInsert;
