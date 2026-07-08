@@ -30,6 +30,9 @@
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
+- Fix pentru deploy EAS:
+  - eliminată cheia invalidă `update` din `eas.json` (schema EAS nu o acceptă)
+  - verificat că eroarea de validare `eas.json is not valid - "update" is not allowed` nu mai apare local
 - Configurare pentru testele SMTP ca să citească variabile de mediu local:
   - `tests/smtp.test.ts` încarcă acum `.env` prin `dotenv/config`
   - testul acceptă `GMAIL_APP_PASSWORD` sau fallback `SMTP_PASS`
@@ -51,7 +54,7 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- EAS Build Android (APK) — necesită push pe `main` pentru a declanșa GitHub Actions
+- Re-rulare workflows `eas-build-android.yml` și `eas-update.yml` după fixul din `eas.json`
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -66,7 +69,7 @@
 
 ## 3. Pasul Următor Concret
 
-**Următorul pas imediat:** setează în mediul local/CI una din variabilele `GMAIL_APP_PASSWORD` sau `SMTP_PASS` cu parola Gmail App Password reală, apoi rulează `npm test`.
+**Următorul pas imediat:** fă merge/push pe `main` și verifică în GitHub Actions că `eas-build-android.yml` și `eas-update.yml` trec după fixul din `eas.json`.
 
 **Următorul task de dezvoltare:** curățare graduală a warning-urilor ESLint rămase (fără schimbări de logică), apoi taskurile backend planificate (guards pe mission endpoints).
 
@@ -142,9 +145,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.2.2**
+Acest document: **v1.2.3**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-08
-Actualizat de: GitHub Copilot Coding Agent — suport variabile SMTP în test + update `.env.example`.
+Actualizat de: GitHub Copilot Coding Agent — fix validare `eas.json` pentru deploy EAS + actualizare handover.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
