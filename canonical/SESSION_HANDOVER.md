@@ -30,15 +30,14 @@
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- Rulate validările repository-ului:
-  - `npm run lint` (fără erori după fixuri, rămân doar warnings)
-  - `npm run build` (trece)
-  - `npm test` (eșuează din cauza lipsei `GMAIL_APP_PASSWORD` în mediu, nu din cod)
-- Aplicate fixuri pe lint `react/no-unescaped-entities` în:
-  - `app/admin/fcm-config.tsx`
-  - `app/forgot-password.tsx`
-  - `app/merchant/api-integration.tsx`
-  - `app/verify-email.tsx`
+- Configurare pentru testele SMTP ca să citească variabile de mediu local:
+  - `tests/smtp.test.ts` încarcă acum `.env` prin `dotenv/config`
+  - testul acceptă `GMAIL_APP_PASSWORD` sau fallback `SMTP_PASS`
+- Actualizat `.env.example` cu `GMAIL_APP_PASSWORD=`
+- Validare:
+  - `npm run lint` ✅ (0 errors, warnings existente)
+  - `npm run build` ✅
+  - `npm test` ❌ încă eșuează fără credențiale reale (`GMAIL_APP_PASSWORD`/`SMTP_PASS`)
 
 ---
 
@@ -67,7 +66,7 @@
 
 ## 3. Pasul Următor Concret
 
-**Următorul pas imediat:** rulează același set de validări într-un mediu cu variabilele necesare (`GMAIL_APP_PASSWORD`, opțional `OAUTH_SERVER_URL`) ca să confirmi și testele.
+**Următorul pas imediat:** setează în mediul local/CI una din variabilele `GMAIL_APP_PASSWORD` sau `SMTP_PASS` cu parola Gmail App Password reală, apoi rulează `npm test`.
 
 **Următorul task de dezvoltare:** curățare graduală a warning-urilor ESLint rămase (fără schimbări de logică), apoi taskurile backend planificate (guards pe mission endpoints).
 
@@ -143,9 +142,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.2.1**
+Acest document: **v1.2.2**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-08
-Actualizat de: GitHub Copilot Coding Agent — fixuri lint `react/no-unescaped-entities` + revalidare lint/build/test.
+Actualizat de: GitHub Copilot Coding Agent — suport variabile SMTP în test + update `.env.example`.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
