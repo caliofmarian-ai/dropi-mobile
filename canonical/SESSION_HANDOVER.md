@@ -25,16 +25,20 @@
 | Câmp | Valoare |
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
-| **Data** | 2026-07-07 |
-| **Branch activ** | `copilot/update-project-views` |
+| **Data** | 2026-07-08 |
+| **Branch activ** | `copilot/situaia-actual` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- Implementat strategia mobile-first completă:
-  - Creat `docs/MOBILE_FIRST_SETUP.md` — ghid pas-cu-pas one-time setup din browser/telefon
-  - Fixat `.github/workflows/eas-update.yml`: eliminat trigger pe `copilot/**` (OTA doar pe `main`), adăugat validare pentru placeholder și `EXPO_TOKEN`
-  - Îmbunătățit `app.config.ts`: `EAS_PROJECT_ID` citit din env var cu fallback + warning runtime
-- Creat `.github/workflows/eas-build-android.yml` — build automat APK development Android la fiecare push pe `main` (folosește `EXPO_TOKEN` din Secrets și `EAS_PROJECT_ID` din Variables)
+- Rulate validările repository-ului:
+  - `npm run lint` (fără erori după fixuri, rămân doar warnings)
+  - `npm run build` (trece)
+  - `npm test` (eșuează din cauza lipsei `GMAIL_APP_PASSWORD` în mediu, nu din cod)
+- Aplicate fixuri pe lint `react/no-unescaped-entities` în:
+  - `app/admin/fcm-config.tsx`
+  - `app/forgot-password.tsx`
+  - `app/merchant/api-integration.tsx`
+  - `app/verify-email.tsx`
 
 ---
 
@@ -63,15 +67,9 @@
 
 ## 3. Pasul Următor Concret
 
-**✅ Setup cloud complet — toate pașii manuali finalizați de fondator.**
+**Următorul pas imediat:** rulează același set de validări într-un mediu cu variabilele necesare (`GMAIL_APP_PASSWORD`, opțional `OAUTH_SERVER_URL`) ca să confirmi și testele.
 
-**Următorul pas imediat:** Mergi pe GitHub → repo `dropi-mobile` → fă un push/merge pe branch-ul `main` pentru a declanșa GitHub Actions:
-- `eas-build-android.yml` → construiește APK development Android (~15-20 min)
-- `eas-update.yml` → OTA update (~3 min)
-
-Apoi: Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Client.
-
-**Următorul task de dezvoltare:** Guards pe mission endpoints (block delivery partners neverificați)
+**Următorul task de dezvoltare:** curățare graduală a warning-urilor ESLint rămase (fără schimbări de logică), apoi taskurile backend planificate (guards pe mission endpoints).
 
 ---
 
@@ -145,9 +143,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.2.0**
+Acest document: **v1.2.1**
 Data creării: 2026-07-07
-Ultima actualizare: 2026-07-07
-Actualizat de: GitHub Copilot Coding Agent — adăugat workflow EAS Build Android.
+Ultima actualizare: 2026-07-08
+Actualizat de: GitHub Copilot Coding Agent — fixuri lint `react/no-unescaped-entities` + revalidare lint/build/test.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
