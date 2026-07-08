@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import * as nodemailer from "nodemailer";
+import "dotenv/config";
 
 describe("SMTP Gmail Configuration", () => {
   it("should verify SMTP credentials are valid", async () => {
