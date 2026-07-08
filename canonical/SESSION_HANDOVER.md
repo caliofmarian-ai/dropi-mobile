@@ -25,19 +25,18 @@
 | Câmp | Valoare |
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
-| **Data** | 2026-07-07 |
-| **Branch activ** | `copilot/dropi-feature-implementation` |
+| **Data** | 2026-07-08 |
+| **Branch activ** | `copilot/fix-issue-with-login-flow` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- Confirmat că branch-ul `copilot/dropi-feature-implementation` conține deja fixul `1a85397` și este deja push-uit pe remote.
-- Făcut `git fetch --unshallow origin` + fetch explicit pentru `origin/main`, apoi pregătit local cherry-pick-ul fixului pe `main` ca commit `8819be9`.
-- Încercat push direct pe `main`, dar GitHub a respins operația cu regula de branch protection `GH013` (`Cannot update this protected ref`).
-- Reverificate run-urile actuale din GitHub Actions pentru workflow-urile EAS:
-  - `EAS Build — Android APK (development)` run `#2` (`28901651896`) ❌
-  - `EAS Update (OTA)` run `#3` (`28901651907`) ❌
-  - ambele încă rulează pe commitul vechi `cb79f1f` și pică la `pnpm install --frozen-lockfile`, exact din cauza mismatch-ului `expo-dev-client` / `pnpm-lock.yaml`
-- Confirmat că nu există run-uri noi pentru fix, deoarece workflow-urile pornesc doar pe `push` către `main` sau `workflow_dispatch`, iar `main` nu a fost actualizat din cauza protecției.
+- PR #6 (`copilot/fix-main-lockfile`) a fost merge-uit pe `main` — fixul `expo-dev-client ~6.0.x` + `pnpm-lock.yaml` regenerat ✅
+- `main` este acum la SHA `1286dd8f` (după merge PR #6)
+- Verificate noi run-uri GitHub Actions pe SHA-ul nou:
+  - `EAS Build — Android APK (development)` run pe `1286dd8f` ❌ — eroare nouă: `eas.json is not valid. - "update" is not allowed`
+  - `EAS Update (OTA)` run pe `1286dd8f` ❌ — aceeași eroare EAS CLI >= 16
+- Identificat că câmpul `"update": { "channel": "..." }` la nivel de root în `eas.json` nu mai este permis în EAS CLI >= 16.0.0
+- Scos câmpul `"update"` din `eas.json` — canalul rămâne definit în fiecare profil de build (`"channel": "development"` etc.)
 
 ---
 
@@ -51,8 +50,7 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Promovarea fixului `1a85397` către `main` prin mecanism compatibil cu branch protection (PR/merge din GitHub)
-- Reverificarea workflow-urilor EAS imediat după ce `main` primește fixul
+- Validare că workflow-urile EAS trec după fixul `eas.json` (PR curent)
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -61,17 +59,15 @@
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- Push direct pe `main` este blocat de branch protection GitHub (`GH013: Cannot update this protected ref`), deci fixul nu poate ajunge pe `main` fără PR/merge prin GitHub
+- Nimic blocat momentan — PR cu fixul `eas.json` este în curs
 
 ---
 
 ## 3. Pasul Următor Concret
 
-**Următorul pas imediat:** deschide și merge-uiește în GitHub un PR din `copilot/dropi-feature-implementation` (sau din branch-ul derivat din `8819be9`) către `main`, apoi verifică din GitHub Actions că:
-- `eas-build-android.yml` pornește pe noul SHA din `main` și trece de pasul `pnpm install --frozen-lockfile`
-- `eas-update.yml` pornește pe noul SHA din `main` și trece de pasul `pnpm install --frozen-lockfile`
-
-Dacă workflow-urile trec de install, continuă cu verificarea build/update EAS în dashboard. Dacă mai pică, compară noul run cu run-urile eșuate `28901651896` și `28901651907`, pentru că acelea reflectă doar starea de dinaintea fixului.
+**Următorul pas imediat:** merge PR-ul curent cu fixul `eas.json` în `main`, apoi verifică din GitHub Actions că:
+- `eas-build-android.yml` pornește pe noul SHA și trece complet (nu mai primește `eas.json is not valid`)
+- `eas-update.yml` pornește pe noul SHA și trece complet
 
 **Următorul task de dezvoltare după validarea CI:** Guards pe mission endpoints (block delivery partners neverificați)
 
@@ -89,7 +85,7 @@ Dacă workflow-urile trec de install, continuă cu verificarea build/update EAS 
 | 2026-07-07 | EAS OTA se publică DOAR din branch `main` | Evită update-uri OTA din branch-uri WIP/agent | Copilot Agent |
 | 2026-07-07 | `EAS_PROJECT_ID` ca GitHub Actions Variable (nu hardcodat) | Setup fără editare manuală a codului | Copilot Agent |
 | 2026-07-07 | APK build automat la fiecare push pe `main` via `eas-build-android.yml` | Fondatorul nu mai are nevoie de terminal local pentru build | Copilot Agent |
-| 2026-07-07 | `expo-dev-client` pentru Expo SDK 54 trebuie ținut pe seria `~6.0.x`, nu `~5.0.x` | `~5.0.28` nu se mai rezolvă și rupe sincronizarea `package.json` ↔ `pnpm-lock.yaml` | Copilot Agent |
+| 2026-07-08 | Câmpul `"update"` root în `eas.json` scos — incompatibil cu EAS CLI >= 16.0.0 | Canalul e deja definit în profiluri de build; câmpul root nu mai este valid | Copilot Agent |
 
 ---
 
@@ -148,9 +144,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.3.1**
+Acest document: **v1.4.0**
 Data creării: 2026-07-07
-Ultima actualizare: 2026-07-07
-Actualizat de: GitHub Copilot Coding Agent — validare locală fix `expo-dev-client`/`pnpm-lock.yaml` + audit GitHub Actions.
+Ultima actualizare: 2026-07-08
+Actualizat de: GitHub Copilot Coding Agent — fix `eas.json` (scos câmpul `update` invalid pentru EAS CLI >= 16).
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
