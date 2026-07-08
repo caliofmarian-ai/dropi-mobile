@@ -203,7 +203,7 @@ export default function ForgotPasswordScreen() {
                   onPress={() => { setStep("email"); setCode(""); setError(""); setSuccess(""); }}
                   style={{ marginTop: 16 }}
                 >
-                  <Text className="text-primary text-sm text-center">Didn't receive code? Send again</Text>
+                  <Text className="text-primary text-sm text-center">Didn&apos;t receive code? Send again</Text>
                 </TouchableOpacity>
               </>
             )}
