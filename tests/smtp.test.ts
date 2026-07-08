@@ -4,7 +4,7 @@ import "dotenv/config";
 
 describe("SMTP Gmail Configuration", () => {
   it("should verify SMTP credentials are valid", async () => {
-    const password = process.env.GMAIL_APP_PASSWORD;
+    const password = process.env.GMAIL_APP_PASSWORD ?? process.env.SMTP_PASS;
     expect(password).toBeDefined();
     expect(password!.length).toBeGreaterThanOrEqual(10);
 
