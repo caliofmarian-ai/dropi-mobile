@@ -48,7 +48,7 @@ const config: ExpoConfig = {
     checkAutomatically: "ON_LOAD",
   },
   runtimeVersion: {
-    policy: "appVersion",
+    policy: "fingerprint",
   },
   extra: {
     eas: {
