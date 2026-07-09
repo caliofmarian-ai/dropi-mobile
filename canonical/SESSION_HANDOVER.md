@@ -25,11 +25,14 @@
 | Câmp | Valoare |
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
-| **Data** | 2026-07-08 |
+| **Data** | 2026-07-09 |
 | **Branch activ** | `copilot/situaia-actual` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
+- Fix pentru crash după deploy OTA:
+  - schimbat `runtimeVersion.policy` din `appVersion` în `fingerprint` în `app.config.ts`
+  - astfel, EAS Update livrează doar update-uri compatibile cu build-ul nativ curent (evită incompatibilități JS/native după deploy)
 - Fix pentru deploy EAS:
   - eliminată cheia invalidă `update` din `eas.json` (schema EAS nu o acceptă)
   - verificat că eroarea de validare `eas.json is not valid - "update" is not allowed` nu mai apare local
@@ -145,9 +148,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.2.3**
+Acest document: **v1.2.4**
 Data creării: 2026-07-07
-Ultima actualizare: 2026-07-08
-Actualizat de: GitHub Copilot Coding Agent — fix validare `eas.json` pentru deploy EAS + actualizare handover.
+Ultima actualizare: 2026-07-09
+Actualizat de: GitHub Copilot Coding Agent — fix runtime compatibilitate OTA (`runtimeVersion: fingerprint`) + actualizare handover.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
