@@ -6,7 +6,7 @@
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { AppState } from "react-native";
-import Constants from "expo-constants";
+import { getApiBaseUrl } from "@/constants/oauth";
 
 export interface PilotPosition {
   deliveryId: number;
@@ -54,7 +54,7 @@ export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingO
     if (!enabled || !deliveryId) return;
 
     // Build WS URL from API base
-    const apiUrl = Constants.expoConfig?.extra?.apiBaseUrl || "http://127.0.0.1:3000";
+    const apiUrl = getApiBaseUrl() || "http://127.0.0.1:3000";
     const wsUrl = apiUrl.replace(/^http/, "ws") + `/ws/tracking?role=subscriber&deliveryId=${deliveryId}`;
 
     try {
