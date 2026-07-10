@@ -139,7 +139,7 @@ PORT=3000
 ## Pasul 4 — Conectează aplicația mobilă la backend
 
 1. Deschide GitHub → fișierul `.env.example`
-2. Adaugă URL-ul Railway în variabilele de mediu ale aplicației (dacă există `EXPO_PUBLIC_API_URL`)
+2. Adaugă URL-ul Railway în variabilele de mediu ale aplicației (`EXPO_PUBLIC_API_BASE_URL`)
 3. Commit pe `main` → EAS Update OTA → aplicația se actualizează automat
 
 ---

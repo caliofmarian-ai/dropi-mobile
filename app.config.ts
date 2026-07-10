@@ -51,6 +51,7 @@ const config: ExpoConfig = {
     policy: "fingerprint",
   },
   extra: {
+    apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? "",
     eas: {
       projectId: EAS_PROJECT_ID,
     },
