@@ -35,6 +35,10 @@
   - Cauza root: `eas.json` conținea o cheie `"update"` la nivel de top (liniile 33-35), respinsă de EAS CLI cu eroarea `"eas.json is not valid - \"update\" is not allowed"`
   - Fix: șters cheia `"update": { "channel": "development" }` din `eas.json`
   - Commit: `e136dfc fix: remove invalid top-level update key from eas.json`
+- **Fix CI/CD — EAS Update (OTA):**
+  - Investigat job-ul eșuat (run ID: 29070087721, job ID: 86289628745)
+  - Cauza root: `app.config.ts` avea `slug: "dropi-mobile"` dar proiectul EAS înregistrat pe expo.dev are slug-ul `"dropiexpodev"` — nepotrivire care blochează `eas update`
+  - Fix: modificat `appSlug` în `app.config.ts` din `"dropi-mobile"` în `"dropiexpodev"` pentru a se alinia cu proiectul EAS înregistrat
 
 ---
 
@@ -63,12 +67,13 @@
 
 ## 3. Pasul Următor Concret
 
-**Fix `eas.json` gata — în PR `copilot/fix-failing-github-actions-job`.**
+**Fix `eas.json` + `app.config.ts` slug gata — în PR `copilot/fix-failing-github-actions-job`.**
 
 **Pasul imediat următor:**
 1. Mergi pe GitHub → repo `dropi-mobile` → fă **merge** la PR-ul `copilot/fix-failing-github-actions-job` în `main`
-2. Asta va declanșa automat `eas-build-android.yml` → construiește APK development Android (~15-20 min)
-3. Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Client
+2. Asta va declanșa automat `eas-build-android.yml` (APK) și `eas-update.yml` (OTA)
+3. Ambele workflow-uri ar trebui să treacă acum (eas.json valid + slug aliniat)
+4. Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Client
 
 **Următorul task de dezvoltare:** Guards pe mission endpoints (block delivery partners neverificați)
 
@@ -87,6 +92,7 @@
 | 2026-07-07 | `EAS_PROJECT_ID` ca GitHub Actions Variable (nu hardcodat) | Setup fără editare manuală a codului | Copilot Agent |
 | 2026-07-07 | APK build automat la fiecare push pe `main` via `eas-build-android.yml` | Fondatorul nu mai are nevoie de terminal local pentru build | Copilot Agent |
 | 2026-07-10 | Cheia `update` NU aparține în `eas.json` — aparține în `app.config.ts` sub `expo.updates` | EAS CLI respinge `eas.json` cu cheie `update` la top-level | Copilot Agent |
+| 2026-07-10 | `slug` în `app.config.ts` trebuie să fie `"dropiexpodev"` (nu `"dropi-mobile"`) ca să se alinieze cu proiectul EAS înregistrat pe expo.dev | EAS CLI respinge `eas update` dacă slug-ul din config nu se potrivește cu slug-ul proiectului EAS | Copilot Agent |
 
 ---
 
@@ -105,7 +111,8 @@
 | `copilot/fix-failing-github-actions-job` | Fix eas.json — top-level update key invalid | Activ, PR deschis |
 
 ### Probleme cunoscute / Datorie tehnică
-- `eas.json` — fix aplicat (e136dfc), PR în așteptare de merge ✅
+- `eas.json` — fix aplicat (e136dfc), în PR `copilot/fix-failing-github-actions-job` ✅
+- `app.config.ts` slug — fix aplicat, `slug` aliniat la `"dropiexpodev"` ✅
 - Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
 
 ### Tehnologii principale
@@ -144,9 +151,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.3.0**
+Acest document: **v1.4.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-10
-Actualizat de: GitHub Copilot Coding Agent — fix eas.json (top-level update key invalid), PR în așteptare de merge.
+Actualizat de: GitHub Copilot Coding Agent — fix slug mismatch în app.config.ts (dropiexpodev), EAS Update OTA deblocat.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
