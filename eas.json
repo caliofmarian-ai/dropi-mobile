@@ -30,9 +30,6 @@
       }
     }
   },
-  "update": {
-    "channel": "development"
-  },
   "submit": {
     "production": {}
   }
