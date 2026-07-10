@@ -25,16 +25,16 @@
 | Câmp | Valoare |
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
-| **Data** | 2026-07-07 |
-| **Branch activ** | `copilot/update-project-views` |
+| **Data** | 2026-07-10 |
+| **Branch activ** | `copilot/fix-failing-github-actions-job` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- Implementat strategia mobile-first completă:
-  - Creat `docs/MOBILE_FIRST_SETUP.md` — ghid pas-cu-pas one-time setup din browser/telefon
-  - Fixat `.github/workflows/eas-update.yml`: eliminat trigger pe `copilot/**` (OTA doar pe `main`), adăugat validare pentru placeholder și `EXPO_TOKEN`
-  - Îmbunătățit `app.config.ts`: `EAS_PROJECT_ID` citit din env var cu fallback + warning runtime
-- Creat `.github/workflows/eas-build-android.yml` — build automat APK development Android la fiecare push pe `main` (folosește `EXPO_TOKEN` din Secrets și `EAS_PROJECT_ID` din Variables)
+- **Fix CI/CD — Build Android APK (development):**
+  - Investigat job-ul eșuat (run ID: 29015177408, job ID: 86121879342)
+  - Cauza root: `eas.json` conținea o cheie `"update"` la nivel de top (liniile 33-35), respinsă de EAS CLI cu eroarea `"eas.json is not valid - \"update\" is not allowed"`
+  - Fix: șters cheia `"update": { "channel": "development" }` din `eas.json`
+  - Commit: `e136dfc fix: remove invalid top-level update key from eas.json`
 
 ---
 
@@ -42,13 +42,13 @@
 
 ### ✅ Funcții terminate
 - Implementare sistem AI Agent Orchestrator
-- Configurare EAS Build pentru Android APK + iOS (`eas.json`)
+- Configurare EAS Build pentru Android APK + iOS (`eas.json`) — **fixat**
 - Documente canonice de bază: `AI_DEVELOPMENT_HANDOVER_CANON.md`, `AI_AGENT_SYSTEM.md`, `DELIVERY_MULTIMODAL.md`
 - Infrastructură cloud: `railway.toml`, `eas-update.yml` (OTA), `eas-build-android.yml` (APK), EAS config în `app.config.ts`
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- EAS Build Android (APK) — necesită push pe `main` pentru a declanșa GitHub Actions
+- PR `copilot/fix-failing-github-actions-job` — fix `eas.json`, necesită merge în `main` pentru a activa build-ul
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -57,19 +57,18 @@
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- Nimic blocat — toate pașii de setup cloud sunt finalizați
+- Nimic blocat — toate pașii de setup cloud sunt finalizați; fix-ul `eas.json` este în PR și așteaptă merge
 
 ---
 
 ## 3. Pasul Următor Concret
 
-**✅ Setup cloud complet — toate pașii manuali finalizați de fondator.**
+**Fix `eas.json` gata — în PR `copilot/fix-failing-github-actions-job`.**
 
-**Următorul pas imediat:** Mergi pe GitHub → repo `dropi-mobile` → fă un push/merge pe branch-ul `main` pentru a declanșa GitHub Actions:
-- `eas-build-android.yml` → construiește APK development Android (~15-20 min)
-- `eas-update.yml` → OTA update (~3 min)
-
-Apoi: Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Client.
+**Pasul imediat următor:**
+1. Mergi pe GitHub → repo `dropi-mobile` → fă **merge** la PR-ul `copilot/fix-failing-github-actions-job` în `main`
+2. Asta va declanșa automat `eas-build-android.yml` → construiește APK development Android (~15-20 min)
+3. Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Client
 
 **Următorul task de dezvoltare:** Guards pe mission endpoints (block delivery partners neverificați)
 
@@ -87,6 +86,7 @@ Apoi: Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Cli
 | 2026-07-07 | EAS OTA se publică DOAR din branch `main` | Evită update-uri OTA din branch-uri WIP/agent | Copilot Agent |
 | 2026-07-07 | `EAS_PROJECT_ID` ca GitHub Actions Variable (nu hardcodat) | Setup fără editare manuală a codului | Copilot Agent |
 | 2026-07-07 | APK build automat la fiecare push pe `main` via `eas-build-android.yml` | Fondatorul nu mai are nevoie de terminal local pentru build | Copilot Agent |
+| 2026-07-10 | Cheia `update` NU aparține în `eas.json` — aparține în `app.config.ts` sub `expo.updates` | EAS CLI respinge `eas.json` cu cheie `update` la top-level | Copilot Agent |
 
 ---
 
@@ -102,11 +102,10 @@ Apoi: Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Cli
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
-| `copilot/update-project-views` | Branch curent de lucru Copilot | Activ |
+| `copilot/fix-failing-github-actions-job` | Fix eas.json — top-level update key invalid | Activ, PR deschis |
 
 ### Probleme cunoscute / Datorie tehnică
-- `EAS_PROJECT_ID` hardcodat în `app.config.ts` ca `4720acfb-4ff2-4a5d-85eb-8ff14c439ea6` ✅
-- `EXPO_TOKEN` trebuie adăugat în GitHub Secrets de fondator (dacă nu e deja)
+- `eas.json` — fix aplicat (e136dfc), PR în așteptare de merge ✅
 - Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
 
 ### Tehnologii principale
@@ -145,9 +144,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.2.0**
+Acest document: **v1.3.0**
 Data creării: 2026-07-07
-Ultima actualizare: 2026-07-07
-Actualizat de: GitHub Copilot Coding Agent — adăugat workflow EAS Build Android.
+Ultima actualizare: 2026-07-10
+Actualizat de: GitHub Copilot Coding Agent — fix eas.json (top-level update key invalid), PR în așteptare de merge.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
