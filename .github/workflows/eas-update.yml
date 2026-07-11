@@ -55,6 +55,6 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Publish EAS Update
-        run: eas update --auto --non-interactive
+        run: eas update --branch development --message "$(git log -1 --pretty=format:'%s')" --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
