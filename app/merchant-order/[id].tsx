@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
-import { MERCHANT_ORDERS } from "@/lib/mock-data";
 import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/shared/types";
 import { safeGoBack } from "@/lib/safe-back";
+import { trpc } from "@/lib/trpc";
 
 const VEHICLE_ICONS: Record<string, string> = {
   drone: "🚁",
@@ -19,8 +19,27 @@ export default function MerchantOrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const colors = useColors();
-  const order = MERCHANT_ORDERS.find((o) => o.id === Number(id));
+  const orderId = Number(id);
+  const orderQuery = trpc.operations.myOrderById.useQuery(
+    { id: orderId },
+    { enabled: Number.isFinite(orderId) },
+  );
+  const order = orderQuery.data;
   const [currentStatus, setCurrentStatus] = useState(order?.status || "validated");
+
+  useEffect(() => {
+    if (order?.status) {
+      setCurrentStatus(order.status);
+    }
+  }, [order?.status]);
+
+  if (orderQuery.isLoading) {
+    return (
+      <ScreenContainer edges={["top", "bottom", "left", "right"]} className="items-center justify-center">
+        <Text className="text-muted">Loading order...</Text>
+      </ScreenContainer>
+    );
+  }
 
   if (!order) {
     return (

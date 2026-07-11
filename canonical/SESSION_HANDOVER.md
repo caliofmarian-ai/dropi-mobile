@@ -26,25 +26,23 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-11 |
-| **Branch activ** | `copilot/fix-apk-versioning-errors` |
+| **Branch activ** | `copilot/update-graphic-asset` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- **Fix versionare APK + login mobil după update**
-  - `eas.json`:
-    - `cli.appVersionSource` schimbat din `local` în `remote`
-    - `autoIncrement: true` adăugat pe profilele `development`, `preview`, `production`
-  - Efect: EAS crește build/version code-ul la fiecare build nou, deci APK-urile Android se pot instala corect ca update peste cele vechi.
-  - `constants/oauth.ts`:
-    - eliminată schema deep-link derivată dintr-un `bundleId` hardcodat și învechit (`com.app.dropimobile`)
-    - redirect-ul OAuth nativ folosește acum `Linking.createURL("/oauth/callback")`, adică schema reală a build-ului Expo instalat
-  - Efect: login-ul mobil nu mai trimite callback-ul pe o schemă greșită după build/update.
-  - Validare:
-    - `pnpm lint` ✅ (warnings existente, fără erori noi)
-    - `pnpm build` ✅
-    - `pnpm test` ✅ (2 teste skipped controlat din cauza env opțional)
-    - `npx expo config --type public` ✅
-  - Commit: `4d4b9dd fix: update apk versioning and mobile auth redirect`
+- **Milestone M1 (baseline audit production-readiness) finalizat**
+  - Confirmată starea canonică + config deploy/build (EAS, workflows, app config).
+  - Confirmat blocker critic: ecranele operaționale mobile foloseau încă `lib/mock-data`.
+- **Milestone M2 (faza 1 — replace mock data) implementat**
+  - Adăugat router nou server-side: `server/operations-router.ts` (orders + missions pentru mobile).
+  - Conectat în app router: `server/routers.ts` (`operations` namespace).
+  - Înlocuit consumul de mock data cu tRPC real în ecranele:
+    - `app/(tabs)/index.tsx` (Customer/Merchant/Delivery Partner dashboards)
+    - `app/(tabs)/history.tsx`
+    - `app/order/[id].tsx`
+    - `app/merchant-order/[id].tsx`
+    - `app/mission/[id].tsx`
+  - Validare executată după implementare: `pnpm run lint`, `pnpm run build`, `pnpm run test` (fără erori, doar warnings existente + teste skipate controlat în lipsă secrets/env).
 
 ---
 
@@ -58,8 +56,8 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Branch curent: `copilot/fix-apk-versioning-errors` (versionare EAS remote + redirect OAuth nativ)
-- PR `copilot/funcioneaz-aplicaia-server` a fost deja merged în `main` (workflow-urile EAS au rulat cu succes)
+- Branch curent: `copilot/update-graphic-asset`
+- Milestone M2 faza 2: eliminare hardcoded demo metrics/UI rămase în dashboard-uri non-C1 și continuare înlocuire mock/hardcoded cu date reale end-to-end
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -68,26 +66,17 @@
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- Nicio blocare tehnică critică în cod; pentru test SMTP live este necesar secret valid (`GMAIL_APP_PASSWORD` sau `SMTP_PASS`) în environment-ul de execuție
+- Pentru verificare end-to-end a noilor ecrane realtime este necesar dataset real în DB (orders/b2b deliveries) pe environment-ul de test.
+- Pentru test SMTP live este necesar secret valid (`GMAIL_APP_PASSWORD` sau `SMTP_PASS`) în environment-ul de execuție.
 
 ---
 
 ## 3. Pasul Următor Concret
 
-**Fixul pentru versionarea APK și login-ul mobil după update este aplicat în `copilot/fix-apk-versioning-errors`.**
-
 **Pasul imediat următor:**
-1. Deschide PR pentru branch-ul curent și fă merge în `main`
-2. Confirmă în GitHub Actions că rulează din nou cu succes:
-   - `eas-build-android.yml`
-   - `eas-update.yml`
-3. Instalează APK-ul nou peste cel existent și verifică pe telefon:
-   - login complet
-   - dispariția mesajului de tip “incompatible update”
-   - update OTA după un commit nou în `main`
-4. Dacă UI arată în continuare `Version 1.0.0`, ține cont că acum se auto-incrementează **build/versionCode**; versiunea semantică vizibilă (`1.0.0`) se schimbă doar când o mărim manual în `app.config.ts`
-
-**Următorul task de dezvoltare:** Verificare E2E mobilă pe Railway după merge (auth + OTA + live tracking)
+1. M2 faza 2: înlocuiește hardcoded metrics/UI demo rămase pe dashboard-urile C2/C3/Admin cu query-uri reale unde există backend.
+2. M2 faza 3: aliniază status tracking între `AUDIT_TRACKING.md`, `todo.md` și implementarea reală.
+3. Rulează validare completă după fiecare increment (`lint`, `build`, `test`) și documentează progresul în acest handover.
 
 ---
 
@@ -109,6 +98,7 @@
 | 2026-07-11 | Runtime standard pentru validare mobilă: telefon + Expo Dev Client + Railway cloud backend/agenți AI; fără localhost în testele reale mobile | Evităm erori false de conectivitate și păstrăm fluxul de lucru cloud-first al proiectului | Fondator + Copilot Agent |
 | 2026-07-11 | Versionarea EAS pentru build-uri mobile trebuie gestionată prin `appVersionSource: "remote"` + `autoIncrement: true` | Cu `local`, fiecare build CI pornea din aceeași stare și APK-ul nu mai avansa corect build/version code-ul | Copilot Agent |
 | 2026-07-11 | Redirect-ul OAuth nativ trebuie generat din schema activă a build-ului (`Linking.createURL`) și nu dintr-un `bundleId` hardcodat în codul runtime | Evităm callback-uri pe schemă greșită după build/update și reducem erorile de login pe telefon | Copilot Agent |
+| 2026-07-11 | Ecranele operaționale C1 trebuie să consume date reale prin tRPC (`operations` router), nu `lib/mock-data` | Eliminăm inconsistența dintre UI și starea reală backend și reducem regresiile de integrare | Copilot Agent |
 
 ---
 
@@ -172,9 +162,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.7.0**
+Acest document: **v1.9.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-11
-Actualizat de: GitHub Copilot Coding Agent — fix versionare EAS remote + redirect OAuth nativ.
+Actualizat de: GitHub Copilot Coding Agent — M2 faza 1 (replace mock data pe ecranele operaționale principale prin tRPC operations router).
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.

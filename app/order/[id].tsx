@@ -2,13 +2,13 @@ import { Text, View, ScrollView, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
-import { CLIENT_ORDERS } from "@/lib/mock-data";
 import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/shared/types";
 import type { OrderStatus } from "@/shared/types";
 import { DeliveryMap, createDemoRoute } from "@/components/delivery-map";
-import type { VehicleType, DeliveryStatus } from "@/components/delivery-map";
+import type { VehicleType } from "@/components/delivery-map";
 import { safeGoBack } from "@/lib/safe-back";
+import { trpc } from "@/lib/trpc";
 
 const TIMELINE_STEPS: OrderStatus[] = ["initiated", "validated", "preparing", "ready", "accepted", "in_execution", "completed"];
 
@@ -36,7 +36,20 @@ export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const colors = useColors();
-  const order = CLIENT_ORDERS.find((o) => o.id === Number(id));
+  const orderId = Number(id);
+  const orderQuery = trpc.operations.myOrderById.useQuery(
+    { id: orderId },
+    { enabled: Number.isFinite(orderId) },
+  );
+  const order = orderQuery.data;
+
+  if (orderQuery.isLoading) {
+    return (
+      <ScreenContainer edges={["top", "bottom", "left", "right"]} className="items-center justify-center">
+        <Text className="text-muted">Loading order...</Text>
+      </ScreenContainer>
+    );
+  }
 
   if (!order) {
     return (

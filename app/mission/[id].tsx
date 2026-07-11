@@ -4,7 +4,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useDropiAuth } from "@/lib/auth-context";
-import { PILOT_MISSIONS } from "@/lib/mock-data";
 import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
 import { DeliveryMap, createDemoRoute } from "@/components/delivery-map";
 import type { VehicleType } from "@/components/delivery-map";
@@ -50,7 +49,12 @@ export default function MissionDetailScreen() {
   const router = useRouter();
   const colors = useColors();
   const { user } = useDropiAuth();
-  const mission = PILOT_MISSIONS.find((m) => m.id === Number(id));
+  const missionId = Number(id);
+  const missionQuery = trpc.operations.myPilotMissionById.useQuery(
+    { id: missionId },
+    { enabled: Number.isFinite(missionId) },
+  );
+  const mission = missionQuery.data;
   const [phase, setPhase] = useState<MissionPhase>("detail");
   const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
   const [checkingVerification, setCheckingVerification] = useState(false);
@@ -60,6 +64,14 @@ export default function MissionDetailScreen() {
   const initialChecks = isDrone ? DRONE_PREFLIGHT : TERRESTRIAL_PREFLIGHT;
   const [checks, setChecks] = useState<CheckItem[]>(initialChecks);
   const [statusUpdating, setStatusUpdating] = useState(false);
+
+  if (missionQuery.isLoading) {
+    return (
+      <ScreenContainer edges={["top", "bottom", "left", "right"]} className="items-center justify-center">
+        <Text className="text-muted">Loading mission...</Text>
+      </ScreenContainer>
+    );
+  }
 
   // tRPC mutation for pilot status updates (triggers webhooks server-side)
   const pilotUpdateStatus = trpc.b2bDelivery.pilotUpdateStatus.useMutation({
