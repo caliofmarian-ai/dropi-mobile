@@ -184,7 +184,7 @@ export default function VerifyEmailScreen() {
           ) : cooldown > 0 ? (
             <Text className="text-muted text-sm">Resend code in {cooldown}s</Text>
           ) : (
-            <Text className="text-primary text-sm font-medium">Didn't receive the code? Resend</Text>
+            <Text className="text-primary text-sm font-medium">Didn’t receive the code? Resend</Text>
           )}
         </TouchableOpacity>
 

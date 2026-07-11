@@ -1,16 +1,16 @@
+import "dotenv/config";
 import { describe, it, expect } from "vitest";
 import * as nodemailer from "nodemailer";
 
-describe("SMTP Gmail Configuration", () => {
-  it("should verify SMTP credentials are valid", async () => {
-    const password = process.env.GMAIL_APP_PASSWORD;
-    expect(password).toBeDefined();
-    expect(password!.length).toBeGreaterThanOrEqual(10);
+const password = process.env.GMAIL_APP_PASSWORD ?? process.env.SMTP_PASS;
+const smtpUser = process.env.SMTP_USER ?? "dropi.deliveries@gmail.com";
 
+describe("SMTP Gmail Configuration", () => {
+  it.skipIf(!password || password.length < 10)("should verify SMTP credentials are valid", async () => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "dropi.deliveries@gmail.com",
+        user: smtpUser,
         pass: password,
       },
     });

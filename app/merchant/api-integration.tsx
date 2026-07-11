@@ -194,7 +194,7 @@ export default function ApiIntegrationScreen() {
           {/* New Key Form */}
           {showNewKeyForm && (
             <View className="bg-background border border-border rounded-xl p-3 mb-3">
-              <Text className="text-xs text-muted mb-2">Key Name (e.g., "Production", "Staging")</Text>
+              <Text className="text-xs text-muted mb-2">Key Name (e.g., ‘Production’, ‘Staging’)</Text>
               <TextInput
                 className="border border-border rounded-lg px-3 py-2 text-sm text-foreground bg-surface mb-2"
                 placeholder="Enter key name..."
