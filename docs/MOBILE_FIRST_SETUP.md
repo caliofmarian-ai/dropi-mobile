@@ -87,6 +87,7 @@
 
 > **Notă:** APK-ul de `development` conține Expo Dev Client și se conectează la EAS Updates.
 > La fiecare build nou OTA, aplicația se actualizează automat fără reinstalare.
+> Build-urile EAS cresc acum automat **build/versionCode**; textul vizibil `Version 1.0.0` se schimbă doar când mărim manual versiunea semantică din `app.config.ts`.
 
 ---
 
