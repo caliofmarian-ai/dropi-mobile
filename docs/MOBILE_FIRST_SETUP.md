@@ -41,15 +41,14 @@
    - Arată ca: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
    - **Salvează-l** — îl vei folosi la pasul următor
 
-### 1.3 Actualizează `app.config.ts` cu Project ID real
+### 1.3 Verifică `app.config.ts` (projectId + slug)
 
 1. Deschide **https://github.com/caliofmarian-ai/dropi-mobile** pe telefon
 2. Navighează la fișierul `app.config.ts`
 3. Click pe iconița de **edit** (creion)
-4. Caută textul `YOUR_EAS_PROJECT_ID` (apare de 2 ori)
-5. Înlocuiește **ambele** apariții cu Project ID-ul copiat la pasul anterior
-6. Scroll jos → completează mesajul de commit: `config: add real EAS project ID`
-7. Click **Commit changes** direct pe `main`
+4. Confirmă că `extra.eas.projectId` este Project ID-ul real al proiectului Expo
+5. Confirmă că `slug` este `dropiexpodev`
+6. Dacă faci schimbări, deschide PR și apoi merge în `main`
 
 ### 1.4 Creează Expo Access Token
 
@@ -173,7 +172,7 @@ Tu (pe telefon):
 
 | Pas | Verificare |
 |-----|-----------|
-| Expo project creat | `app.config.ts` nu mai conține `YOUR_EAS_PROJECT_ID` |
+| Expo project creat | `app.config.ts` are `slug: "dropiexpodev"` și `extra.eas.projectId` valid |
 | EXPO_TOKEN în GitHub | GitHub Actions → EAS Update rulează cu succes |
 | APK instalat pe telefon | Aplicația se deschide și se conectează la EAS |
 | Railway activ | `GET /api/health` returnează `{"status":"ok"}` |
@@ -185,7 +184,7 @@ Tu (pe telefon):
 
 ### EAS Update eșuează în GitHub Actions
 - Verifică că `EXPO_TOKEN` a fost adăugat corect în GitHub Secrets
-- Verifică că `app.config.ts` nu mai conține `YOUR_EAS_PROJECT_ID`
+- Verifică în `app.config.ts` că `slug` este `dropiexpodev` și `extra.eas.projectId` este valid
 - Mergi la GitHub → tab Actions → click pe run-ul eșuat → citește log-ul
 
 ### APK-ul nu se conectează la EAS Updates
