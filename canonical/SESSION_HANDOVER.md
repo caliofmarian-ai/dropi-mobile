@@ -26,25 +26,27 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-11 |
-| **Branch activ** | `copilot/fix-apk-versioning-errors` |
+| **Branch activ** | `copilot/update-graphic-asset` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- **Fix versionare APK + login mobil după update**
-  - `eas.json`:
-    - `cli.appVersionSource` schimbat din `local` în `remote`
-    - `autoIncrement: true` adăugat pe profilele `development`, `preview`, `production`
-  - Efect: EAS crește build/version code-ul la fiecare build nou, deci APK-urile Android se pot instala corect ca update peste cele vechi.
-  - `constants/oauth.ts`:
-    - eliminată schema deep-link derivată dintr-un `bundleId` hardcodat și învechit (`com.app.dropimobile`)
-    - redirect-ul OAuth nativ folosește acum `Linking.createURL("/oauth/callback")`, adică schema reală a build-ului Expo instalat
-  - Efect: login-ul mobil nu mai trimite callback-ul pe o schemă greșită după build/update.
-  - Validare:
-    - `pnpm lint` ✅ (warnings existente, fără erori noi)
-    - `pnpm build` ✅
-    - `pnpm test` ✅ (2 teste skipped controlat din cauza env opțional)
-    - `npx expo config --type public` ✅
-  - Commit: `4d4b9dd fix: update apk versioning and mobile auth redirect`
+- **Audit complet documentație (inclusiv 04.zip) + consolidare canonical docs noi**
+  - Confirmat că repository-ul avea 30 documente `.md`, dar arhiva `04.zip` conține setul extins (`04/DROPI_CANONICAL/*`) cu ~166 documente canonice.
+  - Livrat gap analysis complet cu:
+    - documente existente,
+    - documente parțiale,
+    - documente lipsă,
+    - duplicate,
+    - inconsistențe.
+  - Create documente canonice lipsă solicitate:
+    - `AGENTS.md`
+    - `AI_DEVELOPMENT_CHARTER.md`
+    - `PROJECT_TRANSFER.md`
+    - `ARCHITECTURE.md`
+    - `DEPLOYMENT.md`
+    - `ROADMAP.md`
+    - `SESSION_STATE.md`
+    - `DECISION_LOG.md`
 
 ---
 
@@ -58,8 +60,8 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Branch curent: `copilot/fix-apk-versioning-errors` (versionare EAS remote + redirect OAuth nativ)
-- PR `copilot/funcioneaz-aplicaia-server` a fost deja merged în `main` (workflow-urile EAS au rulat cu succes)
+- Branch curent: `copilot/update-graphic-asset`
+- Consolidare finală documentație canonică și verificare consistență între `canonical/*`, root docs și `04.zip`
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -74,20 +76,22 @@
 
 ## 3. Pasul Următor Concret
 
-**Fixul pentru versionarea APK și login-ul mobil după update este aplicat în `copilot/fix-apk-versioning-errors`.**
+**Auditul complet de documentație este făcut, iar documentele canonice lipsă au fost create.**
 
 **Pasul imediat următor:**
-1. Deschide PR pentru branch-ul curent și fă merge în `main`
-2. Confirmă în GitHub Actions că rulează din nou cu succes:
-   - `eas-build-android.yml`
-   - `eas-update.yml`
-3. Instalează APK-ul nou peste cel existent și verifică pe telefon:
-   - login complet
-   - dispariția mesajului de tip “incompatible update”
-   - update OTA după un commit nou în `main`
-4. Dacă UI arată în continuare `Version 1.0.0`, ține cont că acum se auto-incrementează **build/versionCode**; versiunea semantică vizibilă (`1.0.0`) se schimbă doar când o mărim manual în `app.config.ts`
-
-**Următorul task de dezvoltare:** Verificare E2E mobilă pe Railway după merge (auth + OTA + live tracking)
+1. Revizuiește noile documente:
+   - `AGENTS.md`
+   - `AI_DEVELOPMENT_CHARTER.md`
+   - `PROJECT_TRANSFER.md`
+   - `ARCHITECTURE.md`
+   - `DEPLOYMENT.md`
+   - `ROADMAP.md`
+   - `SESSION_STATE.md`
+   - `DECISION_LOG.md`
+2. Confirmă dacă vrei și etapa de cleanup:
+   - eliminare duplicate (`canonical-delivery-reference.md`)
+   - alinieri index-uri canonice
+3. După aprobare, deschidere PR pentru documentație.
 
 ---
 
@@ -172,9 +176,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.7.0**
+Acest document: **v1.8.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-11
-Actualizat de: GitHub Copilot Coding Agent — fix versionare EAS remote + redirect OAuth nativ.
+Actualizat de: GitHub Copilot Coding Agent — audit documentație complet + creare documente canonice lipsă.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
