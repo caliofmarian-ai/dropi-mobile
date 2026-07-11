@@ -200,7 +200,7 @@ export default function FCMConfigScreen() {
           </Text>
           <Text className="text-xs text-muted leading-5">
             1. Go to Firebase Console → Project Settings{"\n"}
-            2. Tab &quot;Service accounts&quot; → &quot;Generate new private key&quot;{"\n"}
+            2. Tab Service accounts → Generate new private key{"\n"}
             3. Download the JSON file{"\n"}
             4. Paste the full content below{"\n"}
             {"\n"}

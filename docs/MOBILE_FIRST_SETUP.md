@@ -14,6 +14,14 @@
 
 ---
 
+## Regulă de lucru obligatorie (mobile + cloud)
+
+- Runtime-ul standard DROPi este: **telefon + Expo Dev Client + Railway cloud backend/agenți AI**.
+- Pentru testele reale pe telefon, API-ul trebuie să fie URL-ul public Railway (`EXPO_PUBLIC_API_BASE_URL`).
+- **Nu folosi localhost/127.0.0.1** ca backend pentru validarea fluxurilor mobile reale.
+
+---
+
 ## Pasul 1 — Setup Expo EAS (OTA Updates)
 
 ### 1.1 Creează cont Expo
@@ -27,21 +35,20 @@
 1. Loghează-te la **https://expo.dev**
 2. Click **+ New Project** (sau **Projects → Create a project**)
 3. La **Name** introdu: `dropi-mobile`
-4. La **Slug** introdu: `dropi-mobile`
+4. La **Slug** introdu: `dropiexpodev`
 5. Click **Create**
 6. Copiază **Project ID** din pagina proiectului
    - Arată ca: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
    - **Salvează-l** — îl vei folosi la pasul următor
 
-### 1.3 Actualizează `app.config.ts` cu Project ID real
+### 1.3 Verifică `app.config.ts` (projectId + slug)
 
 1. Deschide **https://github.com/caliofmarian-ai/dropi-mobile** pe telefon
 2. Navighează la fișierul `app.config.ts`
 3. Click pe iconița de **edit** (creion)
-4. Caută textul `YOUR_EAS_PROJECT_ID` (apare de 2 ori)
-5. Înlocuiește **ambele** apariții cu Project ID-ul copiat la pasul anterior
-6. Scroll jos → completează mesajul de commit: `config: add real EAS project ID`
-7. Click **Commit changes** direct pe `main`
+4. Confirmă că `extra.eas.projectId` este Project ID-ul real al proiectului Expo
+5. Confirmă că `slug` este `dropiexpodev`
+6. Dacă faci schimbări, deschide PR și apoi merge în `main`
 
 ### 1.4 Creează Expo Access Token
 
@@ -67,7 +74,7 @@
 
 > Acesta este singurul APK pe care îl instalezi manual. Tot ce urmează după = OTA.
 
-1. Mergi la **https://expo.dev/accounts/[username]/projects/dropi-mobile/builds**
+1. Mergi la **https://expo.dev/accounts/[username]/projects/dropiexpodev/builds**
 2. Click **New Build**
 3. Setează:
    - **Platform:** Android
@@ -138,9 +145,11 @@ PORT=3000
 
 ## Pasul 4 — Conectează aplicația mobilă la backend
 
-1. Deschide GitHub → fișierul `.env.example`
-2. Adaugă URL-ul Railway în variabilele de mediu ale aplicației (`EXPO_PUBLIC_API_BASE_URL`)
-3. Commit pe `main` → EAS Update OTA → aplicația se actualizează automat
+1. În environment-ul folosit la build/update setează:
+   - `EXPO_PUBLIC_API_BASE_URL=https://<serviciul-tău>.up.railway.app`
+2. Confirmă că URL-ul este public și răspunde la `GET /api/health`
+3. Rulează build/update și reinstalează Dev Client dacă ai schimbat env-ul la build-time
+4. Testează login din telefon (nu din localhost)
 
 ---
 
@@ -163,7 +172,7 @@ Tu (pe telefon):
 
 | Pas | Verificare |
 |-----|-----------|
-| Expo project creat | `app.config.ts` nu mai conține `YOUR_EAS_PROJECT_ID` |
+| Expo project creat | `app.config.ts` are `slug: "dropiexpodev"` și `extra.eas.projectId` valid |
 | EXPO_TOKEN în GitHub | GitHub Actions → EAS Update rulează cu succes |
 | APK instalat pe telefon | Aplicația se deschide și se conectează la EAS |
 | Railway activ | `GET /api/health` returnează `{"status":"ok"}` |
@@ -175,7 +184,7 @@ Tu (pe telefon):
 
 ### EAS Update eșuează în GitHub Actions
 - Verifică că `EXPO_TOKEN` a fost adăugat corect în GitHub Secrets
-- Verifică că `app.config.ts` nu mai conține `YOUR_EAS_PROJECT_ID`
+- Verifică în `app.config.ts` că `slug` este `dropiexpodev` și `extra.eas.projectId` este valid
 - Mergi la GitHub → tab Actions → click pe run-ul eșuat → citește log-ul
 
 ### APK-ul nu se conectează la EAS Updates

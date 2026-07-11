@@ -26,7 +26,7 @@ const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID ?? "4720acfb-4ff2-4a5d-85eb-8f
 
 const env = {
   appName: "DROPi",
-  appSlug: "dropi-mobile",
+  appSlug: "dropiexpodev",
   logoUrl: "/manus-storage/dropi-icon_40f34a24.png",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,

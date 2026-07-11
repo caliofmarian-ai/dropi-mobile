@@ -13,6 +13,8 @@
  * Fallback: If FCM is not configured, falls back to Expo Push API for development.
  */
 import { eq, and } from "drizzle-orm";
+import fs from "node:fs";
+import crypto from "node:crypto";
 import { getDb } from "./db";
 import { pushTokens } from "../drizzle/schema";
 
@@ -113,7 +115,6 @@ function parseServiceAccount(): FCMServiceAccount | null {
       return JSON.parse(FCM_SERVICE_ACCOUNT);
     }
     // If it's a file path, read it (sync for simplicity at startup)
-    const fs = require("fs");
     const content = fs.readFileSync(FCM_SERVICE_ACCOUNT, "utf-8");
     return JSON.parse(content);
   } catch (err) {
@@ -127,8 +128,6 @@ function parseServiceAccount(): FCMServiceAccount | null {
  * Uses Node.js crypto (no external dependencies).
  */
 async function createServiceAccountJWT(sa: FCMServiceAccount): Promise<string> {
-  const crypto = require("crypto");
-
   const header = { alg: "RS256", typ: "JWT" };
   const now = Math.floor(Date.now() / 1000);
   const payload = {
