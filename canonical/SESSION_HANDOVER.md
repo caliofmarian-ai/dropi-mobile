@@ -26,26 +26,25 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-11 |
-| **Branch activ** | `copilot/funcioneaz-aplicaia-server` |
+| **Branch activ** | `copilot/fix-apk-versioning-errors` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- **Fix runtime mobile: eliminare fallback localhost pe native**
-  - Eliminat fallback-urile hardcodate către `localhost/127.0.0.1` din căile mobile critice:
-    - `lib/auth-context.tsx`
-    - `hooks/use-pilot-broadcasting.ts`
-    - `hooks/use-live-tracking.ts`
-    - `components/live-tracking-map.tsx`
-    - `app/admin/moderation.tsx`
-  - Consolidat rezolvarea URL API:
-    - adăugat `getRequiredApiBaseUrl(...)` în `constants/oauth.ts`
-    - aplicat în `lib/trpc.ts` și `lib/_core/api.ts` pentru fail-fast pe native dacă lipsește `EXPO_PUBLIC_API_BASE_URL`
-  - Efect: aplicația nu mai cade “tăcut” pe local host pe telefon; dacă env lipsește, apare eroare explicită de configurare.
+- **Fix versionare APK + login mobil după update**
+  - `eas.json`:
+    - `cli.appVersionSource` schimbat din `local` în `remote`
+    - `autoIncrement: true` adăugat pe profilele `development`, `preview`, `production`
+  - Efect: EAS crește build/version code-ul la fiecare build nou, deci APK-urile Android se pot instala corect ca update peste cele vechi.
+  - `constants/oauth.ts`:
+    - eliminată schema deep-link derivată dintr-un `bundleId` hardcodat și învechit (`com.app.dropimobile`)
+    - redirect-ul OAuth nativ folosește acum `Linking.createURL("/oauth/callback")`, adică schema reală a build-ului Expo instalat
+  - Efect: login-ul mobil nu mai trimite callback-ul pe o schemă greșită după build/update.
   - Validare:
     - `pnpm lint` ✅ (warnings existente, fără erori noi)
     - `pnpm build` ✅
     - `pnpm test` ✅ (2 teste skipped controlat din cauza env opțional)
-  - Commit: `f54b6d9 fix: remove native localhost fallbacks`
+    - `npx expo config --type public` ✅
+  - Commit: `4d4b9dd fix: update apk versioning and mobile auth redirect`
 
 ---
 
@@ -59,8 +58,8 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Branch curent: `copilot/funcioneaz-aplicaia-server` (eliminare fallback localhost pe runtime mobil)
-- PR anterior: `copilot/fix-failing-github-actions-job` (fix `eas.json` / slug) — de verificat status merge în `main`
+- Branch curent: `copilot/fix-apk-versioning-errors` (versionare EAS remote + redirect OAuth nativ)
+- PR `copilot/funcioneaz-aplicaia-server` a fost deja merged în `main` (workflow-urile EAS au rulat cu succes)
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -75,15 +74,20 @@
 
 ## 3. Pasul Următor Concret
 
-**Fixul runtime pentru server cloud este aplicat în `copilot/funcioneaz-aplicaia-server`.**
+**Fixul pentru versionarea APK și login-ul mobil după update este aplicat în `copilot/fix-apk-versioning-errors`.**
 
 **Pasul imediat următor:**
 1. Deschide PR pentru branch-ul curent și fă merge în `main`
-2. Rulează din nou GitHub Actions după merge (`eas-build-android.yml` și `eas-update.yml`)
-3. Instalează APK-ul nou și verifică pe telefon login/live tracking fără referințe la localhost
-4. Dacă apare eroare de config, confirmă că `EXPO_PUBLIC_API_BASE_URL` este setat în GitHub Secret + EAS env la build
+2. Confirmă în GitHub Actions că rulează din nou cu succes:
+   - `eas-build-android.yml`
+   - `eas-update.yml`
+3. Instalează APK-ul nou peste cel existent și verifică pe telefon:
+   - login complet
+   - dispariția mesajului de tip “incompatible update”
+   - update OTA după un commit nou în `main`
+4. Dacă UI arată în continuare `Version 1.0.0`, ține cont că acum se auto-incrementează **build/versionCode**; versiunea semantică vizibilă (`1.0.0`) se schimbă doar când o mărim manual în `app.config.ts`
 
-**Următorul task de dezvoltare:** Verificare E2E mobilă pe Railway după merge (auth + live tracking)
+**Următorul task de dezvoltare:** Verificare E2E mobilă pe Railway după merge (auth + OTA + live tracking)
 
 ---
 
@@ -103,6 +107,8 @@
 | 2026-07-10 | `slug` în `app.config.ts` trebuie să fie `"dropiexpodev"` (nu `"dropi-mobile"`) ca să se alinieze cu proiectul EAS înregistrat pe expo.dev | EAS CLI respinge `eas update` dacă slug-ul din config nu se potrivește cu slug-ul proiectului EAS | Copilot Agent |
 | 2026-07-11 | Testul SMTP trebuie să fie rezilient la lipsa credentialelor locale (skip controlat, nu fail global) | Evităm blocarea suitei locale/CI când secretul de email nu e setat pe toate mediile | Copilot Agent |
 | 2026-07-11 | Runtime standard pentru validare mobilă: telefon + Expo Dev Client + Railway cloud backend/agenți AI; fără localhost în testele reale mobile | Evităm erori false de conectivitate și păstrăm fluxul de lucru cloud-first al proiectului | Fondator + Copilot Agent |
+| 2026-07-11 | Versionarea EAS pentru build-uri mobile trebuie gestionată prin `appVersionSource: "remote"` + `autoIncrement: true` | Cu `local`, fiecare build CI pornea din aceeași stare și APK-ul nu mai avansa corect build/version code-ul | Copilot Agent |
+| 2026-07-11 | Redirect-ul OAuth nativ trebuie generat din schema activă a build-ului (`Linking.createURL`) și nu dintr-un `bundleId` hardcodat în codul runtime | Evităm callback-uri pe schemă greșită după build/update și reducem erorile de login pe telefon | Copilot Agent |
 
 ---
 
@@ -118,12 +124,14 @@
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
-| `copilot/funcioneaz-aplicaia-server` | Eliminare fallback localhost pe mobile runtime + fail-fast config API | Activ, necesită PR/merge |
-| `copilot/fix-failing-github-actions-job` | Fix eas.json + slug EAS | De verificat dacă e deja merged |
+| `copilot/fix-apk-versioning-errors` | Fix versionare EAS build + redirect OAuth nativ | Activ, necesită PR/merge |
+| `copilot/funcioneaz-aplicaia-server` | Eliminare fallback localhost pe mobile runtime + fail-fast config API | Merged în `main` |
 
 ### Probleme cunoscute / Datorie tehnică
 - `eas.json` — fix top-level update key aplicat ✅
 - `app.config.ts` slug — fix aplicat, `slug` aliniat la `"dropiexpodev"` ✅
+- `eas.json` versioning — mutat pe `remote` + `autoIncrement` ✅
+- `constants/oauth.ts` folosea o schemă derivată din `bundleId` hardcodat, diferită de schema reală a app-ului (`manus20260627`) ✅ fixat
 - `react/no-unescaped-entities` în ecrane mobile — fixat (0 errors la lint) ✅
 - Test SMTP live depinde de secret email în environment (`GMAIL_APP_PASSWORD`/`SMTP_PASS`) ⚠️
 - Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
@@ -164,9 +172,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.6.0**
+Acest document: **v1.7.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-11
-Actualizat de: GitHub Copilot Coding Agent — audit general + regulă mobil/cloud Railway + actualizare ghid setup.
+Actualizat de: GitHub Copilot Coding Agent — fix versionare EAS remote + redirect OAuth nativ.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
