@@ -26,34 +26,26 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-11 |
-| **Branch activ** | `copilot/f345dc3395da2c313962656e4a59f4074e456533` |
+| **Branch activ** | `copilot/funcioneaz-aplicaia-server` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- **Audit general + clarificare reguli runtime mobile/cloud:**
-  - Revalidat structura proiectului (app/server/canonical/docs/workflows) și baseline-ul de validare:
-    - `pnpm run lint` ✅ (warnings existente, 0 errors)
-    - `pnpm run build` ✅
-    - `pnpm run test` ✅ (teste skipped în lipsa env-urilor opționale)
-  - Actualizat regula canonică: pentru validare mobilă reală se folosește telefon + Railway cloud backend/agenți AI, nu localhost.
-  - Actualizat ghidul `docs/MOBILE_FIRST_SETUP.md` cu regula explicită și pașii corecți pentru `EXPO_PUBLIC_API_BASE_URL`.
-
-- **Stabilizare erori locale (lint/test):**
-  - Reprodus baseline-ul cu `pnpm run lint`, `pnpm run build`, `pnpm run test`
-  - Eliminat erorile blocante `react/no-unescaped-entities` din:
-    - `app/admin/fcm-config.tsx`
-    - `app/forgot-password.tsx`
-    - `app/merchant/api-integration.tsx`
-    - `app/verify-email.tsx`
-  - Actualizat `tests/smtp.test.ts`:
-    - încarcă `.env` cu `dotenv/config`
-    - acceptă `GMAIL_APP_PASSWORD` sau `SMTP_PASS`
-    - testul SMTP este `skip` dacă lipsesc credențialele locale
-  - Validare după fixuri:
-    - `pnpm run build` ✅
-    - `pnpm run lint` ✅ (0 errors, warnings rămase)
-    - `pnpm run test` ✅ (fără failures; teste dependente de env = skipped)
-  - Commit: `207ed6a fix: resolve lint blocking text entities and stabilize smtp test env handling`
+- **Fix runtime mobile: eliminare fallback localhost pe native**
+  - Eliminat fallback-urile hardcodate către `localhost/127.0.0.1` din căile mobile critice:
+    - `lib/auth-context.tsx`
+    - `hooks/use-pilot-broadcasting.ts`
+    - `hooks/use-live-tracking.ts`
+    - `components/live-tracking-map.tsx`
+    - `app/admin/moderation.tsx`
+  - Consolidat rezolvarea URL API:
+    - adăugat `getRequiredApiBaseUrl(...)` în `constants/oauth.ts`
+    - aplicat în `lib/trpc.ts` și `lib/_core/api.ts` pentru fail-fast pe native dacă lipsește `EXPO_PUBLIC_API_BASE_URL`
+  - Efect: aplicația nu mai cade “tăcut” pe local host pe telefon; dacă env lipsește, apare eroare explicită de configurare.
+  - Validare:
+    - `pnpm lint` ✅ (warnings existente, fără erori noi)
+    - `pnpm build` ✅
+    - `pnpm test` ✅ (2 teste skipped controlat din cauza env opțional)
+  - Commit: `f54b6d9 fix: remove native localhost fallbacks`
 
 ---
 
@@ -67,7 +59,7 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Branch curent: `copilot/f345dc3395da2c313962656e4a59f4074e456533` (fixuri lint/test locale + stabilizare SMTP test)
+- Branch curent: `copilot/funcioneaz-aplicaia-server` (eliminare fallback localhost pe runtime mobil)
 - PR anterior: `copilot/fix-failing-github-actions-job` (fix `eas.json` / slug) — de verificat status merge în `main`
 
 ### ✅ Setup cloud complet (2026-07-07)
@@ -83,15 +75,15 @@
 
 ## 3. Pasul Următor Concret
 
-**Fixurile locale de lint/test sunt aplicate în `copilot/f345dc3395da2c313962656e4a59f4074e456533`.**
+**Fixul runtime pentru server cloud este aplicat în `copilot/funcioneaz-aplicaia-server`.**
 
 **Pasul imediat următor:**
 1. Deschide PR pentru branch-ul curent și fă merge în `main`
 2. Rulează din nou GitHub Actions după merge (`eas-build-android.yml` și `eas-update.yml`)
-3. Setează/confirmă secretul de email în CI (`GMAIL_APP_PASSWORD` sau `SMTP_PASS`) dacă vrei test SMTP live, altfel rămâne skip controlat
-4. Continuă cu task-ul de business: guards pe mission endpoints (block delivery partners neverificați)
+3. Instalează APK-ul nou și verifică pe telefon login/live tracking fără referințe la localhost
+4. Dacă apare eroare de config, confirmă că `EXPO_PUBLIC_API_BASE_URL` este setat în GitHub Secret + EAS env la build
 
-**Următorul task de dezvoltare:** Guards pe mission endpoints (block delivery partners neverificați)
+**Următorul task de dezvoltare:** Verificare E2E mobilă pe Railway după merge (auth + live tracking)
 
 ---
 
@@ -126,7 +118,7 @@
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
-| `copilot/f345dc3395da2c313962656e4a59f4074e456533` | Fix erori lint blocante + stabilizare test SMTP | Activ, necesită PR/merge |
+| `copilot/funcioneaz-aplicaia-server` | Eliminare fallback localhost pe mobile runtime + fail-fast config API | Activ, necesită PR/merge |
 | `copilot/fix-failing-github-actions-job` | Fix eas.json + slug EAS | De verificat dacă e deja merged |
 
 ### Probleme cunoscute / Datorie tehnică
