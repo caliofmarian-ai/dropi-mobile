@@ -2,7 +2,7 @@ import { createTRPCReact } from "@trpc/react-query";
 import { httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
 import type { AppRouter } from "@/server/routers";
-import { getApiBaseUrl } from "@/constants/oauth";
+import { getRequiredApiBaseUrl } from "@/constants/oauth";
 import * as Auth from "@/lib/_core/auth";
 
 /**
@@ -22,7 +22,7 @@ export function createTRPCClient() {
   return trpc.createClient({
     links: [
       httpBatchLink({
-        url: `${getApiBaseUrl()}/api/trpc`,
+        url: `${getRequiredApiBaseUrl("tRPC client")}/api/trpc`,
         // tRPC v11: transformer MUST be inside httpBatchLink, not at root
         transformer: superjson,
         async headers() {

@@ -6,7 +6,7 @@
  */
 import { useState, useRef, useCallback } from "react";
 import { Platform, AppState } from "react-native";
-import { getApiBaseUrl } from "@/constants/oauth";
+import { getRequiredApiBaseUrl } from "@/constants/oauth";
 
 // Conditionally import expo-location (not available on web in dev)
 let Location: any = null;
@@ -75,7 +75,7 @@ export function usePilotBroadcasting({ deliveryId, pilotId, vehicleType = "drone
       }
 
       // Connect to WebSocket as pilot (include dropoff for ETA/geofence)
-      const apiUrl = getApiBaseUrl() || "http://127.0.0.1:3000";
+      const apiUrl = getRequiredApiBaseUrl("pilot tracking websocket");
       let wsUrl = apiUrl.replace(/^http/, "ws") + `/ws/tracking?role=pilot&deliveryId=${deliveryId}&pilotId=${pilotId}`;
       if (dropoffLat && dropoffLng) {
         wsUrl += `&dropoffLat=${dropoffLat}&dropoffLng=${dropoffLng}`;

@@ -49,6 +49,21 @@ export function getApiBaseUrl(): string {
   return "";
 }
 
+export function getRequiredApiBaseUrl(context: string = "native runtime"): string {
+  const baseUrl = getApiBaseUrl();
+  if (baseUrl) {
+    return baseUrl;
+  }
+
+  if (ReactNative.Platform.OS !== "web") {
+    throw new Error(
+      `[Config] EXPO_PUBLIC_API_BASE_URL is required on native (${context}).`,
+    );
+  }
+
+  return "";
+}
+
 export const SESSION_TOKEN_KEY = "app_session_token";
 export const USER_INFO_KEY = "manus-runtime-user-info";
 
