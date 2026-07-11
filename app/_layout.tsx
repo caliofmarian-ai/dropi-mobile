@@ -1,5 +1,6 @@
 import "@/global.css";
-import { LogBox, Platform } from "react-native";
+import { Component, type ReactNode } from "react";
+import { LogBox, Platform, ScrollView, Text, View } from "react-native";
 
 // Suppress known Expo Go push notification warnings (not relevant in production builds)
 LogBox.ignoreLogs([
@@ -33,6 +34,48 @@ import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-run
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
+
+/**
+ * Catches configuration errors (e.g. missing EXPO_PUBLIC_API_BASE_URL) and
+ * renders a human-readable screen instead of the red Expo crash overlay.
+ */
+class ConfigErrorBoundary extends Component<
+  { children: ReactNode },
+  { error: Error | null }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <View style={{ flex: 1, backgroundColor: "#1a1a2e", justifyContent: "center", padding: 24 }}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}>
+            <Text style={{ color: "#e94560", fontSize: 20, fontWeight: "bold", marginBottom: 12 }}>
+              ⚙️ Eroare de configurare
+            </Text>
+            <Text style={{ color: "#ffffff", fontSize: 14, marginBottom: 16, lineHeight: 22 }}>
+              {this.state.error.message}
+            </Text>
+            <Text style={{ color: "#aaaaaa", fontSize: 13, lineHeight: 20 }}>
+              Aplicația nu poate porni fără URL-ul API-ului.{"\n\n"}
+              Soluție: asigurați-vă că variabila de mediu{" "}
+              <Text style={{ color: "#e94560", fontFamily: "monospace" }}>EXPO_PUBLIC_API_BASE_URL</Text>{" "}
+              este setată în EAS Secrets și reconstruiți aplicația.
+            </Text>
+          </ScrollView>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -157,21 +200,25 @@ export default function RootLayout() {
 
   if (shouldOverrideSafeArea) {
     return (
-      <ThemeProvider>
-        <SafeAreaProvider initialMetrics={providerInitialMetrics}>
-          <SafeAreaFrameContext.Provider value={frame}>
-            <SafeAreaInsetsContext.Provider value={insets}>
-              {content}
-            </SafeAreaInsetsContext.Provider>
-          </SafeAreaFrameContext.Provider>
-        </SafeAreaProvider>
-      </ThemeProvider>
+      <ConfigErrorBoundary>
+        <ThemeProvider>
+          <SafeAreaProvider initialMetrics={providerInitialMetrics}>
+            <SafeAreaFrameContext.Provider value={frame}>
+              <SafeAreaInsetsContext.Provider value={insets}>
+                {content}
+              </SafeAreaInsetsContext.Provider>
+            </SafeAreaFrameContext.Provider>
+          </SafeAreaProvider>
+        </ThemeProvider>
+      </ConfigErrorBoundary>
     );
   }
 
   return (
-    <ThemeProvider>
-      <SafeAreaProvider initialMetrics={providerInitialMetrics}>{content}</SafeAreaProvider>
-    </ThemeProvider>
+    <ConfigErrorBoundary>
+      <ThemeProvider>
+        <SafeAreaProvider initialMetrics={providerInitialMetrics}>{content}</SafeAreaProvider>
+      </ThemeProvider>
+    </ConfigErrorBoundary>
   );
 }
