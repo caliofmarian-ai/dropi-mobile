@@ -14,8 +14,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useDropiAuth } from "@/lib/auth-context";
 import { safeGoBack } from "@/lib/safe-back";
-
-const API_BASE = "http://127.0.0.1:3000";
+import { getRequiredApiBaseUrl } from "@/constants/oauth";
 
 export default function AdminModerationPanel() {
   const colors = useColors();
@@ -36,7 +35,8 @@ export default function AdminModerationPanel() {
   const isAdmin = adminRoles.includes(user?.dropiRole || "");
 
   const apiCall = useCallback(async (path: string, method = "GET", body?: any) => {
-    const res = await fetch(`${API_BASE}${path}`, {
+    const baseUrl = getRequiredApiBaseUrl("admin moderation");
+    const res = await fetch(`${baseUrl}${path}`, {
       method,
       headers: {
         "Content-Type": "application/json",

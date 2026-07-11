@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import type { DropiRole, Channel, DropiUser } from "@/shared/types";
-import { getApiBaseUrl } from "@/constants/oauth";
+import { getApiBaseUrl, getRequiredApiBaseUrl } from "@/constants/oauth";
 import * as Auth from "@/lib/_core/auth";
 
 // ===== AUTH CONTEXT TYPE =====
@@ -41,12 +41,11 @@ const DEMO_KEY = "@dropi_demo";
 // On web: derives from current hostname (8081 → 3000)
 // On native via Expo Go: uses EXPO_PUBLIC_API_BASE_URL env var
 function getApiTrpcUrl(): string {
-  const base = getApiBaseUrl();
-  if (base) return `${base}/api/trpc`;
-  // Web fallback: relative path
-  if (Platform.OS === "web") return "/api/trpc";
-  // Native fallback: should not happen if env is set
-  return "http://localhost:3000/api/trpc";
+  if (Platform.OS === "web") {
+    const base = getApiBaseUrl();
+    return base ? `${base}/api/trpc` : "/api/trpc";
+  }
+  return `${getRequiredApiBaseUrl("auth tRPC")}/api/trpc`;
 }
 
 // ===== DEMO ACCOUNTS (kept for demo mode) =====

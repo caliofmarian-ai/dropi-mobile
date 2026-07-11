@@ -8,6 +8,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { View, Text, StyleSheet, Platform } from "react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
+import { getRequiredApiBaseUrl } from "@/constants/oauth";
 
 interface PositionData {
   deliveryId: number;
@@ -72,7 +73,7 @@ export function LiveTrackingMap({
 
     const baseUrl = Platform.OS === "web"
       ? `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}`
-      : "ws://127.0.0.1:3000";
+      : getRequiredApiBaseUrl("live tracking map websocket").replace(/^http/, "ws");
 
     const params = new URLSearchParams({
       role,

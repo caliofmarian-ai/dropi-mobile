@@ -6,7 +6,7 @@
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { AppState } from "react-native";
-import { getApiBaseUrl } from "@/constants/oauth";
+import { getRequiredApiBaseUrl } from "@/constants/oauth";
 
 export interface PilotPosition {
   deliveryId: number;
@@ -53,11 +53,10 @@ export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingO
   const connect = useCallback(() => {
     if (!enabled || !deliveryId) return;
 
-    // Build WS URL from API base
-    const apiUrl = getApiBaseUrl() || "http://127.0.0.1:3000";
-    const wsUrl = apiUrl.replace(/^http/, "ws") + `/ws/tracking?role=subscriber&deliveryId=${deliveryId}`;
-
     try {
+      // Build WS URL from API base
+      const apiUrl = getRequiredApiBaseUrl("subscriber tracking websocket");
+      const wsUrl = apiUrl.replace(/^http/, "ws") + `/ws/tracking?role=subscriber&deliveryId=${deliveryId}`;
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
