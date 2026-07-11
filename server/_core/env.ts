@@ -1,7 +1,14 @@
+function resolveDatabaseUrl() {
+  const value = (process.env.DATABASE_URL ?? process.env.MYSQL_URL ?? "").trim();
+  if (!value) return "";
+  if (!value.includes("://")) return "";
+  return value;
+}
+
 export const ENV = {
   appId: process.env.VITE_APP_ID ?? "",
   cookieSecret: process.env.JWT_SECRET ?? "",
-  databaseUrl: process.env.DATABASE_URL ?? "",
+  databaseUrl: resolveDatabaseUrl(),
   oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
   ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
   isProduction: process.env.NODE_ENV === "production",

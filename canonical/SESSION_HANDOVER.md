@@ -25,20 +25,35 @@
 | Câmp | Valoare |
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
-| **Data** | 2026-07-10 |
-| **Branch activ** | `copilot/fix-failing-github-actions-job` |
+| **Data** | 2026-07-11 |
+| **Branch activ** | `copilot/f345dc3395da2c313962656e4a59f4074e456533` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- **Fix CI/CD — Build Android APK (development):**
-  - Investigat job-ul eșuat (run ID: 29015177408, job ID: 86121879342)
-  - Cauza root: `eas.json` conținea o cheie `"update"` la nivel de top (liniile 33-35), respinsă de EAS CLI cu eroarea `"eas.json is not valid - \"update\" is not allowed"`
-  - Fix: șters cheia `"update": { "channel": "development" }` din `eas.json`
-  - Commit: `e136dfc fix: remove invalid top-level update key from eas.json`
-- **Fix CI/CD — EAS Update (OTA):**
-  - Investigat job-ul eșuat (run ID: 29070087721, job ID: 86289628745)
-  - Cauza root: `app.config.ts` avea `slug: "dropi-mobile"` dar proiectul EAS înregistrat pe expo.dev are slug-ul `"dropiexpodev"` — nepotrivire care blochează `eas update`
-  - Fix: modificat `appSlug` în `app.config.ts` din `"dropi-mobile"` în `"dropiexpodev"` pentru a se alinia cu proiectul EAS înregistrat
+- **Audit general + clarificare reguli runtime mobile/cloud:**
+  - Revalidat structura proiectului (app/server/canonical/docs/workflows) și baseline-ul de validare:
+    - `pnpm run lint` ✅ (warnings existente, 0 errors)
+    - `pnpm run build` ✅
+    - `pnpm run test` ✅ (teste skipped în lipsa env-urilor opționale)
+  - Actualizat regula canonică: pentru validare mobilă reală se folosește telefon + Railway cloud backend/agenți AI, nu localhost.
+  - Actualizat ghidul `docs/MOBILE_FIRST_SETUP.md` cu regula explicită și pașii corecți pentru `EXPO_PUBLIC_API_BASE_URL`.
+
+- **Stabilizare erori locale (lint/test):**
+  - Reprodus baseline-ul cu `pnpm run lint`, `pnpm run build`, `pnpm run test`
+  - Eliminat erorile blocante `react/no-unescaped-entities` din:
+    - `app/admin/fcm-config.tsx`
+    - `app/forgot-password.tsx`
+    - `app/merchant/api-integration.tsx`
+    - `app/verify-email.tsx`
+  - Actualizat `tests/smtp.test.ts`:
+    - încarcă `.env` cu `dotenv/config`
+    - acceptă `GMAIL_APP_PASSWORD` sau `SMTP_PASS`
+    - testul SMTP este `skip` dacă lipsesc credențialele locale
+  - Validare după fixuri:
+    - `pnpm run build` ✅
+    - `pnpm run lint` ✅ (0 errors, warnings rămase)
+    - `pnpm run test` ✅ (fără failures; teste dependente de env = skipped)
+  - Commit: `207ed6a fix: resolve lint blocking text entities and stabilize smtp test env handling`
 
 ---
 
@@ -52,7 +67,8 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- PR `copilot/fix-failing-github-actions-job` — fix `eas.json`, necesită merge în `main` pentru a activa build-ul
+- Branch curent: `copilot/f345dc3395da2c313962656e4a59f4074e456533` (fixuri lint/test locale + stabilizare SMTP test)
+- PR anterior: `copilot/fix-failing-github-actions-job` (fix `eas.json` / slug) — de verificat status merge în `main`
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -61,19 +77,19 @@
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- Nimic blocat — toate pașii de setup cloud sunt finalizați; fix-ul `eas.json` este în PR și așteaptă merge
+- Nicio blocare tehnică critică în cod; pentru test SMTP live este necesar secret valid (`GMAIL_APP_PASSWORD` sau `SMTP_PASS`) în environment-ul de execuție
 
 ---
 
 ## 3. Pasul Următor Concret
 
-**Fix `eas.json` + `app.config.ts` slug gata — în PR `copilot/fix-failing-github-actions-job`.**
+**Fixurile locale de lint/test sunt aplicate în `copilot/f345dc3395da2c313962656e4a59f4074e456533`.**
 
 **Pasul imediat următor:**
-1. Mergi pe GitHub → repo `dropi-mobile` → fă **merge** la PR-ul `copilot/fix-failing-github-actions-job` în `main`
-2. Asta va declanșa automat `eas-build-android.yml` (APK) și `eas-update.yml` (OTA)
-3. Ambele workflow-uri ar trebui să treacă acum (eas.json valid + slug aliniat)
-4. Descarcă APK din EAS dashboard → instalează pe telefon cu Expo Dev Client
+1. Deschide PR pentru branch-ul curent și fă merge în `main`
+2. Rulează din nou GitHub Actions după merge (`eas-build-android.yml` și `eas-update.yml`)
+3. Setează/confirmă secretul de email în CI (`GMAIL_APP_PASSWORD` sau `SMTP_PASS`) dacă vrei test SMTP live, altfel rămâne skip controlat
+4. Continuă cu task-ul de business: guards pe mission endpoints (block delivery partners neverificați)
 
 **Următorul task de dezvoltare:** Guards pe mission endpoints (block delivery partners neverificați)
 
@@ -93,6 +109,8 @@
 | 2026-07-07 | APK build automat la fiecare push pe `main` via `eas-build-android.yml` | Fondatorul nu mai are nevoie de terminal local pentru build | Copilot Agent |
 | 2026-07-10 | Cheia `update` NU aparține în `eas.json` — aparține în `app.config.ts` sub `expo.updates` | EAS CLI respinge `eas.json` cu cheie `update` la top-level | Copilot Agent |
 | 2026-07-10 | `slug` în `app.config.ts` trebuie să fie `"dropiexpodev"` (nu `"dropi-mobile"`) ca să se alinieze cu proiectul EAS înregistrat pe expo.dev | EAS CLI respinge `eas update` dacă slug-ul din config nu se potrivește cu slug-ul proiectului EAS | Copilot Agent |
+| 2026-07-11 | Testul SMTP trebuie să fie rezilient la lipsa credentialelor locale (skip controlat, nu fail global) | Evităm blocarea suitei locale/CI când secretul de email nu e setat pe toate mediile | Copilot Agent |
+| 2026-07-11 | Runtime standard pentru validare mobilă: telefon + Expo Dev Client + Railway cloud backend/agenți AI; fără localhost în testele reale mobile | Evităm erori false de conectivitate și păstrăm fluxul de lucru cloud-first al proiectului | Fondator + Copilot Agent |
 
 ---
 
@@ -108,11 +126,14 @@
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
-| `copilot/fix-failing-github-actions-job` | Fix eas.json — top-level update key invalid | Activ, PR deschis |
+| `copilot/f345dc3395da2c313962656e4a59f4074e456533` | Fix erori lint blocante + stabilizare test SMTP | Activ, necesită PR/merge |
+| `copilot/fix-failing-github-actions-job` | Fix eas.json + slug EAS | De verificat dacă e deja merged |
 
 ### Probleme cunoscute / Datorie tehnică
-- `eas.json` — fix aplicat (e136dfc), în PR `copilot/fix-failing-github-actions-job` ✅
+- `eas.json` — fix top-level update key aplicat ✅
 - `app.config.ts` slug — fix aplicat, `slug` aliniat la `"dropiexpodev"` ✅
+- `react/no-unescaped-entities` în ecrane mobile — fixat (0 errors la lint) ✅
+- Test SMTP live depinde de secret email în environment (`GMAIL_APP_PASSWORD`/`SMTP_PASS`) ⚠️
 - Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
 
 ### Tehnologii principale
@@ -151,9 +172,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.4.0**
+Acest document: **v1.6.0**
 Data creării: 2026-07-07
-Ultima actualizare: 2026-07-10
-Actualizat de: GitHub Copilot Coding Agent — fix slug mismatch în app.config.ts (dropiexpodev), EAS Update OTA deblocat.
+Ultima actualizare: 2026-07-11
+Actualizat de: GitHub Copilot Coding Agent — audit general + regulă mobil/cloud Railway + actualizare ghid setup.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.

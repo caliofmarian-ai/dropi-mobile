@@ -186,6 +186,12 @@ Un task este „done” doar dacă:
   - validări rulate,
   - rezultat observabil.
 
+### 11.6 Mobile-Cloud Runtime Rule (Railway + Telefon)
+- Pentru fluxul operațional DROPi, aplicația se validează pe telefon cu backend și agenți AI rulați în cloud (Railway), nu pe localhost.
+- Pentru sesiuni de test mobile se folosește URL public Railway prin `EXPO_PUBLIC_API_BASE_URL`.
+- `localhost`/`127.0.0.1` sunt interzise ca runtime API pentru testele reale pe telefon.
+- Excepțiile locale (debug punctual) trebuie documentate explicit și nu pot deveni flux implicit de lucru.
+
 ---
 
 ## 12. Initial Roadmap for AI Organization Integration
@@ -242,9 +248,9 @@ Fondatorul lucrează cu mai mulți agenți AI în rotație (ex: GitHub Copilot A
 
 ## 15. Versioning
 
-Acest document: **v1.1.0**  
-Data ultimei actualizări: 7 Iulie 2026  
-Modificare v1.1.0: Adăugat secțiunea 14 despre continuitatea între sesiuni și platforme AI. Creat `canonical/SESSION_HANDOVER.md`.  
+Acest document: **v1.2.0**  
+Data ultimei actualizări: 11 Iulie 2026  
+Modificare v1.2.0: Adăugată regula canonică de runtime mobile-cloud (telefon + Railway, fără localhost pentru validările mobile reale).  
 Bază: Handover strategic furnizat de fondator + consolidare canonică în repository.
 
 ---
