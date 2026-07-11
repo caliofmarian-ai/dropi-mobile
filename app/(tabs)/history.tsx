@@ -1,9 +1,9 @@
 import { Text, View, FlatList } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
-import { CLIENT_ORDERS, MERCHANT_ORDERS, PILOT_MISSIONS } from "@/lib/mock-data";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/shared/types";
 import type { OrderStatus } from "@/shared/types";
+import { trpc } from "@/lib/trpc";
 
 function StatusBadge({ status }: { status: OrderStatus }) {
   const color = ORDER_STATUS_COLORS[status];
@@ -17,19 +17,23 @@ function StatusBadge({ status }: { status: OrderStatus }) {
 export default function HistoryScreen() {
   const { user } = useDropiAuth();
   const role = user?.dropiRole;
+  const ordersQuery = trpc.operations.myOrders.useQuery(
+    { includeCompleted: true },
+    { enabled: role === "customer" || role === "merchant" },
+  );
+  const missionsHistoryQuery = trpc.operations.myPilotMissionHistory.useQuery(undefined, {
+    enabled: role === "delivery_partner",
+  });
 
   // Delivery partner sees completed missions
   if (role === "delivery_partner") {
+    const completedMissions = missionsHistoryQuery.data?.missions ?? [];
     return (
       <ScreenContainer className="px-4 pt-4">
         <Text className="text-2xl font-bold text-foreground mb-1">Mission History</Text>
         <Text className="text-sm text-muted mb-4">Completed deliveries</Text>
         <FlatList
-          data={[
-            { id: 100, merchantName: "Juan's Kitchen", pickupZone: "QC-D4", deliveryZone: "Manila-Taft", distance: 4.2, time: "8 min", date: "Today 09:15" },
-            { id: 101, merchantName: "Fresh Pharmacy", pickupZone: "Makati-Poblacion", deliveryZone: "Manila-Ermita", distance: 2.8, time: "5 min", date: "Today 08:30" },
-            { id: 102, merchantName: "Tech Store PH", pickupZone: "Pasig-Ortigas", deliveryZone: "Mandaluyong-Shaw", distance: 3.1, time: "6 min", date: "Yesterday 17:45" },
-          ]}
+          data={completedMissions}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{ paddingBottom: 100 }}
           renderItem={({ item }) => (
@@ -43,7 +47,7 @@ export default function HistoryScreen() {
               <Text className="text-xs text-muted">{item.pickupZone} → {item.deliveryZone}</Text>
               <View className="flex-row justify-between items-center mt-2">
                 <Text className="text-xs text-muted">{item.distance} km • {item.time}</Text>
-                <Text className="text-xs text-muted">{item.date}</Text>
+                <Text className="text-xs text-muted">{new Date(item.date).toLocaleDateString()}</Text>
               </View>
             </View>
           )}
@@ -54,9 +58,7 @@ export default function HistoryScreen() {
   }
 
   // Merchant and Customer see order history
-  const orders = role === "merchant"
-    ? MERCHANT_ORDERS.filter((o) => o.status === "completed" || o.status === "cancelled")
-    : CLIENT_ORDERS.filter((o) => o.status === "completed" || o.status === "cancelled");
+  const orders = (ordersQuery.data?.orders ?? []).filter((o) => o.status === "completed" || o.status === "cancelled");
 
   return (
     <ScreenContainer className="px-4 pt-4">

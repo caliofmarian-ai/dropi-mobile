@@ -11,6 +11,7 @@ import { pilotSelectionRouter } from "./pilot-selection-router";
 import { pilotRatingAdminRouter } from "./pilot-rating-admin";
 import { notificationRouter } from "./notification-router";
 import { agentRouter } from "./agent-router";
+import { operationsRouter } from "./operations-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -65,6 +66,9 @@ export const appRouter = router({
 
   // AI Agent Orchestrator — task queue, agent states, reports
   agent: agentRouter,
+
+  // Mobile operational data (orders/missions) for dashboard & detail screens
+  operations: operationsRouter,
 });
 
 export type AppRouter = typeof appRouter;

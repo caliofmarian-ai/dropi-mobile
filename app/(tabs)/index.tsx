@@ -3,7 +3,6 @@ import { useRouter, Redirect } from "expo-router";
 import { useState, useCallback } from "react";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
-import { CLIENT_ORDERS, MERCHANT_ORDERS, PILOT_MISSIONS } from "@/lib/mock-data";
 import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
 import type { DeliveryMode } from "@/lib/marketplace-data";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, CHANNEL_INFO, getRoleConfig } from "@/shared/types";
@@ -42,9 +41,11 @@ function StatusBadge({ status }: { status: OrderStatus }) {
 
 function CustomerDashboard() {
   const router = useRouter();
-  const [refreshing, setRefreshing] = useState(false);
-  const activeOrders = CLIENT_ORDERS.filter((o) => o.status !== "completed" && o.status !== "cancelled");
-  const onRefresh = useCallback(() => { setRefreshing(true); setTimeout(() => setRefreshing(false), 1000); }, []);
+  const ordersQuery = trpc.operations.myOrders.useQuery({ includeCompleted: false });
+  const activeOrders = ordersQuery.data?.orders ?? [];
+  const onRefresh = useCallback(async () => {
+    await ordersQuery.refetch();
+  }, [ordersQuery]);
 
   return (
     <ScreenContainer className="px-4 pt-4">
@@ -54,7 +55,7 @@ function CustomerDashboard() {
       <FlatList
         data={activeOrders}
         keyExtractor={(item) => item.id.toString()}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<RefreshControl refreshing={ordersQuery.isFetching} onRefresh={onRefresh} />}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
           <TouchableOpacity className="bg-surface border border-border rounded-2xl p-4 mb-3" activeOpacity={0.7} onPress={() => router.push(`/order/${item.id}`)}>
@@ -97,11 +98,14 @@ function CustomerDashboard() {
 
 function MerchantDashboard() {
   const router = useRouter();
-  const [refreshing, setRefreshing] = useState(false);
-  const newOrders = MERCHANT_ORDERS.filter((o) => o.status === "validated");
-  const preparingOrders = MERCHANT_ORDERS.filter((o) => o.status === "preparing");
-  const readyOrders = MERCHANT_ORDERS.filter((o) => o.status === "ready");
-  const onRefresh = useCallback(() => { setRefreshing(true); setTimeout(() => setRefreshing(false), 1000); }, []);
+  const ordersQuery = trpc.operations.myOrders.useQuery({ includeCompleted: true });
+  const allOrders = ordersQuery.data?.orders ?? [];
+  const newOrders = allOrders.filter((o) => o.status === "validated");
+  const preparingOrders = allOrders.filter((o) => o.status === "preparing");
+  const readyOrders = allOrders.filter((o) => o.status === "ready");
+  const onRefresh = useCallback(async () => {
+    await ordersQuery.refetch();
+  }, [ordersQuery]);
   const sections = [
     { title: "New Orders", data: newOrders, color: "#0066FF" },
     { title: "Preparing", data: preparingOrders, color: "#F59E0B" },
@@ -112,11 +116,11 @@ function MerchantDashboard() {
     <ScreenContainer className="px-4 pt-4">
       <OnboardingNudgeBanner />
       <Text className="text-2xl font-bold text-foreground mb-1">Order Queue</Text>
-      <Text className="text-sm text-muted mb-4">{MERCHANT_ORDERS.length} orders today</Text>
+      <Text className="text-sm text-muted mb-4">{allOrders.length} orders today</Text>
       <FlatList
         data={sections}
         keyExtractor={(item) => item.title}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<RefreshControl refreshing={ordersQuery.isFetching} onRefresh={onRefresh} />}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item: section }) => (
           <View className="mb-5">
@@ -147,9 +151,11 @@ function MerchantDashboard() {
 function DeliveryPartnerDashboard() {
   const router = useRouter();
   const { user } = useDropiAuth();
-  const [refreshing, setRefreshing] = useState(false);
-  const availableMissions = PILOT_MISSIONS.filter((m) => m.status === "available");
-  const onRefresh = useCallback(() => { setRefreshing(true); setTimeout(() => setRefreshing(false), 1000); }, []);
+  const missionsQuery = trpc.operations.myPilotMissions.useQuery();
+  const availableMissions = (missionsQuery.data?.missions ?? []).filter((m) => m.status === "available");
+  const onRefresh = useCallback(async () => {
+    await missionsQuery.refetch();
+  }, [missionsQuery]);
 
   // Sprint 6A: Check if delivery partner is verified
   const isUnverified = user && !(user as any).isVerified;
@@ -195,7 +201,7 @@ function DeliveryPartnerDashboard() {
       <FlatList
         data={availableMissions}
         keyExtractor={(item) => item.id.toString()}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<RefreshControl refreshing={missionsQuery.isFetching} onRefresh={onRefresh} />}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
           <TouchableOpacity className="bg-surface border border-border rounded-2xl p-4 mb-3" activeOpacity={0.7} onPress={() => router.push(`/mission/${item.id}`)}>
