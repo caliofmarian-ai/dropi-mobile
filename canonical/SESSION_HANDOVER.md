@@ -30,6 +30,14 @@
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
+- **Audit general + clarificare reguli runtime mobile/cloud:**
+  - Revalidat structura proiectului (app/server/canonical/docs/workflows) și baseline-ul de validare:
+    - `pnpm run lint` ✅ (warnings existente, 0 errors)
+    - `pnpm run build` ✅
+    - `pnpm run test` ✅ (teste skipped în lipsa env-urilor opționale)
+  - Actualizat regula canonică: pentru validare mobilă reală se folosește telefon + Railway cloud backend/agenți AI, nu localhost.
+  - Actualizat ghidul `docs/MOBILE_FIRST_SETUP.md` cu regula explicită și pașii corecți pentru `EXPO_PUBLIC_API_BASE_URL`.
+
 - **Stabilizare erori locale (lint/test):**
   - Reprodus baseline-ul cu `pnpm run lint`, `pnpm run build`, `pnpm run test`
   - Eliminat erorile blocante `react/no-unescaped-entities` din:
@@ -102,6 +110,7 @@
 | 2026-07-10 | Cheia `update` NU aparține în `eas.json` — aparține în `app.config.ts` sub `expo.updates` | EAS CLI respinge `eas.json` cu cheie `update` la top-level | Copilot Agent |
 | 2026-07-10 | `slug` în `app.config.ts` trebuie să fie `"dropiexpodev"` (nu `"dropi-mobile"`) ca să se alinieze cu proiectul EAS înregistrat pe expo.dev | EAS CLI respinge `eas update` dacă slug-ul din config nu se potrivește cu slug-ul proiectului EAS | Copilot Agent |
 | 2026-07-11 | Testul SMTP trebuie să fie rezilient la lipsa credentialelor locale (skip controlat, nu fail global) | Evităm blocarea suitei locale/CI când secretul de email nu e setat pe toate mediile | Copilot Agent |
+| 2026-07-11 | Runtime standard pentru validare mobilă: telefon + Expo Dev Client + Railway cloud backend/agenți AI; fără localhost în testele reale mobile | Evităm erori false de conectivitate și păstrăm fluxul de lucru cloud-first al proiectului | Fondator + Copilot Agent |
 
 ---
 
@@ -163,9 +172,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.5.0**
+Acest document: **v1.6.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-11
-Actualizat de: GitHub Copilot Coding Agent — fix erori lint blocante + stabilizare test SMTP + validare lint/build/test.
+Actualizat de: GitHub Copilot Coding Agent — audit general + regulă mobil/cloud Railway + actualizare ghid setup.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
