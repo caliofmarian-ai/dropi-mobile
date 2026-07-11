@@ -26,23 +26,19 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-11 |
-| **Branch activ** | `copilot/update-graphic-asset` |
+| **Branch activ** | `copilot/fixmobile-api-env-injection-rca` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- **Milestone M1 (baseline audit production-readiness) finalizat**
-  - Confirmată starea canonică + config deploy/build (EAS, workflows, app config).
-  - Confirmat blocker critic: ecranele operaționale mobile foloseau încă `lib/mock-data`.
-- **Milestone M2 (faza 1 — replace mock data) implementat**
-  - Adăugat router nou server-side: `server/operations-router.ts` (orders + missions pentru mobile).
-  - Conectat în app router: `server/routers.ts` (`operations` namespace).
-  - Înlocuit consumul de mock data cu tRPC real în ecranele:
-    - `app/(tabs)/index.tsx` (Customer/Merchant/Delivery Partner dashboards)
-    - `app/(tabs)/history.tsx`
-    - `app/order/[id].tsx`
-    - `app/merchant-order/[id].tsx`
-    - `app/mission/[id].tsx`
-  - Validare executată după implementare: `pnpm run lint`, `pnpm run build`, `pnpm run test` (fără erori, doar warnings existente + teste skipate controlat în lipsă secrets/env).
+- **Fix aprobat implementat pentru RCA „mobile API env injection”**
+  - Adăugat fail-fast validation în `.github/workflows/eas-build-android.yml` pentru `EXPO_PUBLIC_API_BASE_URL`:
+    - workflow-ul oprește build-ul dacă secretul lipsește;
+    - workflow-ul oprește build-ul dacă valoarea este `localhost`/`127.0.0.1`.
+  - Adăugat aceeași validare în `.github/workflows/eas-update.yml` pentru fluxul OTA.
+  - Validare executată înainte și după modificări:
+    - `pnpm run lint` (0 errors, warnings existente),
+    - `pnpm run build` (success),
+    - `pnpm run test` (suite skip controlat în lipsă env/secrets locale).
 
 ---
 
@@ -56,7 +52,7 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Branch curent: `copilot/update-graphic-asset`
+- Branch curent: `copilot/fixmobile-api-env-injection-rca`
 - Milestone M2 faza 2: eliminare hardcoded demo metrics/UI rămase în dashboard-uri non-C1 și continuare înlocuire mock/hardcoded cu date reale end-to-end
 
 ### ✅ Setup cloud complet (2026-07-07)
@@ -74,9 +70,9 @@
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. M2 faza 2: înlocuiește hardcoded metrics/UI demo rămase pe dashboard-urile C2/C3/Admin cu query-uri reale unde există backend.
-2. M2 faza 3: aliniază status tracking între `AUDIT_TRACKING.md`, `todo.md` și implementarea reală.
-3. Rulează validare completă după fiecare increment (`lint`, `build`, `test`) și documentează progresul în acest handover.
+1. Deschide PR pentru `copilot/fixmobile-api-env-injection-rca` și rulează workflow-urile EAS după merge pe `main`.
+2. Confirmă în GitHub Actions că validarea `EXPO_PUBLIC_API_BASE_URL` blochează corect lipsa secretului/localhost.
+3. Continuă M2 faza 2 (eliminare hardcoded demo metrics/UI rămase pe dashboard-urile non-C1).
 
 ---
 
@@ -99,6 +95,7 @@
 | 2026-07-11 | Versionarea EAS pentru build-uri mobile trebuie gestionată prin `appVersionSource: "remote"` + `autoIncrement: true` | Cu `local`, fiecare build CI pornea din aceeași stare și APK-ul nu mai avansa corect build/version code-ul | Copilot Agent |
 | 2026-07-11 | Redirect-ul OAuth nativ trebuie generat din schema activă a build-ului (`Linking.createURL`) și nu dintr-un `bundleId` hardcodat în codul runtime | Evităm callback-uri pe schemă greșită după build/update și reducem erorile de login pe telefon | Copilot Agent |
 | 2026-07-11 | Ecranele operaționale C1 trebuie să consume date reale prin tRPC (`operations` router), nu `lib/mock-data` | Eliminăm inconsistența dintre UI și starea reală backend și reducem regresiile de integrare | Copilot Agent |
+| 2026-07-11 | Workflow-urile EAS (`build` și `update`) trebuie să valideze explicit `EXPO_PUBLIC_API_BASE_URL` și să respingă `localhost`/`127.0.0.1` | Prevenim build/update mobile cu API invalid și aliniem runtime-ul mobil la regula cloud-first (telefon + Railway) | Copilot Agent |
 
 ---
 
@@ -114,7 +111,7 @@
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
-| `copilot/fix-apk-versioning-errors` | Fix versionare EAS build + redirect OAuth nativ | Activ, necesită PR/merge |
+| `copilot/fixmobile-api-env-injection-rca` | Fix fail-fast validation pentru `EXPO_PUBLIC_API_BASE_URL` în workflow-urile EAS | Activ, necesită PR/merge |
 | `copilot/funcioneaz-aplicaia-server` | Eliminare fallback localhost pe mobile runtime + fail-fast config API | Merged în `main` |
 
 ### Probleme cunoscute / Datorie tehnică
@@ -162,9 +159,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.9.0**
+Acest document: **v1.10.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-11
-Actualizat de: GitHub Copilot Coding Agent — M2 faza 1 (replace mock data pe ecranele operaționale principale prin tRPC operations router).
+Actualizat de: GitHub Copilot Coding Agent — implementare fix RCA pentru validare/env injection `EXPO_PUBLIC_API_BASE_URL` în workflow-urile EAS.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
