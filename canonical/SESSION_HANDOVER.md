@@ -30,23 +30,19 @@
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- **Audit complet documentație (inclusiv 04.zip) + consolidare canonical docs noi**
-  - Confirmat că repository-ul avea 30 documente `.md`, dar arhiva `04.zip` conține setul extins (`04/DROPI_CANONICAL/*`) cu ~166 documente canonice.
-  - Livrat gap analysis complet cu:
-    - documente existente,
-    - documente parțiale,
-    - documente lipsă,
-    - duplicate,
-    - inconsistențe.
-  - Create documente canonice lipsă solicitate:
-    - `AGENTS.md`
-    - `AI_DEVELOPMENT_CHARTER.md`
-    - `PROJECT_TRANSFER.md`
-    - `ARCHITECTURE.md`
-    - `DEPLOYMENT.md`
-    - `ROADMAP.md`
-    - `SESSION_STATE.md`
-    - `DECISION_LOG.md`
+- **Milestone M1 (baseline audit production-readiness) finalizat**
+  - Confirmată starea canonică + config deploy/build (EAS, workflows, app config).
+  - Confirmat blocker critic: ecranele operaționale mobile foloseau încă `lib/mock-data`.
+- **Milestone M2 (faza 1 — replace mock data) implementat**
+  - Adăugat router nou server-side: `server/operations-router.ts` (orders + missions pentru mobile).
+  - Conectat în app router: `server/routers.ts` (`operations` namespace).
+  - Înlocuit consumul de mock data cu tRPC real în ecranele:
+    - `app/(tabs)/index.tsx` (Customer/Merchant/Delivery Partner dashboards)
+    - `app/(tabs)/history.tsx`
+    - `app/order/[id].tsx`
+    - `app/merchant-order/[id].tsx`
+    - `app/mission/[id].tsx`
+  - Validare executată după implementare: `pnpm run lint`, `pnpm run build`, `pnpm run test` (fără erori, doar warnings existente + teste skipate controlat în lipsă secrets/env).
 
 ---
 
@@ -61,7 +57,7 @@
 
 ### 🔄 În progres
 - Branch curent: `copilot/update-graphic-asset`
-- Consolidare finală documentație canonică și verificare consistență între `canonical/*`, root docs și `04.zip`
+- Milestone M2 faza 2: eliminare hardcoded demo metrics/UI rămase în dashboard-uri non-C1 și continuare înlocuire mock/hardcoded cu date reale end-to-end
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -70,28 +66,17 @@
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- Nicio blocare tehnică critică în cod; pentru test SMTP live este necesar secret valid (`GMAIL_APP_PASSWORD` sau `SMTP_PASS`) în environment-ul de execuție
+- Pentru verificare end-to-end a noilor ecrane realtime este necesar dataset real în DB (orders/b2b deliveries) pe environment-ul de test.
+- Pentru test SMTP live este necesar secret valid (`GMAIL_APP_PASSWORD` sau `SMTP_PASS`) în environment-ul de execuție.
 
 ---
 
 ## 3. Pasul Următor Concret
 
-**Auditul complet de documentație este făcut, iar documentele canonice lipsă au fost create.**
-
 **Pasul imediat următor:**
-1. Revizuiește noile documente:
-   - `AGENTS.md`
-   - `AI_DEVELOPMENT_CHARTER.md`
-   - `PROJECT_TRANSFER.md`
-   - `ARCHITECTURE.md`
-   - `DEPLOYMENT.md`
-   - `ROADMAP.md`
-   - `SESSION_STATE.md`
-   - `DECISION_LOG.md`
-2. Confirmă dacă vrei și etapa de cleanup:
-   - eliminare duplicate (`canonical-delivery-reference.md`)
-   - alinieri index-uri canonice
-3. După aprobare, deschidere PR pentru documentație.
+1. M2 faza 2: înlocuiește hardcoded metrics/UI demo rămase pe dashboard-urile C2/C3/Admin cu query-uri reale unde există backend.
+2. M2 faza 3: aliniază status tracking între `AUDIT_TRACKING.md`, `todo.md` și implementarea reală.
+3. Rulează validare completă după fiecare increment (`lint`, `build`, `test`) și documentează progresul în acest handover.
 
 ---
 
@@ -113,6 +98,7 @@
 | 2026-07-11 | Runtime standard pentru validare mobilă: telefon + Expo Dev Client + Railway cloud backend/agenți AI; fără localhost în testele reale mobile | Evităm erori false de conectivitate și păstrăm fluxul de lucru cloud-first al proiectului | Fondator + Copilot Agent |
 | 2026-07-11 | Versionarea EAS pentru build-uri mobile trebuie gestionată prin `appVersionSource: "remote"` + `autoIncrement: true` | Cu `local`, fiecare build CI pornea din aceeași stare și APK-ul nu mai avansa corect build/version code-ul | Copilot Agent |
 | 2026-07-11 | Redirect-ul OAuth nativ trebuie generat din schema activă a build-ului (`Linking.createURL`) și nu dintr-un `bundleId` hardcodat în codul runtime | Evităm callback-uri pe schemă greșită după build/update și reducem erorile de login pe telefon | Copilot Agent |
+| 2026-07-11 | Ecranele operaționale C1 trebuie să consume date reale prin tRPC (`operations` router), nu `lib/mock-data` | Eliminăm inconsistența dintre UI și starea reală backend și reducem regresiile de integrare | Copilot Agent |
 
 ---
 
@@ -176,9 +162,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.8.0**
+Acest document: **v1.9.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-11
-Actualizat de: GitHub Copilot Coding Agent — audit documentație complet + creare documente canonice lipsă.
+Actualizat de: GitHub Copilot Coding Agent — M2 faza 1 (replace mock data pe ecranele operaționale principale prin tRPC operations router).
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
