@@ -23,7 +23,6 @@ const schemeFromBundleId = `manus${timestamp}`;
 // EAS Project ID configurat: 4720acfb-4ff2-4a5d-85eb-8ff14c439ea6
 // Poate fi suprascris prin env var EAS_PROJECT_ID dacă e necesar
 const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID ?? "4720acfb-4ff2-4a5d-85eb-8ff14c439ea6";
-const isDevelopmentBuild = process.env.EAS_BUILD_PROFILE === "development";
 
 const env = {
   appName: "DROPi",
@@ -42,7 +41,7 @@ const config: ExpoConfig = {
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
   userInterfaceStyle: "automatic",
-  newArchEnabled: !isDevelopmentBuild,
+  newArchEnabled: true,
   // EAS Updates — Over-The-Air updates fără reconstruire APK
   updates: {
     url: `https://u.expo.dev/${EAS_PROJECT_ID}`,
