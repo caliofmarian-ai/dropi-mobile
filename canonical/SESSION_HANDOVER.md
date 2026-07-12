@@ -25,20 +25,24 @@
 | Câmp | Valoare |
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
-| **Data** | 2026-07-11 |
+| **Data** | 2026-07-12 |
 | **Branch activ** | `copilot/fixmobile-api-env-injection-rca` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- **Fix aprobat implementat pentru RCA „mobile API env injection”**
-  - Adăugat fail-fast validation în `.github/workflows/eas-build-android.yml` pentru `EXPO_PUBLIC_API_BASE_URL`:
-    - workflow-ul oprește build-ul dacă secretul lipsește;
-    - workflow-ul oprește build-ul dacă valoarea este `localhost`/`127.0.0.1`.
-  - Adăugat aceeași validare în `.github/workflows/eas-update.yml` pentru fluxul OTA.
+- **Tracing end-to-end pentru `EXPO_PUBLIC_API_BASE_URL` + fix runtime pe device**
+  - Verificat lanțul complet:
+    1. GitHub Secret este referențiat în workflow-uri EAS (build/update) și validat fail-fast dacă lipsește/este localhost.
+    2. GitHub Action injectează variabila în comanda `eas build` / `eas update`.
+    3. `app.config.ts` mapează variabila în `extra.apiBaseUrl`.
+    4. Problema reală era la runtime: `constants/oauth.ts` citea doar `process.env.EXPO_PUBLIC_API_BASE_URL`, care poate fi gol pe device în anumite fluxuri Dev Client/manifest.
+  - Aplicat fix în `constants/oauth.ts`:
+    - `API_BASE_URL` rezolvă acum din `process.env` **sau** fallback din `Constants.expoConfig.extra.apiBaseUrl`.
   - Validare executată înainte și după modificări:
     - `pnpm run lint` (0 errors, warnings existente),
     - `pnpm run build` (success),
-    - `pnpm run test` (suite skip controlat în lipsă env/secrets locale).
+    - `pnpm run test` (suite skip controlat în lipsă env/secrets locale),
+    - `codeql_checker` (0 alerte).
 
 ---
 
@@ -70,8 +74,8 @@
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Deschide PR pentru `copilot/fixmobile-api-env-injection-rca` și rulează workflow-urile EAS după merge pe `main`.
-2. Confirmă în GitHub Actions că validarea `EXPO_PUBLIC_API_BASE_URL` blochează corect lipsa secretului/localhost.
+1. Rulează un build nou `development` + OTA update și validează pe telefon că `Invalid URL host: ""` nu mai apare.
+2. După validarea pe device, deschide/actualizează PR-ul pentru `copilot/fixmobile-api-env-injection-rca`.
 3. Continuă M2 faza 2 (eliminare hardcoded demo metrics/UI rămase pe dashboard-urile non-C1).
 
 ---
@@ -159,9 +163,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.10.0**
+Acest document: **v1.10.1**
 Data creării: 2026-07-07
-Ultima actualizare: 2026-07-11
-Actualizat de: GitHub Copilot Coding Agent — implementare fix RCA pentru validare/env injection `EXPO_PUBLIC_API_BASE_URL` în workflow-urile EAS.
+Ultima actualizare: 2026-07-12
+Actualizat de: GitHub Copilot Coding Agent — tracing end-to-end `EXPO_PUBLIC_API_BASE_URL` și fix fallback runtime (`process.env` -> `expoConfig.extra`).
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
