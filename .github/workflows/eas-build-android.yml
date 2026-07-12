@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - copilot/build-new-expo-development
   workflow_dispatch:
 
 jobs:
