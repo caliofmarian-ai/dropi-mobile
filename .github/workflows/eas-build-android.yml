@@ -1,12 +1,10 @@
 name: EAS Build — Android APK (development)
 
 # Construiește APK-ul de development Android cu Expo EAS
-# Rulează la fiecare push pe main și manual (workflow_dispatch)
-# APK-ul rezultat este disponibil ca artifact și în dashboard-ul EAS
+# Se rulează EXCLUSIV manual (workflow_dispatch) pentru a conserva cota EAS Free plan.
+# NU se declanșează automat la push pe main.
+# APK-ul rezultat este disponibil în dashboard-ul EAS (expo.dev).
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
