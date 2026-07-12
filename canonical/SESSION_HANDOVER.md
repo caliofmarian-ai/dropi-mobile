@@ -26,71 +26,46 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-12 |
-| **Branch activ** | `copilot/database-migration-audit` |
+| **Branch activ** | `copilot/fix-auth-crypto-email` |
 | **Agent** | GitHub Copilot Coding Agent |
 
-### Ce s-a făcut în sesiunile anterioare pe branch `copilot/fix-eas-quota-ci-failure` (context auth/reset):
-- Audit complet auth/reset după testul real-device post-PR #27.
-- Confirmat din GitHub Actions run `29192979619` că APK-ul nou folosește `EXPO_PUBLIC_API_BASE_URL=https://dropi-mobile-production.up.railway.app`; blocajul vechi de env injection nu mai este cauza curentă.
-- Traseu login/reset dovedit cap-coadă în cod (`app/login.tsx` / `app/forgot-password.tsx` → `lib/auth-context.tsx` → `server/auth-router.ts` → `server/db.ts`).
-- Identificat două cauze reale în backend:
-  - reset password returna succes chiar dacă emailul nu era livrat;
-  - implementarea email suporta doar Gmail + `GMAIL_APP_PASSWORD`, deși documentația/env-ul proiectului indică contract generic `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM`.
-- Fix aplicat:
-  - helper nou `server/_core/mail.ts` cu suport SMTP generic + fallback Gmail;
-  - `forgotPassword` curăță reset token-ul și returnează eroare reală dacă livrarea emailului eșuează;
-  - au fost eliminate log-urile care expuneau codurile de reset în clar;
-  - `verification-router` folosește același helper pentru consistență.
-- Adăugat raport RCA: `docs/AUTH_PASSWORD_RESET_RCA_2026-07-12.md`.
-- Adăugate teste noi:
-  - `tests/mail-config.test.ts`
-  - `tests/auth.forgot-password.test.ts`
-- Validări rulate:
-  - `pnpm install --frozen-lockfile` ✅
-  - `pnpm lint` ✅ (warnings existente, fără erori noi)
-  - `pnpm test` ✅
-  - `pnpm build` ✅
-  - `pnpm check` ❌ erori TypeScript preexistente, nelegate de PR (`app/order/[id].tsx`, `lib/trpc.ts`, `server/operations-router.ts`)
+### Ce s-a făcut în sesiunile anterioare (context auth/reset + database-migration-audit):
+- Rezumat complet în PR #28, PR #29, PR #30 (merged). Detalii în versiunile anterioare ale acestui document.
+- Stare produsă de PR #30 (merged): Railway backend Online, MySQL Online, migrații 0000–0013 aplicate, 26 tabele prezente.
 
-### Ce s-a făcut în sesiunea curentă (database-migration-audit):
-- Audit complet al tuturor celor 14 migrații drizzle (0000–0013) vs. schema.ts.
-- Identificat problemă critică: `drizzle/meta/0013_snapshot.json` lipsea complet.
-  - Migrația `0013_agent_orchestrator.sql` a fost creată manual (fără `drizzle-kit generate`).
-  - Fără snapshot, `drizzle-kit generate` viitor ar compara schema față de starea din 0012, ignorând cele 3 tabele noi (agentTasks, agentState, agentReports) și ar genera o migrație duplicată.
-- Fix aplicat: creat `drizzle/meta/0013_snapshot.json` cu toate 26 de tabele (23 din 0012 + 3 noi din 0013).
-- Verificat consistența: toate 26 tabele din schema.ts au migrații corespunzătoare.
-- **Implementat mecanism de migrare producție** (cerință obligatorie):
-  - Creat `scripts/migrate.ts` — runner programmatic care folosește `drizzle-orm/mysql2/migrator` (NU `drizzle-kit`), deci funcționează fără devDependencies la runtime.
-  - Creat `scripts/validate-db.ts` — validare post-migrare: verifică existența celor 26 tabele, istoricul `__drizzle_migrations` cu 14 intrări, și raportează users count.
-  - Actualizat `package.json`: comanda `build` compilează și `scripts/migrate.ts` → `dist/migrate.mjs` și `scripts/validate-db.ts` → `dist/validate-db.mjs`; adăugat `db:migrate` (alias `drizzle-kit migrate` pentru uz local).
-  - Actualizat `railway.toml`: `startCommand = "node dist/migrate.mjs && node dist/validate-db.mjs && pnpm start"` — migrațiile rulează înainte de pornirea serverului; orice eșec blochează startup-ul.
-- Validare: `pnpm build` ✅, `pnpm test` ✅, `pnpm lint` ✅, secret scan ✅, CodeQL ✅ (0 alerts)
+### Sesiune curentă (fix-auth-crypto-email) — 2026-07-12:
+- **Diagnoza blocantelor producție verificate live:**
+  - Login eșuează cu `crypto is not defined` → `jose` v6 folosește bara `crypto` globală (Web Crypto API). Pe Node.js < 19 (inclusiv Railway cu Node.js 18 LTS), `crypto` nu este expus ca identificator global în modul ESM fără `--experimental-global-webcrypto`.
+  - Email de recuperare parolă nu ajunge → `mail.ts` folosea `"dropi.deliveries@gmail.com"` ca username Gmail implicit (hardcodat) când `SMTP_USER` nu era setat; fiecare Gmail App Password este legat de contul specific care l-a generat.
 
-### Sesiune de verificare 2026-07-12 (acest agent):
-- Codul implementat de sesiunea anterioară verificat și confirmat complet.
-- Validări rulate din nou:
-  - `pnpm install --frozen-lockfile` ✅
+- **Fix A — Login (`crypto is not defined`):**
+  - `server/_core/index.ts`: import `webcrypto` din `node:crypto`; polyfill `globalThis.crypto = webcrypto` dacă nu este definit — rulează sincron la inițializarea server-ului, înainte de orice request handler.
+  - `server/storage.ts`: înlocuit `crypto.randomUUID()` global cu `import { randomUUID } from "node:crypto"` explicit.
+
+- **Fix B — Email de recuperare (Gmail):**
+  - `server/_core/mail.ts`: eliminat fallback hardcodat `"dropi.deliveries@gmail.com"` pentru `SMTP_USER`.
+  - Când `GMAIL_APP_PASSWORD` este setat dar `SMTP_USER` lipsește → log `[SMTP]` error cu instrucțiunile exacte pentru Railway (ce variabilă să adauge), returnează `null` (transport neconfigurat).
+  - Erori Nodemailer: logate DOAR mesajul (`.message`), nu obiectul complet care poate conține credențiale SMTP.
+
+- **Teste noi:**
+  - `tests/auth.login-session.test.ts` (nou): 3 teste jose WebCrypto — creeare/verificare JWT, respingere semn greșit. Prove că nu se aruncă `ReferenceError: crypto is not defined`.
+  - `tests/auth.forgot-password.test.ts`: adăugat test care verifică că codul de reset (6 cifre) nu apare în niciun canal de logging.
+  - `tests/mail-config.test.ts`: actualizat — noul test verifică că `GMAIL_APP_PASSWORD` fără `SMTP_USER` returnează `null` și loghează eroarea.
+
+- **Validări:**
   - `pnpm lint` ✅ (0 erori, 70 warnings preexistente)
-  - `pnpm build` ✅ (dist/index.mjs, dist/migrate.mjs, dist/validate-db.mjs produse)
-  - `pnpm test` ✅ (7 passed, 2 skipped — skipped tests sunt preexistente, nu legate de migrare)
-  - `pnpm check` ❌ 3 erori TypeScript preexistente (app/order/[id].tsx, lib/trpc.ts, server/operations-router.ts — nelegate de task)
-  - Secret scan ✅ (0 secrete detectate)
+  - `pnpm test` ✅ (12 passed, 2 skipped — skipped preexistente)
+  - `pnpm build` ✅ (webcrypto polyfill prezent în dist/index.mjs la linia 8444)
+  - `pnpm check` ❌ 3 erori TypeScript preexistente nelegate (app/order/[id].tsx, lib/trpc.ts, server/operations-router.ts)
+  - Secret scan ✅ (0 secrete)
   - CodeQL ✅ (0 alerts)
-- Confirmat că cele 26 tabele din `drizzle/meta/0013_snapshot.json` corespund cu lista din `scripts/validate-db.ts`.
 
-### Arhitectura finală Railway deployment flow:
+### Acțiune Railway obligatorie (manual, fără modificare cod):
 ```
-Railway deploy trigger (push to main)
-  └─ buildCommand: pnpm install --frozen-lockfile && pnpm build
-       └─ dist/index.mjs, dist/migrate.mjs, dist/validate-db.mjs produse
-  └─ startCommand:
-       1. node dist/migrate.mjs          ← aplică migrații 0000–0013 (idempotent via __drizzle_migrations)
-       2. node dist/validate-db.mjs      ← verifică 26 tabele + 14 intrări history + users count
-       3. pnpm start                     ← NODE_ENV=production node dist/index.mjs
-       (oricare eșec în 1 sau 2 opreste startup-ul; Railway nu va deveni healthy)
+Railway Dashboard → dropi-mobile service → Variables → Add Variable:
+  SMTP_USER = <adresa Gmail care a generat GMAIL_APP_PASSWORD>
 ```
-
----
+Fără această variabilă, emailul de recuperare rămâne blocant chiar și după deploy.
 
 ## 2. Starea Curentă a Proiectului
 
@@ -102,11 +77,11 @@ Railway deploy trigger (push to main)
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 - Fix auth/reset password backend (PR #28 merged) ✅
 - Fix EAS build trigger / quota workflow (PR #29 merged) ✅
-- Audit migrații drizzle + creare snapshot 0013 lipsă ✅
-- **Mecanism producție migrare Railway** — `scripts/migrate.ts` + `scripts/validate-db.ts` + `railway.toml` startCommand actualizat ✅
+- Audit migrații drizzle + creare snapshot 0013 lipsă + mecanism migrare Railway (PR #30 merged) ✅
+- **Fix login `crypto is not defined` + Gmail `SMTP_USER` missing** — branch `copilot/fix-auth-crypto-email` (PR #31, necesită merge)
 
 ### 🔄 În progres
-- Branch curent: `copilot/database-migration-audit` — necesită PR/merge.
+- Branch curent: `copilot/fix-auth-crypto-email` — necesită PR/merge + acțiune Railway manuală.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -115,31 +90,23 @@ Railway deploy trigger (push to main)
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- Este încă necesară confirmarea din Railway că variabilele SMTP sunt setate pe serviciul de producție (doar nume, fără valori).
-- Este încă necesară verificarea real-device după deploy că reset-password returnează eroare reală când providerul nu poate trimite și succes doar când emailul este livrat.
-- Pentru verificarea exactă a contului testat la login este necesar acces controlat la DB/log-urile Railway sau repetarea testului cu emailul confirmat.
+- **SMTP_USER lipsă în Railway** — fără această variabilă emailul de recuperare nu funcționează. Setare manuală obligatorie (detalii la Pasul Următor).
 
 ---
 
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Merguiește PR-ul `copilot/database-migration-audit` (snapshot 0013 + mecanism migrare producție).
-2. Railway va redeploya automat; log-urile de start vor arăta:
-   - `[migrate] ✓ All migrations applied successfully`
-   - `[validate-db] ✓ All 26 application tables present`
-   - `[validate-db] ✓ Migration history: 14/14 entries recorded`
-   - `[validate-db] ✓ users count: 0 (expected 0 on fresh deployment, seed script never runs automatically)`
-   - `[validate-db] ✓ Post-migration validation PASSED`
-3. Verifică Railway logs după deploy că toate 5 linii de mai sus apar.
-4. În Railway, verifică **după nume** existența variabilelor SMTP relevante (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `GMAIL_APP_PASSWORD`) fără a expune valorile.
-5. Repetă pe telefon:
-   - login cu contul dorit;
-   - reset password pentru același email.
-6. Confirmă unul dintre cele două comportamente corecte:
-   - emailul chiar ajunge și codul funcționează; sau
-   - aplicația primește eroare reală de livrare, nu mesaj fals de succes.
-7. Dacă login încă eșuează, verifică în DB/loguri dacă emailul există efectiv în producție; demo accounts nu sunt seed-uite automat.
+1. Merguiește PR-ul `copilot/fix-auth-crypto-email` (fix login + email).
+2. Railway va redeploya automat după merge.
+3. **OBLIGATORIU — înainte de testul pe telefon:** adaugă în Railway Dashboard → `dropi-mobile` service → Variables:
+   - `SMTP_USER` = adresa Gmail care a generat `GMAIL_APP_PASSWORD`
+   (fără aceasta, emailul de recuperare rămâne blocat)
+4. Testează pe telefon (cu contul deja creat în producție):
+   - **Login** → trebuie să reușească (fără `crypto is not defined`)
+   - **Forgot Password** → emailul de reset trebuie să ajungă
+5. Dacă login eșuează în continuare → verifică Railway logs pentru erori noi.
+6. Dacă emailul nu ajunge → verifică Railway logs pentru `[SMTP]` entries; mesajele de eroare acum arată exact ce lipsește.
 
 ---
 
@@ -169,6 +136,9 @@ Railway deploy trigger (push to main)
 | 2026-07-12 | Migrația `0013_agent_orchestrator.sql` trebuie însoțită de `drizzle/meta/0013_snapshot.json`; orice migrație manuală care nu generează automat snapshot-ul drizzle trebuie să îl creeze explicit | Fără snapshot, `drizzle-kit generate` viitor ignoră tabelele noi și generează migrații duplicat | Copilot Agent |
 | 2026-07-12 | Mecanismul de migrare în producție folosește `drizzle-orm/mysql2/migrator` (API programmatic) compilat cu esbuild, NU `drizzle-kit migrate` CLI — devDependencies pot fi absente în runtime Railway | `drizzle-kit` este devDep; `drizzle-orm` este dep de producție; Railway poate prune devDeps după build | Copilot Agent |
 | 2026-07-12 | `railway.toml` startCommand = `node dist/migrate.mjs && node dist/validate-db.mjs && pnpm start` — migrațiile și validarea rulează înainte de pornirea serverului și blochează startup-ul dacă eșuează | Orice alt ordin (build-time migrate) este mai fragil: build-cache poate sări peste migrate; start-time garantează că DB e gata înainte ca serverul să accepte request-uri | Copilot Agent |
+| 2026-07-12 | `jose` v6 necesită `globalThis.crypto` (Web Crypto API). Pe Node.js < 19, `crypto` nu este expus ca identificator global în ESM fără flag. Polyfill-ul `globalThis.crypto = webcrypto` în `server/_core/index.ts` rezolvă definitiv. | Login producea `ReferenceError: crypto is not defined` la Railway (Node.js 18 LTS) | Copilot Agent |
+| 2026-07-12 | Gmail App Password necesită `SMTP_USER` explicit (adresa Gmail care l-a generat). Nicio valoare default nu poate fi hardcodată în cod — fiecare App Password este legat de un cont specific. | Fallback hardcodat `dropi.deliveries@gmail.com` cauza eșec silențios dacă adresa reală era diferită | Copilot Agent |
+| 2026-07-12 | Erorile Nodemailer se loghează DOAR ca `.message` (nu obiect complet) pentru a nu expune credențiale SMTP sau detalii de conexiune sensibile în log-urile Railway | Obiectul complet de eroare Nodemailer poate include `auth` details în unele versiuni | Copilot Agent |
 
 ---
 
@@ -184,7 +154,8 @@ Railway deploy trigger (push to main)
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
-| `copilot/database-migration-audit` | Audit migrații drizzle + creare snapshot 0013 lipsă | Activ, necesită PR/merge |
+| `copilot/fix-auth-crypto-email` | Fix login crypto + Gmail SMTP_USER | Activ, necesită PR/merge |
+| `copilot/database-migration-audit` | Audit migrații drizzle + snapshot 0013 + mecanism migrare | Merged în `main` (PR #30) |
 | `copilot/real-device-tests-auth-issues` | RCA auth/reset real-device + fix minim email/reset backend | Merged în `main` (PR #28) |
 | `copilot/audit-eas-environment-injection` | Audit EAS env chain + validare workflow EXPO_PUBLIC_API_BASE_URL | Merged în `main` (PR #27) |
 | `copilot/fix-apk-versioning-errors` | Fix versionare EAS build + redirect OAuth nativ | Merged în `main` |
@@ -201,6 +172,8 @@ Railway deploy trigger (push to main)
 - Implementarea email backend era legată doar de Gmail/`GMAIL_APP_PASSWORD`, deși documentația proiectului indică SMTP generic ✅ fixat în branch-ul `copilot/real-device-tests-auth-issues`
 - `drizzle/meta/0013_snapshot.json` lipsea → creat în branch-ul `copilot/database-migration-audit` ✅
 - **Mecanism Railway producție** lipsea → `scripts/migrate.ts` + `scripts/validate-db.ts` + `railway.toml` update → PR #30 ✅
+- **Login `crypto is not defined`** pe Node.js 18/Railway → polyfill `globalThis.crypto` în `server/_core/index.ts` → PR #31 ✅ (necesită merge)
+- **Gmail email nu sosea** → `SMTP_USER` lipsea din Railway + hardcoded default greșit în cod → fix în PR #31 ✅ (necesită merge + setare Railway manual)
 - Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
 
 ### Tehnologii principale
