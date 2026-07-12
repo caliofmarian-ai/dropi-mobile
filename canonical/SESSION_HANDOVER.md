@@ -53,7 +53,7 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Branch curent: `copilot/build-new-expo-development`
+- Branch curent: `copilot/audit-eas-environment-injection`
 - Cerință operațională: pornire build Android Development nou și confirmare link instalare.
 
 ### ✅ Setup cloud complet (2026-07-07)
