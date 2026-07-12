@@ -2,9 +2,10 @@
  * DROPi Post-Migration Database Validator
  *
  * Verifies that all 26 expected application tables exist, Drizzle's migration
- * history table records all 14 committed migrations, and the users table is
- * accessible. Reports users count (informational — proves no seed data was
- * inserted on an empty production database).
+ * history table records all committed migrations (count derived from
+ * drizzle/meta/_journal.json — no manual update needed when new migrations land),
+ * and the users table is accessible. Reports users count informational-only;
+ * a non-zero count is not a failure (legitimate users may exist in production).
  *
  * Exit codes:
  *   0 — all checks passed
@@ -15,6 +16,8 @@
  */
 
 import "dotenv/config";
+import fs from "fs";
+import path from "path";
 import mysql from "mysql2/promise";
 
 const EXPECTED_TABLES: readonly string[] = [
@@ -49,8 +52,26 @@ const EXPECTED_TABLES: readonly string[] = [
 /** Drizzle ORM MySQL migration-history table (created automatically). */
 const MIGRATION_HISTORY_TABLE = "__drizzle_migrations";
 
-/** Number of committed migrations (0000–0013). Update when new migrations land. */
-const EXPECTED_MIGRATION_COUNT = 14;
+/**
+ * Derive the expected migration count from drizzle/meta/_journal.json so that
+ * adding future committed migrations never requires editing this file.
+ */
+function loadExpectedMigrationCount(): number {
+  const journalPath = path.resolve(process.cwd(), "drizzle", "meta", "_journal.json");
+  try {
+    const journal = JSON.parse(fs.readFileSync(journalPath, "utf8")) as {
+      entries?: unknown[];
+    };
+    const count = Array.isArray(journal.entries) ? journal.entries.length : 0;
+    if (count === 0) {
+      throw new Error("_journal.json has no entries — file may be corrupt or empty");
+    }
+    return count;
+  } catch (err) {
+    console.error(`[validate-db] FATAL: Cannot read ${journalPath}:`, err);
+    process.exit(1);
+  }
+}
 
 async function validateDatabase(): Promise<void> {
   const url = process.env.DATABASE_URL;
@@ -58,6 +79,9 @@ async function validateDatabase(): Promise<void> {
     console.error("[validate-db] FATAL: DATABASE_URL environment variable is not set");
     process.exit(1);
   }
+
+  const EXPECTED_MIGRATION_COUNT = loadExpectedMigrationCount();
+  console.log(`[validate-db] Expected migrations from _journal.json: ${EXPECTED_MIGRATION_COUNT}`);
 
   console.log("[validate-db] Connecting to database for post-migration validation...");
   let connection: mysql.Connection | undefined;
@@ -90,7 +114,7 @@ async function validateDatabase(): Promise<void> {
       failed = true;
     }
 
-    // --- 4. Verify Drizzle migration history table exists and has 14 entries --
+    // --- 4. Verify Drizzle migration history table exists and has the expected number of entries --
     if (!existingTables.has(MIGRATION_HISTORY_TABLE)) {
       console.error(`[validate-db] ✗ MISSING: ${MIGRATION_HISTORY_TABLE} table`);
       failed = true;
@@ -111,14 +135,14 @@ async function validateDatabase(): Promise<void> {
       }
     }
 
-    // --- 5. Report users count (informational — proves no seed data inserted) --
+    // --- 5. Report users count (informational only — non-zero count is not a failure) --
     if (existingTables.has("users")) {
       const [userRows] = await connection.execute(
         "SELECT COUNT(*) AS cnt FROM `users`"
       );
       const userCount = Number((userRows as Record<string, unknown>[])[0].cnt);
       console.log(
-        `[validate-db] ✓ users count: ${userCount} (expected 0 on fresh deployment, seed script never runs automatically)`
+        `[validate-db] ✓ users count: ${userCount} (informational — seed script never runs automatically)`
       );
     }
 
