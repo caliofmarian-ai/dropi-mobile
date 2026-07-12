@@ -26,19 +26,30 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-12 |
-| **Branch activ** | `copilot/audit-eas-environment-injection` |
+| **Branch activ** | `copilot/real-device-tests-auth-issues` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- **Audit final de scope + consistență pentru PR #27** față de `main`.
-- Confirmat că **sursa unică GitHub** pentru `EXPO_PUBLIC_API_BASE_URL` este `vars.EXPO_PUBLIC_API_BASE_URL` în ambele workflow-uri EAS; `EXPO_TOKEN` rămâne în `secrets.*`.
-- Eliminat din `eas-build-android.yml` toți pașii temporari `[DIAG]`; a rămas doar validarea permanentă fail-fast + injectarea aceleiași valori `vars.EXPO_PUBLIC_API_BASE_URL` în `eas build`.
-- Corectat mesajul din `app/_layout.tsx` ca să indice corect **GitHub Variables**, nu „EAS Secrets”.
-- Corectat acest handover: referințele vechi la `GitHub Secret EXPO_PUBLIC_API_BASE_URL` erau incorecte și nu mai reflectă configurația finală din cod.
+- Audit complet auth/reset după testul real-device post-PR #27.
+- Confirmat din GitHub Actions run `29192979619` că APK-ul nou folosește `EXPO_PUBLIC_API_BASE_URL=https://dropi-mobile-production.up.railway.app`; blocajul vechi de env injection nu mai este cauza curentă.
+- Traseu login/reset dovedit cap-coadă în cod (`app/login.tsx` / `app/forgot-password.tsx` → `lib/auth-context.tsx` → `server/auth-router.ts` → `server/db.ts`).
+- Identificat două cauze reale în backend:
+  - reset password returna succes chiar dacă emailul nu era livrat;
+  - implementarea email suporta doar Gmail + `GMAIL_APP_PASSWORD`, deși documentația/env-ul proiectului indică contract generic `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM`.
+- Fix aplicat:
+  - helper nou `server/_core/mail.ts` cu suport SMTP generic + fallback Gmail;
+  - `forgotPassword` curăță reset token-ul și returnează eroare reală dacă livrarea emailului eșuează;
+  - au fost eliminate log-urile care expuneau codurile de reset în clar;
+  - `verification-router` folosește același helper pentru consistență.
+- Adăugat raport RCA: `docs/AUTH_PASSWORD_RESET_RCA_2026-07-12.md`.
+- Adăugate teste noi:
+  - `tests/mail-config.test.ts`
+  - `tests/auth.forgot-password.test.ts`
 - Validări rulate în sesiune:
   - `pnpm install --frozen-lockfile` ✅
   - `pnpm lint` ✅ (warnings existente, fără erori noi)
-  - `pnpm test` ✅ (2 teste skipped controlat din cauza env lipsă)
+  - `pnpm test` ✅
+  - `pnpm build` ✅
   - `pnpm check` ❌ are erori TypeScript preexistente, nelegate de acest PR (`app/order/[id].tsx`, `lib/trpc.ts`, `server/operations-router.ts`)
 
 ---
@@ -53,8 +64,8 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Branch curent: `copilot/audit-eas-environment-injection`
-- Cerință operațională: pornire build Android Development nou și confirmare link instalare.
+- Branch curent: `copilot/real-device-tests-auth-issues`
+- Cerință operațională: merge + deploy pentru fixul auth/reset, apoi retest real-device pe backend Railway actualizat.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -63,19 +74,24 @@
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- Confirmarea printr-un **Development Build nou** că variabila ajunge în APK-ul generat după workflow-ul corectat.
-- Pentru verificare end-to-end a noilor ecrane realtime este necesar dataset real în DB (orders/b2b deliveries) pe environment-ul de test.
-- Pentru test SMTP live este necesar secret valid (`GMAIL_APP_PASSWORD` sau `SMTP_PASS`) în environment-ul de execuție.
+- Este încă necesară confirmarea din Railway că variabilele SMTP sunt setate pe serviciul de producție (doar nume, fără valori).
+- Este încă necesară verificarea real-device după deploy că reset-password returnează eroare reală când providerul nu poate trimite și succes doar când emailul este livrat.
+- Pentru verificarea exactă a contului testat la login este necesar acces controlat la DB/log-urile Railway sau repetarea testului cu emailul confirmat.
 
 ---
 
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Rulează/confirmă un **Development Build nou** din workflow-ul corectat (ideal după merge în `main` sau prin `workflow_dispatch`).
-2. Verifică în log că pasul `Validate EXPO_PUBLIC_API_BASE_URL` trece și că `eas build` rulează cu workflow-ul final fără pași `[DIAG]`.
-3. Instalează APK-ul nou pe telefon și verifică dispariția erorii `[Config] EXPO_PUBLIC_API_BASE_URL is required on native (auth tRPC)`.
-4. Confirmă accesul la backend (`/api/health`) și fluxul de autentificare/reset password.
+1. Merguiește PR-ul cu fixul auth/reset astfel încât Railway să redeployeze backend-ul.
+2. În Railway, verifică **după nume** existența variabilelor SMTP relevante (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `GMAIL_APP_PASSWORD`) fără a expune valorile.
+3. Repetă pe telefon:
+   - login cu contul dorit;
+   - reset password pentru același email.
+4. Confirmă unul dintre cele două comportamente corecte:
+   - emailul chiar ajunge și codul funcționează; sau
+   - aplicația primește eroare reală de livrare, nu mesaj fals de succes.
+5. Dacă login încă eșuează, verifică în DB/loguri dacă emailul există efectiv în producție; demo accounts nu sunt seed-uite automat.
 
 ---
 
@@ -99,6 +115,7 @@
 | 2026-07-11 | Redirect-ul OAuth nativ trebuie generat din schema activă a build-ului (`Linking.createURL`) și nu dintr-un `bundleId` hardcodat în codul runtime | Evităm callback-uri pe schemă greșită după build/update și reducem erorile de login pe telefon | Copilot Agent |
 | 2026-07-12 | Workflow-urile EAS build/update trebuie să valideze explicit `EXPO_PUBLIC_API_BASE_URL` înainte de `eas build`/`eas update` pentru a preveni build-uri silențioase cu URL gol | Fără validare, EAS CLI "încarcă" variabila goală și produce APK-uri nefuncționale fără erori vizibile în CI | Copilot Agent |
 | 2026-07-12 | Sursa unică GitHub pentru `EXPO_PUBLIC_API_BASE_URL` este `vars.EXPO_PUBLIC_API_BASE_URL`; nu se folosește `secrets.EXPO_PUBLIC_API_BASE_URL` | Variabila este publică (embedded în bundle-ul JS), iar workflow-urile finale trebuie să rămână consistente între guard și `eas build`/`eas update` | Copilot Agent |
+| 2026-07-12 | Reset-password trebuie să eșueze explicit dacă emailul nu poate fi livrat, iar codurile de reset nu se loghează niciodată în clar | Evităm false-positive în UI și expunerea secretelor temporare în log-uri | Copilot Agent |
 
 ---
 
@@ -114,6 +131,7 @@
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
+| `copilot/real-device-tests-auth-issues` | RCA auth/reset real-device + fix minim email/reset backend | Activ, necesită PR/merge |
 | `copilot/audit-eas-environment-injection` | Audit EAS env chain + validare workflow EXPO_PUBLIC_API_BASE_URL | Activ, necesită PR/merge |
 | `copilot/fix-apk-versioning-errors` | Fix versionare EAS build + redirect OAuth nativ | Activ, necesită PR/merge |
 | `copilot/funcioneaz-aplicaia-server` | Eliminare fallback localhost pe mobile runtime + fail-fast config API | Merged în `main` |
@@ -124,7 +142,8 @@
 - `eas.json` versioning — mutat pe `remote` + `autoIncrement` ✅
 - `constants/oauth.ts` folosea o schemă derivată din `bundleId` hardcodat, diferită de schema reală a app-ului (`manus20260627`) ✅ fixat
 - `react/no-unescaped-entities` în ecrane mobile — fixat (0 errors la lint) ✅
-- Test SMTP live depinde de secret email în environment (`GMAIL_APP_PASSWORD`/`SMTP_PASS`) ⚠️
+- Reset password returna mesaj fals de succes când emailul nu era livrat și loga codul de reset în clar ✅ fixat în branch-ul `copilot/real-device-tests-auth-issues`
+- Implementarea email backend era legată doar de Gmail/`GMAIL_APP_PASSWORD`, deși documentația proiectului indică SMTP generic ✅ fixat în branch-ul `copilot/real-device-tests-auth-issues`
 - Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
 
 ### Tehnologii principale
@@ -163,9 +182,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.12.0**
+Acest document: **v1.13.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-12
-Actualizat de: GitHub Copilot Coding Agent — audit final PR #27; eliminare diagnostic temporar; confirmare configurație finală `vars.EXPO_PUBLIC_API_BASE_URL`; handover aliniat la starea reală.
+Actualizat de: GitHub Copilot Coding Agent — RCA auth/reset după test real-device; fix backend email/reset; raport RCA + handover aliniate la noul blocker.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
