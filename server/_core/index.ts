@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { webcrypto } from "node:crypto";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
@@ -11,6 +12,18 @@ import { initNotificationWS, getNotificationWSStats } from "../ws-notifications"
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { startOrchestrator } from "./orchestrator";
+
+// Polyfill globalThis.crypto for jose v6 WebCrypto API (needed on Node.js < 19).
+// jose v6 uses the bare `crypto` identifier which resolves through globalThis.
+// Node.js 19+ exposes it as an unflagged global; Node.js 18 requires this shim.
+if (!globalThis.crypto) {
+  Object.defineProperty(globalThis, "crypto", {
+    value: webcrypto,
+    writable: false,
+    configurable: false,
+    enumerable: false,
+  });
+}
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {

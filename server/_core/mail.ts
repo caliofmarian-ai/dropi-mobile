@@ -34,18 +34,19 @@ export function resolveMailTransportConfig(
   env: MailEnv = process.env,
 ): MailTransportConfig | null {
   const smtpHost = env.SMTP_HOST?.trim() || "";
-  const smtpUser = env.SMTP_USER?.trim() || "dropi.deliveries@gmail.com";
+  const explicitSmtpUser = env.SMTP_USER?.trim() || "";
   const smtpPass = env.SMTP_PASS?.trim() || "";
   const gmailPass = env.GMAIL_APP_PASSWORD?.trim() || "";
   const smtpPort = Number(env.SMTP_PORT || "587");
-  const smtpFrom = getMailFromAddress(smtpUser, env);
 
   if (smtpHost && smtpPass) {
+    const user = explicitSmtpUser || "noreply";
+    const from = getMailFromAddress(user, env);
     const port = Number.isFinite(smtpPort) && smtpPort > 0 ? smtpPort : 587;
     return {
       mode: "smtp",
-      from: smtpFrom,
-      user: smtpUser,
+      from,
+      user,
       host: smtpHost,
       port,
       secure: port === 465,
@@ -54,10 +55,22 @@ export function resolveMailTransportConfig(
   }
 
   if (gmailPass) {
+    if (!explicitSmtpUser) {
+      // SMTP_USER is required for Gmail App Password authentication.
+      // Each Gmail App Password is bound to a specific account; without the
+      // account address, authentication will fail with a 535 error.
+      console.error(
+        "[SMTP] Gmail mode requires SMTP_USER to be set to the Gmail address " +
+        "that owns the GMAIL_APP_PASSWORD. " +
+        "Add SMTP_USER=<your-gmail-address> as a Railway environment variable.",
+      );
+      return null;
+    }
+    const from = getMailFromAddress(explicitSmtpUser, env);
     return {
       mode: "gmail",
-      from: smtpFrom,
-      user: smtpUser,
+      from,
+      user: explicitSmtpUser,
       pass: gmailPass,
     };
   }
@@ -106,7 +119,10 @@ export async function sendPlatformEmail(input: {
     console.log(`[SMTP] ${input.logLabel} sent to ${maskEmail(input.to)} via ${config.mode}`);
     return true;
   } catch (error) {
-    console.error(`[SMTP] ${input.logLabel} failed for ${maskEmail(input.to)} via ${config.mode}:`, error);
+    // Log only the error message — never log the full error object which may
+    // contain App Password, SMTP credentials, or sensitive connection details.
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error(`[SMTP] ${input.logLabel} failed for ${maskEmail(input.to)} via ${config.mode}: ${errMsg}`);
     return false;
   }
 }
