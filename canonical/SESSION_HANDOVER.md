@@ -25,24 +25,19 @@
 | Câmp | Valoare |
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
-| **Data** | 2026-07-11 |
-| **Branch activ** | `copilot/update-graphic-asset` |
+| **Data** | 2026-07-12 |
+| **Branch activ** | `copilot/build-new-expo-development` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- **Milestone M1 (baseline audit production-readiness) finalizat**
-  - Confirmată starea canonică + config deploy/build (EAS, workflows, app config).
-  - Confirmat blocker critic: ecranele operaționale mobile foloseau încă `lib/mock-data`.
-- **Milestone M2 (faza 1 — replace mock data) implementat**
-  - Adăugat router nou server-side: `server/operations-router.ts` (orders + missions pentru mobile).
-  - Conectat în app router: `server/routers.ts` (`operations` namespace).
-  - Înlocuit consumul de mock data cu tRPC real în ecranele:
-    - `app/(tabs)/index.tsx` (Customer/Merchant/Delivery Partner dashboards)
-    - `app/(tabs)/history.tsx`
-    - `app/order/[id].tsx`
-    - `app/merchant-order/[id].tsx`
-    - `app/mission/[id].tsx`
-  - Validare executată după implementare: `pnpm run lint`, `pnpm run build`, `pnpm run test` (fără erori, doar warnings existente + teste skipate controlat în lipsă secrets/env).
+- Audit rapid build pipeline EAS + verificare config runtime (`eas.json`, `app.config.ts`, workflow Android build).
+- Validare locală executată: `pnpm install --frozen-lockfile`, `pnpm run lint`, `pnpm run build`, `pnpm run test` (fără erori blocante; warnings existente; teste skip la lipsă env OAuth/SMTP).
+- Verificat ultimul build Android development reușit:
+  - GitHub Actions run: `29161934127`
+  - Job: `86568371262`
+  - EAS build/install link: `https://expo.dev/accounts/caliofm/projects/dropiexpodev/builds/92303024-c6f3-4d20-b823-eb0a8d681ffe`
+  - Log confirmă încărcarea variabilei: `Environment variables loaded ... EXPO_PUBLIC_API_BASE_URL`
+- Încercare de pornire build nou din branch agent (`run 29184403247`) a fost oprită instant cu `conclusion: action_required` (0 job-uri executate), deci fără build nou efectiv.
 
 ---
 
@@ -56,8 +51,8 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Branch curent: `copilot/update-graphic-asset`
-- Milestone M2 faza 2: eliminare hardcoded demo metrics/UI rămase în dashboard-uri non-C1 și continuare înlocuire mock/hardcoded cu date reale end-to-end
+- Branch curent: `copilot/build-new-expo-development`
+- Cerință operațională: pornire build Android Development nou și confirmare link instalare.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -68,15 +63,16 @@
 ### 🔴 Blocate
 - Pentru verificare end-to-end a noilor ecrane realtime este necesar dataset real în DB (orders/b2b deliveries) pe environment-ul de test.
 - Pentru test SMTP live este necesar secret valid (`GMAIL_APP_PASSWORD` sau `SMTP_PASS`) în environment-ul de execuție.
+- Build nou EAS din branch agent (`run 29184403247`) este `action_required` înainte de executarea job-urilor; necesită rulare aprobată/manuală din GitHub Actions (workflow_dispatch sau push pe `main`).
 
 ---
 
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. M2 faza 2: înlocuiește hardcoded metrics/UI demo rămase pe dashboard-urile C2/C3/Admin cu query-uri reale unde există backend.
-2. M2 faza 3: aliniază status tracking între `AUDIT_TRACKING.md`, `todo.md` și implementarea reală.
-3. Rulează validare completă după fiecare increment (`lint`, `build`, `test`) și documentează progresul în acest handover.
+1. Rulează manual workflow-ul `EAS Build — Android APK (development)` din Actions (`workflow_dispatch`) sau fă push pe `main`.
+2. Așteaptă finalizarea run-ului nou și extrage din log linkul EAS/instalare.
+3. Confirmă în log linia de env load pentru `EXPO_PUBLIC_API_BASE_URL` și salvează run ID + build URL în acest handover.
 
 ---
 
@@ -162,9 +158,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.9.0**
+Acest document: **v1.10.0**
 Data creării: 2026-07-07
-Ultima actualizare: 2026-07-11
-Actualizat de: GitHub Copilot Coding Agent — M2 faza 1 (replace mock data pe ecranele operaționale principale prin tRPC operations router).
+Ultima actualizare: 2026-07-12
+Actualizat de: GitHub Copilot Coding Agent — audit build pipeline EAS + verificare build/install links + documentare blocaj `action_required` pentru build nou din branch agent.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
