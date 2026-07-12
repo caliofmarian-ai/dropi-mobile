@@ -67,7 +67,7 @@ class ConfigErrorBoundary extends Component<
               Aplicația nu poate porni fără URL-ul API-ului.{"\n\n"}
               Soluție: asigurați-vă că variabila de mediu{" "}
               <Text style={{ color: "#e94560", fontFamily: "monospace" }}>EXPO_PUBLIC_API_BASE_URL</Text>{" "}
-              este setată în EAS Secrets și reconstruiți aplicația.
+              este setată în GitHub Variables (Settings → Secrets and variables → Actions → Variables) și reconstruiți aplicația.
             </Text>
           </ScrollView>
         </View>

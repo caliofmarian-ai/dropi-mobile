@@ -26,18 +26,20 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-12 |
-| **Branch activ** | `copilot/build-new-expo-development` |
+| **Branch activ** | `copilot/audit-eas-environment-injection` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- Audit rapid build pipeline EAS + verificare config runtime (`eas.json`, `app.config.ts`, workflow Android build).
-- Validare locală executată: `pnpm install --frozen-lockfile`, `pnpm run lint`, `pnpm run build`, `pnpm run test` (fără erori blocante; warnings existente; teste skip la lipsă env OAuth/SMTP).
-- Verificat ultimul build Android development reușit:
-  - GitHub Actions run: `29161934127`
-  - Job: `86568371262`
-  - EAS build/install link: `https://expo.dev/accounts/caliofm/projects/dropiexpodev/builds/92303024-c6f3-4d20-b823-eb0a8d681ffe`
-  - Log confirmă încărcarea variabilei: `Environment variables loaded ... EXPO_PUBLIC_API_BASE_URL`
-- Încercare de pornire build nou din branch agent (`run 29184403247`) a fost oprită instant cu `conclusion: action_required` (0 job-uri executate), deci fără build nou efectiv.
+- **Audit final de scope + consistență pentru PR #27** față de `main`.
+- Confirmat că **sursa unică GitHub** pentru `EXPO_PUBLIC_API_BASE_URL` este `vars.EXPO_PUBLIC_API_BASE_URL` în ambele workflow-uri EAS; `EXPO_TOKEN` rămâne în `secrets.*`.
+- Eliminat din `eas-build-android.yml` toți pașii temporari `[DIAG]`; a rămas doar validarea permanentă fail-fast + injectarea aceleiași valori `vars.EXPO_PUBLIC_API_BASE_URL` în `eas build`.
+- Corectat mesajul din `app/_layout.tsx` ca să indice corect **GitHub Variables**, nu „EAS Secrets”.
+- Corectat acest handover: referințele vechi la `GitHub Secret EXPO_PUBLIC_API_BASE_URL` erau incorecte și nu mai reflectă configurația finală din cod.
+- Validări rulate în sesiune:
+  - `pnpm install --frozen-lockfile` ✅
+  - `pnpm lint` ✅ (warnings existente, fără erori noi)
+  - `pnpm test` ✅ (2 teste skipped controlat din cauza env lipsă)
+  - `pnpm check` ❌ are erori TypeScript preexistente, nelegate de acest PR (`app/order/[id].tsx`, `lib/trpc.ts`, `server/operations-router.ts`)
 
 ---
 
@@ -51,7 +53,7 @@
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 
 ### 🔄 În progres
-- Branch curent: `copilot/build-new-expo-development`
+- Branch curent: `copilot/audit-eas-environment-injection`
 - Cerință operațională: pornire build Android Development nou și confirmare link instalare.
 
 ### ✅ Setup cloud complet (2026-07-07)
@@ -61,18 +63,19 @@
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
+- Confirmarea printr-un **Development Build nou** că variabila ajunge în APK-ul generat după workflow-ul corectat.
 - Pentru verificare end-to-end a noilor ecrane realtime este necesar dataset real în DB (orders/b2b deliveries) pe environment-ul de test.
 - Pentru test SMTP live este necesar secret valid (`GMAIL_APP_PASSWORD` sau `SMTP_PASS`) în environment-ul de execuție.
-- Build nou EAS din branch agent (`run 29184403247`) este `action_required` înainte de executarea job-urilor; necesită rulare aprobată/manuală din GitHub Actions (workflow_dispatch sau push pe `main`).
 
 ---
 
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Rulează manual workflow-ul `EAS Build — Android APK (development)` din Actions (`workflow_dispatch`) sau fă push pe `main`.
-2. Așteaptă finalizarea run-ului nou și extrage din log linkul EAS/instalare.
-3. Confirmă în log linia de env load pentru `EXPO_PUBLIC_API_BASE_URL` și salvează run ID + build URL în acest handover.
+1. Rulează/confirmă un **Development Build nou** din workflow-ul corectat (ideal după merge în `main` sau prin `workflow_dispatch`).
+2. Verifică în log că pasul `Validate EXPO_PUBLIC_API_BASE_URL` trece și că `eas build` rulează cu workflow-ul final fără pași `[DIAG]`.
+3. Instalează APK-ul nou pe telefon și verifică dispariția erorii `[Config] EXPO_PUBLIC_API_BASE_URL is required on native (auth tRPC)`.
+4. Confirmă accesul la backend (`/api/health`) și fluxul de autentificare/reset password.
 
 ---
 
@@ -94,7 +97,8 @@
 | 2026-07-11 | Runtime standard pentru validare mobilă: telefon + Expo Dev Client + Railway cloud backend/agenți AI; fără localhost în testele reale mobile | Evităm erori false de conectivitate și păstrăm fluxul de lucru cloud-first al proiectului | Fondator + Copilot Agent |
 | 2026-07-11 | Versionarea EAS pentru build-uri mobile trebuie gestionată prin `appVersionSource: "remote"` + `autoIncrement: true` | Cu `local`, fiecare build CI pornea din aceeași stare și APK-ul nu mai avansa corect build/version code-ul | Copilot Agent |
 | 2026-07-11 | Redirect-ul OAuth nativ trebuie generat din schema activă a build-ului (`Linking.createURL`) și nu dintr-un `bundleId` hardcodat în codul runtime | Evităm callback-uri pe schemă greșită după build/update și reducem erorile de login pe telefon | Copilot Agent |
-| 2026-07-11 | Ecranele operaționale C1 trebuie să consume date reale prin tRPC (`operations` router), nu `lib/mock-data` | Eliminăm inconsistența dintre UI și starea reală backend și reducem regresiile de integrare | Copilot Agent |
+| 2026-07-12 | Workflow-urile EAS build/update trebuie să valideze explicit `EXPO_PUBLIC_API_BASE_URL` înainte de `eas build`/`eas update` pentru a preveni build-uri silențioase cu URL gol | Fără validare, EAS CLI "încarcă" variabila goală și produce APK-uri nefuncționale fără erori vizibile în CI | Copilot Agent |
+| 2026-07-12 | Sursa unică GitHub pentru `EXPO_PUBLIC_API_BASE_URL` este `vars.EXPO_PUBLIC_API_BASE_URL`; nu se folosește `secrets.EXPO_PUBLIC_API_BASE_URL` | Variabila este publică (embedded în bundle-ul JS), iar workflow-urile finale trebuie să rămână consistente între guard și `eas build`/`eas update` | Copilot Agent |
 
 ---
 
@@ -110,6 +114,7 @@
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
+| `copilot/audit-eas-environment-injection` | Audit EAS env chain + validare workflow EXPO_PUBLIC_API_BASE_URL | Activ, necesită PR/merge |
 | `copilot/fix-apk-versioning-errors` | Fix versionare EAS build + redirect OAuth nativ | Activ, necesită PR/merge |
 | `copilot/funcioneaz-aplicaia-server` | Eliminare fallback localhost pe mobile runtime + fail-fast config API | Merged în `main` |
 
@@ -158,9 +163,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.10.0**
+Acest document: **v1.12.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-12
-Actualizat de: GitHub Copilot Coding Agent — audit build pipeline EAS + verificare build/install links + documentare blocaj `action_required` pentru build nou din branch agent.
+Actualizat de: GitHub Copilot Coding Agent — audit final PR #27; eliminare diagnostic temporar; confirmare configurație finală `vars.EXPO_PUBLIC_API_BASE_URL`; handover aliniat la starea reală.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.

@@ -48,6 +48,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Validate EXPO_PUBLIC_API_BASE_URL
+        run: |
+          if [ -z "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" ]; then
+            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu este setat în GitHub Variables"
+            echo "   → GitHub → Settings → Secrets and variables → Actions → Variables → adaugă EXPO_PUBLIC_API_BASE_URL"
+            echo "   → Valoarea: URL-ul public Railway al backend-ului (ex: https://dropi-xxx.up.railway.app)"
+            exit 1
+          fi
+          if echo "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" | grep -qE "(localhost|127\.0\.0\.1)"; then
+            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu poate fi localhost sau 127.0.0.1 pe mobile"
+            echo "   → Folosește URL-ul public Railway al backend-ului."
+            exit 1
+          fi
+          echo "✅ EXPO_PUBLIC_API_BASE_URL este configurat"
+
       - name: Setup EAS
         uses: expo/expo-github-action@v8
         with:
@@ -58,4 +73,4 @@ jobs:
         run: eas update --branch development --message "$(git log -1 --pretty=format:'%s')" --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          EXPO_PUBLIC_API_BASE_URL: ${{ secrets.EXPO_PUBLIC_API_BASE_URL }}
+          EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
