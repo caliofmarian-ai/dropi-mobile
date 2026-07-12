@@ -1,5 +1,12 @@
 import * as Linking from "expo-linking";
+import Constants from "expo-constants";
 import * as ReactNative from "react-native";
+
+const normalizeEnvValue = (value: unknown) =>
+  typeof value === "string" ? value.trim() : "";
+
+const apiBaseUrlFromProcess = normalizeEnvValue(process.env.EXPO_PUBLIC_API_BASE_URL);
+const apiBaseUrlFromExpoConfig = normalizeEnvValue(Constants.expoConfig?.extra?.apiBaseUrl);
 
 const env = {
   portal: process.env.EXPO_PUBLIC_OAUTH_PORTAL_URL ?? "",
@@ -7,7 +14,7 @@ const env = {
   appId: process.env.EXPO_PUBLIC_APP_ID ?? "",
   ownerId: process.env.EXPO_PUBLIC_OWNER_OPEN_ID ?? "",
   ownerName: process.env.EXPO_PUBLIC_OWNER_NAME ?? "",
-  apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? "",
+  apiBaseUrl: apiBaseUrlFromProcess || apiBaseUrlFromExpoConfig,
 };
 
 export const OAUTH_PORTAL_URL = env.portal;

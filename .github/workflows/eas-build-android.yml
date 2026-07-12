@@ -37,6 +37,24 @@ jobs:
           fi
           echo "✅ EXPO_TOKEN este configurat"
 
+      - name: Validate EXPO_PUBLIC_API_BASE_URL
+        run: |
+          if [ -z "${{ secrets.EXPO_PUBLIC_API_BASE_URL }}" ]; then
+            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu este setat în GitHub Secrets"
+            echo "   → GitHub → Settings → Secrets → Actions → adaugă EXPO_PUBLIC_API_BASE_URL cu URL-ul public Railway"
+            exit 1
+          fi
+
+          case "${{ secrets.EXPO_PUBLIC_API_BASE_URL }}" in
+            http://localhost*|https://localhost*|http://127.0.0.1*|https://127.0.0.1*)
+              echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu poate fi localhost/127.0.0.1 pentru build mobil real"
+              echo "   → Folosește URL public Railway (ex: https://<serviciu>.up.railway.app)"
+              exit 1
+              ;;
+          esac
+
+          echo "✅ EXPO_PUBLIC_API_BASE_URL este valid pentru build mobil"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
