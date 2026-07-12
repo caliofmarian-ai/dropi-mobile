@@ -29,13 +29,37 @@
 | **Branch activ** | `copilot/fix-eas-quota-ci-failure` |
 | **Agent** | GitHub Copilot Coding Agent |
 
-### Ce s-a făcut în această sesiune:
+### Ce s-a făcut în sesiunile anterioare pe acest branch (context auth/reset):
+- Audit complet auth/reset după testul real-device post-PR #27.
+- Confirmat din GitHub Actions run `29192979619` că APK-ul nou folosește `EXPO_PUBLIC_API_BASE_URL=https://dropi-mobile-production.up.railway.app`; blocajul vechi de env injection nu mai este cauza curentă.
+- Traseu login/reset dovedit cap-coadă în cod (`app/login.tsx` / `app/forgot-password.tsx` → `lib/auth-context.tsx` → `server/auth-router.ts` → `server/db.ts`).
+- Identificat două cauze reale în backend:
+  - reset password returna succes chiar dacă emailul nu era livrat;
+  - implementarea email suporta doar Gmail + `GMAIL_APP_PASSWORD`, deși documentația/env-ul proiectului indică contract generic `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM`.
+- Fix aplicat:
+  - helper nou `server/_core/mail.ts` cu suport SMTP generic + fallback Gmail;
+  - `forgotPassword` curăță reset token-ul și returnează eroare reală dacă livrarea emailului eșuează;
+  - au fost eliminate log-urile care expuneau codurile de reset în clar;
+  - `verification-router` folosește același helper pentru consistență.
+- Adăugat raport RCA: `docs/AUTH_PASSWORD_RESET_RCA_2026-07-12.md`.
+- Adăugate teste noi:
+  - `tests/mail-config.test.ts`
+  - `tests/auth.forgot-password.test.ts`
+- Validări rulate:
+  - `pnpm install --frozen-lockfile` ✅
+  - `pnpm lint` ✅ (warnings existente, fără erori noi)
+  - `pnpm test` ✅
+  - `pnpm build` ✅
+  - `pnpm check` ❌ erori TypeScript preexistente, nelegate de PR (`app/order/[id].tsx`, `lib/trpc.ts`, `server/operations-router.ts`)
+
+### Ce s-a făcut în sesiunea curentă (trigger + quota fix):
 - Analizat eroarea GitHub Actions job "Build Android APK (development)" (check run ID 86660702672).
-- Root cause: EAS Free plan Android build quota epuizată pentru luna iulie 2026 → `eas build` eșua cu cod 1.
-- Fix aplicat în `.github/workflows/eas-build-android.yml`:
-  - Pasul "Build Android APK (development)" acum captează output-ul, detectează eroarea de quota EAS Free plan și iese cu `exit 0` (warning, nu failure).
-  - Orice altă eroare EAS propagă exit code-ul original → CI eșuează corect pentru probleme reale.
-- Actualizat `canonical/SESSION_HANDOVER.md` cu decizia nouă.
+- Root cause: cota EAS Free plan Android epuizată pentru iulie 2026 → `eas build` eșua cu exit code 1.
+- Fix arhitectural aplicat în `.github/workflows/eas-build-android.yml`:
+  - Eliminat trigger `push: branches: main` — APK build se declanșează EXCLUSIV prin `workflow_dispatch`.
+  - Eliminată logica de exit-0 la quota epuizată (care era incorectă: raporta succes fără APK).
+  - Păstrat comportamentul simplu: `eas build` eșuează cu exit code real → CI reflectă adevărul.
+  - Toate validările existente (EAS_PROJECT_ID, EXPO_TOKEN, EXPO_PUBLIC_API_BASE_URL) nemodificate.
 
 ---
 
@@ -101,7 +125,8 @@
 | 2026-07-12 | Workflow-urile EAS build/update trebuie să valideze explicit `EXPO_PUBLIC_API_BASE_URL` înainte de `eas build`/`eas update` pentru a preveni build-uri silențioase cu URL gol | Fără validare, EAS CLI "încarcă" variabila goală și produce APK-uri nefuncționale fără erori vizibile în CI | Copilot Agent |
 | 2026-07-12 | Sursa unică GitHub pentru `EXPO_PUBLIC_API_BASE_URL` este `vars.EXPO_PUBLIC_API_BASE_URL`; nu se folosește `secrets.EXPO_PUBLIC_API_BASE_URL` | Variabila este publică (embedded în bundle-ul JS), iar workflow-urile finale trebuie să rămână consistente între guard și `eas build`/`eas update` | Copilot Agent |
 | 2026-07-12 | Reset-password trebuie să eșueze explicit dacă emailul nu poate fi livrat, iar codurile de reset nu se loghează niciodată în clar | Evităm false-positive în UI și expunerea secretelor temporare în log-uri | Copilot Agent |
-| 2026-07-12 | `eas-build-android.yml` detectează quota EAS Free plan epuizată și iese cu exit 0 (warning, nu failure); orice altă eroare EAS eșuează în continuare CI | Quota epuizată este o problemă de billing, nu de cod; CI nu trebuie să eșueze repetat pentru o cauză externă pe care codul nu o poate rezolva | Copilot Agent |
+| 2026-07-12 | `eas-build-android.yml` se declanșează EXCLUSIV prin `workflow_dispatch`, NU la push pe `main` | Cota EAS Free plan este limitată (10 build-uri/lună); un build automat la fiecare commit o epuiza rapid; APK-ul se construiește doar când este explicit solicitat | Copilot Agent |
+| 2026-07-12 | Nu se falsifică succesul CI: dacă `eas build` eșuează (indiferent de motiv), CI raportează FAILURE | Un workflow verde trebuie să implice că un APK real a fost produs; exit-0 la quota epuizată ar minți statusul build-ului | Copilot Agent |
 
 ---
 
@@ -110,7 +135,7 @@
 ### GitHub Actions Workflows
 | Workflow | Fișier | Trigger | Scop |
 |----------|--------|---------|------|
-| EAS Build Android | `eas-build-android.yml` | push main | Construiește APK development Android |
+| EAS Build Android | `eas-build-android.yml` | `workflow_dispatch` (manual) | Construiește APK development Android |
 | EAS Update OTA | `eas-update.yml` | push main | Trimite update OTA pe telefon |
 | Railway Notify | `railway-notify.yml` | push main (server/) | Confirmă deploy backend |
 
@@ -168,9 +193,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.14.0**
+Acest document: **v1.15.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-12
-Actualizat de: GitHub Copilot Coding Agent — Fix CI "Build Android APK (development)": quota EAS Free plan detectată și tratată ca warning (exit 0) în loc de failure.
+Actualizat de: GitHub Copilot Coding Agent — Corecție arhitecturală `eas-build-android.yml`: eliminat trigger automat push/main și logica incorectă de exit-0 la quota; trigger schimbat la workflow_dispatch exclusiv; restaurat contextul auth/reset din sesiunea anterioară.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
