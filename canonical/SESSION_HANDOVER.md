@@ -26,40 +26,30 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-12 |
-| **Branch activ** | `copilot/fix-eas-quota-ci-failure` |
+| **Branch activ** | `copilot/fix-oauth-server-url-optional` |
 | **Agent** | GitHub Copilot Coding Agent |
 
-### Ce s-a făcut în sesiunile anterioare pe acest branch (context auth/reset):
-- Audit complet auth/reset după testul real-device post-PR #27.
-- Confirmat din GitHub Actions run `29192979619` că APK-ul nou folosește `EXPO_PUBLIC_API_BASE_URL=https://dropi-mobile-production.up.railway.app`; blocajul vechi de env injection nu mai este cauza curentă.
-- Traseu login/reset dovedit cap-coadă în cod (`app/login.tsx` / `app/forgot-password.tsx` → `lib/auth-context.tsx` → `server/auth-router.ts` → `server/db.ts`).
-- Identificat două cauze reale în backend:
-  - reset password returna succes chiar dacă emailul nu era livrat;
-  - implementarea email suporta doar Gmail + `GMAIL_APP_PASSWORD`, deși documentația/env-ul proiectului indică contract generic `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM`.
-- Fix aplicat:
-  - helper nou `server/_core/mail.ts` cu suport SMTP generic + fallback Gmail;
-  - `forgotPassword` curăță reset token-ul și returnează eroare reală dacă livrarea emailului eșuează;
-  - au fost eliminate log-urile care expuneau codurile de reset în clar;
-  - `verification-router` folosește același helper pentru consistență.
-- Adăugat raport RCA: `docs/AUTH_PASSWORD_RESET_RCA_2026-07-12.md`.
-- Adăugate teste noi:
-  - `tests/mail-config.test.ts`
-  - `tests/auth.forgot-password.test.ts`
-- Validări rulate:
-  - `pnpm install --frozen-lockfile` ✅
-  - `pnpm lint` ✅ (warnings existente, fără erori noi)
-  - `pnpm test` ✅
-  - `pnpm build` ✅
-  - `pnpm check` ❌ erori TypeScript preexistente, nelegate de PR (`app/order/[id].tsx`, `lib/trpc.ts`, `server/operations-router.ts`)
+### Ce s-a făcut în sesiunea curentă (OAUTH_SERVER_URL optional fix):
 
-### Ce s-a făcut în sesiunea curentă (trigger + quota fix):
-- Analizat eroarea GitHub Actions job "Build Android APK (development)" (check run ID 86660702672).
-- Root cause: cota EAS Free plan Android epuizată pentru iulie 2026 → `eas build` eșua cu exit code 1.
-- Fix arhitectural aplicat în `.github/workflows/eas-build-android.yml`:
-  - Eliminat trigger `push: branches: main` — APK build se declanșează EXCLUSIV prin `workflow_dispatch`.
-  - Eliminată logica de exit-0 la quota epuizată (care era incorectă: raporta succes fără APK).
-  - Păstrat comportamentul simplu: `eas build` eșuează cu exit code real → CI reflectă adevărul.
-  - Toate validările existente (EAS_PROJECT_ID, EXPO_TOKEN, EXPO_PUBLIC_API_BASE_URL) nemodificate.
+**ROOT CAUSE identificat:** `server/_core/sdk.ts` instanțiaza `OAuthService` ca singleton la încărcarea modulului și logga `console.error` la startup când `OAUTH_SERVER_URL` era absent — chiar dacă autentificarea email/parolă a DROPi nu necesită niciodată OAuth.
+
+**Audit complet efectuat:**
+- Fiecare fișier care citește `OAUTH_SERVER_URL`: `server/_core/env.ts`, `server/_core/sdk.ts`, `server/README.md`, `scripts/load-env.js`, `constants/oauth.ts`, `.env.example`
+- `OAUTH_SERVER_URL` este folosit EXCLUSIV pentru: login extern Manus OAuth (`/api/oauth/callback`, `/api/oauth/mobile`) și sesiuni cron Manus
+- Autentificarea email/parolă DROPi (`auth-router.ts`) folosește doar JWT signing/verification cu `JWT_SECRET` — nu contactează niciodată serverul OAuth
+- Pe Railway production, OAuth Manus este infrastructură legacy neutilizată
+
+**Fix implementat:**
+- `server/_core/sdk.ts`: `console.error` → `console.warn` cu mesaj clar că OAuth este optional/legacy; mesajul "[OAuth] ERROR:" eliminat din Railway production logs
+- `server/_core/sdk.ts`: guard explicit în `authenticateRequest` când userul nu e în DB și OAuth nu e configurat (eroare mai clară vs. timeout de rețea)
+- `server/_core/oauth.ts`: import `ENV` + guard 503 pe `/api/oauth/callback` și `/api/oauth/mobile` când `OAUTH_SERVER_URL` lipsește (în loc de fail cu eroare de rețea)
+- `tests/sdk.oauth-optional.test.ts`: 5 teste noi care verifică: fără console.error, console.warn cu mesaj explicativ, JWT signing/verification funcționează fără OAuth
+
+**Validări:**
+- `pnpm test` ✅ — 12 passed, 2 skipped (nicio regresie)
+- `pnpm build` ✅ — build reușit
+- `pnpm lint` ✅ — 0 errors (70 warnings preexistente)
+- secret scan ✅ — fără secrete introduse
 
 ---
 
@@ -92,15 +82,16 @@
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Merguiește PR-ul cu fixul auth/reset astfel încât Railway să redeployeze backend-ul.
-2. În Railway, verifică **după nume** existența variabilelor SMTP relevante (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `GMAIL_APP_PASSWORD`) fără a expune valorile.
-3. Repetă pe telefon:
-   - login cu contul dorit;
-   - reset password pentru același email.
-4. Confirmă unul dintre cele două comportamente corecte:
-   - emailul chiar ajunge și codul funcționează; sau
-   - aplicația primește eroare reală de livrare, nu mesaj fals de succes.
-5. Dacă login încă eșuează, verifică în DB/loguri dacă emailul există efectiv în producție; demo accounts nu sunt seed-uite automat.
+1. Merguiește PR-ul cu fixul OAUTH_SERVER_URL optional astfel încât Railway să redeployeze backend-ul.
+2. Verifică în Railway logs că mesajul `[OAuth] ERROR:` a dispărut și a fost înlocuit cu `[OAuth] OAUTH_SERVER_URL is not configured —` (warn).
+3. Verifică că autentificarea email/parolă funcționează în continuare pe telefon (login, register, forgot-password).
+4. Dacă dorești login extern Manus OAuth în viitor, setează `OAUTH_SERVER_URL` în Railway ca variabilă de mediu.
+
+**Pași backlog (auth/reset):**
+1. Merguiește PR-ul cu fixul auth/reset dacă nu e deja mergeduit.
+2. În Railway, verifică **după nume** existența variabilelor SMTP relevante (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `GMAIL_APP_PASSWORD`).
+3. Repetă pe telefon: login + reset password.
+4. Confirmă unul din comportamentele corecte: emailul ajunge, sau aplicația returnează eroare reală de livrare.
 
 ---
 
@@ -127,6 +118,7 @@
 | 2026-07-12 | Reset-password trebuie să eșueze explicit dacă emailul nu poate fi livrat, iar codurile de reset nu se loghează niciodată în clar | Evităm false-positive în UI și expunerea secretelor temporare în log-uri | Copilot Agent |
 | 2026-07-12 | `eas-build-android.yml` se declanșează EXCLUSIV prin `workflow_dispatch`, NU la push pe `main` | Cota EAS Free plan este limitată (10 build-uri/lună); un build automat la fiecare commit o epuiza rapid; APK-ul se construiește doar când este explicit solicitat | Copilot Agent |
 | 2026-07-12 | Nu se falsifică succesul CI: dacă `eas build` eșuează (indiferent de motiv), CI raportează FAILURE | Un workflow verde trebuie să implice că un APK real a fost produs; exit-0 la quota epuizată ar minți statusul build-ului | Copilot Agent |
+| 2026-07-12 | `OAUTH_SERVER_URL` este OPȚIONAL în Railway production — OAuth Manus este infrastructură legacy; DROPi folosește email/parolă proprie | La startup, SDK-ul logga `console.error` misleading chiar dacă OAuth nu era niciodată apelat în producție; fixat la `console.warn` cu mesaj clar | Copilot Agent |
 
 ---
 
@@ -193,9 +185,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.15.0**
+Acest document: **v1.16.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-12
-Actualizat de: GitHub Copilot Coding Agent — Corecție arhitecturală `eas-build-android.yml`: eliminat trigger automat push/main și logica incorectă de exit-0 la quota; trigger schimbat la workflow_dispatch exclusiv; restaurat contextul auth/reset din sesiunea anterioară.
+Actualizat de: GitHub Copilot Coding Agent — Fix OAUTH_SERVER_URL optional: downgradat console.error la console.warn cu mesaj clar că OAuth Manus este infrastructură legacy opțională; guard 503 pe rutele OAuth când URL lipsește; 5 teste noi; autentificarea email/parolă DROPi neafectată.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.

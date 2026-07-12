@@ -2,6 +2,7 @@ import { COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const.js";
 import type { Express, Request, Response } from "express";
 import { getUserByOpenId, upsertUser } from "../db";
 import { getSessionCookieOptions } from "./cookies";
+import { ENV } from "./env";
 import { sdk } from "./sdk";
 
 function getQueryParam(req: Request, key: string): string | undefined {
@@ -63,6 +64,13 @@ function buildUserResponse(
 
 export function registerOAuthRoutes(app: Express) {
   app.get("/api/oauth/callback", async (req: Request, res: Response) => {
+    if (!ENV.oAuthServerUrl) {
+      res
+        .status(503)
+        .json({ error: "External OAuth service is not configured. Set OAUTH_SERVER_URL." });
+      return;
+    }
+
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");
 
@@ -97,6 +105,13 @@ export function registerOAuthRoutes(app: Express) {
   });
 
   app.get("/api/oauth/mobile", async (req: Request, res: Response) => {
+    if (!ENV.oAuthServerUrl) {
+      res
+        .status(503)
+        .json({ error: "External OAuth service is not configured. Set OAUTH_SERVER_URL." });
+      return;
+    }
+
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");
 
