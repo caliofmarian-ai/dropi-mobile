@@ -30,15 +30,16 @@
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în această sesiune:
-- **Audit complet al lanțului EAS environment injection** (toate cele 10 puncte din task).
-- **Cauza rădăcină identificată și confirmată cu dovezi din log-ul Actions run `29184596268`:**
-  - Linia critică: `EXPO_PUBLIC_API_BASE_URL: ` (gol) — GitHub Secret nu este setat sau este gol.
-  - EAS CLI "încarcă" variabila din `eas.json` env config, dar cu valoare goală: APK-ul rezultat conține `EXPO_PUBLIC_API_BASE_URL=""`.
-  - La runtime pe telefon: `getRequiredApiBaseUrl("auth tRPC")` → throw `[Config] EXPO_PUBLIC_API_BASE_URL is required on native (auth tRPC)`.
-- **EAS Environment pe expo.dev:** `No environment variables with visibility "Plain text" and "Sensitive" found for the "development" environment on EAS.` — gol.
-- **Fix implementat (cod):** Adăugat pas de validare `Validate EXPO_PUBLIC_API_BASE_URL` în `eas-build-android.yml` și `eas-update.yml` — build-ul eșuează rapid cu mesaj clar dacă secretul lipsește sau este localhost.
-- **⚠️ Acțiune necesară de la utilizator:** Setarea GitHub Secret `EXPO_PUBLIC_API_BASE_URL` cu URL-ul Railway backend → va produce un build valid la următorul push/workflow_dispatch.
-- Ultimul build cu APK generat (dar URL gol): `https://expo.dev/accounts/caliofm/projects/dropiexpodev/builds/df451e38-2cf8-4695-99a1-9eab549ea80b`
+- **Audit final de scope + consistență pentru PR #27** față de `main`.
+- Confirmat că **sursa unică GitHub** pentru `EXPO_PUBLIC_API_BASE_URL` este `vars.EXPO_PUBLIC_API_BASE_URL` în ambele workflow-uri EAS; `EXPO_TOKEN` rămâne în `secrets.*`.
+- Eliminat din `eas-build-android.yml` toți pașii temporari `[DIAG]`; a rămas doar validarea permanentă fail-fast + injectarea aceleiași valori `vars.EXPO_PUBLIC_API_BASE_URL` în `eas build`.
+- Corectat mesajul din `app/_layout.tsx` ca să indice corect **GitHub Variables**, nu „EAS Secrets”.
+- Corectat acest handover: referințele vechi la `GitHub Secret EXPO_PUBLIC_API_BASE_URL` erau incorecte și nu mai reflectă configurația finală din cod.
+- Validări rulate în sesiune:
+  - `pnpm install --frozen-lockfile` ✅
+  - `pnpm lint` ✅ (warnings existente, fără erori noi)
+  - `pnpm test` ✅ (2 teste skipped controlat din cauza env lipsă)
+  - `pnpm check` ❌ are erori TypeScript preexistente, nelegate de acest PR (`app/order/[id].tsx`, `lib/trpc.ts`, `server/operations-router.ts`)
 
 ---
 
@@ -62,7 +63,7 @@
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- **`EXPO_PUBLIC_API_BASE_URL` GitHub Secret LIPSĂ** — cauza erorii `[Config] EXPO_PUBLIC_API_BASE_URL is required on native (auth tRPC)`. Trebuie setat manual de utilizator înainte de build-ul următor.
+- Confirmarea printr-un **Development Build nou** că variabila ajunge în APK-ul generat după workflow-ul corectat.
 - Pentru verificare end-to-end a noilor ecrane realtime este necesar dataset real în DB (orders/b2b deliveries) pe environment-ul de test.
 - Pentru test SMTP live este necesar secret valid (`GMAIL_APP_PASSWORD` sau `SMTP_PASS`) în environment-ul de execuție.
 
@@ -71,14 +72,10 @@
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. **[UTILIZATOR — OBLIGATORIU]** Setează GitHub Secret `EXPO_PUBLIC_API_BASE_URL`:
-   - Mergi la: `https://github.com/caliofmarian-ai/dropi-mobile/settings/secrets/actions`
-   - Adaugă secret nou: `EXPO_PUBLIC_API_BASE_URL` = URL-ul public Railway al backend-ului (ex: `https://dropi-xxx.up.railway.app`)
-   - Găsești URL-ul în Railway: dashboard → serviciul backend → Settings → Public Networking → domeniu generat
-2. **[AUTO după secret setat]** Merge PR `copilot/audit-eas-environment-injection` în `main` → declanșează build nou.
-3. Verifică în log-ul noului build că apare: `EXPO_PUBLIC_API_BASE_URL: ***` (mascat, dar prezent).
-4. Instalează APK-ul nou pe telefon și verifică că aplicația nu mai aruncă eroarea de config.
-5. Confirmă că `/api/health` este accesibil și ecranul Reset Password funcționează.
+1. Rulează/confirmă un **Development Build nou** din workflow-ul corectat (ideal după merge în `main` sau prin `workflow_dispatch`).
+2. Verifică în log că pasul `Validate EXPO_PUBLIC_API_BASE_URL` trece și că `eas build` rulează cu workflow-ul final fără pași `[DIAG]`.
+3. Instalează APK-ul nou pe telefon și verifică dispariția erorii `[Config] EXPO_PUBLIC_API_BASE_URL is required on native (auth tRPC)`.
+4. Confirmă accesul la backend (`/api/health`) și fluxul de autentificare/reset password.
 
 ---
 
@@ -101,6 +98,7 @@
 | 2026-07-11 | Versionarea EAS pentru build-uri mobile trebuie gestionată prin `appVersionSource: "remote"` + `autoIncrement: true` | Cu `local`, fiecare build CI pornea din aceeași stare și APK-ul nu mai avansa corect build/version code-ul | Copilot Agent |
 | 2026-07-11 | Redirect-ul OAuth nativ trebuie generat din schema activă a build-ului (`Linking.createURL`) și nu dintr-un `bundleId` hardcodat în codul runtime | Evităm callback-uri pe schemă greșită după build/update și reducem erorile de login pe telefon | Copilot Agent |
 | 2026-07-12 | Workflow-urile EAS build/update trebuie să valideze explicit `EXPO_PUBLIC_API_BASE_URL` înainte de `eas build`/`eas update` pentru a preveni build-uri silențioase cu URL gol | Fără validare, EAS CLI "încarcă" variabila goală și produce APK-uri nefuncționale fără erori vizibile în CI | Copilot Agent |
+| 2026-07-12 | Sursa unică GitHub pentru `EXPO_PUBLIC_API_BASE_URL` este `vars.EXPO_PUBLIC_API_BASE_URL`; nu se folosește `secrets.EXPO_PUBLIC_API_BASE_URL` | Variabila este publică (embedded în bundle-ul JS), iar workflow-urile finale trebuie să rămână consistente între guard și `eas build`/`eas update` | Copilot Agent |
 
 ---
 
@@ -165,9 +163,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.11.0**
+Acest document: **v1.12.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-12
-Actualizat de: GitHub Copilot Coding Agent — audit complet EAS env injection chain; cauză rădăcină identificată (GitHub Secret `EXPO_PUBLIC_API_BASE_URL` gol); fix validare workflow adăugat; instrucțiuni acțiune utilizator documentate.
+Actualizat de: GitHub Copilot Coding Agent — audit final PR #27; eliminare diagnostic temporar; confirmare configurație finală `vars.EXPO_PUBLIC_API_BASE_URL`; handover aliniat la starea reală.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
