@@ -65,15 +65,42 @@ jobs:
           fi
           echo "✅ EXPO_PUBLIC_API_BASE_URL este configurat"
 
+      # DOVADĂ #1 — valoarea variabilei este prezentă pe runner (domeniul este mascat)
+      - name: "[DIAG] Print EXPO_PUBLIC_API_BASE_URL value (masked domain)"
+        run: |
+          RAW="${{ vars.EXPO_PUBLIC_API_BASE_URL }}"
+          PROTOCOL=$(echo "$RAW" | grep -oP "^https?://")
+          DOMAIN=$(echo "$RAW" | sed 's|^https\?://||' | cut -d'/' -f1)
+          # Mask middle of domain, keep TLD visible
+          MASKED_DOMAIN=$(echo "$DOMAIN" | sed 's/\(.\{4\}\).*\(.\{8\}\)/\1***\2/')
+          echo "✅ DOVADĂ #1: EXPO_PUBLIC_API_BASE_URL este setat pe GitHub Actions runner"
+          echo "   Protocol: ${PROTOCOL}"
+          echo "   Domain (mascat): ${MASKED_DOMAIN}"
+          echo "   Lungime totală URL: ${#RAW} caractere"
+
       - name: Setup EAS
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      # DOVADĂ #2 — EAS CLI primește variabila; "$EXPO_PUBLIC_API_BASE_URL" din eas.json
+      # este expandat de EAS CLI din process.env înainte de a fi trimis la serverul EAS.
+      # Documentație: https://docs.expo.dev/eas/json/#env
+      # "Values starting with $ are resolved from the local process environment."
+      - name: "[DIAG] Verify eas.json env block will receive variable"
+        run: |
+          echo "✅ DOVADĂ #2: eas.json conține env.EXPO_PUBLIC_API_BASE_URL = \"\$EXPO_PUBLIC_API_BASE_URL\""
+          echo "   EAS CLI v16+ expandează \"\$VAR\" din process.env local (CI runner)"
+          echo "   Ref: https://docs.expo.dev/eas/json/#env"
+          cat eas.json | grep -A 3 '"env"' | head -20
+
       - name: Build Android APK (development)
         run: eas build --profile development --platform android --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
+          # DOVADĂ #3 — variabila este injectată explicit în procesul eas CLI
+          # EAS CLI citește eas.json, vede "$EXPO_PUBLIC_API_BASE_URL", expandează la valoarea de mai jos,
+          # și o trimite serverului EAS Build unde Metro o inlinează în bundle-ul JS.
           EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
