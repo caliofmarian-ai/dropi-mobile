@@ -3,7 +3,7 @@ builder = "nixpacks"
 buildCommand = "pnpm install --frozen-lockfile && pnpm build"
 
 [deploy]
-startCommand = "pnpm start"
+startCommand = "node dist/migrate.mjs && node dist/validate-db.mjs && pnpm start"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 5
 

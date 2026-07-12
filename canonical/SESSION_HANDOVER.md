@@ -26,10 +26,10 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-12 |
-| **Branch activ** | `copilot/fix-eas-quota-ci-failure` |
+| **Branch activ** | `copilot/database-migration-audit` |
 | **Agent** | GitHub Copilot Coding Agent |
 
-### Ce s-a făcut în sesiunile anterioare pe acest branch (context auth/reset):
+### Ce s-a făcut în sesiunile anterioare pe branch `copilot/fix-eas-quota-ci-failure` (context auth/reset):
 - Audit complet auth/reset după testul real-device post-PR #27.
 - Confirmat din GitHub Actions run `29192979619` că APK-ul nou folosește `EXPO_PUBLIC_API_BASE_URL=https://dropi-mobile-production.up.railway.app`; blocajul vechi de env injection nu mai este cauza curentă.
 - Traseu login/reset dovedit cap-coadă în cod (`app/login.tsx` / `app/forgot-password.tsx` → `lib/auth-context.tsx` → `server/auth-router.ts` → `server/db.ts`).
@@ -52,14 +52,43 @@
   - `pnpm build` ✅
   - `pnpm check` ❌ erori TypeScript preexistente, nelegate de PR (`app/order/[id].tsx`, `lib/trpc.ts`, `server/operations-router.ts`)
 
-### Ce s-a făcut în sesiunea curentă (trigger + quota fix):
-- Analizat eroarea GitHub Actions job "Build Android APK (development)" (check run ID 86660702672).
-- Root cause: cota EAS Free plan Android epuizată pentru iulie 2026 → `eas build` eșua cu exit code 1.
-- Fix arhitectural aplicat în `.github/workflows/eas-build-android.yml`:
-  - Eliminat trigger `push: branches: main` — APK build se declanșează EXCLUSIV prin `workflow_dispatch`.
-  - Eliminată logica de exit-0 la quota epuizată (care era incorectă: raporta succes fără APK).
-  - Păstrat comportamentul simplu: `eas build` eșuează cu exit code real → CI reflectă adevărul.
-  - Toate validările existente (EAS_PROJECT_ID, EXPO_TOKEN, EXPO_PUBLIC_API_BASE_URL) nemodificate.
+### Ce s-a făcut în sesiunea curentă (database-migration-audit):
+- Audit complet al tuturor celor 14 migrații drizzle (0000–0013) vs. schema.ts.
+- Identificat problemă critică: `drizzle/meta/0013_snapshot.json` lipsea complet.
+  - Migrația `0013_agent_orchestrator.sql` a fost creată manual (fără `drizzle-kit generate`).
+  - Fără snapshot, `drizzle-kit generate` viitor ar compara schema față de starea din 0012, ignorând cele 3 tabele noi (agentTasks, agentState, agentReports) și ar genera o migrație duplicată.
+- Fix aplicat: creat `drizzle/meta/0013_snapshot.json` cu toate 26 de tabele (23 din 0012 + 3 noi din 0013).
+- Verificat consistența: toate 26 tabele din schema.ts au migrații corespunzătoare.
+- **Implementat mecanism de migrare producție** (cerință obligatorie):
+  - Creat `scripts/migrate.ts` — runner programmatic care folosește `drizzle-orm/mysql2/migrator` (NU `drizzle-kit`), deci funcționează fără devDependencies la runtime.
+  - Creat `scripts/validate-db.ts` — validare post-migrare: verifică existența celor 26 tabele, istoricul `__drizzle_migrations` cu 14 intrări, și raportează users count.
+  - Actualizat `package.json`: comanda `build` compilează și `scripts/migrate.ts` → `dist/migrate.mjs` și `scripts/validate-db.ts` → `dist/validate-db.mjs`; adăugat `db:migrate` (alias `drizzle-kit migrate` pentru uz local).
+  - Actualizat `railway.toml`: `startCommand = "node dist/migrate.mjs && node dist/validate-db.mjs && pnpm start"` — migrațiile rulează înainte de pornirea serverului; orice eșec blochează startup-ul.
+- Validare: `pnpm build` ✅, `pnpm test` ✅, `pnpm lint` ✅, secret scan ✅, CodeQL ✅ (0 alerts)
+
+### Sesiune de verificare 2026-07-12 (acest agent):
+- Codul implementat de sesiunea anterioară verificat și confirmat complet.
+- Validări rulate din nou:
+  - `pnpm install --frozen-lockfile` ✅
+  - `pnpm lint` ✅ (0 erori, 70 warnings preexistente)
+  - `pnpm build` ✅ (dist/index.mjs, dist/migrate.mjs, dist/validate-db.mjs produse)
+  - `pnpm test` ✅ (7 passed, 2 skipped — skipped tests sunt preexistente, nu legate de migrare)
+  - `pnpm check` ❌ 3 erori TypeScript preexistente (app/order/[id].tsx, lib/trpc.ts, server/operations-router.ts — nelegate de task)
+  - Secret scan ✅ (0 secrete detectate)
+  - CodeQL ✅ (0 alerts)
+- Confirmat că cele 26 tabele din `drizzle/meta/0013_snapshot.json` corespund cu lista din `scripts/validate-db.ts`.
+
+### Arhitectura finală Railway deployment flow:
+```
+Railway deploy trigger (push to main)
+  └─ buildCommand: pnpm install --frozen-lockfile && pnpm build
+       └─ dist/index.mjs, dist/migrate.mjs, dist/validate-db.mjs produse
+  └─ startCommand:
+       1. node dist/migrate.mjs          ← aplică migrații 0000–0013 (idempotent via __drizzle_migrations)
+       2. node dist/validate-db.mjs      ← verifică 26 tabele + 14 intrări history + users count
+       3. pnpm start                     ← NODE_ENV=production node dist/index.mjs
+       (oricare eșec în 1 sau 2 opreste startup-ul; Railway nu va deveni healthy)
+```
 
 ---
 
@@ -71,10 +100,13 @@
 - Documente canonice de bază: `AI_DEVELOPMENT_HANDOVER_CANON.md`, `AI_AGENT_SYSTEM.md`, `DELIVERY_MULTIMODAL.md`
 - Infrastructură cloud: `railway.toml`, `eas-update.yml` (OTA), `eas-build-android.yml` (APK), EAS config în `app.config.ts`
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
+- Fix auth/reset password backend (PR #28 merged) ✅
+- Fix EAS build trigger / quota workflow (PR #29 merged) ✅
+- Audit migrații drizzle + creare snapshot 0013 lipsă ✅
+- **Mecanism producție migrare Railway** — `scripts/migrate.ts` + `scripts/validate-db.ts` + `railway.toml` startCommand actualizat ✅
 
 ### 🔄 În progres
-- Branch curent: `copilot/real-device-tests-auth-issues`
-- Cerință operațională: merge + deploy pentru fixul auth/reset, apoi retest real-device pe backend Railway actualizat.
+- Branch curent: `copilot/database-migration-audit` — necesită PR/merge.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -92,15 +124,22 @@
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Merguiește PR-ul cu fixul auth/reset astfel încât Railway să redeployeze backend-ul.
-2. În Railway, verifică **după nume** existența variabilelor SMTP relevante (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `GMAIL_APP_PASSWORD`) fără a expune valorile.
-3. Repetă pe telefon:
+1. Merguiește PR-ul `copilot/database-migration-audit` (snapshot 0013 + mecanism migrare producție).
+2. Railway va redeploya automat; log-urile de start vor arăta:
+   - `[migrate] ✓ All migrations applied successfully`
+   - `[validate-db] ✓ All 26 application tables present`
+   - `[validate-db] ✓ Migration history: 14/14 entries recorded`
+   - `[validate-db] ✓ users count: 0 (expected 0 on fresh deployment, seed script never runs automatically)`
+   - `[validate-db] ✓ Post-migration validation PASSED`
+3. Verifică Railway logs după deploy că toate 5 linii de mai sus apar.
+4. În Railway, verifică **după nume** existența variabilelor SMTP relevante (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `GMAIL_APP_PASSWORD`) fără a expune valorile.
+5. Repetă pe telefon:
    - login cu contul dorit;
    - reset password pentru același email.
-4. Confirmă unul dintre cele două comportamente corecte:
+6. Confirmă unul dintre cele două comportamente corecte:
    - emailul chiar ajunge și codul funcționează; sau
    - aplicația primește eroare reală de livrare, nu mesaj fals de succes.
-5. Dacă login încă eșuează, verifică în DB/loguri dacă emailul există efectiv în producție; demo accounts nu sunt seed-uite automat.
+7. Dacă login încă eșuează, verifică în DB/loguri dacă emailul există efectiv în producție; demo accounts nu sunt seed-uite automat.
 
 ---
 
@@ -127,6 +166,9 @@
 | 2026-07-12 | Reset-password trebuie să eșueze explicit dacă emailul nu poate fi livrat, iar codurile de reset nu se loghează niciodată în clar | Evităm false-positive în UI și expunerea secretelor temporare în log-uri | Copilot Agent |
 | 2026-07-12 | `eas-build-android.yml` se declanșează EXCLUSIV prin `workflow_dispatch`, NU la push pe `main` | Cota EAS Free plan este limitată (10 build-uri/lună); un build automat la fiecare commit o epuiza rapid; APK-ul se construiește doar când este explicit solicitat | Copilot Agent |
 | 2026-07-12 | Nu se falsifică succesul CI: dacă `eas build` eșuează (indiferent de motiv), CI raportează FAILURE | Un workflow verde trebuie să implice că un APK real a fost produs; exit-0 la quota epuizată ar minți statusul build-ului | Copilot Agent |
+| 2026-07-12 | Migrația `0013_agent_orchestrator.sql` trebuie însoțită de `drizzle/meta/0013_snapshot.json`; orice migrație manuală care nu generează automat snapshot-ul drizzle trebuie să îl creeze explicit | Fără snapshot, `drizzle-kit generate` viitor ignoră tabelele noi și generează migrații duplicat | Copilot Agent |
+| 2026-07-12 | Mecanismul de migrare în producție folosește `drizzle-orm/mysql2/migrator` (API programmatic) compilat cu esbuild, NU `drizzle-kit migrate` CLI — devDependencies pot fi absente în runtime Railway | `drizzle-kit` este devDep; `drizzle-orm` este dep de producție; Railway poate prune devDeps după build | Copilot Agent |
+| 2026-07-12 | `railway.toml` startCommand = `node dist/migrate.mjs && node dist/validate-db.mjs && pnpm start` — migrațiile și validarea rulează înainte de pornirea serverului și blochează startup-ul dacă eșuează | Orice alt ordin (build-time migrate) este mai fragil: build-cache poate sări peste migrate; start-time garantează că DB e gata înainte ca serverul să accepte request-uri | Copilot Agent |
 
 ---
 
@@ -142,9 +184,11 @@
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
-| `copilot/real-device-tests-auth-issues` | RCA auth/reset real-device + fix minim email/reset backend | Activ, necesită PR/merge |
-| `copilot/audit-eas-environment-injection` | Audit EAS env chain + validare workflow EXPO_PUBLIC_API_BASE_URL | Activ, necesită PR/merge |
-| `copilot/fix-apk-versioning-errors` | Fix versionare EAS build + redirect OAuth nativ | Activ, necesită PR/merge |
+| `copilot/database-migration-audit` | Audit migrații drizzle + creare snapshot 0013 lipsă | Activ, necesită PR/merge |
+| `copilot/real-device-tests-auth-issues` | RCA auth/reset real-device + fix minim email/reset backend | Merged în `main` (PR #28) |
+| `copilot/audit-eas-environment-injection` | Audit EAS env chain + validare workflow EXPO_PUBLIC_API_BASE_URL | Merged în `main` (PR #27) |
+| `copilot/fix-apk-versioning-errors` | Fix versionare EAS build + redirect OAuth nativ | Merged în `main` |
+| `copilot/fix-build-android-apk-job` | Eliminat trigger push/main; APK build exclusiv manual | Merged în `main` (PR #29) |
 | `copilot/funcioneaz-aplicaia-server` | Eliminare fallback localhost pe mobile runtime + fail-fast config API | Merged în `main` |
 
 ### Probleme cunoscute / Datorie tehnică
@@ -155,6 +199,8 @@
 - `react/no-unescaped-entities` în ecrane mobile — fixat (0 errors la lint) ✅
 - Reset password returna mesaj fals de succes când emailul nu era livrat și loga codul de reset în clar ✅ fixat în branch-ul `copilot/real-device-tests-auth-issues`
 - Implementarea email backend era legată doar de Gmail/`GMAIL_APP_PASSWORD`, deși documentația proiectului indică SMTP generic ✅ fixat în branch-ul `copilot/real-device-tests-auth-issues`
+- `drizzle/meta/0013_snapshot.json` lipsea → creat în branch-ul `copilot/database-migration-audit` ✅
+- **Mecanism Railway producție** lipsea → `scripts/migrate.ts` + `scripts/validate-db.ts` + `railway.toml` update → PR #30 ✅
 - Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
 
 ### Tehnologii principale
@@ -193,9 +239,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.15.0**
+Acest document: **v1.18.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-12
-Actualizat de: GitHub Copilot Coding Agent — Corecție arhitecturală `eas-build-android.yml`: eliminat trigger automat push/main și logica incorectă de exit-0 la quota; trigger schimbat la workflow_dispatch exclusiv; restaurat contextul auth/reset din sesiunea anterioară.
+Actualizat de: GitHub Copilot Coding Agent — Sesiune de verificare PR #30: confirmat implementarea completă a mecanismului de migrare producție Railway; rulat CodeQL (0 alerts); toate validările trecute (lint ✅ build ✅ test ✅ secret scan ✅ CodeQL ✅).
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
