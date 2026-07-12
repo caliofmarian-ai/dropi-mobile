@@ -26,10 +26,10 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-12 |
-| **Branch activ** | `copilot/fix-oauth-server-url-optional` |
+| **Branch activ** | `copilot/copilotdatabase-migration-audit` |
 | **Agent** | GitHub Copilot Coding Agent |
 
-### Ce s-a făcut în sesiunea curentă (OAUTH_SERVER_URL optional fix):
+### Ce s-a făcut în sesiunea curentă (OAUTH_SERVER_URL optional fix — PR #31):
 
 **ROOT CAUSE identificat:** `server/_core/sdk.ts` instanțiaza `OAuthService` ca singleton la încărcarea modulului și logga `console.error` la startup când `OAUTH_SERVER_URL` era absent — chiar dacă autentificarea email/parolă a DROPi nu necesită niciodată OAuth.
 
@@ -50,6 +50,46 @@
 - `pnpm build` ✅ — build reușit
 - `pnpm lint` ✅ — 0 errors (70 warnings preexistente)
 - secret scan ✅ — fără secrete introduse
+- CodeQL ✅ — 0 alerts
+
+### Ce s-a făcut în sesiunile anterioare pe branch `copilot/database-migration-audit` (PR #30 merged):
+- Audit complet al tuturor celor 14 migrații drizzle (0000–0013) vs. schema.ts.
+- Identificat problemă critică: `drizzle/meta/0013_snapshot.json` lipsea complet.
+  - Migrația `0013_agent_orchestrator.sql` a fost creată manual (fără `drizzle-kit generate`).
+  - Fără snapshot, `drizzle-kit generate` viitor ar compara schema față de starea din 0012, ignorând cele 3 tabele noi (agentTasks, agentState, agentReports) și ar genera o migrație duplicată.
+- Fix aplicat: creat `drizzle/meta/0013_snapshot.json` cu toate 26 de tabele (23 din 0012 + 3 noi din 0013).
+- Verificat consistența: toate 26 tabele din schema.ts au migrații corespunzătoare.
+- **Implementat mecanism de migrare producție** (cerință obligatorie):
+  - Creat `scripts/migrate.ts` — runner programmatic care folosește `drizzle-orm/mysql2/migrator` (NU `drizzle-kit`), deci funcționează fără devDependencies la runtime.
+  - Creat `scripts/validate-db.ts` — validare post-migrare: verifică existența celor 26 tabele, istoricul `__drizzle_migrations` cu 14 intrări, și raportează users count.
+  - Actualizat `package.json`: comanda `build` compilează și `scripts/migrate.ts` → `dist/migrate.mjs` și `scripts/validate-db.ts` → `dist/validate-db.mjs`; adăugat `db:migrate` (alias `drizzle-kit migrate` pentru uz local).
+  - Actualizat `railway.toml`: `startCommand = "node dist/migrate.mjs && node dist/validate-db.mjs && pnpm start"` — migrațiile rulează înainte de pornirea serverului; orice eșec blochează startup-ul.
+- Validare: `pnpm build` ✅, `pnpm test` ✅, `pnpm lint` ✅, secret scan ✅, CodeQL ✅ (0 alerts)
+
+### Sesiune de verificare 2026-07-12:
+- Codul implementat de sesiunea anterioară verificat și confirmat complet.
+- Confirmat că cele 26 tabele din `drizzle/meta/0013_snapshot.json` corespund cu lista din `scripts/validate-db.ts`.
+
+### Arhitectura finală Railway deployment flow:
+```
+Railway deploy trigger (push to main)
+  └─ buildCommand: pnpm install --frozen-lockfile && pnpm build
+       └─ dist/index.mjs, dist/migrate.mjs, dist/validate-db.mjs produse
+  └─ startCommand:
+       1. node dist/migrate.mjs          ← aplică migrații 0000–0013 (idempotent via __drizzle_migrations)
+       2. node dist/validate-db.mjs      ← verifică 26 tabele + 14 intrări history + users count
+       3. pnpm start                     ← NODE_ENV=production node dist/index.mjs
+       (oricare eșec în 1 sau 2 opreste startup-ul; Railway nu va deveni healthy)
+```
+
+### Ce s-a făcut în sesiunile anterioare pe branch `copilot/fix-eas-quota-ci-failure` (PR #29 merged — context auth/reset):
+- Audit complet auth/reset după testul real-device post-PR #27.
+- Fix aplicat:
+  - helper nou `server/_core/mail.ts` cu suport SMTP generic + fallback Gmail;
+  - `forgotPassword` curăță reset token-ul și returnează eroare reală dacă livrarea emailului eșuează;
+  - au fost eliminate log-urile care expuneau codurile de reset în clar.
+- Adăugat raport RCA: `docs/AUTH_PASSWORD_RESET_RCA_2026-07-12.md`.
+- Adăugate teste: `tests/mail-config.test.ts`, `tests/auth.forgot-password.test.ts`.
 
 ---
 
@@ -61,10 +101,14 @@
 - Documente canonice de bază: `AI_DEVELOPMENT_HANDOVER_CANON.md`, `AI_AGENT_SYSTEM.md`, `DELIVERY_MULTIMODAL.md`
 - Infrastructură cloud: `railway.toml`, `eas-update.yml` (OTA), `eas-build-android.yml` (APK), EAS config în `app.config.ts`
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
+- Fix auth/reset password backend (PR #28 merged) ✅
+- Fix EAS build trigger / quota workflow (PR #29 merged) ✅
+- Audit migrații drizzle + creare snapshot 0013 lipsă ✅
+- **Mecanism producție migrare Railway** — `scripts/migrate.ts` + `scripts/validate-db.ts` + `railway.toml` startCommand actualizat ✅ (PR #30 merged)
+- **Fix OAUTH_SERVER_URL opțional** — eliminat misleading ERROR log de la startup ✅ (PR #31 în review)
 
 ### 🔄 În progres
-- Branch curent: `copilot/real-device-tests-auth-issues`
-- Cerință operațională: merge + deploy pentru fixul auth/reset, apoi retest real-device pe backend Railway actualizat.
+- PR #31: fix OAUTH_SERVER_URL opțional — necesită merge.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -75,23 +119,22 @@
 ### 🔴 Blocate
 - Este încă necesară confirmarea din Railway că variabilele SMTP sunt setate pe serviciul de producție (doar nume, fără valori).
 - Este încă necesară verificarea real-device după deploy că reset-password returnează eroare reală când providerul nu poate trimite și succes doar când emailul este livrat.
-- Pentru verificarea exactă a contului testat la login este necesar acces controlat la DB/log-urile Railway sau repetarea testului cu emailul confirmat.
 
 ---
 
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Merguiește PR-ul cu fixul OAUTH_SERVER_URL optional astfel încât Railway să redeployeze backend-ul.
+1. Merguiește PR-ul #31 cu fixul OAUTH_SERVER_URL optional astfel încât Railway să redeployeze backend-ul.
 2. Verifică în Railway logs că mesajul `[OAuth] ERROR:` a dispărut și a fost înlocuit cu `[OAuth] OAUTH_SERVER_URL is not configured —` (warn).
 3. Verifică că autentificarea email/parolă funcționează în continuare pe telefon (login, register, forgot-password).
 4. Dacă dorești login extern Manus OAuth în viitor, setează `OAUTH_SERVER_URL` în Railway ca variabilă de mediu.
 
-**Pași backlog (auth/reset):**
-1. Merguiește PR-ul cu fixul auth/reset dacă nu e deja mergeduit.
-2. În Railway, verifică **după nume** existența variabilelor SMTP relevante (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `GMAIL_APP_PASSWORD`).
-3. Repetă pe telefon: login + reset password.
-4. Confirmă unul din comportamentele corecte: emailul ajunge, sau aplicația returnează eroare reală de livrare.
+**Pași backlog (SMTP/email):**
+1. În Railway, verifică **după nume** existența variabilelor SMTP relevante (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `GMAIL_APP_PASSWORD`) fără a expune valorile.
+2. Repetă pe telefon: login + reset password.
+3. Confirmă unul din comportamentele corecte: emailul ajunge, sau aplicația returnează eroare reală de livrare.
+4. Dacă login încă eșuează, verifică în DB/loguri dacă emailul există efectiv în producție; demo accounts nu sunt seed-uite automat.
 
 ---
 
@@ -118,6 +161,9 @@
 | 2026-07-12 | Reset-password trebuie să eșueze explicit dacă emailul nu poate fi livrat, iar codurile de reset nu se loghează niciodată în clar | Evităm false-positive în UI și expunerea secretelor temporare în log-uri | Copilot Agent |
 | 2026-07-12 | `eas-build-android.yml` se declanșează EXCLUSIV prin `workflow_dispatch`, NU la push pe `main` | Cota EAS Free plan este limitată (10 build-uri/lună); un build automat la fiecare commit o epuiza rapid; APK-ul se construiește doar când este explicit solicitat | Copilot Agent |
 | 2026-07-12 | Nu se falsifică succesul CI: dacă `eas build` eșuează (indiferent de motiv), CI raportează FAILURE | Un workflow verde trebuie să implice că un APK real a fost produs; exit-0 la quota epuizată ar minți statusul build-ului | Copilot Agent |
+| 2026-07-12 | Migrația `0013_agent_orchestrator.sql` trebuie însoțită de `drizzle/meta/0013_snapshot.json`; orice migrație manuală care nu generează automat snapshot-ul drizzle trebuie să îl creeze explicit | Fără snapshot, `drizzle-kit generate` viitor ignoră tabelele noi și generează migrații duplicat | Copilot Agent |
+| 2026-07-12 | Mecanismul de migrare în producție folosește `drizzle-orm/mysql2/migrator` (API programmatic) compilat cu esbuild, NU `drizzle-kit migrate` CLI — devDependencies pot fi absente în runtime Railway | `drizzle-kit` este devDep; `drizzle-orm` este dep de producție; Railway poate prune devDeps după build | Copilot Agent |
+| 2026-07-12 | `railway.toml` startCommand = `node dist/migrate.mjs && node dist/validate-db.mjs && pnpm start` — migrațiile și validarea rulează înainte de pornirea serverului și blochează startup-ul dacă eșuează | Orice alt ordin (build-time migrate) este mai fragil: build-cache poate sări peste migrate; start-time garantează că DB e gata înainte ca serverul să accepte request-uri | Copilot Agent |
 | 2026-07-12 | `OAUTH_SERVER_URL` este OPȚIONAL în Railway production — OAuth Manus este infrastructură legacy; DROPi folosește email/parolă proprie | La startup, SDK-ul logga `console.error` misleading chiar dacă OAuth nu era niciodată apelat în producție; fixat la `console.warn` cu mesaj clar | Copilot Agent |
 
 ---
@@ -134,10 +180,13 @@
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
-| `copilot/real-device-tests-auth-issues` | RCA auth/reset real-device + fix minim email/reset backend | Activ, necesită PR/merge |
-| `copilot/audit-eas-environment-injection` | Audit EAS env chain + validare workflow EXPO_PUBLIC_API_BASE_URL | Activ, necesită PR/merge |
-| `copilot/fix-apk-versioning-errors` | Fix versionare EAS build + redirect OAuth nativ | Activ, necesită PR/merge |
+| `copilot/copilotdatabase-migration-audit` | Fix OAUTH_SERVER_URL opțional (PR #31) | Activ, necesită merge |
+| `copilot/real-device-tests-auth-issues` | RCA auth/reset real-device + fix minim email/reset backend | Merged în `main` (PR #28) |
+| `copilot/audit-eas-environment-injection` | Audit EAS env chain + validare workflow EXPO_PUBLIC_API_BASE_URL | Merged în `main` (PR #27) |
+| `copilot/fix-apk-versioning-errors` | Fix versionare EAS build + redirect OAuth nativ | Merged în `main` |
+| `copilot/fix-build-android-apk-job` | Eliminat trigger push/main; APK build exclusiv manual | Merged în `main` (PR #29) |
 | `copilot/funcioneaz-aplicaia-server` | Eliminare fallback localhost pe mobile runtime + fail-fast config API | Merged în `main` |
+| `copilot/database-migration-audit` | Audit migrații drizzle + creare snapshot 0013 lipsă + mecanism Railway | Merged în `main` (PR #30) |
 
 ### Probleme cunoscute / Datorie tehnică
 - `eas.json` — fix top-level update key aplicat ✅
@@ -147,6 +196,9 @@
 - `react/no-unescaped-entities` în ecrane mobile — fixat (0 errors la lint) ✅
 - Reset password returna mesaj fals de succes când emailul nu era livrat și loga codul de reset în clar ✅ fixat în branch-ul `copilot/real-device-tests-auth-issues`
 - Implementarea email backend era legată doar de Gmail/`GMAIL_APP_PASSWORD`, deși documentația proiectului indică SMTP generic ✅ fixat în branch-ul `copilot/real-device-tests-auth-issues`
+- `drizzle/meta/0013_snapshot.json` lipsea → creat în branch-ul `copilot/database-migration-audit` ✅
+- **Mecanism Railway producție** lipsea → `scripts/migrate.ts` + `scripts/validate-db.ts` + `railway.toml` update → PR #30 ✅
+- `[OAuth] ERROR:` misleading în Railway production logs → PR #31 (în review) ✅
 - Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
 
 ### Tehnologii principale
@@ -185,9 +237,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.16.0**
+Acest document: **v1.19.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-12
-Actualizat de: GitHub Copilot Coding Agent — Fix OAUTH_SERVER_URL optional: downgradat console.error la console.warn cu mesaj clar că OAuth Manus este infrastructură legacy opțională; guard 503 pe rutele OAuth când URL lipsește; 5 teste noi; autentificarea email/parolă DROPi neafectată.
+Actualizat de: GitHub Copilot Coding Agent — Merge conflict resolution: integrat contextul database-migration-audit (PR #30) cu fixul OAUTH_SERVER_URL opțional (PR #31); decizie adăugată pentru OAUTH_SERVER_URL; versiune incrementată la v1.19.0.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
