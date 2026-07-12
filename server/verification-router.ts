@@ -3,18 +3,9 @@ import { router, protectedProcedure, adminProcedure } from "./_core/trpc";
 import { verifications, roleApplications, users } from "../drizzle/schema";
 import { getDb } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
-import nodemailer from "nodemailer";
+import { maskEmail, sendPlatformEmail } from "./_core/mail";
 import { storagePut } from "./storage";
 import { notifyOwner } from "./_core/notification";
-
-// SMTP transporter for notifications
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "dropi.deliveries@gmail.com",
-    pass: process.env.GMAIL_APP_PASSWORD || "",
-  },
-});
 
 // Roles that require admin approval (operational/supervisory)
 const ROLES_REQUIRING_APPROVAL = [
@@ -257,15 +248,14 @@ export const verificationRouter = router({
           ? `<h2>Congratulations!</h2><p>Your ${verification.documentType.replace(/_/g, " ")} verification has been approved. You can now receive delivery missions on DROPi.</p>`
           : `<h2>Verification Update</h2><p>Your ${verification.documentType.replace(/_/g, " ")} verification was not approved.</p><p><strong>Reason:</strong> ${input.rejectionReason || "Not specified"}</p><p>Please submit updated documents to try again.</p>`;
 
-        try {
-          await transporter.sendMail({
-            from: '"DROPi Platform" <dropi.deliveries@gmail.com>',
-            to: user.email,
-            subject,
-            html: `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">${body}<hr><p style="color:#888;font-size:12px;">DROPi Logistics Platform</p></div>`,
-          });
-        } catch (err) {
-          console.error("[SMTP] Failed to send verification notification:", err);
+        const sent = await sendPlatformEmail({
+          to: user.email,
+          subject,
+          logLabel: "verification decision email",
+          html: `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">${body}<hr><p style="color:#888;font-size:12px;">DROPi Logistics Platform</p></div>`,
+        });
+        if (!sent) {
+          console.warn(`[SMTP] Verification decision notification not delivered to ${maskEmail(user.email)}`);
         }
       }
 
@@ -540,15 +530,14 @@ export const roleApplicationRouter = router({
           ? `<h2>Congratulations!</h2><p>Your application for <strong>${roleName}</strong> on channel <strong>${application.requestedChannel}</strong> has been approved.</p><p>Log in to access your new dashboard and responsibilities.</p>`
           : `<h2>Application Update</h2><p>Your application for <strong>${roleName}</strong> was not approved at this time.</p><p><strong>Reason:</strong> ${input.rejectionReason || "Not specified"}</p><p>You may reapply after addressing the feedback.</p>`;
 
-        try {
-          await transporter.sendMail({
-            from: '"DROPi Platform" <dropi.deliveries@gmail.com>',
-            to: user.email,
-            subject,
-            html: `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">${body}<hr><p style="color:#888;font-size:12px;">DROPi Logistics Platform</p></div>`,
-          });
-        } catch (err) {
-          console.error("[SMTP] Failed to send role notification:", err);
+        const sent = await sendPlatformEmail({
+          to: user.email,
+          subject,
+          logLabel: "role application decision email",
+          html: `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">${body}<hr><p style="color:#888;font-size:12px;">DROPi Logistics Platform</p></div>`,
+        });
+        if (!sent) {
+          console.warn(`[SMTP] Role application notification not delivered to ${maskEmail(user.email)}`);
         }
       }
 

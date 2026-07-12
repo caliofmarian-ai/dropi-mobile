@@ -1,29 +1,18 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
-import { randomUUID } from "crypto";
-import nodemailer from "nodemailer";
 import { router, publicProcedure, protectedProcedure, adminProcedure } from "./_core/trpc";
 import { sdk } from "./_core/sdk";
+import { maskEmail, sendPlatformEmail } from "./_core/mail";
 import * as db from "./db";
 import { createAuditLog } from "./db";
 
-// ===== SMTP TRANSPORTER =====
-const smtpTransporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "dropi.deliveries@gmail.com",
-    pass: process.env.GMAIL_APP_PASSWORD || "",
-  },
-});
-
 async function sendVerificationEmail(toEmail: string, code: string): Promise<boolean> {
-  try {
-    await smtpTransporter.sendMail({
-      from: '"DROPi Platform" <dropi.deliveries@gmail.com>',
-      to: toEmail,
-      subject: "DROPi - Verify Your Email",
-      html: `
+  return sendPlatformEmail({
+    to: toEmail,
+    subject: "DROPi - Verify Your Email",
+    logLabel: "verification email",
+    html: `
         <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
           <h2 style="color: #2563EB; margin-bottom: 8px;">DROPi</h2>
           <p style="color: #666; font-size: 14px;">Logistics Platform</p>
@@ -38,22 +27,15 @@ async function sendVerificationEmail(toEmail: string, code: string): Promise<boo
           <p style="color: #999; font-size: 11px;">&copy; DROPi Deliveries. All rights reserved.</p>
         </div>
       `,
-    });
-    console.log(`[SMTP] Verification email sent to ${toEmail}`);
-    return true;
-  } catch (err) {
-    console.error(`[SMTP] Failed to send verification email to ${toEmail}:`, err);
-    return false;
-  }
+  });
 }
 
 async function sendRecoveryEmail(toEmail: string, code: string): Promise<boolean> {
-  try {
-    await smtpTransporter.sendMail({
-      from: '"DROPi Platform" <dropi.deliveries@gmail.com>',
-      to: toEmail,
-      subject: "DROPi - Password Reset Code",
-      html: `
+  return sendPlatformEmail({
+    to: toEmail,
+    subject: "DROPi - Password Reset Code",
+    logLabel: "password reset email",
+    html: `
         <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
           <h2 style="color: #2563EB; margin-bottom: 8px;">DROPi</h2>
           <p style="color: #666; font-size: 14px;">Logistics Platform</p>
@@ -68,13 +50,7 @@ async function sendRecoveryEmail(toEmail: string, code: string): Promise<boolean
           <p style="color: #999; font-size: 11px;">&copy; DROPi Deliveries. All rights reserved.</p>
         </div>
       `,
-    });
-    console.log(`[SMTP] Recovery email sent to ${toEmail}`);
-    return true;
-  } catch (err) {
-    console.error(`[SMTP] Failed to send recovery email to ${toEmail}:`, err);
-    return false;
-  }
+  });
 }
 
 // ===== VALIDATION SCHEMAS =====
@@ -190,7 +166,7 @@ export const dropiAuthRouter = router({
     // Send verification email
     const emailSent = await sendVerificationEmail(input.email, verifyCode);
     if (!emailSent) {
-      console.log(`[EMAIL VERIFY] SMTP failed, code for ${input.email}: ${verifyCode}`);
+      console.warn(`[EMAIL VERIFY] Verification delivery failed for userId=${id} email=${maskEmail(input.email)}`);
     }
 
     // Create session token (user can login but will see verification prompt)
@@ -396,7 +372,12 @@ export const dropiAuthRouter = router({
     // Send recovery email via SMTP
     const emailSent = await sendRecoveryEmail(input.email, code);
     if (!emailSent) {
-      console.log(`[PASSWORD RESET] SMTP failed, code for ${input.email}: ${code} (expires in 15 min)`);
+      await db.clearResetToken(user.id);
+      console.error(`[PASSWORD RESET] Delivery failed for userId=${user.id} email=${maskEmail(input.email)}`);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Unable to send reset code right now. Please try again later.",
+      });
     }
 
     return { success: true, message: "If this email is registered, a 6-digit code has been sent." };
@@ -526,7 +507,7 @@ export const dropiAuthRouter = router({
     if (user.email) {
       const sent = await sendVerificationEmail(user.email, code);
       if (!sent) {
-        console.log(`[EMAIL VERIFY] Resend SMTP failed, code for ${user.email}: ${code}`);
+        console.warn(`[EMAIL VERIFY] Resend delivery failed for userId=${userId} email=${maskEmail(user.email)}`);
       }
     }
 
