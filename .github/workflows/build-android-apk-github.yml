@@ -1,0 +1,172 @@
+name: GitHub Build — Android APK (development/debug)
+
+# Construiește un APK Android debug direct cu Gradle, fără EAS Build.
+# Se rulează EXCLUSIV manual (workflow_dispatch).
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android debug APK with Gradle
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      CI: "1"
+      EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Validate EXPO_PUBLIC_API_BASE_URL
+        run: |
+          if [ -z "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" ]; then
+            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu este setat în GitHub Variables"
+            echo "   → GitHub → Settings → Secrets and variables → Actions → Variables → adaugă EXPO_PUBLIC_API_BASE_URL"
+            exit 1
+          fi
+          if ! echo "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" | grep -qE '^https://'; then
+            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL trebuie să fie un URL HTTPS"
+            exit 1
+          fi
+          if echo "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" | grep -qE '(localhost|127\.0\.0\.1)'; then
+            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu poate fi localhost sau 127.0.0.1 pe mobile"
+            echo "   → Folosește URL-ul public Railway al backend-ului."
+            exit 1
+          fi
+          echo "✅ EXPO_PUBLIC_API_BASE_URL este configurat"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve Expo config
+        run: |
+          npx expo config --json > expo-config.json
+          APP_VERSION=$(node -e "const fs = require('fs'); const config = JSON.parse(fs.readFileSync('expo-config.json', 'utf8')); process.stdout.write(config.version || '');")
+          if [ -z "$APP_VERSION" ]; then
+            echo "❌ EROARE: Expo app version nu a putut fi rezolvată din app.config.ts"
+            exit 1
+          fi
+          echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
+          echo "✅ Expo config a fost rezolvat corect"
+
+      - name: Generate Android project when missing
+        run: |
+          if [ -d android ]; then
+            echo "✅ Directorul android/ există deja în repository"
+            exit 0
+          fi
+          echo "ℹ️ Directorul android/ nu este comis în repository; generăm proiectul nativ Android cu Expo prebuild"
+          npx expo prebuild --platform android --clean --non-interactive
+          if [ ! -d android ]; then
+            echo "❌ EROARE: Expo prebuild nu a generat directorul android/"
+            exit 1
+          fi
+          echo "✅ Proiectul Android a fost generat"
+
+      - name: Extract build metadata
+        run: |
+          COMMIT_SHA=$(git rev-parse HEAD)
+          SHORT_SHA=$(git rev-parse --short=7 HEAD)
+          GIT_BRANCH="${GITHUB_REF_NAME}"
+
+          if [ -f android/app/build.gradle ]; then
+            VERSION_CODE=$(sed -nE 's/^[[:space:]]*versionCode[[:space:]]+([0-9]+).*/\1/p' android/app/build.gradle | head -n 1)
+          elif [ -f android/app/build.gradle.kts ]; then
+            VERSION_CODE=$(sed -nE 's/^[[:space:]]*versionCode[[:space:]]*=[[:space:]]*([0-9]+).*/\1/p' android/app/build.gradle.kts | head -n 1)
+          else
+            echo "❌ EROARE: Nu există android/app/build.gradle sau build.gradle.kts"
+            exit 1
+          fi
+
+          if [ -z "$VERSION_CODE" ]; then
+            echo "❌ EROARE: Android versionCode nu a putut fi determinat"
+            exit 1
+          fi
+
+          echo "COMMIT_SHA=$COMMIT_SHA" >> "$GITHUB_ENV"
+          echo "SHORT_SHA=$SHORT_SHA" >> "$GITHUB_ENV"
+          echo "GIT_BRANCH=$GIT_BRANCH" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+
+          echo "Git commit SHA: $COMMIT_SHA"
+          echo "Branch: $GIT_BRANCH"
+          echo "Expo app version: $APP_VERSION"
+          echo "Android versionCode: $VERSION_CODE"
+          echo "Resolved API base URL: $EXPO_PUBLIC_API_BASE_URL"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build Android debug APK
+        run: |
+          cd android
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
+
+      - name: Locate and rename APK
+        run: |
+          APK_PATH=$(find "$GITHUB_WORKSPACE/android/app/build/outputs/apk" -type f -name '*debug*.apk' | sort | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            APK_PATH=$(find "$GITHUB_WORKSPACE/android/app/build/outputs/apk" -type f -name '*.apk' | sort | head -n 1)
+          fi
+          if [ -z "$APK_PATH" ]; then
+            echo "❌ EROARE: APK-ul generat nu a putut fi localizat"
+            exit 1
+          fi
+
+          ARTIFACT_DIR="$RUNNER_TEMP/android-apk-artifact"
+          mkdir -p "$ARTIFACT_DIR"
+
+          FINAL_APK_NAME="dropi-development-v${APP_VERSION}-code${VERSION_CODE}-${SHORT_SHA}.apk"
+          FINAL_APK_PATH="$ARTIFACT_DIR/$FINAL_APK_NAME"
+          ARTIFACT_NAME="dropi-android-development-debug-v${APP_VERSION}-code${VERSION_CODE}-${SHORT_SHA}"
+
+          cp "$APK_PATH" "$FINAL_APK_PATH"
+
+          echo "APK_PATH=$APK_PATH" >> "$GITHUB_ENV"
+          echo "FINAL_APK_NAME=$FINAL_APK_NAME" >> "$GITHUB_ENV"
+          echo "FINAL_APK_PATH=$FINAL_APK_PATH" >> "$GITHUB_ENV"
+          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> "$GITHUB_ENV"
+
+          {
+            echo "## Android APK build summary"
+            echo ""
+            echo "- Git commit SHA: $COMMIT_SHA"
+            echo "- Branch: $GIT_BRANCH"
+            echo "- Expo app version: $APP_VERSION"
+            echo "- Android versionCode: $VERSION_CODE"
+            echo "- API base URL: $EXPO_PUBLIC_API_BASE_URL"
+            echo "- Source APK path on runner: $APK_PATH"
+            echo "- Final APK path on runner: $FINAL_APK_PATH"
+            echo "- Final APK filename: $FINAL_APK_NAME"
+            echo "- GitHub artifact name: $ARTIFACT_NAME"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.FINAL_APK_PATH }}
+          if-no-files-found: error
+          retention-days: 14

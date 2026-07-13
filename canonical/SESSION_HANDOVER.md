@@ -26,7 +26,7 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-13 |
-| **Branch activ** | `copilot/fix-missing-session-cookie` |
+| **Branch activ** | `copilot/github-native-android-apk` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în sesiunile anterioare (context auth/reset + database-migration-audit + oauth-optional):
@@ -125,6 +125,32 @@
   - `pnpm build` ✅
   - `pnpm check` ❌ — erori preexistente, nelegate de acest fix, în `app/order/[id].tsx` și `server/operations-router.ts`
 
+### Sesiune curentă (GitHub-native Android APK workflow fără EAS Build) — 2026-07-13:
+- **Context / de ce a fost adăugat:** EAS Build nu mai poate produce APK Android în această lună pe Free plan (quota Android epuizată), dar este încă necesar un APK instalabil care să includă fixurile deja merged în `main` (inclusiv PR #33).
+- **Audit confirmat:**
+  - repository-ul NU conține un director `android/` comis;
+  - `.gitignore` ignoră explicit `/android` și `/ios`;
+  - `app.config.ts` citește `EXPO_PUBLIC_API_BASE_URL` din environment, iar sursa canonică GitHub rămâne `vars.EXPO_PUBLIC_API_BASE_URL`.
+- **Soluție implementată pe branch:** workflow nou `.github/workflows/build-android-apk-github.yml`
+  - rulează **doar manual** prin `workflow_dispatch`;
+  - face checkout la commitul selectat în workflow;
+  - validează `EXPO_PUBLIC_API_BASE_URL` (prezent, HTTPS, non-localhost);
+  - rezolvă config-ul Expo;
+  - dacă `android/` lipsește, rulează `npx expo prebuild --platform android --clean --non-interactive`;
+  - instalează JDK 17 + Android SDK;
+  - rulează Gradle direct (`./gradlew assembleDebug`);
+  - localizează APK-ul dinamic, îl redenumește clar și îl publică drept artifact GitHub Actions.
+- **Cum se trigger-uiește după merge:**
+  1. GitHub → Actions
+  2. workflow `GitHub Build — Android APK (development/debug)`
+  3. `Run workflow`
+  4. branch `main`
+- **De unde se descarcă APK-ul:** din pagina run-ului GitHub Actions, secțiunea **Artifacts**; artifact-ul conține APK-ul debug redenumit clar.
+- **Diferență față de EAS builds:**
+  - workflow-ul GitHub-native produce un **debug APK** direct cu Gradle și îl atașează ca artifact GitHub;
+  - EAS Build rămâne neschimbat ca alternativă pentru fluxul managed Expo/EAS și credențiale remote;
+  - workflow-ul GitHub-native nu face OTA update și nu folosește quota EAS Build.
+
 ### Acțiune Railway obligatorie (manual, fără modificare cod):
 ```
 Railway Dashboard → dropi-mobile service → Variables → Add Variable:
@@ -159,7 +185,7 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 - **Fix mobile verify-email / resend auth transport (`Missing session cookie`)** — branch `copilot/fix-missing-session-cookie`
 
 ### 🔄 În progres
-- Branch curent: `copilot/fix-missing-session-cookie` — necesită PR + merge + validare real-device pe telefon pentru verify email / resend verification.
+- Branch curent: `copilot/github-native-android-apk` — necesită PR focusat + merge, apoi trigger manual pe `main` pentru generarea artifact-ului APK.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -172,24 +198,22 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 - Este încă necesară confirmarea din Railway că variabilele SMTP sunt setate pe serviciul de producție (doar nume, fără valori).
 - Este încă necesară verificarea real-device după deploy că reset-password returnează eroare reală când providerul nu poate trimite și succes doar când emailul este livrat.
 - `pnpm check` rămâne blocat de erori TypeScript preexistente, nelegate de acest RCA, în `app/order/[id].tsx` și `server/operations-router.ts`.
+- Workflow-ul GitHub-native pentru APK nu poate produce încă artifact real din `main` până când PR-ul care îl introduce nu este merge-uit.
 
 ---
 
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Deschide și merge-uiește PR-ul din branch-ul `copilot/fix-missing-session-cookie`.
-2. După deploy, testează pe telefon fluxul real:
-   - login email/parolă;
-   - `Verify Email`;
-   - `Resend Verification`;
-   - confirmă că nu mai apare `Please login (10001)` și că Railway nu mai loghează `[Auth] Missing session cookie` pentru aceste request-uri.
-3. **OBLIGATORIU — înainte de testul pe telefon pentru forgot-password:** adaugă în Railway Dashboard → `dropi-mobile` service → Variables:
-   - `SMTP_USER` = adresa Gmail care a generat `GMAIL_APP_PASSWORD`
-   (fără aceasta, emailul de recuperare rămâne blocat)
-4. Testează separat `Forgot Password`; fluxul este public și nu face parte din bugul `Missing session cookie`.
-5. Dacă login/verify eșuează în continuare → verifică Railway logs pentru erori noi.
-6. Dacă emailul de reset nu ajunge → verifică Railway logs pentru `[SMTP]` entries; mesajele de eroare acum arată exact ce lipsește.
+1. Deschide și merge-uiește PR-ul din branch-ul `copilot/github-native-android-apk`.
+2. După merge, GitHub → Actions → rulează manual workflow-ul `GitHub Build — Android APK (development/debug)` pe branch `main`.
+3. Confirmă în logs:
+   - SHA-ul `main` folosit pentru build;
+   - `Expo app version`;
+   - `Android versionCode`;
+   - `Resolved API base URL = https://dropi-mobile-production.up.railway.app`.
+4. La finalul run-ului, descarcă artifact-ul din secțiunea **Artifacts** și instalează APK-ul debug pe telefon.
+5. Păstrează workflow-ul EAS existent ca alternativă pentru momentul când quota EAS se resetează sau când este necesar build-ul managed prin Expo.
 
 ---
 
@@ -204,7 +228,7 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 | 2026-07-07 | Backend pe Railway, mobile updates prin EAS Updates (OTA), auto-deploy prin GitHub Actions | Workflow 100% cloud, fără dependență de computerul fondatorului | Fondator + Copilot Agent |
 | 2026-07-07 | EAS OTA se publică DOAR din branch `main` | Evită update-uri OTA din branch-uri WIP/agent | Copilot Agent |
 | 2026-07-07 | `EAS_PROJECT_ID` ca GitHub Actions Variable (nu hardcodat) | Setup fără editare manuală a codului | Copilot Agent |
-| 2026-07-07 | APK build automat la fiecare push pe `main` via `eas-build-android.yml` | Fondatorul nu mai are nevoie de terminal local pentru build | Copilot Agent |
+| 2026-07-07 | APK-urile Android se construiesc doar prin workflow-uri manuale (`workflow_dispatch`) pentru a controla quota/costul și momentul build-ului | Fondatorul nu mai are nevoie de terminal local pentru build, dar rularea rămâne explicită pentru a evita consumul inutil de resurse EAS/GitHub | Copilot Agent |
 | 2026-07-10 | Cheia `update` NU aparține în `eas.json` — aparține în `app.config.ts` sub `expo.updates` | EAS CLI respinge `eas.json` cu cheie `update` la top-level | Copilot Agent |
 | 2026-07-10 | `slug` în `app.config.ts` trebuie să fie `"dropiexpodev"` (nu `"dropi-mobile"`) ca să se alinieze cu proiectul EAS înregistrat pe expo.dev | EAS CLI respinge `eas update` dacă slug-ul din config nu se potrivește cu slug-ul proiectului EAS | Copilot Agent |
 | 2026-07-11 | Testul SMTP trebuie să fie rezilient la lipsa credentialelor locale (skip controlat, nu fail global) | Evităm blocarea suitei locale/CI când secretul de email nu e setat pe toate mediile | Copilot Agent |
@@ -216,6 +240,7 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 | 2026-07-12 | Reset-password trebuie să eșueze explicit dacă emailul nu poate fi livrat, iar codurile de reset nu se loghează niciodată în clar | Evităm false-positive în UI și expunerea secretelor temporare în log-uri | Copilot Agent |
 | 2026-07-12 | `eas-build-android.yml` se declanșează EXCLUSIV prin `workflow_dispatch`, NU la push pe `main` | Cota EAS Free plan este limitată (10 build-uri/lună); un build automat la fiecare commit o epuiza rapid; APK-ul se construiește doar când este explicit solicitat | Copilot Agent |
 | 2026-07-12 | Nu se falsifică succesul CI: dacă `eas build` eșuează (indiferent de motiv), CI raportează FAILURE | Un workflow verde trebuie să implice că un APK real a fost produs; exit-0 la quota epuizată ar minți statusul build-ului | Copilot Agent |
+| 2026-07-13 | Când quota EAS Build este epuizată, APK-ul Android debug se construiește printr-un workflow GitHub separat care rulează Expo prebuild + Gradle local pe runner, fără a modifica workflow-urile EAS existente | Permite livrarea unui APK instalabil direct din GitHub Actions chiar și fără EAS Build, păstrând `vars.EXPO_PUBLIC_API_BASE_URL` ca sursă unică de adevăr și fără a falsifica succesul build-urilor EAS | Copilot Agent |
 | 2026-07-12 | Migrația `0013_agent_orchestrator.sql` trebuie însoțită de `drizzle/meta/0013_snapshot.json`; orice migrație manuală care nu generează automat snapshot-ul drizzle trebuie să îl creeze explicit | Fără snapshot, `drizzle-kit generate` viitor ignoră tabelele noi și generează migrații duplicat | Copilot Agent |
 | 2026-07-12 | Mecanismul de migrare în producție folosește `drizzle-orm/mysql2/migrator` (API programmatic) compilat cu esbuild, NU `drizzle-kit migrate` CLI — devDependencies pot fi absente în runtime Railway | `drizzle-kit` este devDep; `drizzle-orm` este dep de producție; Railway poate prune devDeps după build | Copilot Agent |
 | 2026-07-12 | `railway.toml` startCommand = `node dist/migrate.mjs && node dist/validate-db.mjs && pnpm start` — migrațiile și validarea rulează înainte de pornirea serverului și blochează startup-ul dacă eșuează | Orice alt ordin (build-time migrate) este mai fragil: build-cache poate sări peste migrate; start-time garantează că DB e gata înainte ca serverul să accepte request-uri | Copilot Agent |
