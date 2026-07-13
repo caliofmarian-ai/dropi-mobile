@@ -26,7 +26,7 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-13 |
-| **Branch activ** | `copilot/read-only-verification` |
+| **Branch activ** | `copilot/fix-missing-session-cookie` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în sesiunile anterioare (context auth/reset + database-migration-audit + oauth-optional):
@@ -99,6 +99,32 @@
 - Toate fixurile din PR #32 au fost păstrate împreună cu schimbările deja merged în `main`, inclusiv PR #30 și PR #31.
 - Validările finale se rulează după rezolvarea conflictului; rezultatul va fi reflectat în commitul acestei sesiuni.
 
+### Sesiune curentă (RCA missing session cookie pe verify email / resend verification) — 2026-07-13:
+- **RCA PROVEN:** blocantul nu era în backend auth logic și nici în forgot-password; era un mismatch de transport/token store pe clientul mobil.
+- **Fluxul bun (mobile auth normal):**
+  - login/register email-parolă creează JWT-ul de sesiune în `server/auth-router.ts`;
+  - mobile îl salvează în `AsyncStorage` și îl bridge-uiește în store-ul canonic `SecureStore` prin `Auth.setSessionToken(...)` în `lib/auth-context.tsx`;
+  - endpoint-urile mobile obișnuite folosesc clientul tRPC din `lib/trpc.ts`, care citește token-ul din `SecureStore` prin `lib/_core/trpc-auth.ts` și îl trimite în header-ul `Authorization` cu JWT-ul Bearer.
+- **Fluxul defect (verify email / resend):**
+  - `app/verify-email.tsx` NU folosea clientul tRPC canonic;
+  - ecranul făcea `fetch` manual și citea separat `@dropi_token` din `AsyncStorage`;
+  - dacă acea copie lipsea / nu era store-ul suportat de fluxul mobil curent, request-ul pleca fără `Authorization`, iar pe native nici cookie-ul de sesiune nu exista;
+  - backend-ul în `server/_core/sdk.ts` încearcă `Authorization` întâi și cookie-ul `app_session_id` doar ca fallback; fără ambele, loghează `[Auth] Missing session cookie`, apoi `protectedProcedure` returnează `Please login (10001)`.
+- **De ce forgot-password este nerelevant:** `dropiAuth.forgotPassword` rămâne `publicProcedure` în `server/auth-router.ts`, deci nu folosește `sdk.authenticateRequest` și nu depinde de cookie/token de sesiune.
+- **Fix aplicat:**
+  - `app/verify-email.tsx` a fost mutat pe mutațiile tRPC canonice `trpc.dropiAuth.verifyEmail.useMutation()` și `trpc.dropiAuth.resendVerificationCode.useMutation()`;
+  - `lib/trpc.ts` folosește helper-ul partajat `lib/_core/trpc-auth.ts`, astfel verify/resend trimit exact același JWT transport ca endpoint-urile mobile autentificate care funcționează deja.
+- **Teste noi:**
+  - `tests/auth.verify-email.test.ts` — user autentificat poate verifica emailul și poate cere resend; user neautentificat este respins cu `Please login (10001)`;
+  - `tests/sdk.authenticate-request.test.ts` — dovedește că backend-ul acceptă JWT-ul mobil din `Authorization` fără cookie și că lipsa ambelor produce exact logica `Missing session cookie` / `Invalid session cookie`;
+  - `tests/trpc.auth-headers.test.ts` — dovedește că transportul mobil canonic citește token-ul din store-ul suportat și construiește header-ul `Authorization`.
+- **Validări sesiune:**
+  - `pnpm install --frozen-lockfile` ✅
+  - `pnpm test` ✅ — 24 passed, 2 skipped
+  - `pnpm lint` ✅ — 0 errors, 69 warnings preexistente
+  - `pnpm build` ✅
+  - `pnpm check` ❌ — erori preexistente, nelegate de acest fix, în `app/order/[id].tsx` și `server/operations-router.ts`
+
 ### Acțiune Railway obligatorie (manual, fără modificare cod):
 ```
 Railway Dashboard → dropi-mobile service → Variables → Add Variable:
@@ -130,9 +156,10 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 - Audit migrații drizzle + creare snapshot 0013 lipsă + mecanism migrare Railway (PR #30 merged) ✅
 - Fix OAUTH_SERVER_URL opțional — eliminat misleading ERROR log de la startup ✅ (PR #31 merged)
 - **Fix login `crypto is not defined` + Gmail `SMTP_USER` missing** — branch `copilot/read-only-verification` (PR #32, conflict resolved, necesită merge)
+- **Fix mobile verify-email / resend auth transport (`Missing session cookie`)** — branch `copilot/fix-missing-session-cookie`
 
 ### 🔄 În progres
-- Branch curent: `copilot/read-only-verification` — rezolvare conflict PR #32; necesită push + merge + acțiune Railway manuală.
+- Branch curent: `copilot/fix-missing-session-cookie` — necesită PR + merge + validare real-device pe telefon pentru verify email / resend verification.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -144,22 +171,25 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 - **SMTP_USER lipsă în Railway** — fără această variabilă emailul de recuperare nu funcționează. Setare manuală obligatorie (detalii la Pasul Următor).
 - Este încă necesară confirmarea din Railway că variabilele SMTP sunt setate pe serviciul de producție (doar nume, fără valori).
 - Este încă necesară verificarea real-device după deploy că reset-password returnează eroare reală când providerul nu poate trimite și succes doar când emailul este livrat.
+- `pnpm check` rămâne blocat de erori TypeScript preexistente, nelegate de acest RCA, în `app/order/[id].tsx` și `server/operations-router.ts`.
 
 ---
 
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Finalizează push-ul branch-ului `copilot/read-only-verification` cu commitul de conflict resolution pentru PR #32.
-2. Railway va redeploya automat după merge.
-3. **OBLIGATORIU — înainte de testul pe telefon:** adaugă în Railway Dashboard → `dropi-mobile` service → Variables:
+1. Deschide și merge-uiește PR-ul din branch-ul `copilot/fix-missing-session-cookie`.
+2. După deploy, testează pe telefon fluxul real:
+   - login email/parolă;
+   - `Verify Email`;
+   - `Resend Verification`;
+   - confirmă că nu mai apare `Please login (10001)` și că Railway nu mai loghează `[Auth] Missing session cookie` pentru aceste request-uri.
+3. **OBLIGATORIU — înainte de testul pe telefon pentru forgot-password:** adaugă în Railway Dashboard → `dropi-mobile` service → Variables:
    - `SMTP_USER` = adresa Gmail care a generat `GMAIL_APP_PASSWORD`
    (fără aceasta, emailul de recuperare rămâne blocat)
-4. Testează pe telefon (cu contul deja creat în producție):
-   - **Login** → trebuie să reușească (fără `crypto is not defined`)
-   - **Forgot Password** → emailul de reset trebuie să ajungă
-5. Dacă login eșuează în continuare → verifică Railway logs pentru erori noi.
-6. Dacă emailul nu ajunge → verifică Railway logs pentru `[SMTP]` entries; mesajele de eroare acum arată exact ce lipsește.
+4. Testează separat `Forgot Password`; fluxul este public și nu face parte din bugul `Missing session cookie`.
+5. Dacă login/verify eșuează în continuare → verifică Railway logs pentru erori noi.
+6. Dacă emailul de reset nu ajunge → verifică Railway logs pentru `[SMTP]` entries; mesajele de eroare acum arată exact ce lipsește.
 
 ---
 
@@ -268,9 +298,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.20.0**
+Acest document: **v1.21.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-13
-Actualizat de: GitHub Copilot Coding Agent — Merge conflict resolution pentru PR #32: integrat schimbările deja merged în `main` (PR #30 și PR #31) cu fixurile auth/crypto/email din branch-ul `copilot/read-only-verification`; versiune incrementată la v1.20.0.
+Actualizat de: GitHub Copilot Coding Agent — RCA + fix pentru `Missing session cookie` pe `Verify Email` / `Resend Verification`; fluxul mobil a fost aliniat la transportul JWT canonic prin tRPC; versiune incrementată la v1.21.0.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
