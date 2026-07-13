@@ -99,6 +99,58 @@
 - Toate fixurile din PR #32 au fost păstrate împreună cu schimbările deja merged în `main`, inclusiv PR #30 și PR #31.
 - Validările finale se rulează după rezolvarea conflictului; rezultatul va fi reflectat în commitul acestei sesiuni.
 
+### Sesiune curentă (RCA SMTP IPv6 ENETUNREACH + JWT empty-appId auth) — 2026-07-13:
+
+**ROOT CAUSES PROVEN (din Railway production logs post-PR #33):**
+
+**A. SMTP / Password Reset — `connect ENETUNREACH 2a00:1450:4025:401::6d:465`**
+- Nodemailer 9.x cu `service: "gmail"` face `dns.resolve4` + `dns.resolve6` intern și alege o adresă **random** (`Math.floor(Math.random() * addresses.length)` în `lib/shared/index.js`).
+- Railway are conectivitate IPv6 outbound instabilă → când Nodemailer alege IPv6, se produce ENETUNREACH.
+- **Fix:** Pre-resolve `smtp.gmail.com` via `dns.resolve4` (numai IPv4) înainte de crearea transporterului; când `host` este deja o adresă IP, `net.isIP(host)` returnează non-zero și Nodemailer sare complet peste DNS intern. Adăugat `tls: { servername: "smtp.gmail.com" }` pentru SNI (altfel TLS ar verifica cert față de IP literal). Adăugat `connectionTimeout/greetingTimeout/socketTimeout` (10s/10s/15s) pentru ambele transporturi.
+
+**B. Verify Email — `[Auth] Session payload missing required fields` → `Please login (10001)`**
+- `ENV.appId = process.env.VITE_APP_ID ?? ""` — `VITE_APP_ID` este o variabilă Vite/Expo build-time, nu o variabilă Railway; pe Railway producție `appId = ""`.
+- Vechea `verifySession` cerea `isNonEmptyString(appId)` → false cu `""` → token respins → toate request-urile autentificate eșuau.
+- Similar, `name: user.name || ""` produce string gol pentru user fără name.
+- **Fix:** `verifySession` acum cere doar `openId` non-empty; `appId`/`name` se acceptă ca string gol; validarea HMAC a semnăturii JWT garantează autenticitatea tokenului — claims suplimentare nu adaugă securitate.
+
+**Fișiere modificate:**
+- `server/_core/mail.ts`: `resolveIPv4Host()` export nou, transport Gmail explicit cu host/port/secure/tls + timeouts
+- `server/_core/sdk.ts`: `verifySession` relaxed — doar `openId` obligatoriu
+- `tests/smtp.test.ts`: 11 teste noi (IPv4 forcing, ENETUNREACH, timeout, no-credentials-logged, transport options)
+- `tests/sdk.authenticate-request.test.ts`: 5 teste noi (empty appId, empty name, both empty, empty openId rejected, missing cookie)
+
+**Validări:**
+- `pnpm test` ✅ — 40 passed, 2 skipped (credentiale live)
+- `pnpm build` ✅
+- `pnpm lint` ✅ — 0 errors, 69 warnings preexistente
+- secret scan ✅ — fără secrete introduse
+- CodeQL ✅ — 0 alerts
+
+### Sesiune curentă (Security Audit PR #36 — JWT/SMTP) — 2026-07-13:
+
+**AUDIT COMPLET PR #36 — REZULTAT: PASS, MERGE RECOMANDAT**
+
+**Scopul auditului:** Verificare securitate și corectitudine înainte de merge PR #36 (fix SMTP ENETUNREACH + JWT verifySession empty-appId).
+
+**Concluzia JWT:**
+- `appId` este **OPTION B**: câmp legacy Manus/OAuth, NU o granița de securitate pentru autentificarea email/parolă DROPi. `VITE_APP_ID` este o variabilă Vite build-time; nu există în Railway runtime → `appId = ""` permanent. HMAC-SHA256 (JWT_SECRET) este singura frontieră de securitate reală. Relaxarea validării `appId`/`name` nu slăbește autentificarea cu niciun bit.
+- JWT integrity enforced: semnătură HMAC-SHA256, expirationTime (exp), algorithm enforcement (HS256 only). Wrong-secret, expired, malformed → toate respinse prin `jwtVerify`.
+- Fix canonic: `verifySession` cere doar `openId` non-empty (cheia de lookup user în DB). Restul claimurilor JWT sunt informaționale.
+
+**Teste lipsă identificate și adăugate:**
+- `tests/sdk.authenticate-request.test.ts` — 3 teste noi de invarianți de securitate JWT:
+  1. Wrong secret → verifySession returnează null (HMAC integrity enforced)
+  2. Expired token → verifySession returnează null (exp claim enforced)
+  3. Malformed token → verifySession returnează null
+
+**Validări finale:**
+- `pnpm test` ✅ — 43 passed, 2 skipped (3 teste noi adăugate)
+- `pnpm lint` ✅ — 0 errors, 69 warnings preexistente
+- `pnpm build` ✅
+- secret scan ✅ — fără secrete introduse
+- CodeQL ✅ — trivial change (test-only)
+
 ### Sesiune curentă (RCA missing session cookie pe verify email / resend verification) — 2026-07-13:
 - **RCA PROVEN:** blocantul nu era în backend auth logic și nici în forgot-password; era un mismatch de transport/token store pe clientul mobil.
 - **Fluxul bun (mobile auth normal):**
@@ -156,10 +208,11 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 - Audit migrații drizzle + creare snapshot 0013 lipsă + mecanism migrare Railway (PR #30 merged) ✅
 - Fix OAUTH_SERVER_URL opțional — eliminat misleading ERROR log de la startup ✅ (PR #31 merged)
 - **Fix login `crypto is not defined` + Gmail `SMTP_USER` missing** — branch `copilot/read-only-verification` (PR #32, conflict resolved, necesită merge)
-- **Fix mobile verify-email / resend auth transport (`Missing session cookie`)** — branch `copilot/fix-missing-session-cookie`
+- **Fix mobile verify-email / resend auth transport (`Missing session cookie`)** — branch `copilot/fix-missing-session-cookie` (PR #33, merged) ✅
+- **Fix SMTP IPv6 ENETUNREACH + JWT empty-appId auth** — branch curent, PR în curs
 
 ### 🔄 În progres
-- Branch curent: `copilot/fix-missing-session-cookie` — necesită PR + merge + validare real-device pe telefon pentru verify email / resend verification.
+- Branch curent: `copilot/fix-smtp-ipv6-jwt-appid` — PR deschis, necesită merge + deploy Railway + validare real-device pentru password reset și verify email.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -168,28 +221,24 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
-- **SMTP_USER lipsă în Railway** — fără această variabilă emailul de recuperare nu funcționează. Setare manuală obligatorie (detalii la Pasul Următor).
-- Este încă necesară confirmarea din Railway că variabilele SMTP sunt setate pe serviciul de producție (doar nume, fără valori).
-- Este încă necesară verificarea real-device după deploy că reset-password returnează eroare reală când providerul nu poate trimite și succes doar când emailul este livrat.
-- `pnpm check` rămâne blocat de erori TypeScript preexistente, nelegate de acest RCA, în `app/order/[id].tsx` și `server/operations-router.ts`.
+- **SMTP_USER lipsă în Railway** — fără această variabilă, emailul de recuperare nu funcționează. Setare manuală obligatorie (detalii la Pasul Următor).
+- `pnpm check` rămâne blocat de erori TypeScript preexistente, nelegate de aceste fix-uri, în `app/order/[id].tsx` și `server/operations-router.ts`.
 
 ---
 
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Deschide și merge-uiește PR-ul din branch-ul `copilot/fix-missing-session-cookie`.
-2. După deploy, testează pe telefon fluxul real:
-   - login email/parolă;
-   - `Verify Email`;
-   - `Resend Verification`;
-   - confirmă că nu mai apare `Please login (10001)` și că Railway nu mai loghează `[Auth] Missing session cookie` pentru aceste request-uri.
+1. Merge PR-ul din branch-ul curent (`copilot/fix-smtp-ipv6-jwt-appid`) în `main`.
+2. Railway auto-deploy — verifică Railway logs că deploy-ul pornește fără erori.
 3. **OBLIGATORIU — înainte de testul pe telefon pentru forgot-password:** adaugă în Railway Dashboard → `dropi-mobile` service → Variables:
    - `SMTP_USER` = adresa Gmail care a generat `GMAIL_APP_PASSWORD`
    (fără aceasta, emailul de recuperare rămâne blocat)
-4. Testează separat `Forgot Password`; fluxul este public și nu face parte din bugul `Missing session cookie`.
-5. Dacă login/verify eșuează în continuare → verifică Railway logs pentru erori noi.
-6. Dacă emailul de reset nu ajunge → verifică Railway logs pentru `[SMTP]` entries; mesajele de eroare acum arată exact ce lipsește.
+4. Testează pe telefon fluxul real:
+   - `Forgot Password` → verifică că emailul de reset sosește (nu mai apare `connect ENETUNREACH`);
+   - login email/parolă → `Verify Email` → confirmă că nu mai apare `Please login (10001)` (JWT empty-appId fix).
+5. Dacă emailul de reset nu sosește → verifică Railway logs pentru `[SMTP]` entries cu noua configurație.
+6. Dacă verify email eșuează în continuare → verifică că PR #33 este merged și că build-ul APK include ultimul commit.
 
 ---
 
@@ -222,6 +271,9 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 | 2026-07-12 | `OAUTH_SERVER_URL` este OPȚIONAL în Railway production — OAuth Manus este infrastructură legacy; DROPi folosește email/parolă proprie | La startup, SDK-ul logga `console.error` misleading chiar dacă OAuth nu era niciodată apelat în producție; fixat la `console.warn` cu mesaj clar | Copilot Agent |
 | 2026-07-12 | `jose` v6 necesită `globalThis.crypto` (Web Crypto API). Pe Node.js < 19, `crypto` nu este expus ca identificator global în ESM fără flag. Polyfill-ul `globalThis.crypto = webcrypto` în `server/_core/index.ts` rezolvă definitiv. | Login producea `ReferenceError: crypto is not defined` la Railway (Node.js 18 LTS) | Copilot Agent |
 | 2026-07-12 | Gmail App Password necesită `SMTP_USER` explicit (adresa Gmail care l-a generat). Nicio valoare default nu poate fi hardcodată în cod — fiecare App Password este legat de un cont specific. | Fallback hardcodat `dropi.deliveries@gmail.com` cauza eșec silențios dacă adresa reală era diferită | Copilot Agent |
+| 2026-07-13 | Gmail SMTP pe Railway se configurează cu `host/port/secure` explicit + IPv4 pre-resolut (nu `service: "gmail"`) pentru a evita ENETUNREACH pe IPv6 | Nodemailer 9.x alege random IPv4/IPv6 cu `service: "gmail"`; Railway are IPv6 outbound instabil | Copilot Agent |
+| 2026-07-13 | `verifySession` cere doar `openId` non-empty; `appId`/`name` sunt opționale ca string gol | `VITE_APP_ID` nu este un env Railway → `appId = ""` → toate sesiunile JWT respinse; HMAC face claims suplimentare redundante pentru securitate | Copilot Agent |
+| 2026-07-13 | Teste de invarianți securitate JWT (wrong secret, expired, malformed) sunt obligatorii lângă orice schimbare a verifySession | Dovedesc că HMAC rămâne singura frontieră de securitate, indiferent de claims payload | Copilot Agent |
 | 2026-07-12 | Erorile Nodemailer se loghează DOAR ca `.message` (nu obiect complet) pentru a nu expune credențiale SMTP sau detalii de conexiune sensibile în log-urile Railway | Obiectul complet de eroare Nodemailer poate include `auth` details în unele versiuni | Copilot Agent |
 
 ---
@@ -298,9 +350,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.21.0**
+Acest document: **v1.22.0**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-07-13
-Actualizat de: GitHub Copilot Coding Agent — RCA + fix pentru `Missing session cookie` pe `Verify Email` / `Resend Verification`; fluxul mobil a fost aliniat la transportul JWT canonic prin tRPC; versiune incrementată la v1.21.0.
+Actualizat de: GitHub Copilot Coding Agent — RCA + fix SMTP IPv6 ENETUNREACH (Railway) + JWT empty-appId auth (`Please login 10001`); versiune incrementată la v1.22.0.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.

@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { resolve4 } from "node:dns/promises";
 
 type MailEnv = Readonly<Record<string, string | undefined>>;
 
@@ -78,6 +79,31 @@ export function resolveMailTransportConfig(
   return null;
 }
 
+/**
+ * Pre-resolve a hostname to its first IPv4 address.
+ *
+ * This prevents ENETUNREACH failures on Railway and similar cloud environments
+ * where outbound IPv6 connectivity is unreliable:
+ * - Nodemailer 9.x resolves both IPv4 and IPv6 addresses and randomly picks
+ *   one for the initial connection attempt.
+ * - When an IPv6 address is picked and the network has no IPv6 route to the
+ *   internet, the connection immediately fails with ENETUNREACH.
+ * - By passing a pre-resolved IPv4 address as `host`, net.isIP() returns 4,
+ *   Nodemailer skips its own DNS stage, and the connection goes to IPv4 only.
+ *
+ * Falls back to the original hostname when dns.resolve4 fails so that existing
+ * SMTP connectivity is never broken by a transient DNS hiccup.
+ */
+export async function resolveIPv4Host(hostname: string): Promise<string> {
+  try {
+    const addresses = await resolve4(hostname);
+    if (addresses.length > 0) return addresses[0];
+  } catch {
+    // resolve4 failed — fall back to hostname-based connection
+  }
+  return hostname;
+}
+
 export async function sendPlatformEmail(input: {
   to: string;
   subject: string;
@@ -90,6 +116,13 @@ export async function sendPlatformEmail(input: {
     return false;
   }
 
+  // Shared timeout options — prevent indefinite hangs on broken connections.
+  const timeoutOpts = {
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
+  };
+
   const transporter =
     config.mode === "smtp"
       ? nodemailer.createTransport({
@@ -100,13 +133,27 @@ export async function sendPlatformEmail(input: {
           user: config.user,
           pass: config.pass,
         },
+        ...timeoutOpts,
       })
       : nodemailer.createTransport({
-        service: "gmail",
+        // Explicit host/port/secure — do NOT use `service: "gmail"`.
+        // Railway (and many cloud platforms) have unreliable IPv6 outbound routing.
+        // Nodemailer's built-in DNS resolver randomly selects from IPv4 + IPv6
+        // addresses; when IPv6 is picked the connection fails with ENETUNREACH.
+        // We pre-resolve smtp.gmail.com to IPv4 via dns.resolve4() so that
+        // Nodemailer's internal resolver (net.isIP check) bypasses DNS entirely
+        // and connects directly to the IPv4 address.
+        // tls.servername is set so TLS SNI + certificate verification still use
+        // the official hostname, not the raw IP.
+        host: await resolveIPv4Host("smtp.gmail.com"),
+        port: 465,
+        secure: true,
+        tls: { servername: "smtp.gmail.com" },
         auth: {
           user: config.user,
           pass: config.pass,
         },
+        ...timeoutOpts,
       });
 
   try {
