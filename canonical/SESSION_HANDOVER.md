@@ -127,6 +127,30 @@
 - secret scan ✅ — fără secrete introduse
 - CodeQL ✅ — 0 alerts
 
+### Sesiune curentă (Security Audit PR #36 — JWT/SMTP) — 2026-07-13:
+
+**AUDIT COMPLET PR #36 — REZULTAT: PASS, MERGE RECOMANDAT**
+
+**Scopul auditului:** Verificare securitate și corectitudine înainte de merge PR #36 (fix SMTP ENETUNREACH + JWT verifySession empty-appId).
+
+**Concluzia JWT:**
+- `appId` este **OPTION B**: câmp legacy Manus/OAuth, NU o granița de securitate pentru autentificarea email/parolă DROPi. `VITE_APP_ID` este o variabilă Vite build-time; nu există în Railway runtime → `appId = ""` permanent. HMAC-SHA256 (JWT_SECRET) este singura frontieră de securitate reală. Relaxarea validării `appId`/`name` nu slăbește autentificarea cu niciun bit.
+- JWT integrity enforced: semnătură HMAC-SHA256, expirationTime (exp), algorithm enforcement (HS256 only). Wrong-secret, expired, malformed → toate respinse prin `jwtVerify`.
+- Fix canonic: `verifySession` cere doar `openId` non-empty (cheia de lookup user în DB). Restul claimurilor JWT sunt informaționale.
+
+**Teste lipsă identificate și adăugate:**
+- `tests/sdk.authenticate-request.test.ts` — 3 teste noi de invarianți de securitate JWT:
+  1. Wrong secret → verifySession returnează null (HMAC integrity enforced)
+  2. Expired token → verifySession returnează null (exp claim enforced)
+  3. Malformed token → verifySession returnează null
+
+**Validări finale:**
+- `pnpm test` ✅ — 43 passed, 2 skipped (3 teste noi adăugate)
+- `pnpm lint` ✅ — 0 errors, 69 warnings preexistente
+- `pnpm build` ✅
+- secret scan ✅ — fără secrete introduse
+- CodeQL ✅ — trivial change (test-only)
+
 ### Sesiune curentă (RCA missing session cookie pe verify email / resend verification) — 2026-07-13:
 - **RCA PROVEN:** blocantul nu era în backend auth logic și nici în forgot-password; era un mismatch de transport/token store pe clientul mobil.
 - **Fluxul bun (mobile auth normal):**
@@ -249,6 +273,7 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 | 2026-07-12 | Gmail App Password necesită `SMTP_USER` explicit (adresa Gmail care l-a generat). Nicio valoare default nu poate fi hardcodată în cod — fiecare App Password este legat de un cont specific. | Fallback hardcodat `dropi.deliveries@gmail.com` cauza eșec silențios dacă adresa reală era diferită | Copilot Agent |
 | 2026-07-13 | Gmail SMTP pe Railway se configurează cu `host/port/secure` explicit + IPv4 pre-resolut (nu `service: "gmail"`) pentru a evita ENETUNREACH pe IPv6 | Nodemailer 9.x alege random IPv4/IPv6 cu `service: "gmail"`; Railway are IPv6 outbound instabil | Copilot Agent |
 | 2026-07-13 | `verifySession` cere doar `openId` non-empty; `appId`/`name` sunt opționale ca string gol | `VITE_APP_ID` nu este un env Railway → `appId = ""` → toate sesiunile JWT respinse; HMAC face claims suplimentare redundante pentru securitate | Copilot Agent |
+| 2026-07-13 | Teste de invarianți securitate JWT (wrong secret, expired, malformed) sunt obligatorii lângă orice schimbare a verifySession | Dovedesc că HMAC rămâne singura frontieră de securitate, indiferent de claims payload | Copilot Agent |
 | 2026-07-12 | Erorile Nodemailer se loghează DOAR ca `.message` (nu obiect complet) pentru a nu expune credențiale SMTP sau detalii de conexiune sensibile în log-urile Railway | Obiectul complet de eroare Nodemailer poate include `auth` details în unele versiuni | Copilot Agent |
 
 ---
