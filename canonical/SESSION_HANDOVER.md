@@ -25,11 +25,15 @@
 | Câmp | Valoare |
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
-| **Data** | 2026-07-12 |
-| **Branch activ** | `copilot/copilotdatabase-migration-audit` |
+| **Data** | 2026-07-13 |
+| **Branch activ** | `copilot/read-only-verification` |
 | **Agent** | GitHub Copilot Coding Agent |
 
-### Ce s-a făcut în sesiunea curentă (OAUTH_SERVER_URL optional fix — PR #31):
+### Ce s-a făcut în sesiunile anterioare (context auth/reset + database-migration-audit + oauth-optional):
+- Rezumat complet în PR #28, PR #29, PR #30 și PR #31 (merged). Detalii în versiunile anterioare ale acestui document.
+- Stare produsă de PR #30 (merged): Railway backend Online, MySQL Online, migrații 0000–0013 aplicate, 26 tabele prezente.
+
+### Sesiune anterioară (OAUTH_SERVER_URL optional fix — PR #31 merged):
 
 **ROOT CAUSE identificat:** `server/_core/sdk.ts` instanțiaza `OAuthService` ca singleton la încărcarea modulului și logga `console.error` la startup când `OAUTH_SERVER_URL` era absent — chiar dacă autentificarea email/parolă a DROPi nu necesită niciodată OAuth.
 
@@ -70,17 +74,37 @@
 - Codul implementat de sesiunea anterioară verificat și confirmat complet.
 - Confirmat că cele 26 tabele din `drizzle/meta/0013_snapshot.json` corespund cu lista din `scripts/validate-db.ts`.
 
-### Arhitectura finală Railway deployment flow:
+### Sesiune anterioară (fix-auth-crypto-email / PR #32) — 2026-07-12:
+- **Diagnoza blocantelor producție verificate live:**
+  - Login eșuează cu `crypto is not defined` → `jose` v6 folosește bara `crypto` globală (Web Crypto API). Pe Node.js < 19 (inclusiv Railway cu Node.js 18 LTS), `crypto` nu este expus ca identificator global în modul ESM fără `--experimental-global-webcrypto`.
+  - Email de recuperare parolă nu ajunge → `mail.ts` folosea `"dropi.deliveries@gmail.com"` ca username Gmail implicit (hardcodat) când `SMTP_USER` nu era setat; fiecare Gmail App Password este legat de contul specific care l-a generat.
+
+- **Fix A — Login (`crypto is not defined`):**
+  - `server/_core/index.ts`: import `webcrypto` din `node:crypto`; polyfill `globalThis.crypto = webcrypto` dacă nu este definit — rulează sincron la inițializarea server-ului, înainte de orice request handler.
+  - `server/storage.ts`: înlocuit `crypto.randomUUID()` global cu `import { randomUUID } from "node:crypto"` explicit.
+
+- **Fix B — Email de recuperare (Gmail):**
+  - `server/_core/mail.ts`: eliminat fallback hardcodat `"dropi.deliveries@gmail.com"` pentru `SMTP_USER`.
+  - Când `GMAIL_APP_PASSWORD` este setat dar `SMTP_USER` lipsește → log `[SMTP]` error cu instrucțiunile exacte pentru Railway (ce variabilă să adauge), returnează `null` (transport neconfigurat).
+  - Erori Nodemailer: logate DOAR mesajul (`.message`), nu obiectul complet care poate conține credențiale SMTP.
+
+- **Teste noi:**
+  - `tests/auth.login-session.test.ts` (nou): 3 teste jose WebCrypto — creeare/verificare JWT, respingere semn greșit. Prove că nu se aruncă `ReferenceError: crypto is not defined`.
+  - `tests/auth.forgot-password.test.ts`: adăugat test care verifică că codul de reset (6 cifre) nu apare în niciun canal de logging.
+  - `tests/mail-config.test.ts`: actualizat — noul test verifică că `GMAIL_APP_PASSWORD` fără `SMTP_USER` returnează `null` și loghează eroarea.
+
+### Sesiune curentă (merge conflict resolution pentru PR #32) — 2026-07-13:
+- `origin/main` a fost integrat în branch-ul `copilot/read-only-verification`.
+- Singurul conflict real a fost în `canonical/SESSION_HANDOVER.md`.
+- Toate fixurile din PR #32 au fost păstrate împreună cu schimbările deja merged în `main`, inclusiv PR #30 și PR #31.
+- Validările finale se rulează după rezolvarea conflictului; rezultatul va fi reflectat în commitul acestei sesiuni.
+
+### Acțiune Railway obligatorie (manual, fără modificare cod):
 ```
-Railway deploy trigger (push to main)
-  └─ buildCommand: pnpm install --frozen-lockfile && pnpm build
-       └─ dist/index.mjs, dist/migrate.mjs, dist/validate-db.mjs produse
-  └─ startCommand:
-       1. node dist/migrate.mjs          ← aplică migrații 0000–0013 (idempotent via __drizzle_migrations)
-       2. node dist/validate-db.mjs      ← verifică 26 tabele + 14 intrări history + users count
-       3. pnpm start                     ← NODE_ENV=production node dist/index.mjs
-       (oricare eșec în 1 sau 2 opreste startup-ul; Railway nu va deveni healthy)
+Railway Dashboard → dropi-mobile service → Variables → Add Variable:
+  SMTP_USER = <adresa Gmail care a generat GMAIL_APP_PASSWORD>
 ```
+Fără această variabilă, emailul de recuperare rămâne blocant chiar și după deploy.
 
 ### Ce s-a făcut în sesiunile anterioare pe branch `copilot/fix-eas-quota-ci-failure` (PR #29 merged — context auth/reset):
 - Audit complet auth/reset după testul real-device post-PR #27.
@@ -103,12 +127,12 @@ Railway deploy trigger (push to main)
 - Ghid setup mobile-first: `docs/MOBILE_FIRST_SETUP.md`
 - Fix auth/reset password backend (PR #28 merged) ✅
 - Fix EAS build trigger / quota workflow (PR #29 merged) ✅
-- Audit migrații drizzle + creare snapshot 0013 lipsă ✅
-- **Mecanism producție migrare Railway** — `scripts/migrate.ts` + `scripts/validate-db.ts` + `railway.toml` startCommand actualizat ✅ (PR #30 merged)
-- **Fix OAUTH_SERVER_URL opțional** — eliminat misleading ERROR log de la startup ✅ (PR #31 în review)
+- Audit migrații drizzle + creare snapshot 0013 lipsă + mecanism migrare Railway (PR #30 merged) ✅
+- Fix OAUTH_SERVER_URL opțional — eliminat misleading ERROR log de la startup ✅ (PR #31 merged)
+- **Fix login `crypto is not defined` + Gmail `SMTP_USER` missing** — branch `copilot/read-only-verification` (PR #32, conflict resolved, necesită merge)
 
 ### 🔄 În progres
-- PR #31: fix OAUTH_SERVER_URL opțional — necesită merge.
+- Branch curent: `copilot/read-only-verification` — rezolvare conflict PR #32; necesită push + merge + acțiune Railway manuală.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -117,6 +141,7 @@ Railway deploy trigger (push to main)
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
+- **SMTP_USER lipsă în Railway** — fără această variabilă emailul de recuperare nu funcționează. Setare manuală obligatorie (detalii la Pasul Următor).
 - Este încă necesară confirmarea din Railway că variabilele SMTP sunt setate pe serviciul de producție (doar nume, fără valori).
 - Este încă necesară verificarea real-device după deploy că reset-password returnează eroare reală când providerul nu poate trimite și succes doar când emailul este livrat.
 
@@ -125,16 +150,16 @@ Railway deploy trigger (push to main)
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Merguiește PR-ul #31 cu fixul OAUTH_SERVER_URL optional astfel încât Railway să redeployeze backend-ul.
-2. Verifică în Railway logs că mesajul `[OAuth] ERROR:` a dispărut și a fost înlocuit cu `[OAuth] OAUTH_SERVER_URL is not configured —` (warn).
-3. Verifică că autentificarea email/parolă funcționează în continuare pe telefon (login, register, forgot-password).
-4. Dacă dorești login extern Manus OAuth în viitor, setează `OAUTH_SERVER_URL` în Railway ca variabilă de mediu.
-
-**Pași backlog (SMTP/email):**
-1. În Railway, verifică **după nume** existența variabilelor SMTP relevante (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `GMAIL_APP_PASSWORD`) fără a expune valorile.
-2. Repetă pe telefon: login + reset password.
-3. Confirmă unul din comportamentele corecte: emailul ajunge, sau aplicația returnează eroare reală de livrare.
-4. Dacă login încă eșuează, verifică în DB/loguri dacă emailul există efectiv în producție; demo accounts nu sunt seed-uite automat.
+1. Finalizează push-ul branch-ului `copilot/read-only-verification` cu commitul de conflict resolution pentru PR #32.
+2. Railway va redeploya automat după merge.
+3. **OBLIGATORIU — înainte de testul pe telefon:** adaugă în Railway Dashboard → `dropi-mobile` service → Variables:
+   - `SMTP_USER` = adresa Gmail care a generat `GMAIL_APP_PASSWORD`
+   (fără aceasta, emailul de recuperare rămâne blocat)
+4. Testează pe telefon (cu contul deja creat în producție):
+   - **Login** → trebuie să reușească (fără `crypto is not defined`)
+   - **Forgot Password** → emailul de reset trebuie să ajungă
+5. Dacă login eșuează în continuare → verifică Railway logs pentru erori noi.
+6. Dacă emailul nu ajunge → verifică Railway logs pentru `[SMTP]` entries; mesajele de eroare acum arată exact ce lipsește.
 
 ---
 
@@ -165,6 +190,9 @@ Railway deploy trigger (push to main)
 | 2026-07-12 | Mecanismul de migrare în producție folosește `drizzle-orm/mysql2/migrator` (API programmatic) compilat cu esbuild, NU `drizzle-kit migrate` CLI — devDependencies pot fi absente în runtime Railway | `drizzle-kit` este devDep; `drizzle-orm` este dep de producție; Railway poate prune devDeps după build | Copilot Agent |
 | 2026-07-12 | `railway.toml` startCommand = `node dist/migrate.mjs && node dist/validate-db.mjs && pnpm start` — migrațiile și validarea rulează înainte de pornirea serverului și blochează startup-ul dacă eșuează | Orice alt ordin (build-time migrate) este mai fragil: build-cache poate sări peste migrate; start-time garantează că DB e gata înainte ca serverul să accepte request-uri | Copilot Agent |
 | 2026-07-12 | `OAUTH_SERVER_URL` este OPȚIONAL în Railway production — OAuth Manus este infrastructură legacy; DROPi folosește email/parolă proprie | La startup, SDK-ul logga `console.error` misleading chiar dacă OAuth nu era niciodată apelat în producție; fixat la `console.warn` cu mesaj clar | Copilot Agent |
+| 2026-07-12 | `jose` v6 necesită `globalThis.crypto` (Web Crypto API). Pe Node.js < 19, `crypto` nu este expus ca identificator global în ESM fără flag. Polyfill-ul `globalThis.crypto = webcrypto` în `server/_core/index.ts` rezolvă definitiv. | Login producea `ReferenceError: crypto is not defined` la Railway (Node.js 18 LTS) | Copilot Agent |
+| 2026-07-12 | Gmail App Password necesită `SMTP_USER` explicit (adresa Gmail care l-a generat). Nicio valoare default nu poate fi hardcodată în cod — fiecare App Password este legat de un cont specific. | Fallback hardcodat `dropi.deliveries@gmail.com` cauza eșec silențios dacă adresa reală era diferită | Copilot Agent |
+| 2026-07-12 | Erorile Nodemailer se loghează DOAR ca `.message` (nu obiect complet) pentru a nu expune credențiale SMTP sau detalii de conexiune sensibile în log-urile Railway | Obiectul complet de eroare Nodemailer poate include `auth` details în unele versiuni | Copilot Agent |
 
 ---
 
@@ -180,7 +208,8 @@ Railway deploy trigger (push to main)
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
-| `copilot/copilotdatabase-migration-audit` | Fix OAUTH_SERVER_URL opțional (PR #31) | Activ, necesită merge |
+| `copilot/read-only-verification` | Fix login crypto + Gmail SMTP_USER + conflict resolution pentru PR #32 | Activ, necesită merge |
+| `copilot/copilotdatabase-migration-audit` | Fix OAUTH_SERVER_URL opțional (PR #31) | Merged în `main` |
 | `copilot/real-device-tests-auth-issues` | RCA auth/reset real-device + fix minim email/reset backend | Merged în `main` (PR #28) |
 | `copilot/audit-eas-environment-injection` | Audit EAS env chain + validare workflow EXPO_PUBLIC_API_BASE_URL | Merged în `main` (PR #27) |
 | `copilot/fix-apk-versioning-errors` | Fix versionare EAS build + redirect OAuth nativ | Merged în `main` |
@@ -198,7 +227,9 @@ Railway deploy trigger (push to main)
 - Implementarea email backend era legată doar de Gmail/`GMAIL_APP_PASSWORD`, deși documentația proiectului indică SMTP generic ✅ fixat în branch-ul `copilot/real-device-tests-auth-issues`
 - `drizzle/meta/0013_snapshot.json` lipsea → creat în branch-ul `copilot/database-migration-audit` ✅
 - **Mecanism Railway producție** lipsea → `scripts/migrate.ts` + `scripts/validate-db.ts` + `railway.toml` update → PR #30 ✅
-- `[OAuth] ERROR:` misleading în Railway production logs → PR #31 (în review) ✅
+- `[OAuth] ERROR:` misleading în Railway production logs → PR #31 merged ✅
+- **Login `crypto is not defined`** pe Node.js 18/Railway → polyfill `globalThis.crypto` în `server/_core/index.ts` → PR #32 ✅ (conflict resolved, necesită merge)
+- **Gmail email nu sosea** → `SMTP_USER` lipsea din Railway + hardcoded default greșit în cod → fix în PR #32 ✅ (necesită merge + setare Railway manual)
 - Backend pe Railway necesită setup manual cont + variabile de mediu din `.env.example`
 
 ### Tehnologii principale
@@ -237,9 +268,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.19.0**
+Acest document: **v1.20.0**
 Data creării: 2026-07-07
-Ultima actualizare: 2026-07-12
-Actualizat de: GitHub Copilot Coding Agent — Merge conflict resolution: integrat contextul database-migration-audit (PR #30) cu fixul OAUTH_SERVER_URL opțional (PR #31); decizie adăugată pentru OAUTH_SERVER_URL; versiune incrementată la v1.19.0.
+Ultima actualizare: 2026-07-13
+Actualizat de: GitHub Copilot Coding Agent — Merge conflict resolution pentru PR #32: integrat schimbările deja merged în `main` (PR #30 și PR #31) cu fixurile auth/crypto/email din branch-ul `copilot/read-only-verification`; versiune incrementată la v1.20.0.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
