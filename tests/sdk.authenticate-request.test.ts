@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { SignJWT } from "jose";
 
 const dbMock = vi.hoisted(() => ({
   getUserByOpenId: vi.fn(),
@@ -132,6 +133,72 @@ describe("sdk.verifySession — JWT claim tolerance", () => {
     const session = await sdk.verifySession(undefined);
     expect(session).toBeNull();
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Missing session cookie"));
+    warnSpy.mockRestore();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// verifySession — JWT security invariants
+// ---------------------------------------------------------------------------
+// These tests prove that removing the non-empty appId/name requirement does
+// NOT weaken authentication: the HMAC-SHA256 signature is still the enforced
+// security boundary. Any token that does not carry a valid signature from
+// JWT_SECRET is rejected, regardless of its payload contents.
+// ---------------------------------------------------------------------------
+
+describe("sdk.verifySession — JWT security invariants", () => {
+  // The mock ENV uses cookieSecret = "test-secret-key-must-be-at-least-32-chars!!"
+  // Tokens signed with any other key must be rejected.
+  const wrongSecret = new TextEncoder().encode(
+    "wrong-secret-key-must-be-at-least-32-chars!!!",
+  );
+
+  it("rejects a token signed with the wrong secret (HMAC integrity enforced)", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    // Sign with a different key than the one in ENV.cookieSecret
+    const forgedToken = await new SignJWT({ openId: "dropi_user_999", appId: "", name: "" })
+      .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+      .setExpirationTime(Math.floor(Date.now() / 1000) + 3600)
+      .sign(wrongSecret);
+
+    const session = await sdk.verifySession(forgedToken);
+    expect(session).toBeNull();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Session verification failed"),
+      expect.any(String),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it("rejects an expired token (exp claim enforced)", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const correctSecret = new TextEncoder().encode(
+      "test-secret-key-must-be-at-least-32-chars!!",
+    );
+    // Set exp to 1 second in the past
+    const expiredToken = await new SignJWT({ openId: "dropi_user_exp", appId: "", name: "" })
+      .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+      .setExpirationTime(Math.floor(Date.now() / 1000) - 1)
+      .sign(correctSecret);
+
+    const session = await sdk.verifySession(expiredToken);
+    expect(session).toBeNull();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Session verification failed"),
+      expect.any(String),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it("rejects a malformed (non-JWT) token string", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const session = await sdk.verifySession("not.a.valid.jwt.token");
+    expect(session).toBeNull();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Session verification failed"),
+      expect.any(String),
+    );
     warnSpy.mockRestore();
   });
 });
