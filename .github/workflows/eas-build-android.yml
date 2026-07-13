@@ -70,7 +70,21 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build Android APK (development)
-        run: eas build --profile development --platform android --non-interactive
+        run: |
+          set +e
+          OUTPUT=$(eas build --profile development --platform android --non-interactive --no-wait 2>&1)
+          EXIT_CODE=$?
+          echo "$OUTPUT"
+          if [ $EXIT_CODE -ne 0 ]; then
+            if echo "$OUTPUT" | grep -qi "used its.*builds from the Free plan\|build quota\|reached your.*build limit"; then
+              echo ""
+              echo "❌ EAS Free plan build quota exhausted for this month."
+              echo "   Builds reset automatically on the 1st of each month."
+              echo "   → Verifică quota: https://expo.dev/accounts/caliofm/settings/billing"
+              echo "   → Upgrade pentru builds nelimitate: https://expo.dev/pricing"
+            fi
+          fi
+          exit $EXIT_CODE
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
