@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -6,44 +6,21 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
-import { getApiBaseUrl } from "@/constants/oauth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const TOKEN_KEY = "@dropi_token";
-
-// API helper
-async function apiCall(path: string, input: any) {
-  const base = getApiBaseUrl();
-  const url = `${base}/api/trpc/${path}`;
-  const token = await AsyncStorage.getItem(TOKEN_KEY);
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ json: input }),
-    credentials: "include",
-  });
-  const data = await response.json();
-  if (data.error) throw new Error(data.error?.json?.message || data.error?.message || "API error");
-  return data.result?.data?.json ?? data.result?.data;
-}
+import { trpc } from "@/lib/trpc";
 
 export default function VerifyEmailScreen() {
   const router = useRouter();
   const { user } = useDropiAuth();
 
   const [code, setCode] = useState(["", "", "", "", "", ""]);
-  const [loading, setLoading] = useState(false);
-  const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const inputRefs = useRef<(TextInput | null)[]>([]);
+  const verifyEmailMutation = trpc.dropiAuth.verifyEmail.useMutation();
+  const resendVerificationMutation = trpc.dropiAuth.resendVerificationCode.useMutation();
 
   const handleCodeChange = (text: string, index: number) => {
     // Only allow digits
@@ -74,9 +51,8 @@ export default function VerifyEmailScreen() {
       return;
     }
 
-    setLoading(true);
     try {
-      await apiCall("dropiAuth.verifyEmail", { code: fullCode });
+      await verifyEmailMutation.mutateAsync({ code: fullCode });
       Alert.alert(
         "Email Verified!",
         "Your email has been verified successfully. Welcome to DROPi!",
@@ -86,16 +62,13 @@ export default function VerifyEmailScreen() {
       Alert.alert("Verification Failed", err.message || "Invalid or expired code. Please try again.");
       setCode(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleResend = async () => {
     if (cooldown > 0) return;
-    setResending(true);
     try {
-      await apiCall("dropiAuth.resendVerificationCode", {});
+      await resendVerificationMutation.mutateAsync();
       Alert.alert("Code Sent", "A new verification code has been sent to your email.");
       // Start cooldown (60 seconds)
       setCooldown(60);
@@ -110,8 +83,6 @@ export default function VerifyEmailScreen() {
       }, 1000);
     } catch (err: any) {
       Alert.alert("Error", err.message || "Failed to resend code");
-    } finally {
-      setResending(false);
     }
   };
 
@@ -161,12 +132,12 @@ export default function VerifyEmailScreen() {
         {/* Verify Button */}
         <TouchableOpacity
           onPress={handleVerify}
-          disabled={loading || code.join("").length !== 6}
+          disabled={verifyEmailMutation.isPending || code.join("").length !== 6}
           className={`w-full max-w-xs rounded-xl py-4 items-center mb-4 ${
-            loading || code.join("").length !== 6 ? "bg-muted" : "bg-primary"
+            verifyEmailMutation.isPending || code.join("").length !== 6 ? "bg-muted" : "bg-primary"
           }`}
         >
-          {loading ? (
+          {verifyEmailMutation.isPending ? (
             <ActivityIndicator color="#fff" size="small" />
           ) : (
             <Text className="text-background font-semibold text-base">Verify Email</Text>
@@ -176,10 +147,10 @@ export default function VerifyEmailScreen() {
         {/* Resend */}
         <TouchableOpacity
           onPress={handleResend}
-          disabled={resending || cooldown > 0}
+          disabled={resendVerificationMutation.isPending || cooldown > 0}
           className="py-3"
         >
-          {resending ? (
+          {resendVerificationMutation.isPending ? (
             <ActivityIndicator size="small" color="#0a7ea4" />
           ) : cooldown > 0 ? (
             <Text className="text-muted text-sm">Resend code in {cooldown}s</Text>

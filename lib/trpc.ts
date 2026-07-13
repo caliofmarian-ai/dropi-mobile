@@ -1,9 +1,9 @@
-import { createTRPCReact } from "@trpc/react-query";
 import { httpBatchLink } from "@trpc/client";
+import { createTRPCReact } from "@trpc/react-query";
 import superjson from "superjson";
-import type { AppRouter } from "@/server/routers";
 import { getRequiredApiBaseUrl } from "@/constants/oauth";
 import * as Auth from "@/lib/_core/auth";
+import type { AppRouter } from "@/server/routers";
 
 /**
  * tRPC React client for type-safe API calls.
@@ -14,6 +14,11 @@ import * as Auth from "@/lib/_core/auth";
  */
 export const trpc = createTRPCReact<AppRouter>();
 
+export async function getTrpcAuthHeaders(): Promise<Record<string, string>> {
+  const token = await Auth.getSessionToken();
+  return token ? { Authorization: ["Bearer", token].join(" ") } : {};
+}
+
 /**
  * Creates the tRPC client with proper configuration.
  * Call this once in your app's root layout.
@@ -22,13 +27,10 @@ export function createTRPCClient() {
   return trpc.createClient({
     links: [
       httpBatchLink({
-        url: () => `${getRequiredApiBaseUrl("tRPC client")}/api/trpc`,
+        url: `${getRequiredApiBaseUrl("tRPC client")}/api/trpc`,
         // tRPC v11: transformer MUST be inside httpBatchLink, not at root
         transformer: superjson,
-        async headers() {
-          const token = await Auth.getSessionToken();
-          return token ? { Authorization: `Bearer ${token}` } : {};
-        },
+        headers: getTrpcAuthHeaders,
         // Custom fetch to include credentials for cookie-based auth
         fetch(url, options) {
           return fetch(url, {
