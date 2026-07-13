@@ -196,15 +196,21 @@ class SDKServer {
       });
       const { openId, appId, name } = payload as Record<string, unknown>;
 
-      if (!isNonEmptyString(openId) || !isNonEmptyString(appId) || !isNonEmptyString(name)) {
-        console.warn("[Auth] Session payload missing required fields");
+      if (!isNonEmptyString(openId)) {
+        // appId and name are NOT checked for non-emptiness.
+        // The HMAC-SHA256 signature already guarantees that the token was issued
+        // by this server. Requiring appId or name to be non-empty breaks all
+        // authentication when VITE_APP_ID is not configured on Railway
+        // (appId embeds as "" in the JWT) and locks out any user registered
+        // without a display name (name embeds as "").
+        console.warn("[Auth] Session payload missing required field: openId");
         return null;
       }
 
       return {
         openId,
-        appId,
-        name,
+        appId: typeof appId === "string" ? appId : "",
+        name: typeof name === "string" ? name : "",
       };
     } catch (error) {
       console.warn("[Auth] Session verification failed", String(error));
