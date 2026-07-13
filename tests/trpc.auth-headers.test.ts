@@ -6,7 +6,7 @@ const authMock = vi.hoisted(() => ({
 
 vi.mock("../lib/_core/auth", () => authMock);
 
-const { getTrpcAuthHeaders } = await import("../lib/trpc");
+const { getTrpcAuthHeaders } = await import("../lib/_core/trpc-auth");
 
 describe("getTrpcAuthHeaders", () => {
   beforeEach(() => {
