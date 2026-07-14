@@ -99,7 +99,45 @@
 - Toate fixurile din PR #32 au fost păstrate împreună cu schimbările deja merged în `main`, inclusiv PR #30 și PR #31.
 - Validările finale se rulează după rezolvarea conflictului; rezultatul va fi reflectat în commitul acestei sesiuni.
 
-### Sesiune curentă (RCA SMTP IPv6 ENETUNREACH + JWT empty-appId auth) — 2026-07-13:
+### Sesiune curentă (Admin Account Provisioning) — 2026-07-14:
+
+**ROOT CAUSE CONFIRMED (din RCA sesiunii anterioare):**
+- Contul de administrator `dropi.deliveries@gmail.com` nu există în Railway MySQL production (query read-only confirmat: 0 rows).
+- `scripts/seed-accounts.ts` generează SQL dar nu se execută automat la deployment.
+- `server/db.ts::createUser` setează mereu `role: "user"` — nu suportă crearea de conturi admin.
+- Nu exista niciun mecanism de provisioning admin în repository.
+
+**Mecanism implementat:**
+- `scripts/provision-admin.ts` — script one-time, idempotent, compilat la `dist/provision-admin.mjs`
+- Citeste `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` (și `ADMIN_NAME` opțional) din env vars
+- Verifică dacă contul există deja → dacă da, exitează cu 0 fără schimbări
+- Dacă nu există: bcrypt.hash(password, 12) + insert cu câmpuri RBAC canonice admin
+- Niciodată nu loghează parola, hash-ul, DATABASE_URL, sau alte secrete
+- `validateEnv()` validează forța parolei (minim 8 caractere, 1 majusculă, 1 cifră) — aceleași reguli ca auth-router.ts
+
+**Câmpuri RBAC admin setate:**
+- `role: "admin"` — accesul la adminProcedure (sistem legacy + DROPi)
+- `dropiRole: "system_administrator"` — rolul DROPi RBAC
+- `channel: "ADMIN"` — canalul operațional DROPi
+- `isActive: true`, `isVerified: true`, `emailVerified: true` — cont activ și verificat imediat
+- `isAIAgent: false`, `loginMethod: "password"`, `zone: null`
+
+**Fișiere adăugate/modificate:**
+- `scripts/provision-admin.ts` (nou)
+- `tests/provision-admin.test.ts` (nou — 25 teste)
+- `docs/ADMIN_PROVISIONING.md` (nou — procedura Railway)
+- `package.json` — build include provision-admin; adăugat `db:provision-admin`
+- `.env.example` — documentate `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`
+
+**Validări:**
+- `pnpm test` ✅ — 68 passed, 2 skipped (25 teste noi fără regresie)
+- `pnpm build` ✅ — dist/provision-admin.mjs compilat
+- `pnpm lint` ✅ — 0 errors, 69 warnings preexistente
+- `pnpm check` ❌ — 11 erori TypeScript preexistente (app/order/[id].tsx, server/operations-router.ts, tests/smtp.test.ts) — 0 erori noi introduse
+- secret scan ✅ — fără secrete introduse
+- CodeQL ✅
+
+
 
 **ROOT CAUSES PROVEN (din Railway production logs post-PR #33):**
 
@@ -209,10 +247,11 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 - Fix OAUTH_SERVER_URL opțional — eliminat misleading ERROR log de la startup ✅ (PR #31 merged)
 - **Fix login `crypto is not defined` + Gmail `SMTP_USER` missing** — branch `copilot/read-only-verification` (PR #32, conflict resolved, necesită merge)
 - **Fix mobile verify-email / resend auth transport (`Missing session cookie`)** — branch `copilot/fix-missing-session-cookie` (PR #33, merged) ✅
-- **Fix SMTP IPv6 ENETUNREACH + JWT empty-appId auth** — branch curent, PR în curs
+- **Fix SMTP IPv6 ENETUNREACH + JWT empty-appId auth** — merged ✅
+- **Admin Provisioning Script** — `scripts/provision-admin.ts`, PR curent (necesită merge + execuție Railway one-time)
 
 ### 🔄 În progres
-- Branch curent: `copilot/fix-smtp-ipv6-jwt-appid` — PR deschis, necesită merge + deploy Railway + validare real-device pentru password reset și verify email.
+- Branch curent: `copilot/provision-admin-account` — PR nou, necesită merge + execuție one-time pe Railway pentru a crea contul admin.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -229,16 +268,18 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Merge PR-ul din branch-ul curent (`copilot/fix-smtp-ipv6-jwt-appid`) în `main`.
-2. Railway auto-deploy — verifică Railway logs că deploy-ul pornește fără erori.
-3. **OBLIGATORIU — înainte de testul pe telefon pentru forgot-password:** adaugă în Railway Dashboard → `dropi-mobile` service → Variables:
-   - `SMTP_USER` = adresa Gmail care a generat `GMAIL_APP_PASSWORD`
-   (fără aceasta, emailul de recuperare rămâne blocat)
-4. Testează pe telefon fluxul real:
-   - `Forgot Password` → verifică că emailul de reset sosește (nu mai apare `connect ENETUNREACH`);
-   - login email/parolă → `Verify Email` → confirmă că nu mai apare `Please login (10001)` (JWT empty-appId fix).
-5. Dacă emailul de reset nu sosește → verifică Railway logs pentru `[SMTP]` entries cu noua configurație.
-6. Dacă verify email eșuează în continuare → verifică că PR #33 este merged și că build-ul APK include ultimul commit.
+1. Merge PR-ul din branch-ul curent în `main`.
+2. Așteptați Railway auto-deploy și verificați că `/api/health` returnează 200.
+3. **OBLIGATORIU — Provisioning admin one-time** (vezi `docs/ADMIN_PROVISIONING.md`):
+   - Adaugă temporar în Railway Dashboard → `dropi-mobile` service → Variables:
+     - `ADMIN_EMAIL` = `dropi.deliveries@gmail.com`
+     - `ADMIN_PASSWORD` = *(parolă puternică — min 8 caractere, 1 majusculă, 1 cifră)*
+     - `ADMIN_NAME` = `Super Admin` (opțional)
+   - Rulează: `railway run --service dropi-mobile node dist/provision-admin.mjs`
+   - Verificați output-ul: `✓ Admin account created successfully for dropi.deliveries@gmail.com`
+   - **Șterge imediat** `ADMIN_EMAIL` și `ADMIN_PASSWORD` din Railway Variables după execuție.
+4. Dacă `SMTP_USER` nu este setat în Railway, adaugă-l (adresa Gmail care a generat `GMAIL_APP_PASSWORD`).
+5. Testează login pe telefon cu `dropi.deliveries@gmail.com` și parola aleasă la pasul 3.
 
 ---
 
@@ -271,6 +312,7 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 | 2026-07-12 | `OAUTH_SERVER_URL` este OPȚIONAL în Railway production — OAuth Manus este infrastructură legacy; DROPi folosește email/parolă proprie | La startup, SDK-ul logga `console.error` misleading chiar dacă OAuth nu era niciodată apelat în producție; fixat la `console.warn` cu mesaj clar | Copilot Agent |
 | 2026-07-12 | `jose` v6 necesită `globalThis.crypto` (Web Crypto API). Pe Node.js < 19, `crypto` nu este expus ca identificator global în ESM fără flag. Polyfill-ul `globalThis.crypto = webcrypto` în `server/_core/index.ts` rezolvă definitiv. | Login producea `ReferenceError: crypto is not defined` la Railway (Node.js 18 LTS) | Copilot Agent |
 | 2026-07-12 | Gmail App Password necesită `SMTP_USER` explicit (adresa Gmail care l-a generat). Nicio valoare default nu poate fi hardcodată în cod — fiecare App Password este legat de un cont specific. | Fallback hardcodat `dropi.deliveries@gmail.com` cauza eșec silențios dacă adresa reală era diferită | Copilot Agent |
+| 2026-07-14 | Admin provisioning folosește un script one-time compilat (`dist/provision-admin.mjs`), nu auto-seed la startup sau SQL manual | Auto-seed riscă să suprascrie accidental date existente; SQL manual necesită acces direct și expune hash-ul; `createUser` din `server/db.ts` setează mereu `role:"user"` | Copilot Agent |
 | 2026-07-13 | Gmail SMTP pe Railway se configurează cu `host/port/secure` explicit + IPv4 pre-resolut (nu `service: "gmail"`) pentru a evita ENETUNREACH pe IPv6 | Nodemailer 9.x alege random IPv4/IPv6 cu `service: "gmail"`; Railway are IPv6 outbound instabil | Copilot Agent |
 | 2026-07-13 | `verifySession` cere doar `openId` non-empty; `appId`/`name` sunt opționale ca string gol | `VITE_APP_ID` nu este un env Railway → `appId = ""` → toate sesiunile JWT respinse; HMAC face claims suplimentare redundante pentru securitate | Copilot Agent |
 | 2026-07-13 | Teste de invarianți securitate JWT (wrong secret, expired, malformed) sunt obligatorii lângă orice schimbare a verifySession | Dovedesc că HMAC rămâne singura frontieră de securitate, indiferent de claims payload | Copilot Agent |
