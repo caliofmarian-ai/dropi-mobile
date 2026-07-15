@@ -233,32 +233,45 @@ export const dropiAuthRouter = router({
 
   login: publicProcedure.input(loginSchema).mutation(async ({ input, ctx }) => {
     const ip = getClientIp(ctx.req);
+    const normalizedEmail = input.email.toLowerCase().trim();
+    const maskedLoginEmail = maskEmail(normalizedEmail);
+
+    console.info(`[AUTH LOGIN] request_received email=${maskedLoginEmail}`);
 
     // Rate limiting (per email — mobile users share IPs)
-    if (!checkRateLimit(input.email.toLowerCase().trim())) {
+    if (!checkRateLimit(normalizedEmail)) {
+      console.warn(`[AUTH LOGIN] failure_reason=rate_limited email=${maskedLoginEmail}`);
       throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many login attempts for this account. Please try again in 15 minutes." });
     }
 
-    // Find user
-    const user = await db.getUserByEmail(input.email);
+    // Find user — always use the normalised email so lookups match provisioned rows
+    const user = await db.getUserByEmail(normalizedEmail);
+    console.info(`[AUTH LOGIN] user_found=${user ? "yes" : "no"} email=${maskedLoginEmail}`);
     if (!user || !user.passwordHash) {
+      console.warn(
+        `[AUTH LOGIN] failure_reason=${!user ? "user_not_found" : "missing_password_hash"} email=${maskedLoginEmail}`,
+      );
       throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
     }
 
     // Check if account is locked
     if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
+      console.warn(`[AUTH LOGIN] failure_reason=account_locked email=${maskedLoginEmail}`);
       const minutesLeft = Math.ceil((new Date(user.lockedUntil).getTime() - Date.now()) / 60000);
       throw new TRPCError({ code: "FORBIDDEN", message: `Account locked. Try again in ${minutesLeft} minutes.` });
     }
 
     // Check if account is active
     if (!user.isActive) {
+      console.warn(`[AUTH LOGIN] failure_reason=account_inactive email=${maskedLoginEmail}`);
       throw new TRPCError({ code: "FORBIDDEN", message: "Account has been deactivated. Contact support." });
     }
 
     // Verify password
     const valid = await bcrypt.compare(input.password, user.passwordHash);
+    console.info(`[AUTH LOGIN] bcrypt_compare=${valid} email=${maskedLoginEmail}`);
     if (!valid) {
+      console.warn(`[AUTH LOGIN] failure_reason=invalid_password email=${maskedLoginEmail}`);
       await db.incrementFailedLogin(user.id);
       // Lock after 10 failed attempts
       if ((user.failedLoginAttempts || 0) + 1 >= 10) {
@@ -288,6 +301,7 @@ export const dropiAuthRouter = router({
 
     // Create session token
     const token = await sdk.createSessionToken(user.openId, { name: user.name || "" });
+    console.info(`[AUTH LOGIN] jwt_created=true email=${maskedLoginEmail}`);
 
     // Store session
     await db.createSession({

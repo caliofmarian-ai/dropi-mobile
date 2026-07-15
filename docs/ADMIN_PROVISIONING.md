@@ -159,9 +159,45 @@ configured in Railway.
 
 ---
 
+## Repairing a Corrupted or Missing Password Hash
+
+If the admin account exists in the database but login still fails with
+"Invalid email or password", the stored `passwordHash` may be missing, corrupted,
+or out of sync with the current `ADMIN_PASSWORD`.
+
+Use `scripts/repair-admin-hash.ts` to verify and repair the hash in-place:
+
+```bash
+# Build first
+pnpm build
+
+# Run the repair tool
+ADMIN_EMAIL=dropi.deliveries@gmail.com \
+ADMIN_PASSWORD=YourCurrentPassword1 \
+DATABASE_URL="your-mysql-url" \
+pnpm db:repair-admin-hash
+```
+
+The script:
+1. Looks up the admin row by email (normalised to lowercase).
+2. Checks whether the stored hash is a valid bcrypt hash.
+3. Runs `bcrypt.compare(ADMIN_PASSWORD, storedHash)`.
+4. If any check fails (missing, invalid format, or mismatch), regenerates the hash
+   with `bcrypt.hash(ADMIN_PASSWORD, 12)` and updates the row.
+5. Exits 0 in both the "ok" and "repaired" cases; exits 1 only on a fatal error.
+
+The script never logs the password, the old hash, or the new hash.
+
+After running, redeploy the Railway service (or it will pick up the fixed hash on
+the next login attempt without a redeployment, since the hash is read from the DB
+on every login).
+
+---
+
 ## Security Notes
 
 - The `ADMIN_PASSWORD` is **never** stored in source code, logs, or commit messages.
 - The provisioning script uses bcrypt with salt rounds = 12 (identical to normal registration).
-- The script is idempotent — running it twice is safe and makes no changes on the second run.
-- `ADMIN_EMAIL` and `ADMIN_PASSWORD` must be removed from Railway after provisioning.
+- The provisioning script is idempotent — running it twice is safe and makes no changes on the second run.
+- The repair script is also idempotent — if the hash is already correct it makes no changes.
+- `ADMIN_EMAIL` and `ADMIN_PASSWORD` must be removed from Railway after provisioning/repair.
