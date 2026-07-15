@@ -301,6 +301,41 @@ describe("repairAdminHash — secrets not logged", () => {
   });
 });
 
+// ===== ONLY THE TARGET ROW IS EVER MODIFIED =====
+
+describe("repairAdminHash — only target row modified", () => {
+  it("update is called with only passwordHash — no email, role, or status field", async () => {
+    const { db, getUpdatedValues } = createMockDb({ id: 1, passwordHash: null });
+    await repairAdminHash(db, VALID_INPUT);
+    const updated = getUpdatedValues();
+    expect(updated).toBeDefined();
+    // Only passwordHash should be set — no other field
+    expect(Object.keys(updated!)).toEqual(["passwordHash"]);
+    expect(updated!["email"]).toBeUndefined();
+    expect(updated!["dropiRole"]).toBeUndefined();
+    expect(updated!["isActive"]).toBeUndefined();
+    expect(updated!["isVerified"]).toBeUndefined();
+    expect(updated!["emailVerified"]).toBeUndefined();
+    expect(updated!["role"]).toBeUndefined();
+  });
+
+  it("update is not called for a user with a different id when no hash match is needed", async () => {
+    // Simulate a correct hash for user id=99 — no update should occur
+    const correctHash = await bcrypt.hash(VALID_PASSWORD, 12);
+    const { db, updateCallCount } = createMockDb({ id: 99, passwordHash: correctHash });
+    await repairAdminHash(db, VALID_INPUT);
+    // User id=99 is fine — no other row should be touched
+    expect(updateCallCount()).toBe(0);
+  });
+
+  it("update is called exactly once even when hash is malformed (not for every user)", async () => {
+    const { db, updateCallCount } = createMockDb({ id: 42, passwordHash: "not-a-hash" });
+    await repairAdminHash(db, VALID_INPUT);
+    // Exactly one update for the one target user
+    expect(updateCallCount()).toBe(1);
+  });
+});
+
 // ===== validateRepairEnv =====
 
 describe("validateRepairEnv — environment validation", () => {

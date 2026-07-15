@@ -272,14 +272,23 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 **Fișiere modificate:**
 - `server/auth-router.ts` — linia 248: `input.email` → `normalizedEmail`; adăugat log `jwt_created=true`
 - `scripts/repair-admin-hash.ts` (nou)
-- `tests/repair-admin-hash.test.ts` (nou — 28 teste)
+- `tests/repair-admin-hash.test.ts` (nou — 32 teste)
+- `tests/auth.login-normalize.test.ts` (nou — 5 teste normalizare login email)
 - `package.json` — build include `repair-admin-hash`; adăugat `db:repair-admin-hash`
 - `docs/ADMIN_PROVISIONING.md` — procedura de reparare
 
-**Validări:**
-- `pnpm test` ✅ — 97 passed, 2 skipped (28 teste noi, fără regresie)
-- `pnpm build` ✅
-- `pnpm lint` ✅ (0 errors, warnings preexistente)
+**Validări (audit final PR #38):**
+- `pnpm install --frozen-lockfile` ✅
+- `pnpm test` ✅ — 105 passed, 2 skipped (fără regresie)
+- `pnpm build` ✅ — dist/repair-admin-hash.mjs generat
+- `pnpm lint` ✅ (0 errors, 69 warnings preexistente)
+- `pnpm check` ❌ — 9 erori TypeScript PREEXISTENTE (identice pe main; nicio eroare nouă din PR)
+- secret scan ✅ — fără secrete
+- CodeQL ✅ — 0 alerts
+
+**Root cause exact în producție: NEDOVEDIT COMPLET**
+Email normalization fix: corect și benefic pentru variante cu majuscule/spații.
+Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), normalizarea singură NU explică eroarea. Cauza reală probabilă: hash bcrypt corupt sau absent în DB — exact ce repară `repair-admin-hash`.
 
 **Pasul următor concret (Railway — acțiune manuală obligatorie):**
 ```
