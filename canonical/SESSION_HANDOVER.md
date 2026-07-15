@@ -253,6 +253,46 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
   - `pnpm build` ✅
   - `pnpm lint` ✅ (0 errors, warnings preexistente)
 
+### Sesiune curentă (Fix login end-to-end) — 2026-07-15:
+
+**BUG CRITIC IDENTIFICAT ȘI REZOLVAT:**
+`server/auth-router.ts` linia 248 transmitea `input.email` (raw) la `getUserByEmail(...)`, în loc de `normalizedEmail` (lowercase + trim). `provision-admin.ts` inserează email-ul normalizat, deci căutarea putea eșua dacă utilizatorul introducea email-ul cu majuscule sau spații. Fix: `getUserByEmail(normalizedEmail)`.
+
+**Logging complet adăugat:**
+- `[AUTH LOGIN] user_found=yes/no` (exista deja)
+- `[AUTH LOGIN] bcrypt_compare=true/false` (exista deja)
+- `[AUTH LOGIN] jwt_created=true` (ADĂUGAT) — după crearea token-ului JWT
+
+**Script de reparare hash:**
+- `scripts/repair-admin-hash.ts` (nou) — verifică dacă hash-ul din DB este valid bcrypt și se potrivește cu `ADMIN_PASSWORD`; dacă nu, regenerează cu `bcrypt.hash(password, 12)` și actualizează rândul
+- `dist/repair-admin-hash.mjs` — compilat via `pnpm build`
+- `pnpm db:repair-admin-hash` — comandă nouă în package.json
+- `docs/ADMIN_PROVISIONING.md` — secțiune nouă "Repairing a Corrupted or Missing Password Hash"
+
+**Fișiere modificate:**
+- `server/auth-router.ts` — linia 248: `input.email` → `normalizedEmail`; adăugat log `jwt_created=true`
+- `scripts/repair-admin-hash.ts` (nou)
+- `tests/repair-admin-hash.test.ts` (nou — 28 teste)
+- `package.json` — build include `repair-admin-hash`; adăugat `db:repair-admin-hash`
+- `docs/ADMIN_PROVISIONING.md` — procedura de reparare
+
+**Validări:**
+- `pnpm test` ✅ — 97 passed, 2 skipped (28 teste noi, fără regresie)
+- `pnpm build` ✅
+- `pnpm lint` ✅ (0 errors, warnings preexistente)
+
+**Pasul următor concret (Railway — acțiune manuală obligatorie):**
+```
+1. Deploy PR pe Railway (merge branch + redeploy)
+2. Adaugă temporar în Railway Variables: ADMIN_EMAIL, ADMIN_PASSWORD, DATABASE_URL
+3. Rulează în Railway shell:
+   pnpm db:repair-admin-hash
+   # sau (dacă contul nu există):
+   pnpm db:provision-admin
+4. Verifică Railway logs pentru: [AUTH LOGIN] user_found=yes, bcrypt_compare=true, jwt_created=true
+5. Șterge ADMIN_EMAIL și ADMIN_PASSWORD din Railway Variables
+```
+
 ---
 
 ## 2. Starea Curentă a Proiectului
@@ -273,7 +313,7 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 - **Admin Provisioning Script** — `scripts/provision-admin.ts`, PR curent (necesită merge + execuție Railway one-time)
 
 ### 🔄 În progres
-- Branch curent: `copilot/analyze-login-flow-issue` — PR diagnostic focusat pentru login, necesită merge + deploy Railway pentru a capta cauza exactă.
+- Branch curent: `copilot/analyze-login-flow-issue` — **Fix login end-to-end**: email normalization bug + repair-admin-hash script. Necesită merge + execuție Railway `pnpm db:repair-admin-hash`.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
