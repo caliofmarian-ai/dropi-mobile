@@ -253,6 +253,61 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
   - `pnpm build` ✅
   - `pnpm lint` ✅ (0 errors, warnings preexistente)
 
+### Sesiune curentă (RCA Verify Email / Resend — mail delivery silent failure) — 2026-07-15:
+
+**ROOT CAUSE PROVEN:**
+`server/auth-router.ts` — `resendVerificationCode` (liniile 506-543 ÎNAINTE de fix):
+- Genera cod ✅ → persista în DB ✅ → apela `sendVerificationEmail` ✅ → verifica `if (!sent)` ✅
+- **BUG:** pe delivery failure, logga DOAR `console.warn` și returna `{ success: true }` necondiționat ❌
+- Niciodată nu arunca `TRPCError` pe livrare eșuată → mobilul primea mereu succes → afișa mereu "Code Sent"
+
+**Does APK request reach Railway: YES**
+- `resendVerificationMutation.mutateAsync()` este așteptat (`await`) ÎNAINTE de dialog
+- Dacă request-ul nu ar ajunge la Railway, `catch` block-ul din mobile ar afișa "Error" (nu "Code Sent")
+- Faptul că mobilul afișa "Code Sent" dovedește că backend-ul returna `{ success: true }`
+- "No Railway log" = probabil SMTP transport neconfigurat (log `skipped: no mail transport configured`) sau latență log Railway
+
+**Exact mobile success-dialog condition (ÎNAINTE de fix):**
+`Alert.alert("Code Sent", ...)` se afișa imediat după ce `mutateAsync()` rezolva. Mutația era așteptată corect, dar backend-ul returna succes indiferent de livrarea emailului.
+
+**Exact backend email-delivery behavior (ÎNAINTE de fix):**
+Backend apela `sendPlatformEmail`, ignora `false` return value, logga warning și returna `{ success: true }` necondiționat.
+
+**Fix implementat:**
+- `server/auth-router.ts` — `resendVerificationCode`:
+  - Arunca `TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Unable to send verification code right now..." })` când `sent === false`
+  - Guard explicit pentru `user.email === null` → TRPCError
+  - Audit log scris DOAR la succes (nu pe eșec)
+  - Observabilitate completă fără a loga tokens/coduri/credențiale:
+    - `[EMAIL VERIFY] request_received authenticated_user=yes userId=N`
+    - `[EMAIL VERIFY] code_persisted=yes userId=N`
+    - `[EMAIL VERIFY] mail_transport_invoked=yes userId=N`
+    - `[EMAIL VERIFY] mail_delivery_success=true/false userId=N`
+    - `[EMAIL VERIFY] response_status=success/failure userId=N`
+
+**Mobile behavior DUPĂ fix:**
+- "Code Sent" afișat NUMAI după confirmat succes backend (nu s-a modificat verify-email.tsx — `catch` block existent gestionează corect eroarea)
+- Loading state termină la atât success cât și la throw (tRPC `isPending` se resetează la settle)
+
+**Teste noi (5 cazuri regresie):**
+- `throws INTERNAL_SERVER_ERROR when provider delivery fails`
+- `throws INTERNAL_SERVER_ERROR when mail service is not configured`
+- `throws INTERNAL_SERVER_ERROR when user has no email address`
+- `does not log the verification code in any log output`
+- `loading state terminates: mutation throws on delivery failure`
+
+**Validări:**
+- `pnpm test` ✅ — 110 passed, 2 skipped (5 teste noi, fără regresie)
+- `pnpm build` ✅
+- `pnpm lint` ✅ — 0 errors, 69 warnings preexistente
+- `pnpm check` ❌ — 9 erori TypeScript PREEXISTENTE (identice; nicio eroare nouă)
+- secret scan ✅ — fără secrete introduse
+- CodeQL ✅ — 0 alerts
+
+**Fișiere modificate:**
+- `server/auth-router.ts` — `resendVerificationCode` procedure (fix + observabilitate)
+- `tests/auth.verify-email.test.ts` — 5 teste noi de regresie
+
 ### Sesiune curentă (Fix login end-to-end) — 2026-07-15:
 
 **BUG CRITIC IDENTIFICAT ȘI REZOLVAT:**
@@ -322,7 +377,7 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 - **Admin Provisioning Script** — `scripts/provision-admin.ts`, PR curent (necesită merge + execuție Railway one-time)
 
 ### 🔄 În progres
-- Branch curent: `copilot/analyze-login-flow-issue` — **Fix login end-to-end**: email normalization bug + repair-admin-hash script. Necesită merge + execuție Railway `pnpm db:repair-admin-hash`.
+- Branch curent: `copilot/analyze-login-flow-issue` — **Fix verify-email resend (mail delivery silent failure)** + fix login email normalization + repair-admin-hash script. Necesită merge + execuție Railway `pnpm db:repair-admin-hash`.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -384,7 +439,7 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 | 2026-07-13 | Gmail SMTP pe Railway se configurează cu `host/port/secure` explicit + IPv4 pre-resolut (nu `service: "gmail"`) pentru a evita ENETUNREACH pe IPv6 | Nodemailer 9.x alege random IPv4/IPv6 cu `service: "gmail"`; Railway are IPv6 outbound instabil | Copilot Agent |
 | 2026-07-13 | `verifySession` cere doar `openId` non-empty; `appId`/`name` sunt opționale ca string gol | `VITE_APP_ID` nu este un env Railway → `appId = ""` → toate sesiunile JWT respinse; HMAC face claims suplimentare redundante pentru securitate | Copilot Agent |
 | 2026-07-13 | Teste de invarianți securitate JWT (wrong secret, expired, malformed) sunt obligatorii lângă orice schimbare a verifySession | Dovedesc că HMAC rămâne singura frontieră de securitate, indiferent de claims payload | Copilot Agent |
-| 2026-07-12 | Erorile Nodemailer se loghează DOAR ca `.message` (nu obiect complet) pentru a nu expune credențiale SMTP sau detalii de conexiune sensibile în log-urile Railway | Obiectul complet de eroare Nodemailer poate include `auth` details în unele versiuni | Copilot Agent |
+| 2026-07-15 | `resendVerificationCode` trebuie să arunce TRPCError când livrarea emailului eșuează; succes returnat NUMAI după confirmare proveder | UI-ul arăta "Code Sent" chiar și când emailul nu era livrat (silent failure în backend) | Copilot Agent |
 
 ---
 
