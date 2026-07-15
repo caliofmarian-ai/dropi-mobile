@@ -25,8 +25,8 @@
 | Câmp | Valoare |
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
-| **Data** | 2026-07-13 |
-| **Branch activ** | `copilot/fix-missing-session-cookie` |
+| **Data** | 2026-07-15 |
+| **Branch activ** | `copilot/analyze-login-flow-issue` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în sesiunile anterioare (context auth/reset + database-migration-audit + oauth-optional):
@@ -231,6 +231,28 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 - Adăugat raport RCA: `docs/AUTH_PASSWORD_RESET_RCA_2026-07-12.md`.
 - Adăugate teste: `tests/mail-config.test.ts`, `tests/auth.forgot-password.test.ts`.
 
+### Sesiune curentă (Focused login RCA diagnostics) — 2026-07-15:
+- Audit static complet al fluxului `dropiAuth.login` de la request HTTP până la crearea JWT:
+  - client mobil: `lib/auth-context.tsx`
+  - mount backend tRPC: `server/_core/index.ts`, `server/routers.ts`
+  - login flow: `server/auth-router.ts`
+  - DB lookup: `server/db.ts`
+  - JWT creation: `server/_core/sdk.ts`
+  - provisioning admin: `scripts/provision-admin.ts`
+- RCA confirmat din cod:
+  - mesajul exact `Invalid email or password` poate veni DOAR din `server/auth-router.ts` și înseamnă fie `!user || !user.passwordHash`, fie `bcrypt.compare(...) === false`;
+  - `isVerified`, `emailVerified`, `role`, `dropiRole`, `channel` NU participă la validarea login-ului;
+  - endpoint-ul așteaptă hash bcrypt din câmpul `users.passwordHash`; scriptul `provision-admin` generează același tip de hash (`bcryptjs`, rounds=12), deci nu există mismatch de algoritm/field în cod.
+- Limitarea observabilității actuale:
+  - codul nu loghează explicit dacă login-ul eșuează pentru `user_not_found`, `missing_password_hash` sau `bcrypt.compare=false`, deci producția nu poate fi probată complet doar din mesajul generic.
+- PR diagnostic focusat pregătit:
+  - `server/auth-router.ts` loghează DOAR: `request_received`, `user_found=yes/no`, `bcrypt_compare=true/false`, `failure_reason=...`
+  - nu loghează parola, hash-ul sau alte secrete; emailul este mascat prin `maskEmail(...)`
+- Validări:
+  - `pnpm test` ✅
+  - `pnpm build` ✅
+  - `pnpm lint` ✅ (0 errors, warnings preexistente)
+
 ---
 
 ## 2. Starea Curentă a Proiectului
@@ -251,7 +273,7 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 - **Admin Provisioning Script** — `scripts/provision-admin.ts`, PR curent (necesită merge + execuție Railway one-time)
 
 ### 🔄 În progres
-- Branch curent: `copilot/provision-admin-account` — PR nou, necesită merge + execuție one-time pe Railway pentru a crea contul admin.
+- Branch curent: `copilot/analyze-login-flow-issue` — PR diagnostic focusat pentru login, necesită merge + deploy Railway pentru a capta cauza exactă.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -268,18 +290,15 @@ Fără această variabilă, emailul de recuperare rămâne blocant chiar și dup
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Merge PR-ul din branch-ul curent în `main`.
+1. Merge PR-ul diagnostic din branch-ul curent în `main`.
 2. Așteptați Railway auto-deploy și verificați că `/api/health` returnează 200.
-3. **OBLIGATORIU — Provisioning admin one-time** (vezi `docs/ADMIN_PROVISIONING.md`):
-   - Adaugă temporar în Railway Dashboard → `dropi-mobile` service → Variables:
-     - `ADMIN_EMAIL` = `dropi.deliveries@gmail.com`
-     - `ADMIN_PASSWORD` = *(parolă puternică — min 8 caractere, 1 majusculă, 1 cifră)*
-     - `ADMIN_NAME` = `Super Admin` (opțional)
-   - Rulează: `railway run --service dropi-mobile node dist/provision-admin.mjs`
-   - Verificați output-ul: `✓ Admin account created successfully for dropi.deliveries@gmail.com`
-   - **Șterge imediat** `ADMIN_EMAIL` și `ADMIN_PASSWORD` din Railway Variables după execuție.
-4. Dacă `SMTP_USER` nu este setat în Railway, adaugă-l (adresa Gmail care a generat `GMAIL_APP_PASSWORD`).
-5. Testează login pe telefon cu `dropi.deliveries@gmail.com` și parola aleasă la pasul 3.
+3. Reproduceți O SINGURĂ dată login-ul cu `dropi.deliveries@gmail.com`.
+4. În Railway logs, capturați cele 4 semnale noi:
+   - `request_received`
+   - `user_found=yes/no`
+   - `bcrypt_compare=true/false`
+   - `failure_reason=...`
+5. Pe baza acestor log-uri, deschideți PR separat DOAR pentru fixul real (nu amestecat cu diagnosticul).
 
 ---
 
