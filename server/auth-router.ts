@@ -505,6 +505,8 @@ export const dropiAuthRouter = router({
   // Resend verification code
   resendVerificationCode: protectedProcedure.mutation(async ({ ctx }) => {
     const userId = ctx.user!.id;
+    console.log(`[EMAIL VERIFY] request_received authenticated_user=yes userId=${userId}`);
+
     const user = await db.getUserById(userId);
     if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
 
@@ -512,17 +514,31 @@ export const dropiAuthRouter = router({
       return { success: true, message: "Email already verified" };
     }
 
+    if (!user.email) {
+      console.error(`[EMAIL VERIFY] mail_transport_invoked=no code_persisted=no response_status=failure reason=no_email userId=${userId}`);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "No email address on file. Please contact support.",
+      });
+    }
+
     // Generate new code
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const expiry = new Date(Date.now() + 30 * 60 * 1000);
     await db.setEmailVerifyToken(userId, code, expiry);
+    console.log(`[EMAIL VERIFY] code_persisted=yes userId=${userId}`);
 
-    // Send email
-    if (user.email) {
-      const sent = await sendVerificationEmail(user.email, code);
-      if (!sent) {
-        console.warn(`[EMAIL VERIFY] Resend delivery failed for userId=${userId} email=${maskEmail(user.email)}`);
-      }
+    // Send email and surface delivery failures to the caller
+    console.log(`[EMAIL VERIFY] mail_transport_invoked=yes userId=${userId}`);
+    const sent = await sendVerificationEmail(user.email, code);
+    console.log(`[EMAIL VERIFY] mail_delivery_success=${sent} userId=${userId}`);
+
+    if (!sent) {
+      console.error(`[EMAIL VERIFY] response_status=failure reason=delivery_failed userId=${userId} email=${maskEmail(user.email)}`);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Unable to send verification code right now. Please try again later.",
+      });
     }
 
     await createAuditLog({
@@ -539,6 +555,7 @@ export const dropiAuthRouter = router({
       userAgent: getDeviceInfo(ctx.req),
     });
 
+    console.log(`[EMAIL VERIFY] response_status=success userId=${userId}`);
     return { success: true, message: "Verification code sent" };
   }),
 
