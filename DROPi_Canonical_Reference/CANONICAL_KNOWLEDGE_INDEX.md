@@ -8,16 +8,16 @@ It consolidates canonical knowledge recovered from three source classes:
 
 - **Active repository documents**
 - **Recovered historical ZIP materials from `04.zip`**
-- **Recovered extracted masterplan files from `canonical/docs/00_MasterPlan/`**
+- **Recovered extracted masterplan files redistributed across the thematic package folders**
 
 ## 2. Canonical Ownership Model
 
 | Ownership label | Meaning | Typical source |
 |---|---|---|
 | Founder + canonical governance | Primary canonical authority | `canonical/*`, extracted masterplan corpus |
-| Founder + Manus AI | Repository-level canonical/derived reference stabilized inside the repo | `ARCHITECTURE.md`, `canonical-structure.md`, governance docs |
-| Manus AI derived reference | Secondary interpretation layer based on canonical sources | `BLUEPRINT/*`, selected `docs/*` blueprints |
-| Historical canonical package | Archived package provenance from `04.zip` | Recovered ZIP markdown |
+| Founder + Manus AI | Repository-level canonical/derived reference stabilized inside the repo | `02_Architecture/Core/ARCHITECTURE.md`, `02_Architecture/Core/canonical-structure.md`, governance docs |
+| Manus AI derived reference | Secondary interpretation layer based on canonical sources | `09_Reference/Blueprint/*`, selected `05_Marketplace/*`, selected `06_Roles/*` |
+| Historical canonical package | Archived canonical bundle provenance | Recovered ZIP-only markdown in `00_Project/Recovered_04_ZIP/` and thematic recovered folders |
 
 ## 3. Quick-Read Path for Future AI Agents
 
@@ -34,16 +34,16 @@ It consolidates canonical knowledge recovered from three source classes:
 
 | Concept | Primary origin documents | Supporting / derived documents |
 |---|---|---|
-| Ecosystem vision and launch logic | `01_Vision/MasterPlan_Volume_I/*`, `01_Vision/Recovered_04_ZIP/02_VOLUME_I_STRATEGY/*` | `08_AI/Governance/AI_DEVELOPMENT_HANDOVER_CANON.md` |
+| Ecosystem vision and launch logic | `01_Vision/MasterPlan_Volume_I/`, `01_Vision/Recovered_04_ZIP/02_VOLUME_I_STRATEGY/` | `08_AI/Governance/AI_DEVELOPMENT_HANDOVER_CANON.md` |
 | Four operational channels | `02_Architecture/Core/canonical-structure.md`, `02_Architecture/Historical_Archive/SYSTEM_ARCHITECTURE.md` | `02_Architecture/Blueprint/DROPi_6_LAYERS_EXPLAINED.md` |
 | Six-layer architecture | `02_Architecture/Historical_Archive/SYSTEM_ARCHITECTURE.md` | `02_Architecture/Core/ARCHITECTURE.md`, `02_Architecture/Blueprint/DROPi_6_LAYERS_EXPLAINED.md` |
-| Marketplace separation from app core | `05_Marketplace/MasterPlan_Product/*`, `05_Marketplace/Recovered_04_ZIP/Cap_06_Product_DROPi/*` | `05_Marketplace/Derived_Blueprints/BLUEPRINT_MARKETPLACE_DROPI.md`, `05_Marketplace/Derived_Analyses/marketplace-canonical-analysis.md` |
+| Marketplace separation from app core | `05_Marketplace/MasterPlan_Product/`, `05_Marketplace/Recovered_04_ZIP/Cap_06_Product_DROPi/` | `05_Marketplace/Derived_Blueprints/BLUEPRINT_MARKETPLACE_DROPI.md`, `05_Marketplace/Derived_Analyses/marketplace-canonical-analysis.md` |
 | Multimodal delivery and badges | `03_Logistics/Delivery/DELIVERY_MULTIMODAL.md`, `05_Marketplace/Recovered_04_ZIP/Cap_06_Product_DROPi/Delivery_Multimodal.md` | `06_Roles/Pilot_Selection/BLUEPRINT_PILOT_SELECTION_SYSTEM.md` |
-| DronePort physical layer | `04_DronePorts/MasterPlan/*` | `02_Architecture/Blueprint/DROPi_6_LAYERS_EXPLAINED.md` |
-| Supervised autonomous delivery | `03_Logistics/Supervised_Autonomous_Delivery/*` | `06_Roles/Pilot_Selection/BLUEPRINT_PILOT_SELECTION_SYSTEM.md` |
-| AI organization and DSS limits | `08_AI/Governance/AI_DEVELOPMENT_HANDOVER_CANON.md`, `08_AI/DSS/*` | `06_Roles/AI_Agent_System/AI_AGENT_SYSTEM.md` |
-| Governance, escalation, and non-goals | `00_Project/Governance/MasterPlan_Governance/*`, `09_Reference/Strategic_Boundaries/*` | `AGENTS.md`, `AI_DEVELOPMENT_CHARTER.md`, `PROJECT_TRANSFER.md` |
-| Business model, legal model, GTM, scaling | `07_Economy/Business_Legal_Scaling/*`, `07_Economy/KPI_Unit_Economics/*`, `07_Economy/Recovered_Contracts/*` | `09_Reference/Pitch/*` |
+| DronePort physical layer | `04_DronePorts/MasterPlan/` | `02_Architecture/Blueprint/DROPi_6_LAYERS_EXPLAINED.md` |
+| Supervised autonomous delivery | `03_Logistics/Supervised_Autonomous_Delivery/` | `06_Roles/Pilot_Selection/BLUEPRINT_PILOT_SELECTION_SYSTEM.md` |
+| AI organization and DSS limits | `08_AI/Governance/AI_DEVELOPMENT_HANDOVER_CANON.md`, `08_AI/DSS/` | `06_Roles/AI_Agent_System/AI_AGENT_SYSTEM.md` |
+| Governance, escalation, and non-goals | `00_Project/Governance/MasterPlan_Governance/`, `09_Reference/Strategic_Boundaries/` | `00_Project/Governance/AGENTS.md`, `00_Project/Governance/AI_DEVELOPMENT_CHARTER.md`, `00_Project/Governance/PROJECT_TRANSFER.md` |
+| Business model, legal model, GTM, scaling | `07_Economy/Business_Legal_Scaling/`, `07_Economy/KPI_Unit_Economics/`, `07_Economy/Recovered_Contracts/` | `09_Reference/Pitch/` |
 | Independent deployment philosophy | `09_Reference/Deployment/BLUEPRINT_INDEPENDENT_DEPLOYMENT.md` | `09_Reference/Deployment/DEPLOYMENT.md`, `09_Reference/Deployment/Historical_Archive/DEPLOYMENT_GUIDE.md` |
 
 ## 5. Folder-by-Folder Intent
@@ -63,8 +63,8 @@ It consolidates canonical knowledge recovered from three source classes:
 
 ## 6. Duplicate and Supersession Rules
 
-- `canonical-delivery-reference.md` is an exact duplicate of `canonical/DELIVERY_MULTIMODAL.md` and was excluded from the package.
-- The extracted `canonical/docs/00_MasterPlan/` corpus duplicates the masterplan `.docx` files inside `04.zip`; the package keeps the extracted copies for readability and provenance, and recovers ZIP-only markdown separately.
+- The root source file canonical-delivery-reference.md was excluded because it is an exact duplicate of `03_Logistics/Delivery/DELIVERY_MULTIMODAL.md`.
+- The extracted masterplan corpus duplicates the masterplan `.docx` files inside `04.zip`; the package keeps the extracted copies for readability and provenance, and recovers ZIP-only markdown separately.
 - Derived blueprints are kept, but they do **not** outrank primary canonical sources.
 
 ## 7. Recommended Tycoon Usage

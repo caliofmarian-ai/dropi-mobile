@@ -3,13 +3,13 @@
 ## 1. Repository Audit
 
 - Repository markdown documents discovered: **40**
-- ZIP archives discovered: **1** (`04.zip`)
-- Extracted historical canonical folder discovered: **`canonical/docs/00_MasterPlan/`**
-- Documentation-like folders audited: `canonical/`, `BLUEPRINT/`, `docs/`, `references/`, recovered historical package structures
+- ZIP archives discovered: **1** (04.zip)
+- Extracted historical canonical folder discovered: **canonical/docs/00_MasterPlan/**
+- Documentation-like folders audited: canonical/, BLUEPRINT/, docs/, references/, recovered historical package structures
 
 ## 2. ZIP Archive Audit
 
-### `04.zip`
+### 04.zip
 
 - Total files in archive: **235**
 - Documentation files in archive used for recovery: **176**
@@ -19,18 +19,18 @@
 
 ### Historical package observations
 
-- `04.zip` is a **first-class canonical source** and was treated as such.
-- The archive contains a broad historical package named `DROPI_CANONICAL/`.
-- The extracted repository folder `canonical/docs/00_MasterPlan/` is a file-level duplicate of the masterplan `.docx` corpus from the archive.
-- Several markdown documents exist **only** inside `04.zip`; these were recovered directly into the final package.
+- 04.zip is a **first-class canonical source** and was treated as such.
+- The archive contains a broad historical package named DROPI_CANONICAL/.
+- The extracted repository folder canonical/docs/00_MasterPlan/ is a file-level duplicate of the masterplan `.docx` corpus from the archive.
+- Several markdown documents exist **only** inside 04.zip; these were recovered directly into the final package.
 
 ## 3. Canonical Recovery Process
 
 1. Audited all repository markdown documents.
-2. Audited `04.zip` as a first-class documentation source.
-3. Verified the extracted `canonical/docs/00_MasterPlan/` corpus against `04.zip`.
+2. Audited 04.zip as a first-class documentation source.
+3. Verified the extracted canonical/docs/00_MasterPlan/ corpus against 04.zip.
 4. Chose the extracted `.docx` masterplan files as the package source for the masterplan corpus to avoid re-extracting duplicate binaries.
-5. Recovered ZIP-only markdown files directly from `04.zip`.
+5. Recovered ZIP-only markdown files directly from 04.zip.
 6. Selected active repository canonical and derived-reference documents that contribute durable ecosystem knowledge.
 7. Excluded implementation reports, test artifacts, setup guides, and duplicate helpers unless they added canonical knowledge.
 
@@ -38,48 +38,48 @@
 
 | Ownership class | Interpretation | Examples |
 |---|---|---|
-| Founder + canonical governance | Primary canonical authority | `canonical/*`, extracted masterplan, `04.zip` canonical chapter corpus |
-| Founder + Manus AI | Stable repository-level governance/reference documents | `ARCHITECTURE.md`, `canonical-structure.md`, `PROJECT_TRANSFER.md` |
+| Founder + canonical governance | Primary canonical authority | `canonical/*`, extracted masterplan, 04.zip canonical chapter corpus |
+| Founder + Manus AI | Stable repository-level governance/reference documents | ARCHITECTURE.md, canonical-structure.md, PROJECT_TRANSFER.md |
 | Manus AI derived reference | Secondary interpretation layer built from canonical sources | selected `BLUEPRINT/*`, selected `docs/*` |
-| Historical canonical package | Archived canonical bundle provenance | ZIP-only markdown recovered from `04.zip` |
+| Historical canonical package | Archived canonical bundle provenance | ZIP-only markdown recovered from 04.zip |
 
 ## 5. Duplicate Analysis
 
 ### Confirmed duplicates
 
-1. **147** extracted `.docx` files in `canonical/docs/00_MasterPlan/` are file-level duplicates of the same files in `04.zip`.
-2. `canonical-delivery-reference.md` is an **exact duplicate** of `canonical/DELIVERY_MULTIMODAL.md`.
+1. **147** extracted `.docx` files in canonical/docs/00_MasterPlan/ are file-level duplicates of the same files in 04.zip.
+2. canonical-delivery-reference.md is an **exact duplicate** of 03_Logistics/Delivery/DELIVERY_MULTIMODAL.md.
 
 ### Duplicate handling decision
 
 - Kept the extracted `.docx` corpus once.
 - Recovered ZIP-only markdown once.
-- Excluded the root duplicate `canonical-delivery-reference.md`.
+- Excluded the root duplicate canonical-delivery-reference.md.
 
 ## 6. Excluded Documents
 
 | Document | Reason excluded |
 |---|---|
-| `canonical-delivery-reference.md` | Exact duplicate of canonical/DELIVERY_MULTIMODAL.md. |
-| `AUDIT_TRACKING.md` | Operational audit tracker, not canonical ecosystem knowledge. |
-| `DECISION_LOG.md` | Repository decision registry; useful operationally but not canonical reference content. |
-| `DROPI_STATUS_REPORT_2026-06-30.md` | Historical implementation status report. |
-| `ROADMAP.md` | Meta-roadmap wrapper that mainly points to other sources. |
-| `SESSION_STATE.md` | Ephemeral session-state helper superseded by canonical/SESSION_HANDOVER.md. |
-| `SPRINT_1_2_SPEC.md` | Sprint-specific technical spec, not durable canonical ecosystem knowledge. |
-| `design.md` | UI design spec for the mobile app rather than ecosystem canon. |
-| `docs/ADMIN_PROVISIONING.md` | Operational admin-account procedure, not ecosystem canon. |
-| `docs/AUTH_PASSWORD_RESET_RCA_2026-07-12.md` | Incident RCA / verification report. |
-| `docs/BLUEPRINT_SPRINT_ROADMAP.md` | Operational sprint prioritization document. |
-| `docs/BLUEPRINT_TESTING_FORMAT.md` | Testing delivery standard, not ecosystem canon. |
-| `docs/BLUEPRINT_TESTING_REQUIREMENTS.md` | Testing process standard, not ecosystem canon. |
-| `docs/MARKETPLACE_IMPLEMENTATION_PLAN.md` | Implementation plan rather than canonical source. |
-| `docs/MOBILE_FIRST_SETUP.md` | Environment/setup guide. |
-| `references/periodic-updates.md` | Periodic operational updates. |
-| `server/README.md` | Implementation-facing backend guide. |
-| `tests/TEST_REGISTRY.md` | Testing registry. |
-| `todo.md` | Working task list. |
-| `BLUEPRINT/DROPi_NEXT_SPRINT_TASKS.md` | Sprint task list, not durable canon. |
+| canonical-delivery-reference.md | Exact duplicate of canonical/DELIVERY_MULTIMODAL.md. |
+| AUDIT_TRACKING.md | Operational audit tracker, not canonical ecosystem knowledge. |
+| DECISION_LOG.md | Repository decision registry; useful operationally but not canonical reference content. |
+| DROPI_STATUS_REPORT_2026-06-30.md | Historical implementation status report. |
+| ROADMAP.md | Meta-roadmap wrapper that mainly points to other sources. |
+| SESSION_STATE.md | Ephemeral session-state helper superseded by canonical/SESSION_HANDOVER.md. |
+| SPRINT_1_2_SPEC.md | Sprint-specific technical spec, not durable canonical ecosystem knowledge. |
+| design.md | UI design spec for the mobile app rather than ecosystem canon. |
+| docs/ADMIN_PROVISIONING.md | Operational admin-account procedure, not ecosystem canon. |
+| docs/AUTH_PASSWORD_RESET_RCA_2026-07-12.md | Incident RCA / verification report. |
+| docs/BLUEPRINT_SPRINT_ROADMAP.md | Operational sprint prioritization document. |
+| docs/BLUEPRINT_TESTING_FORMAT.md | Testing delivery standard, not ecosystem canon. |
+| docs/BLUEPRINT_TESTING_REQUIREMENTS.md | Testing process standard, not ecosystem canon. |
+| docs/MARKETPLACE_IMPLEMENTATION_PLAN.md | Implementation plan rather than canonical source. |
+| docs/MOBILE_FIRST_SETUP.md | Environment/setup guide. |
+| references/periodic-updates.md | Periodic operational updates. |
+| server/README.md | Implementation-facing backend guide. |
+| tests/TEST_REGISTRY.md | Testing registry. |
+| todo.md | Working task list. |
+| BLUEPRINT/DROPi_NEXT_SPRINT_TASKS.md | Sprint task list, not durable canon. |
 | `04.zip::04/DROPI_CANONICAL/DEPLOYMENT_COMPLETE.md` | Generated package status report, not canonical reference knowledge. |
 
 ## 7. Final Package Structure
@@ -108,7 +108,7 @@ DROPi_Canonical_Reference/
 |---|---:|
 | Repository Markdown documents | 40 |
 | Recovered from ZIP archives (direct ZIP-only markdown recovered) | 28 |
-| Recovered from historical documentation packages (`04.zip` total docs used) | 175 |
+| Recovered from historical documentation packages (04.zip total docs used) | 175 |
 | Recovered from extracted folders | 147 |
 | Included in final package (source documents only) | 195 |
 | Included in final package (including package control docs) | 199 |
@@ -122,8 +122,8 @@ DROPi_Canonical_Reference/
 Validation performed:
 
 - Verified every selected repository canonical markdown document was copied into the package.
-- Verified every ZIP-only markdown document selected for inclusion was recovered from `04.zip`.
-- Verified the extracted masterplan corpus was duplicated in `04.zip` and used as the authoritative extracted source in the package.
+- Verified every ZIP-only markdown document selected for inclusion was recovered from 04.zip.
+- Verified the extracted masterplan corpus was duplicated in 04.zip and used as the authoritative extracted source in the package.
 - Verified no duplicate source documents were intentionally included twice in the package.
 - Preserved original document bytes for copied/recovered files.
 - Generated a per-document manifest and a concept-oriented knowledge index.

@@ -21,7 +21,7 @@ DROPi Tycoon is a **simulation** of that ecosystem.
 
 - Active canonical repository documents
 - Recovered historical canonical documents from `04.zip`
-- Recovered extracted masterplan documents from `canonical/docs/00_MasterPlan/`
+- Recovered extracted masterplan documents in `01_Vision/`, `02_Architecture/`, `03_Logistics/`, `04_DronePorts/`, `05_Marketplace/`, `07_Economy/`, `08_AI/`, and `09_Reference/`
 - Supporting blueprint/reference documents that explain how canonical concepts were interpreted in the repository
 - A manifest, knowledge index, and audit report for provenance and navigation
 
@@ -40,7 +40,7 @@ DROPi Tycoon is a **simulation** of that ecosystem.
 4. `08_AI/Governance/AI_DEVELOPMENT_HANDOVER_CANON.md`
 5. `02_Architecture/Core/canonical-structure.md`
 6. `03_Logistics/Delivery/DELIVERY_MULTIMODAL.md`
-7. `01_Vision/` and `05_Marketplace/` source documents
+7. `01_Vision/` and `05_Marketplace/` source folders
 8. `AI_CANONICAL_REFERENCE_AUDIT_REPORT.md`
 
 ## Alignment Rule

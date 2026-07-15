@@ -26,7 +26,7 @@
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
 | **Data** | 2026-07-15 |
-| **Branch activ** | `copilot/analyze-login-flow-issue` |
+| **Branch activ** | `copilot/create-reference-package` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în sesiunile anterioare (context auth/reset + database-migration-audit + oauth-optional):
@@ -359,6 +359,39 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 
 ---
 
+### Sesiune curentă (Canonical Reference Package for DROPi Tycoon) — 2026-07-15:
+
+- Task NON-code executat: audit complet repository + audit complet `04.zip` + audit folder extras `canonical/docs/00_MasterPlan/`.
+- Confirmat că `04.zip` este sursă canonică de prim rang și conține:
+  - 29 documente Markdown în pachetul istoric `DROPI_CANONICAL/`
+  - 147 documente `.docx` masterplan duplicate în folderul extras `canonical/docs/00_MasterPlan/`
+- Creat pachetul portabil oficial:
+  - `DROPi_Canonical_Reference/`
+  - `DROPi_Canonical_Reference.zip`
+- Structură nouă organizată pe domenii:
+  - `00_Project/`, `01_Vision/`, `02_Architecture/`, `03_Logistics/`, `04_DronePorts/`, `05_Marketplace/`, `06_Roles/`, `07_Economy/`, `08_AI/`, `09_Reference/`
+- Fișiere de control generate:
+  - `DROPi_Canonical_Reference/README_FOR_DROPi_TYCOON.md`
+  - `DROPi_Canonical_Reference/CANONICAL_MANIFEST.md`
+  - `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md`
+  - `DROPi_Canonical_Reference/AI_CANONICAL_REFERENCE_AUDIT_REPORT.md`
+- Inventar final inclus:
+  - 195 documente sursă în pachet
+  - 199 fișiere totale în pachet incluzând documentele de control
+- Decizii cheie de includere/excludere:
+  - păstrate documentele canonice active din repository
+  - păstrate documentele masterplan extrase (nu dublurile lor din ZIP)
+  - recuperate separat documentele Markdown care existau numai în `04.zip`
+  - exclus `canonical-delivery-reference.md` deoarece este duplicat exact al `canonical/DELIVERY_MULTIMODAL.md`
+  - excluse rapoarte de implementare, tracking, setup operațional, registre de test și alte documente necanonice
+- Validări rulate:
+  - validare inventar ✅
+  - validare unicitate package paths ✅
+  - validare existență fișiere incluse ✅
+  - validare ZIP extraction / `ZipFile.testzip()` ✅
+  - verificare documente control (`README`, manifest, index, raport) ✅
+
+
 ## 2. Starea Curentă a Proiectului
 
 ### ✅ Funcții terminate
@@ -377,7 +410,7 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 - **Admin Provisioning Script** — `scripts/provision-admin.ts`, PR curent (necesită merge + execuție Railway one-time)
 
 ### 🔄 În progres
-- Branch curent: `copilot/analyze-login-flow-issue` — **Fix verify-email resend (mail delivery silent failure)** + fix login email normalization + repair-admin-hash script. Necesită merge + execuție Railway `pnpm db:repair-admin-hash`.
+- Branch curent: `copilot/create-reference-package` — **DROPi Canonical Reference Package** gata pentru review și PR dedicat.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -394,15 +427,13 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Merge PR-ul diagnostic din branch-ul curent în `main`.
-2. Așteptați Railway auto-deploy și verificați că `/api/health` returnează 200.
-3. Reproduceți O SINGURĂ dată login-ul cu `dropi.deliveries@gmail.com`.
-4. În Railway logs, capturați cele 4 semnale noi:
-   - `request_received`
-   - `user_found=yes/no`
-   - `bcrypt_compare=true/false`
-   - `failure_reason=...`
-5. Pe baza acestor log-uri, deschideți PR separat DOAR pentru fixul real (nu amestecat cu diagnosticul).
+1. Review PR-ul dedicat branch-ului `copilot/create-reference-package`.
+2. Verificați artefactele create:
+   - `DROPi_Canonical_Reference/`
+   - `DROPi_Canonical_Reference.zip`
+   - `DROPi_Canonical_Reference/AI_CANONICAL_REFERENCE_AUDIT_REPORT.md`
+3. După aprobare, folosiți acest pachet ca referință read-only pentru repository-ul DROPi Tycoon.
+4. Orice deviație gameplay față de documentele din pachet trebuie documentată explicit în Tycoon.
 
 ---
 
