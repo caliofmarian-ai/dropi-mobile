@@ -61,13 +61,25 @@ It consolidates canonical knowledge recovered from three source classes:
 | `08_AI/` | AI governance and DSS | AI handover canon and DSS chapters |
 | `09_Reference/` | Supporting reference, deployment, pitch, risk, audit, historical package context | Deployment docs, pitch docs, recovered package indexes, historical component readmes, testing/release, risk, boundaries |
 
-## 6. Duplicate and Supersession Rules
+## 6. Package Statistics (v2.0 — 2026-07-16)
 
-- The root source file canonical-delivery-reference.md was excluded because it is an exact duplicate of `03_Logistics/Delivery/DELIVERY_MULTIMODAL.md`.
+| Metric | Count |
+|---|---|
+| Total files packaged | 217 |
+| Canonical markdown documents | 52 |
+| Historical `.docx` documents (from 04.zip masterplan) | 147 |
+| Recovered ZIP-only markdown documents | 18 |
+| Package control documents | 4 |
+| Source commit | `9bb32560781d30e32b2a6c9b457b9e23287fe92a` |
+| Package version | `v2.0.0` |
+
+## 7. Duplicate and Supersession Rules
+
+- `canonical-delivery-reference.md` is included in `03_Logistics/Delivery_Reference/` as an independent canonical entry (it contains specific cross-references and metadata not present in `DELIVERY_MULTIMODAL.md`).
 - The extracted masterplan corpus duplicates the masterplan `.docx` files inside `04.zip`; the package keeps the extracted copies for readability and provenance, and recovers ZIP-only markdown separately.
 - Derived blueprints are kept, but they do **not** outrank primary canonical sources.
 
-## 7. Recommended Tycoon Usage
+## 8. Recommended Tycoon Usage
 
 Use this package to align:
 

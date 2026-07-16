@@ -25,8 +25,8 @@
 | Câmp | Valoare |
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
-| **Data** | 2026-07-15 |
-| **Branch activ** | `copilot/create-reference-package` |
+| **Data** | 2026-07-16 |
+| **Branch activ** | `copilot/create-dropi-canonical-reference` |
 | **Agent** | GitHub Copilot Coding Agent |
 
 ### Ce s-a făcut în sesiunile anterioare (context auth/reset + database-migration-audit + oauth-optional):
@@ -427,12 +427,15 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Review PR-ul dedicat branch-ului `copilot/create-reference-package`.
+1. Review PR-ul dedicat branch-ului `copilot/create-dropi-canonical-reference`.
 2. Verificați artefactele create:
-   - `DROPi_Canonical_Reference/`
-   - `DROPi_Canonical_Reference.zip`
+   - `DROPi_Canonical_Reference/` (217 fișiere, v2.0.0)
+   - `DROPi_Canonical_Reference.zip` (2.6MB, validat)
+   - `DROPi_Canonical_Reference/CANONICAL_MANIFEST.md`
+   - `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md`
+   - `DROPi_Canonical_Reference/README_FOR_DROPi_TYCOON.md`
    - `DROPi_Canonical_Reference/AI_CANONICAL_REFERENCE_AUDIT_REPORT.md`
-3. După aprobare, folosiți acest pachet ca referință read-only pentru repository-ul DROPi Tycoon.
+3. După aprobare, folosiți ZIP-ul ca referință read-only pentru repository-ul DROPi Tycoon.
 4. Orice deviație gameplay față de documentele din pachet trebuie documentată explicit în Tycoon.
 
 ---
