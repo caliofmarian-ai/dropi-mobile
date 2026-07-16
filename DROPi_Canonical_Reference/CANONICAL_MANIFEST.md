@@ -255,3 +255,72 @@ All `Location` paths below are relative to the root of `DROPi_Canonical_Referenc
 | 20.0.3 ANEXA 20.C ╤В╨Р╨д DECIZIE DE TRECERE -TEMPLATE | `09_Reference/Volume_II_Conclusion/02_PRODUS & TEHNOLOGIE/20.0.3_ANEXA 20.C ╤В╨Р╨д DECIZIE DE TRECERE -TEMPLATE.docx` | Recovered formal close-out of Volume II and transition criteria. | Founder / historical canonical package | Depends on all prior Volume II chapters. | 05_Marketplace/*; 02_Architecture/*; 03_Logistics/* | active historical canonical source |
 | 20.0 CAPITOLUL 20 ╤В╨Р╨д CONCLUZIA VOLUMULUI II | `09_Reference/Volume_II_Conclusion/02_PRODUS & TEHNOLOGIE/20.0_CAPITOLUL 20 ╤В╨Р╨д CONCLUZIA VOLUMULUI II.docx` | Recovered formal close-out of Volume II and transition criteria. | Founder / historical canonical package | Depends on all prior Volume II chapters. | 05_Marketplace/*; 02_Architecture/*; 03_Logistics/* | active historical canonical source |
 | 20 CONCLUZIA VOLUMULUI II тХЪ╨иI CRITERIILE DE TRECERE LA VOLUMUL III | `09_Reference/Volume_II_Conclusion/02_PRODUS & TEHNOLOGIE/20_CONCLUZIA VOLUMULUI II тХЪ╨иI CRITERIILE DE TRECERE LA VOLUMUL III.docx` | Recovered formal close-out of Volume II and transition criteria. | Founder / historical canonical package | Depends on all prior Volume II chapters. | 05_Marketplace/*; 02_Architecture/*; 03_Logistics/* | active historical canonical source |
+
+## v2.0 — Additional Recovered Documents (2026-07-16)
+
+### 00_Project — Status Reports & Sprint Specs
+
+| Title | Location | Reason for inclusion | Canonical owner | Dependency chain | Related documents | Status |
+|---|---|---|---|---|---|---|
+| DROPi — Audit Tracking | `00_Project/Status_Reports/AUDIT_TRACKING.md` | Active audit tracking document recording all canonical audit sessions and findings. | Founder + AI agents | Depends on canonical governance documents and session handover. | AGENTS.md; SESSION_HANDOVER.md | active audit record |
+| DROPi — Status Report 2026-06-30 | `00_Project/Status_Reports/DROPI_STATUS_REPORT_2026-06-30.md` | Historical status report capturing platform state at end of June 2026, including Railway backend, mobile app, and authentication status. | Founder + Copilot Agent | Depends on deployment configuration and backend migrations. | DEPLOYMENT.md; SESSION_HANDOVER.md | historical status record |
+| DROPi — Session State | `00_Project/Status_Reports/SESSION_STATE.md` | Active session state record tracking current working context across agent handoffs. | AI agents | Depends on SESSION_HANDOVER.md and active task state. | SESSION_HANDOVER.md; AGENTS.md | active session state |
+| DROPi — Sprint 1 & 2 Spec | `00_Project/Sprint_Specs/SPRINT_1_2_SPEC.md` | Canonical sprint specification defining deliverables, acceptance criteria, and scope for Sprints 1 and 2. | Founder | Depends on ROADMAP.md and canonical architecture decisions. | ROADMAP.md; DECISION_LOG.md | active sprint reference |
+| DROPi — Decision Log | `00_Project/Decision_Log/DECISION_LOG.md` | Complete log of architectural, product, and operational decisions made during platform development. | Founder + AI agents | Depends on canonical/AI_DEVELOPMENT_HANDOVER_CANON.md and project governance. | AI_DEVELOPMENT_HANDOVER_CANON.md; AGENTS.md | active canonical decision log |
+
+### 02_Architecture — Design
+
+| Title | Location | Reason for inclusion | Canonical owner | Dependency chain | Related documents | Status |
+|---|---|---|---|---|---|---|
+| DROPi — Design Principles | `02_Architecture/Design/design.md` | Captures UI/UX design principles, color system, component structure, and visual identity rules for the DROPi platform. | Founder | Depends on brand decisions and product scope. | ARCHITECTURE.md; canonical-structure.md | active design reference |
+
+### 03_Logistics — Delivery Reference
+
+| Title | Location | Reason for inclusion | Canonical owner | Dependency chain | Related documents | Status |
+|---|---|---|---|---|---|---|
+| DROPi — Canonical Delivery Reference | `03_Logistics/Delivery_Reference/canonical-delivery-reference.md` | Official canonical reference for multimodal delivery rules, badge eligibility, and delivery system constraints. | Founder | Depends on DELIVERY_MULTIMODAL.md and role definitions. | DELIVERY_MULTIMODAL.md; AI_AGENT_SYSTEM.md | primary active canonical |
+
+### 05_Marketplace — Implementation
+
+| Title | Location | Reason for inclusion | Canonical owner | Dependency chain | Related documents | Status |
+|---|---|---|---|---|---|---|
+| DROPi — Marketplace Implementation Plan | `05_Marketplace/Implementation/MARKETPLACE_IMPLEMENTATION_PLAN.md` | Detailed implementation plan for the DROPi marketplace, including feature prioritization, technical approach, and delivery milestones. | Founder + AI agents | Depends on marketplace canonical analysis and architecture decisions. | marketplace-canonical-analysis.md; BLUEPRINT_MARKETPLACE_DROPI.md | active implementation reference |
+
+### 09_Reference — Mobile Setup
+
+| Title | Location | Reason for inclusion | Canonical owner | Dependency chain | Related documents | Status |
+|---|---|---|---|---|---|---|
+| DROPi — Mobile First Setup Guide | `09_Reference/Mobile_Setup/MOBILE_FIRST_SETUP.md` | Step-by-step guide for first-time mobile developer environment setup for the DROPi app. | Founder + AI agents | Depends on package.json and EAS configuration. | eas.json; app.config.ts; DEPLOYMENT.md | active setup reference |
+
+### 09_Reference — Blueprint Sprint & Next Tasks
+
+| Title | Location | Reason for inclusion | Canonical owner | Dependency chain | Related documents | Status |
+|---|---|---|---|---|---|---|
+| DROPi — Sprint Roadmap Blueprint | `09_Reference/Blueprint/Sprint_Roadmap/BLUEPRINT_SPRINT_ROADMAP.md` | Blueprint-level sprint roadmap defining the phased delivery approach for DROPi features. | Founder + AI agents | Depends on ROADMAP.md and SPRINT_1_2_SPEC.md. | ROADMAP.md; SPRINT_1_2_SPEC.md; DROPi_NEXT_SPRINT_TASKS.md | active sprint blueprint |
+| DROPi — Next Sprint Tasks | `09_Reference/Blueprint/Sprint_Roadmap/DROPi_NEXT_SPRINT_TASKS.md` | Active task list for the upcoming sprint, including prioritized deliverables and blockers. | AI agents | Depends on BLUEPRINT_SPRINT_ROADMAP.md and current sprint state. | BLUEPRINT_SPRINT_ROADMAP.md; SPRINT_1_2_SPEC.md | active task reference |
+
+### 09_Reference — Testing Blueprints
+
+| Title | Location | Reason for inclusion | Canonical owner | Dependency chain | Related documents | Status |
+|---|---|---|---|---|---|---|
+| DROPi — Testing Blueprint Format | `09_Reference/Testing_Release/Blueprints/BLUEPRINT_TESTING_FORMAT.md` | Canonical format specification for writing DROPi test blueprints and test documentation. | AI agents | Depends on testing requirements and architecture decisions. | BLUEPRINT_TESTING_REQUIREMENTS.md | active testing reference |
+| DROPi — Testing Requirements | `09_Reference/Testing_Release/Blueprints/BLUEPRINT_TESTING_REQUIREMENTS.md` | Complete testing requirements for all DROPi platform components including mobile, server, and integration layers. | Founder + AI agents | Depends on architecture and product scope definitions. | BLUEPRINT_TESTING_FORMAT.md; ARCHITECTURE.md | active testing reference |
+
+### 09_Reference — Historical RCA
+
+| Title | Location | Reason for inclusion | Canonical owner | Dependency chain | Related documents | Status |
+|---|---|---|---|---|---|---|
+| DROPi — Auth Password Reset RCA 2026-07-12 | `09_Reference/Historical_RCA/AUTH_PASSWORD_RESET_RCA_2026-07-12.md` | Root cause analysis for authentication and password reset failures identified on 2026-07-12; documents diagnosis, fix, and validation. | Copilot Agent | Depends on server auth implementation and SMTP configuration. | SESSION_HANDOVER.md; ADMIN_PROVISIONING.md | historical RCA document |
+
+### 09_Reference — Deployment Additions
+
+| Title | Location | Reason for inclusion | Canonical owner | Dependency chain | Related documents | Status |
+|---|---|---|---|---|---|---|
+| DROPi — Admin Provisioning Guide | `09_Reference/Deployment/ADMIN_PROVISIONING.md` | Step-by-step guide for provisioning the DROPi admin account on Railway production, including env var requirements and idempotency guarantees. | Copilot Agent | Depends on server auth implementation, DATABASE_URL, and Railway deployment. | DEPLOYMENT.md; AUTH_PASSWORD_RESET_RCA_2026-07-12.md | active operational reference |
+
+### 09_Reference — Roadmap & Periodic Updates
+
+| Title | Location | Reason for inclusion | Canonical owner | Dependency chain | Related documents | Status |
+|---|---|---|---|---|---|---|
+| DROPi — Roadmap | `09_Reference/ROADMAP.md` | Top-level product and technical roadmap defining the DROPi delivery phases and milestone targets. | Founder | Depends on SPRINT_1_2_SPEC.md and canonical architecture. | SPRINT_1_2_SPEC.md; BLUEPRINT_SPRINT_ROADMAP.md | active product roadmap |
+| DROPi — Periodic Updates | `09_Reference/Periodic_Updates/periodic-updates.md` | Periodic update log tracking incremental changes, decisions, and context between major sessions. | Founder + AI agents | Depends on SESSION_HANDOVER.md and active development context. | SESSION_HANDOVER.md; DECISION_LOG.md | active update log |

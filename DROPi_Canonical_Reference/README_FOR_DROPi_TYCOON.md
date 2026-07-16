@@ -1,5 +1,19 @@
 # README_FOR_DROPi_TYCOON
 
+## Package Metadata
+
+| Field | Value |
+|-------|-------|
+| **Purpose** | Official canonical reference export for DROPi Tycoon alignment |
+| **Source Repository** | `caliofmarian-ai/dropi-mobile` |
+| **Source Branch** | `copilot/create-dropi-canonical-reference` |
+| **Source Commit** | `9bb32560781d30e32b2a6c9b457b9e23287fe92a` |
+| **Package Version** | `v2.0.0` |
+| **Generation Date** | `2026-07-16` |
+| **Intended Use** | Read-only reference for DROPi Tycoon game design alignment |
+| **Read-Only Policy** | This package must never be modified; import updates only from DROPi repository |
+| **Canonical Authority** | DROPi remains the sole canonical authority for the real platform |
+
 ## Purpose
 
 This package is the **read-only canonical reference package** for the DROPi ecosystem.
