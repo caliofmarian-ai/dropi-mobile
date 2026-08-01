@@ -1,0 +1,3423 @@
+{
+  "anomaly_entries": [
+    {
+      "archive_index": 12,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+      "compressed_size": 14297,
+      "crc32": "2b9ea53b",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "00.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17056,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 13,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00.1_PACHET INVESTITORI тАФ EXECUTIVE ^LM AUDIT EXTRACTS.docx",
+      "compressed_size": 14104,
+      "crc32": "61f669a5",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "00.1_PACHET INVESTITORI тАФ EXECUTIVE ^LM AUDIT EXTRACTS.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00.1_PACHET INVESTITORI тАФ EXECUTIVE ^LM AUDIT EXTRACTS.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16859,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 14,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+      "compressed_size": 14542,
+      "crc32": "d648471d",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "00_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17258,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 15,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 6.docx",
+      "compressed_size": 13518,
+      "crc32": "88a050a2",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "06.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 6.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 6.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16277,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 16,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.0_CAPITOLUL 6 тАФ PRODUSUL DROPi.docx",
+      "compressed_size": 13969,
+      "crc32": "3b6e4f24",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "06.0_CAPITOLUL 6 тАФ PRODUSUL DROPi.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.0_CAPITOLUL 6 тАФ PRODUSUL DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16691,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 17,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.1_ANEXA 6.A тАФ HART─В PRODUS -PRODUCT MAP.docx",
+      "compressed_size": 14396,
+      "crc32": "6f3f1241",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "06.1_ANEXA 6.A тАФ HART─В PRODUS -PRODUCT MAP.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.1_ANEXA 6.A тАФ HART─В PRODUS -PRODUCT MAP.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17220,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 18,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.2_ANEXA 6.B тАФ SEPARARE RESPONSABILIT─В╚ЪI.docx",
+      "compressed_size": 14162,
+      "crc32": "4955200f",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "06.2_ANEXA 6.B тАФ SEPARARE RESPONSABILIT─В╚ЪI.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.2_ANEXA 6.B тАФ SEPARARE RESPONSABILIT─В╚ЪI.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16986,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 19,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.3_ANEXA 6.C тАФ PRINCIPII DE DESIGN PRODUS.docx",
+      "compressed_size": 14864,
+      "crc32": "5e5a9073",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "06.3_ANEXA 6.C тАФ PRINCIPII DE DESIGN PRODUS.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.3_ANEXA 6.C тАФ PRINCIPII DE DESIGN PRODUS.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17686,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 20,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.4_ANEXA 6.D тАФ REGULI DE EVOLU╚ЪIE PRODUS.docx",
+      "compressed_size": 14785,
+      "crc32": "71ffdb68",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "06.4_ANEXA 6.D тАФ REGULI DE EVOLU╚ЪIE PRODUS.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.4_ANEXA 6.D тАФ REGULI DE EVOLU╚ЪIE PRODUS.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17610,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 22,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.X_Marketplace-ul DROPi тАФ pozi╚Ыionare corect─Г.docx",
+      "compressed_size": 13651,
+      "crc32": "e6a8ba69",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "06.X_Marketplace-ul DROPi тАФ pozi╚Ыionare corect─Г.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.X_Marketplace-ul DROPi тАФ pozi╚Ыionare corect─Г.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16402,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 24,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.0.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+      "compressed_size": 14621,
+      "crc32": "77d6f6ba",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.0.0.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.0.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17453,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 25,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 7.docx",
+      "compressed_size": 15267,
+      "crc32": "0dad4fcb",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 7.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 7.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18083,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 26,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.1_MAPARE COMPLET─В CAPITOLE 7тАУ12.docx",
+      "compressed_size": 16496,
+      "crc32": "f61e86ab",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.0.1_MAPARE COMPLET─В CAPITOLE 7тАУ12.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.1_MAPARE COMPLET─В CAPITOLE 7тАУ12.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19318,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 27,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.2_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+      "compressed_size": 16568,
+      "crc32": "e2a007d3",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.0.2_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.2_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19386,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 28,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.1TABEL DE RISC LEGAL тАФ APARI╚ЪIE ACCIDENTAL─В PE SITE-UL DROPi.docx",
+      "compressed_size": 16222,
+      "crc32": "13f21e1e",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.1.1TABEL DE RISC LEGAL тАФ APARI╚ЪIE ACCIDENTAL─В PE SITE-UL DROPi.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.1TABEL DE RISC LEGAL тАФ APARI╚ЪIE ACCIDENTAL─В PE SITE-UL DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19043,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 29,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.2PROCEDUR─В OFICIAL─В тАФ SITE INCIDENT RESPONSE.docx",
+      "compressed_size": 15910,
+      "crc32": "d71be414",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.1.2PROCEDUR─В OFICIAL─В тАФ SITE INCIDENT RESPONSE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.2PROCEDUR─В OFICIAL─В тАФ SITE INCIDENT RESPONSE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18740,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 30,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.3_CHECKLIST QA тАФ ├ОNAINTE DE FIECARE DEPLOY SITE DROPi.docx",
+      "compressed_size": 15468,
+      "crc32": "b857621a",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.1.3_CHECKLIST QA тАФ ├ОNAINTE DE FIECARE DEPLOY SITE DROPi.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.3_CHECKLIST QA тАФ ├ОNAINTE DE FIECARE DEPLOY SITE DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18287,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 31,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.4_ANEX─В тАФ PROCEDUR─В ROLLBACK POST-DEPLOY.docx",
+      "compressed_size": 15567,
+      "crc32": "e463ddc6",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.1.4_ANEX─В тАФ PROCEDUR─В ROLLBACK POST-DEPLOY.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.4_ANEX─В тАФ PROCEDUR─В ROLLBACK POST-DEPLOY.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18390,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 33,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.2_RACI тАФ APROBARE ╚ШI RESPONSABILIT─В╚ЪI SITE DROPi.docx",
+      "compressed_size": 15482,
+      "crc32": "6847e364",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.2_RACI тАФ APROBARE ╚ШI RESPONSABILIT─В╚ЪI SITE DROPi.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.2_RACI тАФ APROBARE ╚ШI RESPONSABILIT─В╚ЪI SITE DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18316,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 34,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.3_ANEX─В тАФ TEMPLATE тАЮSAFE PUBLIC STATEMENTSтАЭ.docx",
+      "compressed_size": 13978,
+      "crc32": "e8d9167e",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.3_ANEX─В тАФ TEMPLATE тАЮSAFE PUBLIC STATEMENTSтАЭ.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.3_ANEX─В тАФ TEMPLATE тАЮSAFE PUBLIC STATEMENTSтАЭ.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16734,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 35,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.4_ANEX─В тАФ SITE GOVERNANCE CHARTER.docx",
+      "compressed_size": 15907,
+      "crc32": "fb95fdd3",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.4_ANEX─В тАФ SITE GOVERNANCE CHARTER.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.4_ANEX─В тАФ SITE GOVERNANCE CHARTER.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18691,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 36,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.5_CHECKLIST тАФ PUBLIC APPEARANCE - INTERVIEW.docx",
+      "compressed_size": 15328,
+      "crc32": "65297663",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.5_CHECKLIST тАФ PUBLIC APPEARANCE - INTERVIEW.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.5_CHECKLIST тАФ PUBLIC APPEARANCE - INTERVIEW.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18153,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 37,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.0_CHECKLIST тАФ TRAINING INTERN -ONBOARDING COMUNICARE.docx",
+      "compressed_size": 15427,
+      "crc32": "27dd66bc",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.6.0_CHECKLIST тАФ TRAINING INTERN -ONBOARDING COMUNICARE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.0_CHECKLIST тАФ TRAINING INTERN -ONBOARDING COMUNICARE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18260,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 38,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.1_TEST DE VALIDARE INTERN─В тАФ COMUNICARE PUBLIC─В (PASS -FAIL).docx",
+      "compressed_size": 15412,
+      "crc32": "5893ffef",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.6.1_TEST DE VALIDARE INTERN─В тАФ COMUNICARE PUBLIC─В (PASS -FAIL).docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.1_TEST DE VALIDARE INTERN─В тАФ COMUNICARE PUBLIC─В (PASS -FAIL).docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18237,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 39,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.2_CURRICULUM DE TRAINING INTERN тАФ COMUNICARE PUBLIC─В DROPi.docx",
+      "compressed_size": 14217,
+      "crc32": "3bf92f8c",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.6.2_CURRICULUM DE TRAINING INTERN тАФ COMUNICARE PUBLIC─В DROPi.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.2_CURRICULUM DE TRAINING INTERN тАФ COMUNICARE PUBLIC─В DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16972,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 40,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.3_FORMULAR INTERN тАФ COMMUNICATION COMPLIANCE ACKNOWLEDGEMENT.docx",
+      "compressed_size": 13811,
+      "crc32": "35770182",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.6.3_FORMULAR INTERN тАФ COMMUNICATION COMPLIANCE ACKNOWLEDGEMENT.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.3_FORMULAR INTERN тАФ COMMUNICATION COMPLIANCE ACKNOWLEDGEMENT.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16562,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 41,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6_ANEX─В тАФ тАЮRED LINESтАЭ -SUBIECTE INTERZISE ABSOLUT.docx",
+      "compressed_size": 15975,
+      "crc32": "bddb9850",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.6_ANEX─В тАФ тАЮRED LINESтАЭ -SUBIECTE INTERZISE ABSOLUT.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6_ANEX─В тАФ тАЮRED LINESтАЭ -SUBIECTE INTERZISE ABSOLUT.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18787,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 42,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.X.1_ANEXA 7.X тАФ REGULI DE DESIGN UI MARKETPLACE.docx",
+      "compressed_size": 15826,
+      "crc32": "5e628f5d",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.X.1_ANEXA 7.X тАФ REGULI DE DESIGN UI MARKETPLACE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.X.1_ANEXA 7.X тАФ REGULI DE DESIGN UI MARKETPLACE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18656,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 43,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.X_Marketplace-ul ├оn cadrul site-ului DROPi.docx",
+      "compressed_size": 13836,
+      "crc32": "e1ff6a3a",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "07.X_Marketplace-ul ├оn cadrul site-ului DROPi.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.X_Marketplace-ul ├оn cadrul site-ului DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16553,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 45,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 8.docx",
+      "compressed_size": 14791,
+      "crc32": "3aa22d61",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "08.0.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 8.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 8.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17616,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 46,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 8тАУ12.docx",
+      "compressed_size": 14756,
+      "crc32": "4c13fa35",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "08.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 8тАУ12.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 8тАУ12.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17506,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 47,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.0_ANEXA 8.A тАФ MAPARE ROLURI ^0 PERMISIUNI (RBAC).docx",
+      "compressed_size": 13147,
+      "crc32": "23f473db",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "08.0.1.0_ANEXA 8.A тАФ MAPARE ROLURI ^0 PERMISIUNI (RBAC).docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.0_ANEXA 8.A тАФ MAPARE ROLURI ^0 PERMISIUNI (RBAC).docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 15933,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 48,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.1_ANEXA 8.B тАФ ORDER LIFECYCLE.docx",
+      "compressed_size": 12776,
+      "crc32": "77d07868",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "08.0.1.1_ANEXA 8.B тАФ ORDER LIFECYCLE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.1_ANEXA 8.B тАФ ORDER LIFECYCLE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 15600,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 49,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.2_ANEXA 8.C тАФ FALLBACK ^0 INTERVEN╚ЪIE.docx",
+      "compressed_size": 12643,
+      "crc32": "54ef6ecc",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "08.0.1.2_ANEXA 8.C тАФ FALLBACK ^0 INTERVEN╚ЪIE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.2_ANEXA 8.C тАФ FALLBACK ^0 INTERVEN╚ЪIE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 15484,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 50,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.3_ANEXA 8.D тАФ SUPERVIZARE PILOT.docx",
+      "compressed_size": 12633,
+      "crc32": "e40bbc93",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "08.0.1.3_ANEXA 8.D тАФ SUPERVIZARE PILOT.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.3_ANEXA 8.D тАФ SUPERVIZARE PILOT.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 15450,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 52,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.1.0_CAPITOLUL 8 тАФ DEZVOLTAREA APLICA╚ЪIEI DROPi -CORE OPERA╚ЪIONAL.docx",
+      "compressed_size": 15247,
+      "crc32": "9e19529f",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "08.1.0_CAPITOLUL 8 тАФ DEZVOLTAREA APLICA╚ЪIEI DROPi -CORE OPERA╚ЪIONAL.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.1.0_CAPITOLUL 8 тАФ DEZVOLTAREA APLICA╚ЪIEI DROPi -CORE OPERA╚ЪIONAL.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17995,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 57,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0.1_ANEXA 9.A тАФ EVENIMENTE DRONEPORT ^0 LOGARE.docx",
+      "compressed_size": 13754,
+      "crc32": "59a3e469",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "09.0.0.1_ANEXA 9.A тАФ EVENIMENTE DRONEPORT ^0 LOGARE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0.1_ANEXA 9.A тАФ EVENIMENTE DRONEPORT ^0 LOGARE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16471,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 58,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0.2_ANEXA 9.B тАФ PROCESE PERMISE - INTERZISE DRONEPORT.docx",
+      "compressed_size": 13481,
+      "crc32": "93b29caa",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "09.0.0.2_ANEXA 9.B тАФ PROCESE PERMISE - INTERZISE DRONEPORT.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0.2_ANEXA 9.B тАФ PROCESE PERMISE - INTERZISE DRONEPORT.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16241,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 59,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 9тАУ12.docx",
+      "compressed_size": 15529,
+      "crc32": "573826de",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "09.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 9тАУ12.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 9тАУ12.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18344,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 60,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 9.docx",
+      "compressed_size": 14777,
+      "crc32": "e31712dd",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "09.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 9.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 9.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17601,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 62,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0.0.1_ANEXA 10.A тАФ GUARDRAILS DSS -REGULI STRICTE.docx",
+      "compressed_size": 14775,
+      "crc32": "5a248be2",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "10.0.0.1_ANEXA 10.A тАФ GUARDRAILS DSS -REGULI STRICTE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0.0.1_ANEXA 10.A тАФ GUARDRAILS DSS -REGULI STRICTE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17597,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 63,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0.0.2_ANEXA 10.B тАФ EXEMPLE DE RECOMAND─ВRI DSS.docx",
+      "compressed_size": 12871,
+      "crc32": "14c190be",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "10.0.0.2_ANEXA 10.B тАФ EXEMPLE DE RECOMAND─ВRI DSS.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0.0.2_ANEXA 10.B тАФ EXEMPLE DE RECOMAND─ВRI DSS.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 15633,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 64,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 10.docx",
+      "compressed_size": 14845,
+      "crc32": "678ceee7",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "10.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 10.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 10.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17678,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 65,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.1_CAPITOLUL 10 тАФ AI ASISTAT -DSS.docx",
+      "compressed_size": 16306,
+      "crc32": "0a45065e",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "10.1_CAPITOLUL 10 тАФ AI ASISTAT -DSS.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.1_CAPITOLUL 10 тАФ AI ASISTAT -DSS.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19129,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 67,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+      "compressed_size": 15034,
+      "crc32": "a3df3c29",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "11.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17822,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 68,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.1ANEXA 11.A тАФ SCENARII DE INTERVEN╚ЪIE PILOT.docx",
+      "compressed_size": 15157,
+      "crc32": "6f572c62",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "11.0.1ANEXA 11.A тАФ SCENARII DE INTERVEN╚ЪIE PILOT.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.1ANEXA 11.A тАФ SCENARII DE INTERVEN╚ЪIE PILOT.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17981,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 69,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.2_ANEXA 11.B тАФ GESTIONARE INCIDENTE OPERA╚ЪIONALE.docx",
+      "compressed_size": 15502,
+      "crc32": "36c01b37",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "11.0.2_ANEXA 11.B тАФ GESTIONARE INCIDENTE OPERA╚ЪIONALE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.2_ANEXA 11.B тАФ GESTIONARE INCIDENTE OPERA╚ЪIONALE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18329,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 70,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+      "compressed_size": 14847,
+      "crc32": "445b4fc5",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "11.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17630,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 71,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.1_CAPITOLUL 11 тАФ LIVRARE AUTONOM─В SUPERVIZAT─В.docx",
+      "compressed_size": 14618,
+      "crc32": "a49b05fb",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "11.1_CAPITOLUL 11 тАФ LIVRARE AUTONOM─В SUPERVIZAT─В.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.1_CAPITOLUL 11 тАФ LIVRARE AUTONOM─В SUPERVIZAT─В.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17364,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 73,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.0_ANEXA 12.A тАФ STRUCTUR─В LOG-URI.docx",
+      "compressed_size": 15872,
+      "crc32": "50a04515",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "12.0.0_ANEXA 12.A тАФ STRUCTUR─В LOG-URI.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.0_ANEXA 12.A тАФ STRUCTUR─В LOG-URI.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18660,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 74,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.1_ANEXA 12.B тАФ POLITIC─В DE RETEN╚ЪIE DATE.docx",
+      "compressed_size": 15513,
+      "crc32": "fd8135c8",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "12.0.1_ANEXA 12.B тАФ POLITIC─В DE RETEN╚ЪIE DATE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.1_ANEXA 12.B тАФ POLITIC─В DE RETEN╚ЪIE DATE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18352,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 75,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.2_ANEXA 12.C тАФ CHECKLIST GDPR COMPLIANCE.docx",
+      "compressed_size": 15239,
+      "crc32": "0fe3c42c",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "12.0.2_ANEXA 12.C тАФ CHECKLIST GDPR COMPLIANCE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.2_ANEXA 12.C тАФ CHECKLIST GDPR COMPLIANCE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18070,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 76,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+      "compressed_size": 15452,
+      "crc32": "b32e4c88",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "12.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18281,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 77,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+      "compressed_size": 15530,
+      "crc32": "b38348c8",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "12.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18311,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 79,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+      "compressed_size": 14917,
+      "crc32": "d0349a80",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "13.0.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17702,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 80,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+      "compressed_size": 14961,
+      "crc32": "fe7d2bdd",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "13.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17747,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 81,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.1_CHECKLIST 13.A тАФ TESTARE FUNC╚ЪIONAL─В.docx",
+      "compressed_size": 13469,
+      "crc32": "cde2a089",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "13.0.1_CHECKLIST 13.A тАФ TESTARE FUNC╚ЪIONAL─В.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.1_CHECKLIST 13.A тАФ TESTARE FUNC╚ЪIONAL─В.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16234,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 82,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.2_CHECKLIST 13.B тАФ TESTARE DE INTEGRARE.docx",
+      "compressed_size": 14534,
+      "crc32": "b7189f51",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "13.0.2_CHECKLIST 13.B тАФ TESTARE DE INTEGRARE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.2_CHECKLIST 13.B тАФ TESTARE DE INTEGRARE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17356,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 83,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.3_CHECKLIST 13.C тАФ TESTARE DE SIGURAN╚Ъ─В.docx",
+      "compressed_size": 14634,
+      "crc32": "dcf585b5",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "13.0.3_CHECKLIST 13.C тАФ TESTARE DE SIGURAN╚Ъ─В.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.3_CHECKLIST 13.C тАФ TESTARE DE SIGURAN╚Ъ─В.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17447,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 84,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.4_CHECKLIST 13.D тАФ TESTARE RBAC -ROLURI ^0 PERMISIUNI.docx",
+      "compressed_size": 13758,
+      "crc32": "b5bfff99",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "13.0.4_CHECKLIST 13.D тАФ TESTARE RBAC -ROLURI ^0 PERMISIUNI.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.4_CHECKLIST 13.D тАФ TESTARE RBAC -ROLURI ^0 PERMISIUNI.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16522,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 85,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.5_CHECKLIST 13.E тАФ CHECKLIST DE RELEASE.docx",
+      "compressed_size": 14726,
+      "crc32": "4714cd86",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "13.0.5_CHECKLIST 13.E тАФ CHECKLIST DE RELEASE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.5_CHECKLIST 13.E тАФ CHECKLIST DE RELEASE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17515,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 86,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.6_CHECKLIST 13.F тАФ ROLLBACK READINESS.docx",
+      "compressed_size": 14990,
+      "crc32": "d7810840",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "13.0.6_CHECKLIST 13.F тАФ ROLLBACK READINESS.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.6_CHECKLIST 13.F тАФ ROLLBACK READINESS.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17807,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 87,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0_CAPITOLUL 13 тАФ TESTARE- QA - RELEASE DISCIPLINE.docx",
+      "compressed_size": 14003,
+      "crc32": "027d1d06",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "13.0_CAPITOLUL 13 тАФ TESTARE- QA - RELEASE DISCIPLINE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0_CAPITOLUL 13 тАФ TESTARE- QA - RELEASE DISCIPLINE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16754,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 89,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 14.docx",
+      "compressed_size": 15509,
+      "crc32": "7525787c",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "14.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 14.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 14.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18325,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 90,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14.0_CAPITOLUL 14 тАФ ARHITECTURA DIGITAL─В.docx",
+      "compressed_size": 16084,
+      "crc32": "cd9219f0",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "14.0_CAPITOLUL 14 тАФ ARHITECTURA DIGITAL─В.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14.0_CAPITOLUL 14 тАФ ARHITECTURA DIGITAL─В.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18916,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 92,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 15.docx",
+      "compressed_size": 13770,
+      "crc32": "e05ed974",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "15.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 15.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 15.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16522,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 93,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.0_CAPITOLUL 15 тАФ INTEGRARE & ECOSISTEM.docx",
+      "compressed_size": 16210,
+      "crc32": "27057d42",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "15.0_CAPITOLUL 15 тАФ INTEGRARE & ECOSISTEM.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.0_CAPITOLUL 15 тАФ INTEGRARE & ECOSISTEM.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18994,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 94,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.1_ANEXA 15.A тАФ TIPURI DE INTEGRARE & DREPTURI.docx",
+      "compressed_size": 15390,
+      "crc32": "0545f863",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "15.1_ANEXA 15.A тАФ TIPURI DE INTEGRARE & DREPTURI.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.1_ANEXA 15.A тАФ TIPURI DE INTEGRARE & DREPTURI.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18213,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 95,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.2_ANEXA 15.B тАФ MODEL API ^0 WEBHOOK.docx",
+      "compressed_size": 15620,
+      "crc32": "bf2daf09",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "15.2_ANEXA 15.B тАФ MODEL API ^0 WEBHOOK.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.2_ANEXA 15.B тАФ MODEL API ^0 WEBHOOK.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18447,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 96,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.3_ANEXA 15.C тАФ CHECKLIST DE INTEGRARE PARTENER.docx",
+      "compressed_size": 15557,
+      "crc32": "7edb0830",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "15.3_ANEXA 15.C тАФ CHECKLIST DE INTEGRARE PARTENER.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.3_ANEXA 15.C тАФ CHECKLIST DE INTEGRARE PARTENER.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18387,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 97,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.4_ANEXA 15.D тАФ AUDIT - SUSPENDARE INTEGRARE.docx",
+      "compressed_size": 15489,
+      "crc32": "65b5f620",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "15.4_ANEXA 15.D тАФ AUDIT - SUSPENDARE INTEGRARE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.4_ANEXA 15.D тАФ AUDIT - SUSPENDARE INTEGRARE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18309,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 99,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+      "compressed_size": 15632,
+      "crc32": "896efc8f",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "16.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18453,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 100,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.0_ANEXA 16.A тАФ RACI DE GUVERNAN╚Ъ─В.docx",
+      "compressed_size": 14885,
+      "crc32": "a7125e8f",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "16.0.1.0_ANEXA 16.A тАФ RACI DE GUVERNAN╚Ъ─В.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.0_ANEXA 16.A тАФ RACI DE GUVERNAN╚Ъ─В.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17706,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 101,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.1_ANEXA 16.B тАФ MATRICE DE DECIZIE.docx",
+      "compressed_size": 15530,
+      "crc32": "fe2ac6f4",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "16.0.1.1_ANEXA 16.B тАФ MATRICE DE DECIZIE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.1_ANEXA 16.B тАФ MATRICE DE DECIZIE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18362,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 102,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.2_ANEXA 16.C тАФ FLUX DE ESCALADARE.docx",
+      "compressed_size": 15433,
+      "crc32": "00ea3467",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "16.0.1.2_ANEXA 16.C тАФ FLUX DE ESCALADARE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.2_ANEXA 16.C тАФ FLUX DE ESCALADARE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18224,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 103,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.3_ANEXA 16.D тАФ REGISTRU POLITICI INTERNE.docx",
+      "compressed_size": 15151,
+      "crc32": "7cdb9852",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "16.0.1.3_ANEXA 16.D тАФ REGISTRU POLITICI INTERNE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.3_ANEXA 16.D тАФ REGISTRU POLITICI INTERNE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17982,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 104,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.4_ANEXA 16.E тАФ REGISTRU SUSPEND─ВRI -OPRIRI.docx",
+      "compressed_size": 15332,
+      "crc32": "a6c06ef9",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "16.0.1.4_ANEXA 16.E тАФ REGISTRU SUSPEND─ВRI -OPRIRI.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.4_ANEXA 16.E тАФ REGISTRU SUSPEND─ВRI -OPRIRI.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18159,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 105,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+      "compressed_size": 16223,
+      "crc32": "8b08ff2e",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "16.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19005,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 106,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.2_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+      "compressed_size": 15797,
+      "crc32": "be774c82",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "16.0.2_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.2_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18617,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 107,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0_CAPITOLUL 16 тАФ GUVERNAN╚Ъ─В.docx",
+      "compressed_size": 16366,
+      "crc32": "f297948d",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "16.0_CAPITOLUL 16 тАФ GUVERNAN╚Ъ─В.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0_CAPITOLUL 16 тАФ GUVERNAN╚Ъ─В.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19190,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 109,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 17.docx",
+      "compressed_size": 14914,
+      "crc32": "85ccda94",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "17.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 17.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 17.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17739,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 110,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.1_ANEXA 17.A тАФ REGISTRU DE RISC.docx",
+      "compressed_size": 13714,
+      "crc32": "f35f9339",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "17.0.1_ANEXA 17.A тАФ REGISTRU DE RISC.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.1_ANEXA 17.A тАФ REGISTRU DE RISC.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16465,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 111,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.2_ANEXA 17.B тАФ MATRICE RISC -PROBABILITATE ├Ч IMPACT.docx",
+      "compressed_size": 13234,
+      "crc32": "bb06a289",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "17.0.2_ANEXA 17.B тАФ MATRICE RISC -PROBABILITATE ├Ч IMPACT.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.2_ANEXA 17.B тАФ MATRICE RISC -PROBABILITATE ├Ч IMPACT.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 15997,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 112,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.3_ANEXA 17.C тАФ PLANURI DE CONTINUITATE (BCP).docx",
+      "compressed_size": 15597,
+      "crc32": "8d890c7f",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "17.0.3_ANEXA 17.C тАФ PLANURI DE CONTINUITATE (BCP).docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.3_ANEXA 17.C тАФ PLANURI DE CONTINUITATE (BCP).docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18415,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 113,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.4_ANEXA 17.D тАФ CHECKLIST MANAGEMENT RISC.docx",
+      "compressed_size": 15098,
+      "crc32": "86c6f2d9",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "17.0.4_ANEXA 17.D тАФ CHECKLIST MANAGEMENT RISC.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.4_ANEXA 17.D тАФ CHECKLIST MANAGEMENT RISC.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17893,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 114,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0_CAPITOLUL 17 тАФ MANAGEMENTUL RISCULUI.docx",
+      "compressed_size": 14141,
+      "crc32": "ea56c4ee",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "17.0_CAPITOLUL 17 тАФ MANAGEMENTUL RISCULUI.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0_CAPITOLUL 17 тАФ MANAGEMENTUL RISCULUI.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16858,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 116,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 18.docx",
+      "compressed_size": 13657,
+      "crc32": "f58eded5",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "18.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 18.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 18.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16412,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 117,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.1_ANEXA 18.A тАФ LIST─В KPI CANONICI.docx",
+      "compressed_size": 15789,
+      "crc32": "66c477db",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "18.0.1_ANEXA 18.A тАФ LIST─В KPI CANONICI.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.1_ANEXA 18.A тАФ LIST─В KPI CANONICI.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18624,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 118,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.2_ANEXA 18.B тАФ STRUCTUR─В UNIT ECONOMICS.docx",
+      "compressed_size": 14924,
+      "crc32": "fb34b460",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "18.0.2_ANEXA 18.B тАФ STRUCTUR─В UNIT ECONOMICS.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.2_ANEXA 18.B тАФ STRUCTUR─В UNIT ECONOMICS.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17751,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 119,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.3_ANEXA 18.C тАФ PRAGURI KPI ^0 ESCALADARE.docx",
+      "compressed_size": 14801,
+      "crc32": "d4bbc474",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "18.0.3_ANEXA 18.C тАФ PRAGURI KPI ^0 ESCALADARE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.3_ANEXA 18.C тАФ PRAGURI KPI ^0 ESCALADARE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17632,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 120,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.4_ANEXA 18.D тАФ RAPORTARE KPI & AUDIT.docx",
+      "compressed_size": 15427,
+      "crc32": "792ddc6f",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "18.0.4_ANEXA 18.D тАФ RAPORTARE KPI & AUDIT.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.4_ANEXA 18.D тАФ RAPORTARE KPI & AUDIT.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18249,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 121,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0_CAPITOLUL 18 тАФ KPI-METRICI ╚ШI UNIT ECONOMICS.docx",
+      "compressed_size": 14379,
+      "crc32": "d54be76e",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "18.0_CAPITOLUL 18 тАФ KPI-METRICI ╚ШI UNIT ECONOMICS.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0_CAPITOLUL 18 тАФ KPI-METRICI ╚ШI UNIT ECONOMICS.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17094,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 123,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 19.docx",
+      "compressed_size": 13958,
+      "crc32": "14ff7aac",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "19.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 19.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 19.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16675,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 124,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.0_CAPITOLUL 19 тАФ CE NU FACE DROPi.docx",
+      "compressed_size": 14537,
+      "crc32": "ff726c7d",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "19.0_CAPITOLUL 19 тАФ CE NU FACE DROPi.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.0_CAPITOLUL 19 тАФ CE NU FACE DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17289,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 125,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.1_ANEXA 19.A тАФ LIST─В DE EXCLUDERI OPERA╚ЪIONALE.docx",
+      "compressed_size": 12916,
+      "crc32": "ab0c90eb",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "19.1.1_ANEXA 19.A тАФ LIST─В DE EXCLUDERI OPERA╚ЪIONALE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.1_ANEXA 19.A тАФ LIST─В DE EXCLUDERI OPERA╚ЪIONALE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 15677,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 126,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.2_ANEXA 19.B тАФ LIMIT─ВRI CONTRACTUALE STANDARD.docx",
+      "compressed_size": 13057,
+      "crc32": "0e7ab652",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "19.1.2_ANEXA 19.B тАФ LIMIT─ВRI CONTRACTUALE STANDARD.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.2_ANEXA 19.B тАФ LIMIT─ВRI CONTRACTUALE STANDARD.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 15782,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 127,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.3_ANEXA 19.C тАФ GHID DE PREVENIRE A A╚ШTEPT─ВRILOR FALSE.docx",
+      "compressed_size": 14876,
+      "crc32": "24cbea63",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "19.1.3_ANEXA 19.C тАФ GHID DE PREVENIRE A A╚ШTEPT─ВRILOR FALSE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.3_ANEXA 19.C тАФ GHID DE PREVENIRE A A╚ШTEPT─ВRILOR FALSE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17707,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 128,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.4_ANEXA 19.D тАФ UTILIZARE ├ОN AUDIT si DUE DILIGENCE.docx",
+      "compressed_size": 13539,
+      "crc32": "c52635eb",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "19.1.4_ANEXA 19.D тАФ UTILIZARE ├ОN AUDIT si DUE DILIGENCE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.4_ANEXA 19.D тАФ UTILIZARE ├ОN AUDIT si DUE DILIGENCE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16297,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 129,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.5_ANEXA 19.E тАФ MECANISM DE APLICARE INTERN─В.docx",
+      "compressed_size": 14967,
+      "crc32": "88c77fc7",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "19.1.5_ANEXA 19.E тАФ MECANISM DE APLICARE INTERN─В.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.5_ANEXA 19.E тАФ MECANISM DE APLICARE INTERN─В.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17796,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 130,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.6_ANEXA 19.F тАФ DECLARA╚ЪIE DE POZI╚ЪIONARE OFICIAL─В.docx",
+      "compressed_size": 14290,
+      "crc32": "3d43dc41",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "19.1.6_ANEXA 19.F тАФ DECLARA╚ЪIE DE POZI╚ЪIONARE OFICIAL─В.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.6_ANEXA 19.F тАФ DECLARA╚ЪIE DE POZI╚ЪIONARE OFICIAL─В.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17115,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 131,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1_ANEXE CAPITOLUL 19 тАФ тАЮCE NU FACE DROPiтАЭ.docx",
+      "compressed_size": 13371,
+      "crc32": "8ede5776",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "19.1_ANEXE CAPITOLUL 19 тАФ тАЮCE NU FACE DROPiтАЭ.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1_ANEXE CAPITOLUL 19 тАФ тАЮCE NU FACE DROPiтАЭ.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16119,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 133,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.1_ANEXA 20.A тАФ CHECKLIST DE ELIGIBILITATE VOLUMUL III.docx",
+      "compressed_size": 14215,
+      "crc32": "faa86ffc",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "20.0.1_ANEXA 20.A тАФ CHECKLIST DE ELIGIBILITATE VOLUMUL III.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.1_ANEXA 20.A тАФ CHECKLIST DE ELIGIBILITATE VOLUMUL III.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17038,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 134,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.2_ANEXA 20.B тАФ DECLARA╚ЪIE OFICIAL─В DE ├ОNCHIDERE VOLUMUL II.docx",
+      "compressed_size": 12599,
+      "crc32": "7a70b288",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "20.0.2_ANEXA 20.B тАФ DECLARA╚ЪIE OFICIAL─В DE ├ОNCHIDERE VOLUMUL II.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.2_ANEXA 20.B тАФ DECLARA╚ЪIE OFICIAL─В DE ├ОNCHIDERE VOLUMUL II.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 15354,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 135,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.3_ANEXA 20.C тАФ DECIZIE DE TRECERE -TEMPLATE.docx",
+      "compressed_size": 12825,
+      "crc32": "26439a8b",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "20.0.3_ANEXA 20.C тАФ DECIZIE DE TRECERE -TEMPLATE.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.3_ANEXA 20.C тАФ DECIZIE DE TRECERE -TEMPLATE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 15584,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 136,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0_CAPITOLUL 20 тАФ CONCLUZIA VOLUMULUI II.docx",
+      "compressed_size": 14339,
+      "crc32": "deba7d16",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "20.0_CAPITOLUL 20 тАФ CONCLUZIA VOLUMULUI II.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0_CAPITOLUL 20 тАФ CONCLUZIA VOLUMULUI II.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17058,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 144,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/26_ROADMAP 0тАУ36 LUNI _EXECU╚ЪIE DISCIPLINAT─В.docx",
+      "compressed_size": 16373,
+      "crc32": "ee2da2b2",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "26_ROADMAP 0тАУ36 LUNI _EXECU╚ЪIE DISCIPLINAT─В.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/26_ROADMAP 0тАУ36 LUNI _EXECU╚ЪIE DISCIPLINAT─В.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19164,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 147,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/00.0_DROPi тАФ OFFICIAL PITCH DECK.docx",
+      "compressed_size": 15416,
+      "crc32": "52adb077",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "00.0_DROPi тАФ OFFICIAL PITCH DECK.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/00.0_DROPi тАФ OFFICIAL PITCH DECK.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18170,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 148,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/00.1_DROPi тАФ OFFICIAL SPEAKER NOTES (ENGLISH).docx",
+      "compressed_size": 15336,
+      "crc32": "7a510679",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "00.1_DROPi тАФ OFFICIAL SPEAKER NOTES (ENGLISH).docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/00.1_DROPi тАФ OFFICIAL SPEAKER NOTES (ENGLISH).docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18086,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 149,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/01.0_DROPi тАФ PITCH DECK OFICIAL_RO.docx",
+      "compressed_size": 15688,
+      "crc32": "d9ed7c5c",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "01.0_DROPi тАФ PITCH DECK OFICIAL_RO.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/01.0_DROPi тАФ PITCH DECK OFICIAL_RO.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18433,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 150,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/01.1_DROPi тАФ SPEAKER NOTES OFICIALE (ROM├ВN─В).docx",
+      "compressed_size": 15220,
+      "crc32": "29af6dd4",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "01.1_DROPi тАФ SPEAKER NOTES OFICIALE (ROM├ВN─В).docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/01.1_DROPi тАФ SPEAKER NOTES OFICIALE (ROM├ВN─В).docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17971,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 151,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/02.0_DROPi тАФ OPISYAL NA PITCH DECK_TL.docx",
+      "compressed_size": 15810,
+      "crc32": "edf1c5bb",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "02.0_DROPi тАФ OPISYAL NA PITCH DECK_TL.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/02.0_DROPi тАФ OPISYAL NA PITCH DECK_TL.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18556,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 152,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/02.1_DROPi тАФ SPEAKER NOTES (TAGALOG)_Para sa Opisyal na Pitch Deck.docx",
+      "compressed_size": 15054,
+      "crc32": "bed9afbd",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "02.1_DROPi тАФ SPEAKER NOTES (TAGALOG)_Para sa Opisyal na Pitch Deck.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/02.1_DROPi тАФ SPEAKER NOTES (TAGALOG)_Para sa Opisyal na Pitch Deck.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17802,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 153,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/03.0_DROPi тАФ OFFICIAL LGU -- GOVERNMENT PITCH.docx",
+      "compressed_size": 15161,
+      "crc32": "1d31d69f",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "03.0_DROPi тАФ OFFICIAL LGU -- GOVERNMENT PITCH.docx",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/03.0_DROPi тАФ OFFICIAL LGU -- GOVERNMENT PITCH.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17912,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 176,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Anexa 6B тАФ Marketplace Controlat DROPi.md",
+      "compressed_size": 5518,
+      "crc32": "f6117642",
+      "encoding_anomalies": [
+        "possible-mojibake"
+      ],
+      "filename": "Anexa 6B тАФ Marketplace Controlat DROPi.md",
+      "has_anomaly": true,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Anexa 6B тАФ Marketplace Controlat DROPi.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 15489,
+      "unicode_form": "NFC+NFD"
+    }
+  ],
+  "anomaly_paths": [
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00.1_PACHET INVESTITORI тАФ EXECUTIVE ^LM AUDIT EXTRACTS.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 6.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.0_CAPITOLUL 6 тАФ PRODUSUL DROPi.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.1_ANEXA 6.A тАФ HART─В PRODUS -PRODUCT MAP.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.2_ANEXA 6.B тАФ SEPARARE RESPONSABILIT─В╚ЪI.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.3_ANEXA 6.C тАФ PRINCIPII DE DESIGN PRODUS.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.4_ANEXA 6.D тАФ REGULI DE EVOLU╚ЪIE PRODUS.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.X_Marketplace-ul DROPi тАФ pozi╚Ыionare corect─Г.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.0.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 7.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.1_MAPARE COMPLET─В CAPITOLE 7тАУ12.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.2_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.1TABEL DE RISC LEGAL тАФ APARI╚ЪIE ACCIDENTAL─В PE SITE-UL DROPi.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.2PROCEDUR─В OFICIAL─В тАФ SITE INCIDENT RESPONSE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.3_CHECKLIST QA тАФ ├ОNAINTE DE FIECARE DEPLOY SITE DROPi.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.4_ANEX─В тАФ PROCEDUR─В ROLLBACK POST-DEPLOY.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.2_RACI тАФ APROBARE ╚ШI RESPONSABILIT─В╚ЪI SITE DROPi.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.3_ANEX─В тАФ TEMPLATE тАЮSAFE PUBLIC STATEMENTSтАЭ.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.4_ANEX─В тАФ SITE GOVERNANCE CHARTER.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.5_CHECKLIST тАФ PUBLIC APPEARANCE - INTERVIEW.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.0_CHECKLIST тАФ TRAINING INTERN -ONBOARDING COMUNICARE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.1_TEST DE VALIDARE INTERN─В тАФ COMUNICARE PUBLIC─В (PASS -FAIL).docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.2_CURRICULUM DE TRAINING INTERN тАФ COMUNICARE PUBLIC─В DROPi.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.3_FORMULAR INTERN тАФ COMMUNICATION COMPLIANCE ACKNOWLEDGEMENT.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6_ANEX─В тАФ тАЮRED LINESтАЭ -SUBIECTE INTERZISE ABSOLUT.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.X.1_ANEXA 7.X тАФ REGULI DE DESIGN UI MARKETPLACE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.X_Marketplace-ul ├оn cadrul site-ului DROPi.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 8.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 8тАУ12.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.0_ANEXA 8.A тАФ MAPARE ROLURI ^0 PERMISIUNI (RBAC).docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.1_ANEXA 8.B тАФ ORDER LIFECYCLE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.2_ANEXA 8.C тАФ FALLBACK ^0 INTERVEN╚ЪIE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.3_ANEXA 8.D тАФ SUPERVIZARE PILOT.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.1.0_CAPITOLUL 8 тАФ DEZVOLTAREA APLICA╚ЪIEI DROPi -CORE OPERA╚ЪIONAL.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0.1_ANEXA 9.A тАФ EVENIMENTE DRONEPORT ^0 LOGARE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0.2_ANEXA 9.B тАФ PROCESE PERMISE - INTERZISE DRONEPORT.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 9тАУ12.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 9.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0.0.1_ANEXA 10.A тАФ GUARDRAILS DSS -REGULI STRICTE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0.0.2_ANEXA 10.B тАФ EXEMPLE DE RECOMAND─ВRI DSS.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 10.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.1_CAPITOLUL 10 тАФ AI ASISTAT -DSS.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.1ANEXA 11.A тАФ SCENARII DE INTERVEN╚ЪIE PILOT.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.2_ANEXA 11.B тАФ GESTIONARE INCIDENTE OPERA╚ЪIONALE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.1_CAPITOLUL 11 тАФ LIVRARE AUTONOM─В SUPERVIZAT─В.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.0_ANEXA 12.A тАФ STRUCTUR─В LOG-URI.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.1_ANEXA 12.B тАФ POLITIC─В DE RETEN╚ЪIE DATE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.2_ANEXA 12.C тАФ CHECKLIST GDPR COMPLIANCE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.1_CHECKLIST 13.A тАФ TESTARE FUNC╚ЪIONAL─В.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.2_CHECKLIST 13.B тАФ TESTARE DE INTEGRARE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.3_CHECKLIST 13.C тАФ TESTARE DE SIGURAN╚Ъ─В.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.4_CHECKLIST 13.D тАФ TESTARE RBAC -ROLURI ^0 PERMISIUNI.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.5_CHECKLIST 13.E тАФ CHECKLIST DE RELEASE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.6_CHECKLIST 13.F тАФ ROLLBACK READINESS.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0_CAPITOLUL 13 тАФ TESTARE- QA - RELEASE DISCIPLINE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 14.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14.0_CAPITOLUL 14 тАФ ARHITECTURA DIGITAL─В.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 15.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.0_CAPITOLUL 15 тАФ INTEGRARE & ECOSISTEM.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.1_ANEXA 15.A тАФ TIPURI DE INTEGRARE & DREPTURI.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.2_ANEXA 15.B тАФ MODEL API ^0 WEBHOOK.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.3_ANEXA 15.C тАФ CHECKLIST DE INTEGRARE PARTENER.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.4_ANEXA 15.D тАФ AUDIT - SUSPENDARE INTEGRARE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.0_ANEXA 16.A тАФ RACI DE GUVERNAN╚Ъ─В.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.1_ANEXA 16.B тАФ MATRICE DE DECIZIE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.2_ANEXA 16.C тАФ FLUX DE ESCALADARE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.3_ANEXA 16.D тАФ REGISTRU POLITICI INTERNE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.4_ANEXA 16.E тАФ REGISTRU SUSPEND─ВRI -OPRIRI.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.2_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0_CAPITOLUL 16 тАФ GUVERNAN╚Ъ─В.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 17.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.1_ANEXA 17.A тАФ REGISTRU DE RISC.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.2_ANEXA 17.B тАФ MATRICE RISC -PROBABILITATE ├Ч IMPACT.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.3_ANEXA 17.C тАФ PLANURI DE CONTINUITATE (BCP).docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.4_ANEXA 17.D тАФ CHECKLIST MANAGEMENT RISC.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0_CAPITOLUL 17 тАФ MANAGEMENTUL RISCULUI.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 18.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.1_ANEXA 18.A тАФ LIST─В KPI CANONICI.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.2_ANEXA 18.B тАФ STRUCTUR─В UNIT ECONOMICS.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.3_ANEXA 18.C тАФ PRAGURI KPI ^0 ESCALADARE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.4_ANEXA 18.D тАФ RAPORTARE KPI & AUDIT.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0_CAPITOLUL 18 тАФ KPI-METRICI ╚ШI UNIT ECONOMICS.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 19.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.0_CAPITOLUL 19 тАФ CE NU FACE DROPi.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.1_ANEXA 19.A тАФ LIST─В DE EXCLUDERI OPERA╚ЪIONALE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.2_ANEXA 19.B тАФ LIMIT─ВRI CONTRACTUALE STANDARD.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.3_ANEXA 19.C тАФ GHID DE PREVENIRE A A╚ШTEPT─ВRILOR FALSE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.4_ANEXA 19.D тАФ UTILIZARE ├ОN AUDIT si DUE DILIGENCE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.5_ANEXA 19.E тАФ MECANISM DE APLICARE INTERN─В.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.6_ANEXA 19.F тАФ DECLARA╚ЪIE DE POZI╚ЪIONARE OFICIAL─В.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1_ANEXE CAPITOLUL 19 тАФ тАЮCE NU FACE DROPiтАЭ.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.1_ANEXA 20.A тАФ CHECKLIST DE ELIGIBILITATE VOLUMUL III.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.2_ANEXA 20.B тАФ DECLARA╚ЪIE OFICIAL─В DE ├ОNCHIDERE VOLUMUL II.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.3_ANEXA 20.C тАФ DECIZIE DE TRECERE -TEMPLATE.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0_CAPITOLUL 20 тАФ CONCLUZIA VOLUMULUI II.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/26_ROADMAP 0тАУ36 LUNI _EXECU╚ЪIE DISCIPLINAT─В.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/00.0_DROPi тАФ OFFICIAL PITCH DECK.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/00.1_DROPi тАФ OFFICIAL SPEAKER NOTES (ENGLISH).docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/01.0_DROPi тАФ PITCH DECK OFICIAL_RO.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/01.1_DROPi тАФ SPEAKER NOTES OFICIALE (ROM├ВN─В).docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/02.0_DROPi тАФ OPISYAL NA PITCH DECK_TL.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/02.1_DROPi тАФ SPEAKER NOTES (TAGALOG)_Para sa Opisyal na Pitch Deck.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/03.0_DROPi тАФ OFFICIAL LGU -- GOVERNMENT PITCH.docx",
+    "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Anexa 6B тАФ Marketplace Controlat DROPi.md"
+  ],
+  "authority": {
+    "archive_path": "04.zip",
+    "archive_sha256": "82a6015b8c968645307e36c8e4aa0351515f50333c08a6c5402a7819b7b747e5"
+  },
+  "clean_entries": [
+    {
+      "archive_index": 5,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/00_CUPRINS GENERAL _INDEX FINAL.docx",
+      "compressed_size": 13950,
+      "crc32": "a1867e35",
+      "encoding_anomalies": [],
+      "filename": "00_CUPRINS GENERAL _INDEX FINAL.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/00_CUPRINS GENERAL _INDEX FINAL.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16705,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 6,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/01_EXECUTIVE SUMMARY (EXTINS).docx",
+      "compressed_size": 14148,
+      "crc32": "a91e9f49",
+      "encoding_anomalies": [],
+      "filename": "01_EXECUTIVE SUMMARY (EXTINS).docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/01_EXECUTIVE SUMMARY (EXTINS).docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16908,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 7,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/02_PROBLEMA GLOBAL─В A LOGISTICII ULTIMULUI KILOMETRU.docx",
+      "compressed_size": 15911,
+      "crc32": "9e534069",
+      "encoding_anomalies": [],
+      "filename": "02_PROBLEMA GLOBAL─В A LOGISTICII ULTIMULUI KILOMETRU.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/02_PROBLEMA GLOBAL─В A LOGISTICII ULTIMULUI KILOMETRU.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18725,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 8,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/03_SOLU╚ЪIA DROPi- ARHITECTUR─В LOGISTIC─В SISTEMIC─В.docx",
+      "compressed_size": 16561,
+      "crc32": "5438609c",
+      "encoding_anomalies": [],
+      "filename": "03_SOLU╚ЪIA DROPi- ARHITECTUR─В LOGISTIC─В SISTEMIC─В.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/03_SOLU╚ЪIA DROPi- ARHITECTUR─В LOGISTIC─В SISTEMIC─В.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19389,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 9,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/04_DIFEREN╚ЪIEREA STRATEGIC─В DROPi.docx",
+      "compressed_size": 15541,
+      "crc32": "2203de8a",
+      "encoding_anomalies": [],
+      "filename": "04_DIFEREN╚ЪIEREA STRATEGIC─В DROPi.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/04_DIFEREN╚ЪIEREA STRATEGIC─В DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18353,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 10,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/05_ZONA 0- FILIPINE PUNCTUL DE START STRATEGIC.docx",
+      "compressed_size": 16800,
+      "crc32": "7099a77c",
+      "encoding_anomalies": [],
+      "filename": "05_ZONA 0- FILIPINE PUNCTUL DE START STRATEGIC.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/05_ZONA 0- FILIPINE PUNCTUL DE START STRATEGIC.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19609,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 21,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.5_ALINIERE CAP. 6 тЖФ 7 тЖФ 8.docx",
+      "compressed_size": 14769,
+      "crc32": "5dc1b1ed",
+      "encoding_anomalies": [],
+      "filename": "06.5_ALINIERE CAP. 6 тЖФ 7 тЖФ 8.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.5_ALINIERE CAP. 6 тЖФ 7 тЖФ 8.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17596,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 23,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06_PRODUSUL DROPi (SITE ^M APLICA╚ЪIE ^M INFRASTRUCTUR─В).docx",
+      "compressed_size": 15601,
+      "crc32": "a634278f",
+      "encoding_anomalies": [],
+      "filename": "06_PRODUSUL DROPi (SITE ^M APLICA╚ЪIE ^M INFRASTRUCTUR─В).docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06_PRODUSUL DROPi (SITE ^M APLICA╚ЪIE ^M INFRASTRUCTUR─В).docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18415,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 32,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1_CE NU APARE NICIODAT─В PE SITE-UL DROPi.docx",
+      "compressed_size": 16336,
+      "crc32": "bb0cb969",
+      "encoding_anomalies": [],
+      "filename": "07.1_CE NU APARE NICIODAT─В PE SITE-UL DROPi.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1_CE NU APARE NICIODAT─В PE SITE-UL DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19157,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 44,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07_DEZVOLTAREA SITE-ULUI DROPi -PRINCIPII ╚ШI EXECU╚ЪIE PAS CU PAS.docx",
+      "compressed_size": 20923,
+      "crc32": "adb3d4d8",
+      "encoding_anomalies": [],
+      "filename": "07_DEZVOLTAREA SITE-ULUI DROPi -PRINCIPII ╚ШI EXECU╚ЪIE PAS CU PAS.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07_DEZVOLTAREA SITE-ULUI DROPi -PRINCIPII ╚ШI EXECU╚ЪIE PAS CU PAS.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 23664,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 51,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1_ANEXE CAPITOLUL 8.docx",
+      "compressed_size": 10930,
+      "crc32": "ccce90f3",
+      "encoding_anomalies": [],
+      "filename": "08.0.1_ANEXE CAPITOLUL 8.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1_ANEXE CAPITOLUL 8.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 13689,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 53,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.X Absen╚Ыa marketplace-ului din aplica╚Ыia DROPi.docx",
+      "compressed_size": 13618,
+      "crc32": "14906624",
+      "encoding_anomalies": [],
+      "filename": "08.X Absen╚Ыa marketplace-ului din aplica╚Ыia DROPi.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.X Absen╚Ыa marketplace-ului din aplica╚Ыia DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16336,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 54,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.X.1_ALINIERE CAP. 8 тЖФ CAP. 11.docx",
+      "compressed_size": 16052,
+      "crc32": "437d1196",
+      "encoding_anomalies": [],
+      "filename": "08.X.1_ALINIERE CAP. 8 тЖФ CAP. 11.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.X.1_ALINIERE CAP. 8 тЖФ CAP. 11.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18842,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 55,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.X.2_DIAGRAM─В SECVEN╚ЪIAL─В CANONIC─В.docx",
+      "compressed_size": 14354,
+      "crc32": "1fd249e0",
+      "encoding_anomalies": [],
+      "filename": "08.X.2_DIAGRAM─В SECVEN╚ЪIAL─В CANONIC─В.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.X.2_DIAGRAM─В SECVEN╚ЪIAL─В CANONIC─В.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17074,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 56,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08_DEZVOLTAREA APLICA╚ЪIEI DROPi -EXECU╚ЪIE PAS CU PAS.docx",
+      "compressed_size": 15095,
+      "crc32": "a01b45d2",
+      "encoding_anomalies": [],
+      "filename": "08_DEZVOLTAREA APLICA╚ЪIEI DROPi -EXECU╚ЪIE PAS CU PAS.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08_DEZVOLTAREA APLICA╚ЪIEI DROPi -EXECU╚ЪIE PAS CU PAS.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17832,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 61,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09_INFRASTRUCTURA DRONEPORT -STANDARD^LJ HARDWARE-J SOFTWARE-J PROCEDURI.docx",
+      "compressed_size": 16597,
+      "crc32": "b37e20bf",
+      "encoding_anomalies": [],
+      "filename": "09_INFRASTRUCTURA DRONEPORT -STANDARD^LJ HARDWARE-J SOFTWARE-J PROCEDURI.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09_INFRASTRUCTURA DRONEPORT -STANDARD^LJ HARDWARE-J SOFTWARE-J PROCEDURI.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19413,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 66,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10_AI ASISTAT-ARHITECTURA DECIZIONAL─В DROPi.docx",
+      "compressed_size": 16830,
+      "crc32": "7c5735c2",
+      "encoding_anomalies": [],
+      "filename": "10_AI ASISTAT-ARHITECTURA DECIZIONAL─В DROPi.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10_AI ASISTAT-ARHITECTURA DECIZIONAL─В DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19670,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 72,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11_LIVRAREA AUTONOM─В SUPERVIZAT─В _PROCEDURI_LIMITE_FALLBACK_ AUDIT.docx",
+      "compressed_size": 16181,
+      "crc32": "a12d864b",
+      "encoding_anomalies": [],
+      "filename": "11_LIVRAREA AUTONOM─В SUPERVIZAT─В _PROCEDURI_LIMITE_FALLBACK_ AUDIT.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11_LIVRAREA AUTONOM─В SUPERVIZAT─В _PROCEDURI_LIMITE_FALLBACK_ AUDIT.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18996,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 78,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12_SISTEMUL DE DATE_ LOG-URI_ TRASABILITATE ╚ШI PROTEC╚ЪIA DATELOR.docx",
+      "compressed_size": 16920,
+      "crc32": "fda95aec",
+      "encoding_anomalies": [],
+      "filename": "12_SISTEMUL DE DATE_ LOG-URI_ TRASABILITATE ╚ШI PROTEC╚ЪIA DATELOR.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12_SISTEMUL DE DATE_ LOG-URI_ TRASABILITATE ╚ШI PROTEC╚ЪIA DATELOR.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19759,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 88,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13_TESTARE_ QA_DISCIPLIN─В DE RELEASE ╚ШI ROLLBACK.docx",
+      "compressed_size": 16263,
+      "crc32": "8ae8874e",
+      "encoding_anomalies": [],
+      "filename": "13_TESTARE_ QA_DISCIPLIN─В DE RELEASE ╚ШI ROLLBACK.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13_TESTARE_ QA_DISCIPLIN─В DE RELEASE ╚ШI ROLLBACK.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19089,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 91,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14_ARHITECTURA INFRASTRUCTURII DIGITALE DROPi.docx",
+      "compressed_size": 16344,
+      "crc32": "4440a3bc",
+      "encoding_anomalies": [],
+      "filename": "14_ARHITECTURA INFRASTRUCTURII DIGITALE DROPi.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14_ARHITECTURA INFRASTRUCTURII DIGITALE DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19160,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 98,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15_INTEGRARE -INTEROPERABILITATE ╚ШI ECOSISTEM.docx",
+      "compressed_size": 16074,
+      "crc32": "63fd625b",
+      "encoding_anomalies": [],
+      "filename": "15_INTEGRARE -INTEROPERABILITATE ╚ШI ECOSISTEM.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15_INTEGRARE -INTEROPERABILITATE ╚ШI ECOSISTEM.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18896,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 108,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16_GUVERNAN╚Ъ─В TEHNIC─В_OWNERSHIP ╚ШI RESPONSABILIT─В╚ЪI.docx",
+      "compressed_size": 15968,
+      "crc32": "5796ebe0",
+      "encoding_anomalies": [],
+      "filename": "16_GUVERNAN╚Ъ─В TEHNIC─В_OWNERSHIP ╚ШI RESPONSABILIT─В╚ЪI.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16_GUVERNAN╚Ъ─В TEHNIC─В_OWNERSHIP ╚ШI RESPONSABILIT─В╚ЪI.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18792,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 115,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17_MANAGEMENTUL RISCULUI _OPERA╚ЪIONAL_TEHNIC_ LEGAL ╚ШI REPUTA╚ЪIONAL.docx",
+      "compressed_size": 17115,
+      "crc32": "f7438a79",
+      "encoding_anomalies": [],
+      "filename": "17_MANAGEMENTUL RISCULUI _OPERA╚ЪIONAL_TEHNIC_ LEGAL ╚ШI REPUTA╚ЪIONAL.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17_MANAGEMENTUL RISCULUI _OPERA╚ЪIONAL_TEHNIC_ LEGAL ╚ШI REPUTA╚ЪIONAL.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19942,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 122,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18_KPI_METRICI ╚ШI UNIT ECONOMICS.docx",
+      "compressed_size": 16161,
+      "crc32": "711e8e6a",
+      "encoding_anomalies": [],
+      "filename": "18_KPI_METRICI ╚ШI UNIT ECONOMICS.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18_KPI_METRICI ╚ШI UNIT ECONOMICS.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18946,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 132,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19_CE NU FACE DROPi _DELIMIT─ВRI STRATEGICE ╚ШI DEFENSIVE.docx",
+      "compressed_size": 14031,
+      "crc32": "691104b6",
+      "encoding_anomalies": [],
+      "filename": "19_CE NU FACE DROPi _DELIMIT─ВRI STRATEGICE ╚ШI DEFENSIVE.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19_CE NU FACE DROPi _DELIMIT─ВRI STRATEGICE ╚ШI DEFENSIVE.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16787,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 137,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20_CONCLUZIA VOLUMULUI II ╚ШI CRITERIILE DE TRECERE LA VOLUMUL III.docx",
+      "compressed_size": 13943,
+      "crc32": "2a5d5602",
+      "encoding_anomalies": [],
+      "filename": "20_CONCLUZIA VOLUMULUI II ╚ШI CRITERIILE DE TRECERE LA VOLUMUL III.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20_CONCLUZIA VOLUMULUI II ╚ШI CRITERIILE DE TRECERE LA VOLUMUL III.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 16705,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 139,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/21_MODELUL ECONOMIC COMPLET DROPi.docx",
+      "compressed_size": 16768,
+      "crc32": "402a3ff2",
+      "encoding_anomalies": [],
+      "filename": "21_MODELUL ECONOMIC COMPLET DROPi.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/21_MODELUL ECONOMIC COMPLET DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19550,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 140,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/22_GO-TO-MARKET FILIPINE _ZONA 0.docx",
+      "compressed_size": 16315,
+      "crc32": "ce08d147",
+      "encoding_anomalies": [],
+      "filename": "22_GO-TO-MARKET FILIPINE _ZONA 0.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/22_GO-TO-MARKET FILIPINE _ZONA 0.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19137,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 141,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/23_COMPLIANCE MULTI-╚ЪAR─В ╚ШI ADAPTAREA LA UNIUNEA EUROPEAN─В _EASA.docx",
+      "compressed_size": 15722,
+      "crc32": "01b3322c",
+      "encoding_anomalies": [],
+      "filename": "23_COMPLIANCE MULTI-╚ЪAR─В ╚ШI ADAPTAREA LA UNIUNEA EUROPEAN─В _EASA.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/23_COMPLIANCE MULTI-╚ЪAR─В ╚ШI ADAPTAREA LA UNIUNEA EUROPEAN─В _EASA.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18545,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 142,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/24_FRANCIZARE, OPERATORI ZONALI ╚ШI REPLICARE GLOBAL─В.docx",
+      "compressed_size": 16173,
+      "crc32": "d03e2e54",
+      "encoding_anomalies": [],
+      "filename": "24_FRANCIZARE, OPERATORI ZONALI ╚ШI REPLICARE GLOBAL─В.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/24_FRANCIZARE, OPERATORI ZONALI ╚ШI REPLICARE GLOBAL─В.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18999,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 143,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/25_STRATEGIA DE INVESTI╚ЪII ╚ШI FINAN╚ЪARE DROPi.docx",
+      "compressed_size": 16301,
+      "crc32": "a0d13675",
+      "encoding_anomalies": [],
+      "filename": "25_STRATEGIA DE INVESTI╚ЪII ╚ШI FINAN╚ЪARE DROPi.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/25_STRATEGIA DE INVESTI╚ЪII ╚ШI FINAN╚ЪARE DROPi.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 19086,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 145,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/27_SCENARII DE EXIT ╚ШI VIITORUL DROPi _REALIST_ NU SPECULATIV.docx",
+      "compressed_size": 15529,
+      "crc32": "42074deb",
+      "encoding_anomalies": [],
+      "filename": "27_SCENARII DE EXIT ╚ШI VIITORUL DROPi _REALIST_ NU SPECULATIV.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/27_SCENARII DE EXIT ╚ШI VIITORUL DROPi _REALIST_ NU SPECULATIV.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18341,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 154,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/Masterplan Dropi ( detaliat).docx",
+      "compressed_size": 195613,
+      "crc32": "ffeec859",
+      "encoding_anomalies": [],
+      "filename": "Masterplan Dropi ( detaliat).docx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/Masterplan Dropi ( detaliat).docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 214121,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 156,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_README_START_HERE/Canon_Rules.md",
+      "compressed_size": 20,
+      "crc32": "701ba235",
+      "encoding_anomalies": [],
+      "filename": "Canon_Rules.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_README_START_HERE/Canon_Rules.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 18,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 157,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_README_START_HERE/Change_Log.md",
+      "compressed_size": 19,
+      "crc32": "c24315df",
+      "encoding_anomalies": [],
+      "filename": "Change_Log.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_README_START_HERE/Change_Log.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 17,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 158,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_README_START_HERE/Project_Overview.md",
+      "compressed_size": 25,
+      "crc32": "604e3e87",
+      "encoding_anomalies": [],
+      "filename": "Project_Overview.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_README_START_HERE/Project_Overview.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 23,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 164,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/01_MASTER_PLAN/MASTER_PLAN_DROPi.md",
+      "compressed_size": 26,
+      "crc32": "7dec117d",
+      "encoding_anomalies": [],
+      "filename": "MASTER_PLAN_DROPi.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/01_MASTER_PLAN/MASTER_PLAN_DROPi.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 24,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 167,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/02_VOLUME_I_STRATEGY/Cap_01_Executive_Summary.md",
+      "compressed_size": 33,
+      "crc32": "54013f59",
+      "encoding_anomalies": [],
+      "filename": "Cap_01_Executive_Summary.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/02_VOLUME_I_STRATEGY/Cap_01_Executive_Summary.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 31,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 168,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/02_VOLUME_I_STRATEGY/Cap_02_Problem_Space.md",
+      "compressed_size": 1762,
+      "crc32": "2fbce5ff",
+      "encoding_anomalies": [],
+      "filename": "Cap_02_Problem_Space.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/02_VOLUME_I_STRATEGY/Cap_02_Problem_Space.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 3836,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 169,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/02_VOLUME_I_STRATEGY/Cap_03_Solution_Overview.md",
+      "compressed_size": 1830,
+      "crc32": "c16eb418",
+      "encoding_anomalies": [],
+      "filename": "Cap_03_Solution_Overview.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/02_VOLUME_I_STRATEGY/Cap_03_Solution_Overview.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 4011,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 170,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/02_VOLUME_I_STRATEGY/Cap_04_Differentiation.md",
+      "compressed_size": 1821,
+      "crc32": "86b748a5",
+      "encoding_anomalies": [],
+      "filename": "Cap_04_Differentiation.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/02_VOLUME_I_STRATEGY/Cap_04_Differentiation.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 4122,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 171,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/02_VOLUME_I_STRATEGY/Cap_05_Zone_0_Philippines.md",
+      "compressed_size": 34,
+      "crc32": "1b45d9b9",
+      "encoding_anomalies": [],
+      "filename": "Cap_05_Zone_0_Philippines.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/02_VOLUME_I_STRATEGY/Cap_05_Zone_0_Philippines.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 32,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 172,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/02_VOLUME_I_STRATEGY/INDEX.md",
+      "compressed_size": 246,
+      "crc32": "3db371e2",
+      "encoding_anomalies": [],
+      "filename": "INDEX.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/02_VOLUME_I_STRATEGY/INDEX.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 383,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 177,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/B2B_Logistics_Partners.md",
+      "compressed_size": 2443,
+      "crc32": "02e03e23",
+      "encoding_anomalies": [],
+      "filename": "B2B_Logistics_Partners.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/B2B_Logistics_Partners.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 6120,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 178,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Cap_06_Product.md",
+      "compressed_size": 12279,
+      "crc32": "ce635154",
+      "encoding_anomalies": [],
+      "filename": "Cap_06_Product.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Cap_06_Product.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 38906,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 179,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Delivery_Multimodal.md",
+      "compressed_size": 2266,
+      "crc32": "e22e56ac",
+      "encoding_anomalies": [],
+      "filename": "Delivery_Multimodal.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Delivery_Multimodal.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 5262,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 180,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Marketplace_Financial_Flow.md",
+      "compressed_size": 2568,
+      "crc32": "cf717f42",
+      "encoding_anomalies": [],
+      "filename": "Marketplace_Financial_Flow.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Marketplace_Financial_Flow.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 6459,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 181,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Pre_Orchestrare_Zonala.md",
+      "compressed_size": 4263,
+      "crc32": "ceb10a96",
+      "encoding_anomalies": [],
+      "filename": "Pre_Orchestrare_Zonala.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Pre_Orchestrare_Zonala.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 11979,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 182,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Pricing_Transparency.md",
+      "compressed_size": 29,
+      "crc32": "7697d67e",
+      "encoding_anomalies": [],
+      "filename": "Pricing_Transparency.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Pricing_Transparency.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 27,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 183,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Reputation_Ranking_System.md",
+      "compressed_size": 34,
+      "crc32": "6e8c4bec",
+      "encoding_anomalies": [],
+      "filename": "Reputation_Ranking_System.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/03_VOLUME_II_PRODUCT_TECH/Cap_06_Product_DROPi/Reputation_Ranking_System.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 32,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 185,
+      "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/05_CONTRACTS_TEMPLATES/Merchant_Terms.md",
+      "compressed_size": 23,
+      "crc32": "07b7d8cb",
+      "encoding_anomalies": [],
+      "filename": "Merchant_Terms.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/05_CONTRACTS_TEMPLATES/Merchant_Terms.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 21,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 187,
+      "archive_path": "04/DROPI_CANONICAL/02_ARCHITECTURE/SYSTEM_ARCHITECTURE.md",
+      "compressed_size": 4085,
+      "crc32": "f4b3ab82",
+      "encoding_anomalies": [],
+      "filename": "SYSTEM_ARCHITECTURE.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/02_ARCHITECTURE/SYSTEM_ARCHITECTURE.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 10009,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 192,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/README.md",
+      "compressed_size": 2001,
+      "crc32": "87fbdcff",
+      "encoding_anomalies": [],
+      "filename": "README.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/README.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 5092,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 193,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/app.json",
+      "compressed_size": 358,
+      "crc32": "03dc545f",
+      "encoding_anomalies": [],
+      "filename": "app.json",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/app.json",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 759,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 195,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/index.js",
+      "compressed_size": 132,
+      "crc32": "82235d2a",
+      "encoding_anomalies": [],
+      "filename": "index.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/index.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 187,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 196,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/package.json",
+      "compressed_size": 631,
+      "crc32": "405959bf",
+      "encoding_anomalies": [],
+      "filename": "package.json",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/package.json",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 1611,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 199,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/App.js",
+      "compressed_size": 1343,
+      "crc32": "666f15f8",
+      "encoding_anomalies": [],
+      "filename": "App.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/App.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 5004,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 203,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/screens/CustomerDashboard.tsx",
+      "compressed_size": 2255,
+      "crc32": "17c39c69",
+      "encoding_anomalies": [],
+      "filename": "CustomerDashboard.tsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/screens/CustomerDashboard.tsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 9331,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 204,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/screens/HomeScreen.tsx",
+      "compressed_size": 1666,
+      "crc32": "55157687",
+      "encoding_anomalies": [],
+      "filename": "HomeScreen.tsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/screens/HomeScreen.tsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 6522,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 205,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/screens/SplashScreen.js",
+      "compressed_size": 265,
+      "crc32": "221be798",
+      "encoding_anomalies": [],
+      "filename": "SplashScreen.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/screens/SplashScreen.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 418,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 211,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/store/index.js",
+      "compressed_size": 180,
+      "crc32": "5c14a0af",
+      "encoding_anomalies": [],
+      "filename": "index.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/store/index.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 428,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 213,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/store/slices/authSlice.js",
+      "compressed_size": 279,
+      "crc32": "c46988fa",
+      "encoding_anomalies": [],
+      "filename": "authSlice.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/store/slices/authSlice.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 735,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 214,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/store/slices/deliveriesSlice.js",
+      "compressed_size": 306,
+      "crc32": "556c0a3c",
+      "encoding_anomalies": [],
+      "filename": "deliveriesSlice.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/store/slices/deliveriesSlice.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 706,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 215,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/store/slices/ordersSlice.js",
+      "compressed_size": 316,
+      "crc32": "0b5cf875",
+      "encoding_anomalies": [],
+      "filename": "ordersSlice.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/store/slices/ordersSlice.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 768,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 216,
+      "archive_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/store/slices/uiSlice.js",
+      "compressed_size": 263,
+      "crc32": "c29fd292",
+      "encoding_anomalies": [],
+      "filename": "uiSlice.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/05_MOBILE_APP/react-native/src/store/slices/uiSlice.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 610,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 222,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/README.md",
+      "compressed_size": 1252,
+      "crc32": "7f291104",
+      "encoding_anomalies": [],
+      "filename": "README.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/README.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 2859,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 223,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/index.html",
+      "compressed_size": 309,
+      "crc32": "a2866866",
+      "encoding_anomalies": [],
+      "filename": "index.html",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/index.html",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 602,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 224,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/package.json",
+      "compressed_size": 364,
+      "crc32": "3d74da8f",
+      "encoding_anomalies": [],
+      "filename": "package.json",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/package.json",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 777,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 228,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/App.jsx",
+      "compressed_size": 467,
+      "crc32": "13a72672",
+      "encoding_anomalies": [],
+      "filename": "App.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/App.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 1669,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 230,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/components/Footer.jsx",
+      "compressed_size": 542,
+      "crc32": "ca5c2565",
+      "encoding_anomalies": [],
+      "filename": "Footer.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/components/Footer.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 1902,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 231,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/components/Navigation.jsx",
+      "compressed_size": 362,
+      "crc32": "984b9564",
+      "encoding_anomalies": [],
+      "filename": "Navigation.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/components/Navigation.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 973,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 233,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/index.css",
+      "compressed_size": 366,
+      "crc32": "4e54461c",
+      "encoding_anomalies": [],
+      "filename": "index.css",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/index.css",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 733,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 234,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/main.jsx",
+      "compressed_size": 146,
+      "crc32": "d1bd85ef",
+      "encoding_anomalies": [],
+      "filename": "main.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/main.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 231,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 236,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/BlogPage.jsx",
+      "compressed_size": 177,
+      "crc32": "eb76d802",
+      "encoding_anomalies": [],
+      "filename": "BlogPage.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/BlogPage.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 254,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 237,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/ContactPage.jsx",
+      "compressed_size": 176,
+      "crc32": "6baa0f18",
+      "encoding_anomalies": [],
+      "filename": "ContactPage.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/ContactPage.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 260,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 238,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/CustomersPage.jsx",
+      "compressed_size": 178,
+      "crc32": "1bcd4d82",
+      "encoding_anomalies": [],
+      "filename": "CustomersPage.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/CustomersPage.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 264,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 239,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/Home.jsx",
+      "compressed_size": 1714,
+      "crc32": "5f3f89b1",
+      "encoding_anomalies": [],
+      "filename": "Home.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/Home.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 8883,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 240,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/HomePage.jsx",
+      "compressed_size": 176,
+      "crc32": "b77c5454",
+      "encoding_anomalies": [],
+      "filename": "HomePage.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/HomePage.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 254,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 241,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/HowItWorksPage.jsx",
+      "compressed_size": 182,
+      "crc32": "39824c7e",
+      "encoding_anomalies": [],
+      "filename": "HowItWorksPage.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/HowItWorksPage.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 266,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 242,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/MerchantsPage.jsx",
+      "compressed_size": 179,
+      "crc32": "af235a68",
+      "encoding_anomalies": [],
+      "filename": "MerchantsPage.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/MerchantsPage.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 264,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 243,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/NotFoundPage.jsx",
+      "compressed_size": 178,
+      "crc32": "b02002ee",
+      "encoding_anomalies": [],
+      "filename": "NotFoundPage.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/NotFoundPage.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 262,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 244,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/PartnersPage.jsx",
+      "compressed_size": 176,
+      "crc32": "1bc21e27",
+      "encoding_anomalies": [],
+      "filename": "PartnersPage.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/PartnersPage.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 262,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 245,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/PricingPage.jsx",
+      "compressed_size": 176,
+      "crc32": "7772e70c",
+      "encoding_anomalies": [],
+      "filename": "PricingPage.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/PricingPage.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 260,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 246,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/PrivacyPage.jsx",
+      "compressed_size": 176,
+      "crc32": "7f9debcc",
+      "encoding_anomalies": [],
+      "filename": "PrivacyPage.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/PrivacyPage.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 260,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 247,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/TermsPage.jsx",
+      "compressed_size": 176,
+      "crc32": "43518a0b",
+      "encoding_anomalies": [],
+      "filename": "TermsPage.jsx",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/src/pages/TermsPage.jsx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 256,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 249,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/tailwind.config.js",
+      "compressed_size": 221,
+      "crc32": "82ebbf08",
+      "encoding_anomalies": [],
+      "filename": "tailwind.config.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/tailwind.config.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 373,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 250,
+      "archive_path": "04/DROPI_CANONICAL/06_WEBSITE/react/vite.config.js",
+      "compressed_size": 175,
+      "crc32": "8e11133b",
+      "encoding_anomalies": [],
+      "filename": "vite.config.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/06_WEBSITE/react/vite.config.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 265,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 253,
+      "archive_path": "04/DROPI_CANONICAL/08_AI_SIMULATION/agents.js",
+      "compressed_size": 1999,
+      "crc32": "42b544dc",
+      "encoding_anomalies": [],
+      "filename": "agents.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/08_AI_SIMULATION/agents.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 9386,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 257,
+      "archive_path": "04/DROPI_CANONICAL/08_AI_SIMULATION/orchestrator.js",
+      "compressed_size": 2293,
+      "crc32": "e6ade37d",
+      "encoding_anomalies": [],
+      "filename": "orchestrator.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/08_AI_SIMULATION/orchestrator.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 8633,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 260,
+      "archive_path": "04/DROPI_CANONICAL/09_DEPLOYMENT/DEPLOYMENT_GUIDE.md",
+      "compressed_size": 1753,
+      "crc32": "7aec6dde",
+      "encoding_anomalies": [],
+      "filename": "DEPLOYMENT_GUIDE.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/09_DEPLOYMENT/DEPLOYMENT_GUIDE.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 4373,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 261,
+      "archive_path": "04/DROPI_CANONICAL/09_DEPLOYMENT/docker-compose.yml",
+      "compressed_size": 844,
+      "crc32": "015267a3",
+      "encoding_anomalies": [],
+      "filename": "docker-compose.yml",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/09_DEPLOYMENT/docker-compose.yml",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 2620,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 264,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/.env.example",
+      "compressed_size": 415,
+      "crc32": "aefea4d6",
+      "encoding_anomalies": [],
+      "filename": ".env.example",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/.env.example",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 694,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 265,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/README.md",
+      "compressed_size": 2360,
+      "crc32": "057c0854",
+      "encoding_anomalies": [],
+      "filename": "README.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/README.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 6143,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 266,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/package.json",
+      "compressed_size": 437,
+      "crc32": "04f8a861",
+      "encoding_anomalies": [],
+      "filename": "package.json",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/package.json",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 1001,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 269,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/context.js",
+      "compressed_size": 405,
+      "crc32": "c9ddc6ee",
+      "encoding_anomalies": [],
+      "filename": "context.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/context.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 786,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 271,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/db/index.js",
+      "compressed_size": 525,
+      "crc32": "a9446222",
+      "encoding_anomalies": [],
+      "filename": "index.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/db/index.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 1144,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 272,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/db/schema.js",
+      "compressed_size": 1667,
+      "crc32": "a88a4211",
+      "encoding_anomalies": [],
+      "filename": "schema.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/db/schema.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 8877,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 274,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/agents.js",
+      "compressed_size": 170,
+      "crc32": "7495d94b",
+      "encoding_anomalies": [],
+      "filename": "agents.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/agents.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 262,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 275,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/analytics.js",
+      "compressed_size": 171,
+      "crc32": "714b9632",
+      "encoding_anomalies": [],
+      "filename": "analytics.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/analytics.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 268,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 276,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/auth.js",
+      "compressed_size": 840,
+      "crc32": "dfa1f698",
+      "encoding_anomalies": [],
+      "filename": "auth.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/auth.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 2979,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 277,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/auth.ts",
+      "compressed_size": 1332,
+      "crc32": "fe2e116c",
+      "encoding_anomalies": [],
+      "filename": "auth.ts",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/auth.ts",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 5943,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 278,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/deliveries.js",
+      "compressed_size": 172,
+      "crc32": "bebc050f",
+      "encoding_anomalies": [],
+      "filename": "deliveries.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/deliveries.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 270,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 279,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/deliveries.ts",
+      "compressed_size": 1281,
+      "crc32": "52434cdd",
+      "encoding_anomalies": [],
+      "filename": "deliveries.ts",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/deliveries.ts",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 5969,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 280,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/index.js",
+      "compressed_size": 235,
+      "crc32": "c153406e",
+      "encoding_anomalies": [],
+      "filename": "index.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/index.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 767,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 281,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/issues.js",
+      "compressed_size": 170,
+      "crc32": "2cc46556",
+      "encoding_anomalies": [],
+      "filename": "issues.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/issues.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 262,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 282,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/marketplace.ts",
+      "compressed_size": 1661,
+      "crc32": "e9a88cf3",
+      "encoding_anomalies": [],
+      "filename": "marketplace.ts",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/marketplace.ts",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 8674,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 283,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/orders.js",
+      "compressed_size": 169,
+      "crc32": "9977f52d",
+      "encoding_anomalies": [],
+      "filename": "orders.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/orders.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 262,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 284,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/orders.ts",
+      "compressed_size": 1328,
+      "crc32": "c561eb19",
+      "encoding_anomalies": [],
+      "filename": "orders.ts",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/orders.ts",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 6015,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 285,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/simulation.js",
+      "compressed_size": 173,
+      "crc32": "023d4ee3",
+      "encoding_anomalies": [],
+      "filename": "simulation.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/simulation.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 270,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 286,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/support.js",
+      "compressed_size": 169,
+      "crc32": "e7978282",
+      "encoding_anomalies": [],
+      "filename": "support.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/support.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 264,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 287,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/users.js",
+      "compressed_size": 169,
+      "crc32": "b7aee706",
+      "encoding_anomalies": [],
+      "filename": "users.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/routers/users.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 260,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 288,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/server.js",
+      "compressed_size": 652,
+      "crc32": "c1052739",
+      "encoding_anomalies": [],
+      "filename": "server.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/server.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 1387,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 289,
+      "archive_path": "04/DROPI_CANONICAL/11_BACKEND/src/trpc.js",
+      "compressed_size": 348,
+      "crc32": "88108d8b",
+      "encoding_anomalies": [],
+      "filename": "trpc.js",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/11_BACKEND/src/trpc.js",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 979,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 292,
+      "archive_path": "04/DROPI_CANONICAL/12_DOCUMENTATION/PRESENTATION_SCRIPT.md",
+      "compressed_size": 8717,
+      "crc32": "f305e3c7",
+      "encoding_anomalies": [],
+      "filename": "PRESENTATION_SCRIPT.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/12_DOCUMENTATION/PRESENTATION_SCRIPT.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 23788,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 293,
+      "archive_path": "04/DROPI_CANONICAL/DEPLOYMENT_COMPLETE.md",
+      "compressed_size": 3654,
+      "crc32": "3d2e99b6",
+      "encoding_anomalies": [],
+      "filename": "DEPLOYMENT_COMPLETE.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/DEPLOYMENT_COMPLETE.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 11113,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 294,
+      "archive_path": "04/DROPI_CANONICAL/FINAL_PACKAGE.sh",
+      "compressed_size": 3325,
+      "crc32": "56291bbe",
+      "encoding_anomalies": [],
+      "filename": "FINAL_PACKAGE.sh",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/FINAL_PACKAGE.sh",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 9208,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 295,
+      "archive_path": "04/DROPI_CANONICAL/IMPLEMENTATION_ROADMAP.md",
+      "compressed_size": 3752,
+      "crc32": "439a54ed",
+      "encoding_anomalies": [],
+      "filename": "IMPLEMENTATION_ROADMAP.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/IMPLEMENTATION_ROADMAP.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 11716,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 296,
+      "archive_path": "04/DROPI_CANONICAL/INDEX.md",
+      "compressed_size": 2666,
+      "crc32": "450aaeef",
+      "encoding_anomalies": [],
+      "filename": "INDEX.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/INDEX.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 6441,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 297,
+      "archive_path": "04/DROPI_CANONICAL/README.md",
+      "compressed_size": 2703,
+      "crc32": "0c207fa8",
+      "encoding_anomalies": [],
+      "filename": "README.md",
+      "has_anomaly": false,
+      "nfc_path": "04/DROPI_CANONICAL/README.md",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 7476,
+      "unicode_form": "NFC+NFD"
+    },
+    {
+      "archive_index": 298,
+      "archive_path": "04/HANDOVER_FROM_CHATGPT.md.docx",
+      "compressed_size": 19513,
+      "crc32": "842fb64f",
+      "encoding_anomalies": [],
+      "filename": "HANDOVER_FROM_CHATGPT.md.docx",
+      "has_anomaly": false,
+      "nfc_path": "04/HANDOVER_FROM_CHATGPT.md.docx",
+      "path_changed_by_nfc": false,
+      "uncompressed_size": 22418,
+      "unicode_form": "NFC+NFD"
+    }
+  ],
+  "nfc_collision_groups": [],
+  "schema_version": 1,
+  "summary": {
+    "anomaly_file_count": 114,
+    "anomaly_type_counts": {
+      "possible-mojibake": 114
+    },
+    "clean_file_count": 121,
+    "nfc_collision_group_count": 0,
+    "total_file_count": 235,
+    "unicode_form_counts": {
+      "NFC+NFD": 235
+    }
+  }
+}
