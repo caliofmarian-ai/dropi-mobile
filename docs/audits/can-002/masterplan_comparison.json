@@ -1,0 +1,3414 @@
+{
+  "additional_local_files": [],
+  "ambiguous_hash_groups": [],
+  "archive_duplicate_paths": [],
+  "archive_unreadable_paths": [],
+  "authority": {
+    "archive_path": "04.zip",
+    "archive_prefix": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/",
+    "archive_sha256": "82a6015b8c968645307e36c8e4aa0351515f50333c08a6c5402a7819b7b747e5",
+    "local_corpus_root": "canonical/docs/00_MasterPlan"
+  },
+  "local_duplicate_paths": [],
+  "mappings": [
+    {
+      "archive": {
+        "archive_index": 27,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/00_CUPRINS GENERAL _INDEX FINAL.docx",
+        "compressed_size": 13950,
+        "crc32": "a1867e35",
+        "filename": "00_CUPRINS GENERAL _INDEX FINAL.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "01_FUNDAMENT & STRATEGIE/00_CUPRINS GENERAL _INDEX FINAL.docx",
+        "sha256": "6ddb024e3bdabf3703dd9e5531532d135e3545cde44f90408735882a761fbccd",
+        "uncompressed_size": 16705
+      },
+      "classification": "exact_path_and_content_match",
+      "local": {
+        "filename": "00_CUPRINS GENERAL _INDEX FINAL.docx",
+        "relative_path": "01_FUNDAMENT & STRATEGIE/00_CUPRINS GENERAL _INDEX FINAL.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/01_FUNDAMENT & STRATEGIE/00_CUPRINS GENERAL _INDEX FINAL.docx",
+        "sha256": "6ddb024e3bdabf3703dd9e5531532d135e3545cde44f90408735882a761fbccd",
+        "size": 16705
+      },
+      "mapping_basis": "exact_relative_path"
+    },
+    {
+      "archive": {
+        "archive_index": 25,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/01_EXECUTIVE SUMMARY (EXTINS).docx",
+        "compressed_size": 14148,
+        "crc32": "a91e9f49",
+        "filename": "01_EXECUTIVE SUMMARY (EXTINS).docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "01_FUNDAMENT & STRATEGIE/01_EXECUTIVE SUMMARY (EXTINS).docx",
+        "sha256": "472baa0f2fac9b44bacdb55356fcdcbe28724f28976a244934713f85dc96c83e",
+        "uncompressed_size": 16908
+      },
+      "classification": "exact_path_and_content_match",
+      "local": {
+        "filename": "01_EXECUTIVE SUMMARY (EXTINS).docx",
+        "relative_path": "01_FUNDAMENT & STRATEGIE/01_EXECUTIVE SUMMARY (EXTINS).docx",
+        "repository_path": "canonical/docs/00_MasterPlan/01_FUNDAMENT & STRATEGIE/01_EXECUTIVE SUMMARY (EXTINS).docx",
+        "sha256": "472baa0f2fac9b44bacdb55356fcdcbe28724f28976a244934713f85dc96c83e",
+        "size": 16908
+      },
+      "mapping_basis": "exact_relative_path"
+    },
+    {
+      "archive": {
+        "archive_index": 26,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/02_PROBLEMA GLOBAL─В A LOGISTICII ULTIMULUI KILOMETRU.docx",
+        "compressed_size": 15911,
+        "crc32": "9e534069",
+        "filename": "02_PROBLEMA GLOBAL─В A LOGISTICII ULTIMULUI KILOMETRU.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "01_FUNDAMENT & STRATEGIE/02_PROBLEMA GLOBAL─В A LOGISTICII ULTIMULUI KILOMETRU.docx",
+        "sha256": "06851769f942e2ef2f348428220bdbb310158122d8764af89aed23edb42bb25a",
+        "uncompressed_size": 18725
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "02_PROBLEMA GLOBALтФА╨Т A LOGISTICII ULTIMULUI KILOMETRU.docx",
+        "relative_path": "01_FUNDAMENT & STRATEGIE/02_PROBLEMA GLOBALтФА╨Т A LOGISTICII ULTIMULUI KILOMETRU.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/01_FUNDAMENT & STRATEGIE/02_PROBLEMA GLOBALтФА╨Т A LOGISTICII ULTIMULUI KILOMETRU.docx",
+        "sha256": "06851769f942e2ef2f348428220bdbb310158122d8764af89aed23edb42bb25a",
+        "size": 18725
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 22,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/03_SOLU╚ЪIA DROPi- ARHITECTUR─В LOGISTIC─В SISTEMIC─В.docx",
+        "compressed_size": 16561,
+        "crc32": "5438609c",
+        "filename": "03_SOLU╚ЪIA DROPi- ARHITECTUR─В LOGISTIC─В SISTEMIC─В.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "01_FUNDAMENT & STRATEGIE/03_SOLU╚ЪIA DROPi- ARHITECTUR─В LOGISTIC─В SISTEMIC─В.docx",
+        "sha256": "154712d8059488f89de74705b0cf322d25e2e482dc2e9d2d9aae92cdea21322f",
+        "uncompressed_size": 19389
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "03_SOLUтХЪ╨кIA DROPi- ARHITECTURтФА╨Т LOGISTICтФА╨Т SISTEMICтФА╨Т.docx",
+        "relative_path": "01_FUNDAMENT & STRATEGIE/03_SOLUтХЪ╨кIA DROPi- ARHITECTURтФА╨Т LOGISTICтФА╨Т SISTEMICтФА╨Т.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/01_FUNDAMENT & STRATEGIE/03_SOLUтХЪ╨кIA DROPi- ARHITECTURтФА╨Т LOGISTICтФА╨Т SISTEMICтФА╨Т.docx",
+        "sha256": "154712d8059488f89de74705b0cf322d25e2e482dc2e9d2d9aae92cdea21322f",
+        "size": 19389
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 23,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/04_DIFEREN╚ЪIEREA STRATEGIC─В DROPi.docx",
+        "compressed_size": 15541,
+        "crc32": "2203de8a",
+        "filename": "04_DIFEREN╚ЪIEREA STRATEGIC─В DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "01_FUNDAMENT & STRATEGIE/04_DIFEREN╚ЪIEREA STRATEGIC─В DROPi.docx",
+        "sha256": "64159789bccf7d900344875750cd6c989158f197b972ad841ffd746f3e5797ff",
+        "uncompressed_size": 18353
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "04_DIFERENтХЪ╨кIEREA STRATEGICтФА╨Т DROPi.docx",
+        "relative_path": "01_FUNDAMENT & STRATEGIE/04_DIFERENтХЪ╨кIEREA STRATEGICтФА╨Т DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/01_FUNDAMENT & STRATEGIE/04_DIFERENтХЪ╨кIEREA STRATEGICтФА╨Т DROPi.docx",
+        "sha256": "64159789bccf7d900344875750cd6c989158f197b972ad841ffd746f3e5797ff",
+        "size": 18353
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 24,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/01_FUNDAMENT & STRATEGIE/05_ZONA 0- FILIPINE PUNCTUL DE START STRATEGIC.docx",
+        "compressed_size": 16800,
+        "crc32": "7099a77c",
+        "filename": "05_ZONA 0- FILIPINE PUNCTUL DE START STRATEGIC.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "01_FUNDAMENT & STRATEGIE/05_ZONA 0- FILIPINE PUNCTUL DE START STRATEGIC.docx",
+        "sha256": "2355e782cb9fc5ff9fb58bfb843c842f972e5580fc1840294e4adc5b0d8cc4e5",
+        "uncompressed_size": 19609
+      },
+      "classification": "exact_path_and_content_match",
+      "local": {
+        "filename": "05_ZONA 0- FILIPINE PUNCTUL DE START STRATEGIC.docx",
+        "relative_path": "01_FUNDAMENT & STRATEGIE/05_ZONA 0- FILIPINE PUNCTUL DE START STRATEGIC.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/01_FUNDAMENT & STRATEGIE/05_ZONA 0- FILIPINE PUNCTUL DE START STRATEGIC.docx",
+        "sha256": "2355e782cb9fc5ff9fb58bfb843c842f972e5580fc1840294e4adc5b0d8cc4e5",
+        "size": 19609
+      },
+      "mapping_basis": "exact_relative_path"
+    },
+    {
+      "archive": {
+        "archive_index": 137,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+        "compressed_size": 14297,
+        "crc32": "2b9ea53b",
+        "filename": "00.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/00.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+        "sha256": "78db9ac13cbd71dab3df71a9a489555892b3d8a5721189e4202c49b3ddfa2805",
+        "uncompressed_size": 17056
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "00.0_CONSOLIDARE FINALтФА╨Т ╤В╨Р╨д VOLUMUL II.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/00.0_CONSOLIDARE FINALтФА╨Т ╤В╨Р╨д VOLUMUL II.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00.0_CONSOLIDARE FINALтФА╨Т ╤В╨Р╨д VOLUMUL II.docx",
+        "sha256": "78db9ac13cbd71dab3df71a9a489555892b3d8a5721189e4202c49b3ddfa2805",
+        "size": 17056
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 117,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00.1_PACHET INVESTITORI тАФ EXECUTIVE ^LM AUDIT EXTRACTS.docx",
+        "compressed_size": 14104,
+        "crc32": "61f669a5",
+        "filename": "00.1_PACHET INVESTITORI тАФ EXECUTIVE ^LM AUDIT EXTRACTS.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/00.1_PACHET INVESTITORI тАФ EXECUTIVE ^LM AUDIT EXTRACTS.docx",
+        "sha256": "3e47bc205c4330a80e1f9cb0f627018f027aa102142123aee5de88ced4e48e63",
+        "uncompressed_size": 16859
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "00.1_PACHET INVESTITORI ╤В╨Р╨д EXECUTIVE ^LM AUDIT EXTRACTS.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/00.1_PACHET INVESTITORI ╤В╨Р╨д EXECUTIVE ^LM AUDIT EXTRACTS.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00.1_PACHET INVESTITORI ╤В╨Р╨д EXECUTIVE ^LM AUDIT EXTRACTS.docx",
+        "sha256": "3e47bc205c4330a80e1f9cb0f627018f027aa102142123aee5de88ced4e48e63",
+        "size": 16859
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 153,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+        "compressed_size": 14542,
+        "crc32": "d648471d",
+        "filename": "00_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/00_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+        "sha256": "565fa5bc01d3ad236ecd93e2d3ef6bd0422ce55ea086ae412b59769576eaa79f",
+        "uncompressed_size": 17258
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "00_CONSOLIDARE FINALтФА╨Т ╤В╨Р╨д VOLUMUL II.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/00_CONSOLIDARE FINALтФА╨Т ╤В╨Р╨д VOLUMUL II.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/00_CONSOLIDARE FINALтФА╨Т ╤В╨Р╨д VOLUMUL II.docx",
+        "sha256": "565fa5bc01d3ad236ecd93e2d3ef6bd0422ce55ea086ae412b59769576eaa79f",
+        "size": 17258
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 136,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 6.docx",
+        "compressed_size": 13518,
+        "crc32": "88a050a2",
+        "filename": "06.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 6.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 6.docx",
+        "sha256": "5645626e95fed7405a36ea4a26d681cb52188b434a5198db6c3b0e87f3424ee8",
+        "uncompressed_size": 16277
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "06.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 6.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 6.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 6.docx",
+        "sha256": "5645626e95fed7405a36ea4a26d681cb52188b434a5198db6c3b0e87f3424ee8",
+        "size": 16277
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 133,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.0_CAPITOLUL 6 тАФ PRODUSUL DROPi.docx",
+        "compressed_size": 13969,
+        "crc32": "3b6e4f24",
+        "filename": "06.0_CAPITOLUL 6 тАФ PRODUSUL DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.0_CAPITOLUL 6 тАФ PRODUSUL DROPi.docx",
+        "sha256": "4af616df571bb21ff67eeac826a99e3263d350927fe389834cbeab25e4932362",
+        "uncompressed_size": 16691
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "06.0_CAPITOLUL 6 ╤В╨Р╨д PRODUSUL DROPi.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.0_CAPITOLUL 6 ╤В╨Р╨д PRODUSUL DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.0_CAPITOLUL 6 ╤В╨Р╨д PRODUSUL DROPi.docx",
+        "sha256": "4af616df571bb21ff67eeac826a99e3263d350927fe389834cbeab25e4932362",
+        "size": 16691
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 154,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.1_ANEXA 6.A тАФ HART─В PRODUS -PRODUCT MAP.docx",
+        "compressed_size": 14396,
+        "crc32": "6f3f1241",
+        "filename": "06.1_ANEXA 6.A тАФ HART─В PRODUS -PRODUCT MAP.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.1_ANEXA 6.A тАФ HART─В PRODUS -PRODUCT MAP.docx",
+        "sha256": "cc4f64fd2a6a700f412c50b79b805751d709fa06fe1cb68a895b5f1b3d9ba0da",
+        "uncompressed_size": 17220
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "06.1_ANEXA 6.A ╤В╨Р╨д HARTтФА╨Т PRODUS -PRODUCT MAP.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.1_ANEXA 6.A ╤В╨Р╨д HARTтФА╨Т PRODUS -PRODUCT MAP.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.1_ANEXA 6.A ╤В╨Р╨д HARTтФА╨Т PRODUS -PRODUCT MAP.docx",
+        "sha256": "cc4f64fd2a6a700f412c50b79b805751d709fa06fe1cb68a895b5f1b3d9ba0da",
+        "size": 17220
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 115,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.2_ANEXA 6.B тАФ SEPARARE RESPONSABILIT─В╚ЪI.docx",
+        "compressed_size": 14162,
+        "crc32": "4955200f",
+        "filename": "06.2_ANEXA 6.B тАФ SEPARARE RESPONSABILIT─В╚ЪI.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.2_ANEXA 6.B тАФ SEPARARE RESPONSABILIT─В╚ЪI.docx",
+        "sha256": "582ad54e3beb8138d5a11f8faad62181dcd8af482d694b8349c1ca94db098a6e",
+        "uncompressed_size": 16986
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "06.2_ANEXA 6.B ╤В╨Р╨д SEPARARE RESPONSABILITтФА╨ТтХЪ╨кI.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.2_ANEXA 6.B ╤В╨Р╨д SEPARARE RESPONSABILITтФА╨ТтХЪ╨кI.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.2_ANEXA 6.B ╤В╨Р╨д SEPARARE RESPONSABILITтФА╨ТтХЪ╨кI.docx",
+        "sha256": "582ad54e3beb8138d5a11f8faad62181dcd8af482d694b8349c1ca94db098a6e",
+        "size": 16986
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 116,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.3_ANEXA 6.C тАФ PRINCIPII DE DESIGN PRODUS.docx",
+        "compressed_size": 14864,
+        "crc32": "5e5a9073",
+        "filename": "06.3_ANEXA 6.C тАФ PRINCIPII DE DESIGN PRODUS.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.3_ANEXA 6.C тАФ PRINCIPII DE DESIGN PRODUS.docx",
+        "sha256": "7b60091b10f8964fcbb685ec34866841f74defd68e6c4b938e083629b8e853a1",
+        "uncompressed_size": 17686
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "06.3_ANEXA 6.C ╤В╨Р╨д PRINCIPII DE DESIGN PRODUS.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.3_ANEXA 6.C ╤В╨Р╨д PRINCIPII DE DESIGN PRODUS.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.3_ANEXA 6.C ╤В╨Р╨д PRINCIPII DE DESIGN PRODUS.docx",
+        "sha256": "7b60091b10f8964fcbb685ec34866841f74defd68e6c4b938e083629b8e853a1",
+        "size": 17686
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 134,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.4_ANEXA 6.D тАФ REGULI DE EVOLU╚ЪIE PRODUS.docx",
+        "compressed_size": 14785,
+        "crc32": "71ffdb68",
+        "filename": "06.4_ANEXA 6.D тАФ REGULI DE EVOLU╚ЪIE PRODUS.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.4_ANEXA 6.D тАФ REGULI DE EVOLU╚ЪIE PRODUS.docx",
+        "sha256": "9b12069ccc7fe3a3f9deba277da568ceaf75b38bf47c158f9b5a1dd89acf631b",
+        "uncompressed_size": 17610
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "06.4_ANEXA 6.D ╤В╨Р╨д REGULI DE EVOLUтХЪ╨кIE PRODUS.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.4_ANEXA 6.D ╤В╨Р╨д REGULI DE EVOLUтХЪ╨кIE PRODUS.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.4_ANEXA 6.D ╤В╨Р╨д REGULI DE EVOLUтХЪ╨кIE PRODUS.docx",
+        "sha256": "9b12069ccc7fe3a3f9deba277da568ceaf75b38bf47c158f9b5a1dd89acf631b",
+        "size": 17610
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 135,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.5_ALINIERE CAP. 6 тЖФ 7 тЖФ 8.docx",
+        "compressed_size": 14769,
+        "crc32": "5dc1b1ed",
+        "filename": "06.5_ALINIERE CAP. 6 тЖФ 7 тЖФ 8.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.5_ALINIERE CAP. 6 тЖФ 7 тЖФ 8.docx",
+        "sha256": "a3e95890753e3ba2ada1e062120c05c21b2b8315d9c66366488bf4703dd064dd",
+        "uncompressed_size": 17596
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "06.5_ALINIERE CAP. 6 ╤В╨Ц╨д 7 ╤В╨Ц╨д 8.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.5_ALINIERE CAP. 6 ╤В╨Ц╨д 7 ╤В╨Ц╨д 8.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.5_ALINIERE CAP. 6 ╤В╨Ц╨д 7 ╤В╨Ц╨д 8.docx",
+        "sha256": "a3e95890753e3ba2ada1e062120c05c21b2b8315d9c66366488bf4703dd064dd",
+        "size": 17596
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 97,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.X_Marketplace-ul DROPi тАФ pozi╚Ыionare corect─Г.docx",
+        "compressed_size": 13651,
+        "crc32": "e6a8ba69",
+        "filename": "06.X_Marketplace-ul DROPi тАФ pozi╚Ыionare corect─Г.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.X_Marketplace-ul DROPi тАФ pozi╚Ыionare corect─Г.docx",
+        "sha256": "5858e1660f418dbbdbe819043d83358260896c77c6afd7a1cb12bba94487e088",
+        "uncompressed_size": 16402
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "06.X_Marketplace-ul DROPi ╤В╨Р╨д poziтХЪ╨лionare corectтФА╨У.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06.X_Marketplace-ul DROPi ╤В╨Р╨д poziтХЪ╨лionare corectтФА╨У.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06.X_Marketplace-ul DROPi ╤В╨Р╨д poziтХЪ╨лionare corectтФА╨У.docx",
+        "sha256": "5858e1660f418dbbdbe819043d83358260896c77c6afd7a1cb12bba94487e088",
+        "size": 16402
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 31,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06_PRODUSUL DROPi (SITE ^M APLICA╚ЪIE ^M INFRASTRUCTUR─В).docx",
+        "compressed_size": 15601,
+        "crc32": "a634278f",
+        "filename": "06_PRODUSUL DROPi (SITE ^M APLICA╚ЪIE ^M INFRASTRUCTUR─В).docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06_PRODUSUL DROPi (SITE ^M APLICA╚ЪIE ^M INFRASTRUCTUR─В).docx",
+        "sha256": "ec54b28c3adfb624783d9c64f144d01f71a57e88d2be559bb5274430a226ab60",
+        "uncompressed_size": 18415
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "06_PRODUSUL DROPi (SITE ^M APLICAтХЪ╨кIE ^M INFRASTRUCTURтФА╨Т).docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/06_PRODUSUL DROPi (SITE ^M APLICAтХЪ╨кIE ^M INFRASTRUCTURтФА╨Т).docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/06_PRODUSUL DROPi (SITE ^M APLICAтХЪ╨кIE ^M INFRASTRUCTURтФА╨Т).docx",
+        "sha256": "ec54b28c3adfb624783d9c64f144d01f71a57e88d2be559bb5274430a226ab60",
+        "size": 18415
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 121,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.0.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+        "compressed_size": 14621,
+        "crc32": "77d6f6ba",
+        "filename": "07.0.0.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.0.0.0_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+        "sha256": "a52925836ff394761b774cd72196c9860c1ce8186f7f85c3656a58f0871ea03e",
+        "uncompressed_size": 17453
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.0.0.0_CONSOLIDARE FINALтФА╨Т ╤В╨Р╨д VOLUMUL II.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.0.0.0_CONSOLIDARE FINALтФА╨Т ╤В╨Р╨д VOLUMUL II.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.0.0_CONSOLIDARE FINALтФА╨Т ╤В╨Р╨д VOLUMUL II.docx",
+        "sha256": "a52925836ff394761b774cd72196c9860c1ce8186f7f85c3656a58f0871ea03e",
+        "size": 17453
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 56,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 7.docx",
+        "compressed_size": 15267,
+        "crc32": "0dad4fcb",
+        "filename": "07.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 7.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 7.docx",
+        "sha256": "434eabae96f182b1253148dab8143d05f4e9da277b0baf1751e99c3282d74b27",
+        "uncompressed_size": 18083
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 7.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 7.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 7.docx",
+        "sha256": "434eabae96f182b1253148dab8143d05f4e9da277b0baf1751e99c3282d74b27",
+        "size": 18083
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 60,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.1_MAPARE COMPLET─В CAPITOLE 7тАУ12.docx",
+        "compressed_size": 16496,
+        "crc32": "f61e86ab",
+        "filename": "07.0.1_MAPARE COMPLET─В CAPITOLE 7тАУ12.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.0.1_MAPARE COMPLET─В CAPITOLE 7тАУ12.docx",
+        "sha256": "a877a997e80f1dc261088dbdf58043f45f547d006f7b57b8de362caac2b8ea47",
+        "uncompressed_size": 19318
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.0.1_MAPARE COMPLETтФА╨Т CAPITOLE 7╤В╨Р╨г12.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.0.1_MAPARE COMPLETтФА╨Т CAPITOLE 7╤В╨Р╨г12.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.1_MAPARE COMPLETтФА╨Т CAPITOLE 7╤В╨Р╨г12.docx",
+        "sha256": "a877a997e80f1dc261088dbdf58043f45f547d006f7b57b8de362caac2b8ea47",
+        "size": 19318
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 72,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.2_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+        "compressed_size": 16568,
+        "crc32": "e2a007d3",
+        "filename": "07.0.2_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.0.2_CONSOLIDARE FINAL─В тАФ VOLUMUL II.docx",
+        "sha256": "8a5ed52e657aba0d5a7762ca857750b34f4bacc95651d183922b0bb2642f9f08",
+        "uncompressed_size": 19386
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.0.2_CONSOLIDARE FINALтФА╨Т ╤В╨Р╨д VOLUMUL II.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.0.2_CONSOLIDARE FINALтФА╨Т ╤В╨Р╨д VOLUMUL II.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.0.2_CONSOLIDARE FINALтФА╨Т ╤В╨Р╨д VOLUMUL II.docx",
+        "sha256": "8a5ed52e657aba0d5a7762ca857750b34f4bacc95651d183922b0bb2642f9f08",
+        "size": 19386
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 48,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.1TABEL DE RISC LEGAL тАФ APARI╚ЪIE ACCIDENTAL─В PE SITE-UL DROPi.docx",
+        "compressed_size": 16222,
+        "crc32": "13f21e1e",
+        "filename": "07.1.1TABEL DE RISC LEGAL тАФ APARI╚ЪIE ACCIDENTAL─В PE SITE-UL DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.1.1TABEL DE RISC LEGAL тАФ APARI╚ЪIE ACCIDENTAL─В PE SITE-UL DROPi.docx",
+        "sha256": "d390b588290b80a31c9cb0fea9c56ff51babbddf14cd6addad1a676e0f0e86b9",
+        "uncompressed_size": 19043
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.1.1TABEL DE RISC LEGAL ╤В╨Р╨д APARIтХЪ╨кIE ACCIDENTALтФА╨Т PE SITE-UL DROPi.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.1.1TABEL DE RISC LEGAL ╤В╨Р╨д APARIтХЪ╨кIE ACCIDENTALтФА╨Т PE SITE-UL DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.1TABEL DE RISC LEGAL ╤В╨Р╨д APARIтХЪ╨кIE ACCIDENTALтФА╨Т PE SITE-UL DROPi.docx",
+        "sha256": "d390b588290b80a31c9cb0fea9c56ff51babbddf14cd6addad1a676e0f0e86b9",
+        "size": 19043
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 47,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.2PROCEDUR─В OFICIAL─В тАФ SITE INCIDENT RESPONSE.docx",
+        "compressed_size": 15910,
+        "crc32": "d71be414",
+        "filename": "07.1.2PROCEDUR─В OFICIAL─В тАФ SITE INCIDENT RESPONSE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.1.2PROCEDUR─В OFICIAL─В тАФ SITE INCIDENT RESPONSE.docx",
+        "sha256": "269cb37b96e82266dd4b0b039fdfb1344f56dc07266257fb0a32c65cf0ea18ed",
+        "uncompressed_size": 18740
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.1.2PROCEDURтФА╨Т OFICIALтФА╨Т ╤В╨Р╨д SITE INCIDENT RESPONSE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.1.2PROCEDURтФА╨Т OFICIALтФА╨Т ╤В╨Р╨д SITE INCIDENT RESPONSE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.2PROCEDURтФА╨Т OFICIALтФА╨Т ╤В╨Р╨д SITE INCIDENT RESPONSE.docx",
+        "sha256": "269cb37b96e82266dd4b0b039fdfb1344f56dc07266257fb0a32c65cf0ea18ed",
+        "size": 18740
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 46,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.3_CHECKLIST QA тАФ ├ОNAINTE DE FIECARE DEPLOY SITE DROPi.docx",
+        "compressed_size": 15468,
+        "crc32": "b857621a",
+        "filename": "07.1.3_CHECKLIST QA тАФ ├ОNAINTE DE FIECARE DEPLOY SITE DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.1.3_CHECKLIST QA тАФ ├ОNAINTE DE FIECARE DEPLOY SITE DROPi.docx",
+        "sha256": "2d1dc5cc793493cbecbd3dd00193e84248cc3747ff796457717ef02d63511c3a",
+        "uncompressed_size": 18287
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.1.3_CHECKLIST QA ╤В╨Р╨д тФЬ╨ЮNAINTE DE FIECARE DEPLOY SITE DROPi.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.1.3_CHECKLIST QA ╤В╨Р╨д тФЬ╨ЮNAINTE DE FIECARE DEPLOY SITE DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.3_CHECKLIST QA ╤В╨Р╨д тФЬ╨ЮNAINTE DE FIECARE DEPLOY SITE DROPi.docx",
+        "sha256": "2d1dc5cc793493cbecbd3dd00193e84248cc3747ff796457717ef02d63511c3a",
+        "size": 18287
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 52,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.4_ANEX─В тАФ PROCEDUR─В ROLLBACK POST-DEPLOY.docx",
+        "compressed_size": 15567,
+        "crc32": "e463ddc6",
+        "filename": "07.1.4_ANEX─В тАФ PROCEDUR─В ROLLBACK POST-DEPLOY.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.1.4_ANEX─В тАФ PROCEDUR─В ROLLBACK POST-DEPLOY.docx",
+        "sha256": "b3bbdedd9e11883026b1a6e1fe96ef00c141364788c83aead4b820e8437a0359",
+        "uncompressed_size": 18390
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.1.4_ANEXтФА╨Т ╤В╨Р╨д PROCEDURтФА╨Т ROLLBACK POST-DEPLOY.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.1.4_ANEXтФА╨Т ╤В╨Р╨д PROCEDURтФА╨Т ROLLBACK POST-DEPLOY.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1.4_ANEXтФА╨Т ╤В╨Р╨д PROCEDURтФА╨Т ROLLBACK POST-DEPLOY.docx",
+        "sha256": "b3bbdedd9e11883026b1a6e1fe96ef00c141364788c83aead4b820e8437a0359",
+        "size": 18390
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 45,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1_CE NU APARE NICIODAT─В PE SITE-UL DROPi.docx",
+        "compressed_size": 16336,
+        "crc32": "bb0cb969",
+        "filename": "07.1_CE NU APARE NICIODAT─В PE SITE-UL DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.1_CE NU APARE NICIODAT─В PE SITE-UL DROPi.docx",
+        "sha256": "90a9d2148c11e7e066a8fe73754af14ac5673aad5e8809c6b2680790974d2c47",
+        "uncompressed_size": 19157
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.1_CE NU APARE NICIODATтФА╨Т PE SITE-UL DROPi.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.1_CE NU APARE NICIODATтФА╨Т PE SITE-UL DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.1_CE NU APARE NICIODATтФА╨Т PE SITE-UL DROPi.docx",
+        "sha256": "90a9d2148c11e7e066a8fe73754af14ac5673aad5e8809c6b2680790974d2c47",
+        "size": 19157
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 49,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.2_RACI тАФ APROBARE ╚ШI RESPONSABILIT─В╚ЪI SITE DROPi.docx",
+        "compressed_size": 15482,
+        "crc32": "6847e364",
+        "filename": "07.2_RACI тАФ APROBARE ╚ШI RESPONSABILIT─В╚ЪI SITE DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.2_RACI тАФ APROBARE ╚ШI RESPONSABILIT─В╚ЪI SITE DROPi.docx",
+        "sha256": "90ede1e333a176c8882eb98286ec64e7edae318203c7e2d828c7c1e4760d1af5",
+        "uncompressed_size": 18316
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.2_RACI ╤В╨Р╨д APROBARE тХЪ╨иI RESPONSABILITтФА╨ТтХЪ╨кI SITE DROPi.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.2_RACI ╤В╨Р╨д APROBARE тХЪ╨иI RESPONSABILITтФА╨ТтХЪ╨кI SITE DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.2_RACI ╤В╨Р╨д APROBARE тХЪ╨иI RESPONSABILITтФА╨ТтХЪ╨кI SITE DROPi.docx",
+        "sha256": "90ede1e333a176c8882eb98286ec64e7edae318203c7e2d828c7c1e4760d1af5",
+        "size": 18316
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 53,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.3_ANEX─В тАФ TEMPLATE тАЮSAFE PUBLIC STATEMENTSтАЭ.docx",
+        "compressed_size": 13978,
+        "crc32": "e8d9167e",
+        "filename": "07.3_ANEX─В тАФ TEMPLATE тАЮSAFE PUBLIC STATEMENTSтАЭ.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.3_ANEX─В тАФ TEMPLATE тАЮSAFE PUBLIC STATEMENTSтАЭ.docx",
+        "sha256": "29ded0945787c7b001c2070e4f2ed3dbea3f3e7aa5a1f4749f9dfd2746211939",
+        "uncompressed_size": 16734
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.3_ANEXтФА╨Т ╤В╨Р╨д TEMPLATE ╤В╨Р╨оSAFE PUBLIC STATEMENTS╤В╨Р╨н.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.3_ANEXтФА╨Т ╤В╨Р╨д TEMPLATE ╤В╨Р╨оSAFE PUBLIC STATEMENTS╤В╨Р╨н.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.3_ANEXтФА╨Т ╤В╨Р╨д TEMPLATE ╤В╨Р╨оSAFE PUBLIC STATEMENTS╤В╨Р╨н.docx",
+        "sha256": "29ded0945787c7b001c2070e4f2ed3dbea3f3e7aa5a1f4749f9dfd2746211939",
+        "size": 16734
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 50,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.4_ANEX─В тАФ SITE GOVERNANCE CHARTER.docx",
+        "compressed_size": 15907,
+        "crc32": "fb95fdd3",
+        "filename": "07.4_ANEX─В тАФ SITE GOVERNANCE CHARTER.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.4_ANEX─В тАФ SITE GOVERNANCE CHARTER.docx",
+        "sha256": "d52840c026eac2dce6cb634160ffce9f0c8fac2f5692ff1bea34898370db2d56",
+        "uncompressed_size": 18691
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.4_ANEXтФА╨Т ╤В╨Р╨д SITE GOVERNANCE CHARTER.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.4_ANEXтФА╨Т ╤В╨Р╨д SITE GOVERNANCE CHARTER.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.4_ANEXтФА╨Т ╤В╨Р╨д SITE GOVERNANCE CHARTER.docx",
+        "sha256": "d52840c026eac2dce6cb634160ffce9f0c8fac2f5692ff1bea34898370db2d56",
+        "size": 18691
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 54,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.5_CHECKLIST тАФ PUBLIC APPEARANCE - INTERVIEW.docx",
+        "compressed_size": 15328,
+        "crc32": "65297663",
+        "filename": "07.5_CHECKLIST тАФ PUBLIC APPEARANCE - INTERVIEW.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.5_CHECKLIST тАФ PUBLIC APPEARANCE - INTERVIEW.docx",
+        "sha256": "6aa889a9648826b301d6f2093213543df9f8b464bf642b1a78299cae3340bc18",
+        "uncompressed_size": 18153
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.5_CHECKLIST ╤В╨Р╨д PUBLIC APPEARANCE - INTERVIEW.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.5_CHECKLIST ╤В╨Р╨д PUBLIC APPEARANCE - INTERVIEW.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.5_CHECKLIST ╤В╨Р╨д PUBLIC APPEARANCE - INTERVIEW.docx",
+        "sha256": "6aa889a9648826b301d6f2093213543df9f8b464bf642b1a78299cae3340bc18",
+        "size": 18153
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 57,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.0_CHECKLIST тАФ TRAINING INTERN -ONBOARDING COMUNICARE.docx",
+        "compressed_size": 15427,
+        "crc32": "27dd66bc",
+        "filename": "07.6.0_CHECKLIST тАФ TRAINING INTERN -ONBOARDING COMUNICARE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.6.0_CHECKLIST тАФ TRAINING INTERN -ONBOARDING COMUNICARE.docx",
+        "sha256": "343325086c0b6e74ee8051342bad62f6c08005b7b4bbc1aff14e6c68b583aaa1",
+        "uncompressed_size": 18260
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.6.0_CHECKLIST ╤В╨Р╨д TRAINING INTERN -ONBOARDING COMUNICARE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.6.0_CHECKLIST ╤В╨Р╨д TRAINING INTERN -ONBOARDING COMUNICARE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.0_CHECKLIST ╤В╨Р╨д TRAINING INTERN -ONBOARDING COMUNICARE.docx",
+        "sha256": "343325086c0b6e74ee8051342bad62f6c08005b7b4bbc1aff14e6c68b583aaa1",
+        "size": 18260
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 58,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.1_TEST DE VALIDARE INTERN─В тАФ COMUNICARE PUBLIC─В (PASS -FAIL).docx",
+        "compressed_size": 15412,
+        "crc32": "5893ffef",
+        "filename": "07.6.1_TEST DE VALIDARE INTERN─В тАФ COMUNICARE PUBLIC─В (PASS -FAIL).docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.6.1_TEST DE VALIDARE INTERN─В тАФ COMUNICARE PUBLIC─В (PASS -FAIL).docx",
+        "sha256": "2744f1362f5f906f45c85e48f0423980416d82d8363d29599aa527a15c81e2a6",
+        "uncompressed_size": 18237
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.6.1_TEST DE VALIDARE INTERNтФА╨Т ╤В╨Р╨д COMUNICARE PUBLICтФА╨Т (PASS -FAIL).docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.6.1_TEST DE VALIDARE INTERNтФА╨Т ╤В╨Р╨д COMUNICARE PUBLICтФА╨Т (PASS -FAIL).docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.1_TEST DE VALIDARE INTERNтФА╨Т ╤В╨Р╨д COMUNICARE PUBLICтФА╨Т (PASS -FAIL).docx",
+        "sha256": "2744f1362f5f906f45c85e48f0423980416d82d8363d29599aa527a15c81e2a6",
+        "size": 18237
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 55,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.2_CURRICULUM DE TRAINING INTERN тАФ COMUNICARE PUBLIC─В DROPi.docx",
+        "compressed_size": 14217,
+        "crc32": "3bf92f8c",
+        "filename": "07.6.2_CURRICULUM DE TRAINING INTERN тАФ COMUNICARE PUBLIC─В DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.6.2_CURRICULUM DE TRAINING INTERN тАФ COMUNICARE PUBLIC─В DROPi.docx",
+        "sha256": "c845e17bacfcc3e4c003392e69d1bd46c7f70ff43f4187882a00cf0bc7f5cfff",
+        "uncompressed_size": 16972
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.6.2_CURRICULUM DE TRAINING INTERN ╤В╨Р╨д COMUNICARE PUBLICтФА╨Т DROPi.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.6.2_CURRICULUM DE TRAINING INTERN ╤В╨Р╨д COMUNICARE PUBLICтФА╨Т DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.2_CURRICULUM DE TRAINING INTERN ╤В╨Р╨д COMUNICARE PUBLICтФА╨Т DROPi.docx",
+        "sha256": "c845e17bacfcc3e4c003392e69d1bd46c7f70ff43f4187882a00cf0bc7f5cfff",
+        "size": 16972
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 59,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.3_FORMULAR INTERN тАФ COMMUNICATION COMPLIANCE ACKNOWLEDGEMENT.docx",
+        "compressed_size": 13811,
+        "crc32": "35770182",
+        "filename": "07.6.3_FORMULAR INTERN тАФ COMMUNICATION COMPLIANCE ACKNOWLEDGEMENT.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.6.3_FORMULAR INTERN тАФ COMMUNICATION COMPLIANCE ACKNOWLEDGEMENT.docx",
+        "sha256": "3ac763e471b67b43f6f317911844ad002d04bc1244ce7725aab4f521e7a0fbab",
+        "uncompressed_size": 16562
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.6.3_FORMULAR INTERN ╤В╨Р╨д COMMUNICATION COMPLIANCE ACKNOWLEDGEMENT.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.6.3_FORMULAR INTERN ╤В╨Р╨д COMMUNICATION COMPLIANCE ACKNOWLEDGEMENT.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6.3_FORMULAR INTERN ╤В╨Р╨д COMMUNICATION COMPLIANCE ACKNOWLEDGEMENT.docx",
+        "sha256": "3ac763e471b67b43f6f317911844ad002d04bc1244ce7725aab4f521e7a0fbab",
+        "size": 16562
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 29,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6_ANEX─В тАФ тАЮRED LINESтАЭ -SUBIECTE INTERZISE ABSOLUT.docx",
+        "compressed_size": 15975,
+        "crc32": "bddb9850",
+        "filename": "07.6_ANEX─В тАФ тАЮRED LINESтАЭ -SUBIECTE INTERZISE ABSOLUT.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.6_ANEX─В тАФ тАЮRED LINESтАЭ -SUBIECTE INTERZISE ABSOLUT.docx",
+        "sha256": "2d5c67655570003e4457a07347c21ae1bc2d5beca749ac35c697417dd30b8e16",
+        "uncompressed_size": 18787
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.6_ANEXтФА╨Т ╤В╨Р╨д ╤В╨Р╨оRED LINES╤В╨Р╨н -SUBIECTE INTERZISE ABSOLUT.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.6_ANEXтФА╨Т ╤В╨Р╨д ╤В╨Р╨оRED LINES╤В╨Р╨н -SUBIECTE INTERZISE ABSOLUT.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.6_ANEXтФА╨Т ╤В╨Р╨д ╤В╨Р╨оRED LINES╤В╨Р╨н -SUBIECTE INTERZISE ABSOLUT.docx",
+        "sha256": "2d5c67655570003e4457a07347c21ae1bc2d5beca749ac35c697417dd30b8e16",
+        "size": 18787
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 98,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.X.1_ANEXA 7.X тАФ REGULI DE DESIGN UI MARKETPLACE.docx",
+        "compressed_size": 15826,
+        "crc32": "5e628f5d",
+        "filename": "07.X.1_ANEXA 7.X тАФ REGULI DE DESIGN UI MARKETPLACE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.X.1_ANEXA 7.X тАФ REGULI DE DESIGN UI MARKETPLACE.docx",
+        "sha256": "7eb5a86f8f76545d9b66690cbd8da14d1e22f5a7b4b9c30a23505f16cba85a56",
+        "uncompressed_size": 18656
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.X.1_ANEXA 7.X ╤В╨Р╨д REGULI DE DESIGN UI MARKETPLACE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.X.1_ANEXA 7.X ╤В╨Р╨д REGULI DE DESIGN UI MARKETPLACE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.X.1_ANEXA 7.X ╤В╨Р╨д REGULI DE DESIGN UI MARKETPLACE.docx",
+        "sha256": "7eb5a86f8f76545d9b66690cbd8da14d1e22f5a7b4b9c30a23505f16cba85a56",
+        "size": 18656
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 138,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.X_Marketplace-ul ├оn cadrul site-ului DROPi.docx",
+        "compressed_size": 13836,
+        "crc32": "e1ff6a3a",
+        "filename": "07.X_Marketplace-ul ├оn cadrul site-ului DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.X_Marketplace-ul ├оn cadrul site-ului DROPi.docx",
+        "sha256": "cb351b434aa31cfc2bca57525f4864cf11bcee9f24dd4abaa28b4421e3cb0f20",
+        "uncompressed_size": 16553
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07.X_Marketplace-ul тФЬ╨╛n cadrul site-ului DROPi.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07.X_Marketplace-ul тФЬ╨╛n cadrul site-ului DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07.X_Marketplace-ul тФЬ╨╛n cadrul site-ului DROPi.docx",
+        "sha256": "cb351b434aa31cfc2bca57525f4864cf11bcee9f24dd4abaa28b4421e3cb0f20",
+        "size": 16553
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 30,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07_DEZVOLTAREA SITE-ULUI DROPi -PRINCIPII ╚ШI EXECU╚ЪIE PAS CU PAS.docx",
+        "compressed_size": 20923,
+        "crc32": "adb3d4d8",
+        "filename": "07_DEZVOLTAREA SITE-ULUI DROPi -PRINCIPII ╚ШI EXECU╚ЪIE PAS CU PAS.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07_DEZVOLTAREA SITE-ULUI DROPi -PRINCIPII ╚ШI EXECU╚ЪIE PAS CU PAS.docx",
+        "sha256": "24b69f360fc21fada2245a68a7089e3c9bc1e6cd5bf5a0e6c1148e859231e44a",
+        "uncompressed_size": 23664
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "07_DEZVOLTAREA SITE-ULUI DROPi -PRINCIPII тХЪ╨иI EXECUтХЪ╨кIE PAS CU PAS.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/07_DEZVOLTAREA SITE-ULUI DROPi -PRINCIPII тХЪ╨иI EXECUтХЪ╨кIE PAS CU PAS.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/07_DEZVOLTAREA SITE-ULUI DROPi -PRINCIPII тХЪ╨иI EXECUтХЪ╨кIE PAS CU PAS.docx",
+        "sha256": "24b69f360fc21fada2245a68a7089e3c9bc1e6cd5bf5a0e6c1148e859231e44a",
+        "size": 23664
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 64,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 8.docx",
+        "compressed_size": 14791,
+        "crc32": "3aa22d61",
+        "filename": "08.0.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 8.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 8.docx",
+        "sha256": "f5305cce0afc41374112cd0e372796a02910a47fef9b7393939f18257c910c8e",
+        "uncompressed_size": 17616
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "08.0.0.1_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 8.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.0.1_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 8.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.0.1_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 8.docx",
+        "sha256": "f5305cce0afc41374112cd0e372796a02910a47fef9b7393939f18257c910c8e",
+        "size": 17616
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 61,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 8тАУ12.docx",
+        "compressed_size": 14756,
+        "crc32": "4c13fa35",
+        "filename": "08.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 8тАУ12.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 8тАУ12.docx",
+        "sha256": "34fc1d7dfffa0f38fe793091873bad2f7ea70e2237292b357e04b79cabb958dd",
+        "uncompressed_size": 17506
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "08.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLELE 8╤В╨Р╨г12.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLELE 8╤В╨Р╨г12.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLELE 8╤В╨Р╨г12.docx",
+        "sha256": "34fc1d7dfffa0f38fe793091873bad2f7ea70e2237292b357e04b79cabb958dd",
+        "size": 17506
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 65,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.0_ANEXA 8.A тАФ MAPARE ROLURI ^0 PERMISIUNI (RBAC).docx",
+        "compressed_size": 13147,
+        "crc32": "23f473db",
+        "filename": "08.0.1.0_ANEXA 8.A тАФ MAPARE ROLURI ^0 PERMISIUNI (RBAC).docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.1.0_ANEXA 8.A тАФ MAPARE ROLURI ^0 PERMISIUNI (RBAC).docx",
+        "sha256": "691bbc4980aae1e1bebcbd213535e0680ee26a7908d27bd1e971717c96c244b9",
+        "uncompressed_size": 15933
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "08.0.1.0_ANEXA 8.A ╤В╨Р╨д MAPARE ROLURI ^0 PERMISIUNI (RBAC).docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.1.0_ANEXA 8.A ╤В╨Р╨д MAPARE ROLURI ^0 PERMISIUNI (RBAC).docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.0_ANEXA 8.A ╤В╨Р╨д MAPARE ROLURI ^0 PERMISIUNI (RBAC).docx",
+        "sha256": "691bbc4980aae1e1bebcbd213535e0680ee26a7908d27bd1e971717c96c244b9",
+        "size": 15933
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 63,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.1_ANEXA 8.B тАФ ORDER LIFECYCLE.docx",
+        "compressed_size": 12776,
+        "crc32": "77d07868",
+        "filename": "08.0.1.1_ANEXA 8.B тАФ ORDER LIFECYCLE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.1.1_ANEXA 8.B тАФ ORDER LIFECYCLE.docx",
+        "sha256": "2120dd11f31082108901a7e6c2ed1168987046de92b4f152ff8aa7672ea2bf68",
+        "uncompressed_size": 15600
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "08.0.1.1_ANEXA 8.B ╤В╨Р╨д ORDER LIFECYCLE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.1.1_ANEXA 8.B ╤В╨Р╨д ORDER LIFECYCLE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.1_ANEXA 8.B ╤В╨Р╨д ORDER LIFECYCLE.docx",
+        "sha256": "2120dd11f31082108901a7e6c2ed1168987046de92b4f152ff8aa7672ea2bf68",
+        "size": 15600
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 67,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.2_ANEXA 8.C тАФ FALLBACK ^0 INTERVEN╚ЪIE.docx",
+        "compressed_size": 12643,
+        "crc32": "54ef6ecc",
+        "filename": "08.0.1.2_ANEXA 8.C тАФ FALLBACK ^0 INTERVEN╚ЪIE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.1.2_ANEXA 8.C тАФ FALLBACK ^0 INTERVEN╚ЪIE.docx",
+        "sha256": "e4aa2657254ee090d554091a07ebc3a173042f13ceb4d3a5d3ef2e96e0fa69a2",
+        "uncompressed_size": 15484
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "08.0.1.2_ANEXA 8.C ╤В╨Р╨д FALLBACK ^0 INTERVENтХЪ╨кIE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.1.2_ANEXA 8.C ╤В╨Р╨д FALLBACK ^0 INTERVENтХЪ╨кIE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.2_ANEXA 8.C ╤В╨Р╨д FALLBACK ^0 INTERVENтХЪ╨кIE.docx",
+        "sha256": "e4aa2657254ee090d554091a07ebc3a173042f13ceb4d3a5d3ef2e96e0fa69a2",
+        "size": 15484
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 62,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.3_ANEXA 8.D тАФ SUPERVIZARE PILOT.docx",
+        "compressed_size": 12633,
+        "crc32": "e40bbc93",
+        "filename": "08.0.1.3_ANEXA 8.D тАФ SUPERVIZARE PILOT.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.1.3_ANEXA 8.D тАФ SUPERVIZARE PILOT.docx",
+        "sha256": "9d541a6aef66983f83f41529276d31c3305cbb2a97303d61c4ef3af8acd384d6",
+        "uncompressed_size": 15450
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "08.0.1.3_ANEXA 8.D ╤В╨Р╨д SUPERVIZARE PILOT.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.1.3_ANEXA 8.D ╤В╨Р╨д SUPERVIZARE PILOT.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1.3_ANEXA 8.D ╤В╨Р╨д SUPERVIZARE PILOT.docx",
+        "sha256": "9d541a6aef66983f83f41529276d31c3305cbb2a97303d61c4ef3af8acd384d6",
+        "size": 15450
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 51,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1_ANEXE CAPITOLUL 8.docx",
+        "compressed_size": 10930,
+        "crc32": "ccce90f3",
+        "filename": "08.0.1_ANEXE CAPITOLUL 8.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.1_ANEXE CAPITOLUL 8.docx",
+        "sha256": "43205a57777fc76bcd5dc0327cb7f243204331e1ef60581bc9652c502489f071",
+        "uncompressed_size": 13689
+      },
+      "classification": "exact_path_and_content_match",
+      "local": {
+        "filename": "08.0.1_ANEXE CAPITOLUL 8.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.0.1_ANEXE CAPITOLUL 8.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.0.1_ANEXE CAPITOLUL 8.docx",
+        "sha256": "43205a57777fc76bcd5dc0327cb7f243204331e1ef60581bc9652c502489f071",
+        "size": 13689
+      },
+      "mapping_basis": "exact_relative_path"
+    },
+    {
+      "archive": {
+        "archive_index": 66,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.1.0_CAPITOLUL 8 тАФ DEZVOLTAREA APLICA╚ЪIEI DROPi -CORE OPERA╚ЪIONAL.docx",
+        "compressed_size": 15247,
+        "crc32": "9e19529f",
+        "filename": "08.1.0_CAPITOLUL 8 тАФ DEZVOLTAREA APLICA╚ЪIEI DROPi -CORE OPERA╚ЪIONAL.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.1.0_CAPITOLUL 8 тАФ DEZVOLTAREA APLICA╚ЪIEI DROPi -CORE OPERA╚ЪIONAL.docx",
+        "sha256": "c2fecdd3c204f6168a6310b22038d09eaabfdac79b0f2c9b8874e05f32bd96ed",
+        "uncompressed_size": 17995
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "08.1.0_CAPITOLUL 8 ╤В╨Р╨д DEZVOLTAREA APLICAтХЪ╨кIEI DROPi -CORE OPERAтХЪ╨кIONAL.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.1.0_CAPITOLUL 8 ╤В╨Р╨д DEZVOLTAREA APLICAтХЪ╨кIEI DROPi -CORE OPERAтХЪ╨кIONAL.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.1.0_CAPITOLUL 8 ╤В╨Р╨д DEZVOLTAREA APLICAтХЪ╨кIEI DROPi -CORE OPERAтХЪ╨кIONAL.docx",
+        "sha256": "c2fecdd3c204f6168a6310b22038d09eaabfdac79b0f2c9b8874e05f32bd96ed",
+        "size": 17995
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 139,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.X Absen╚Ыa marketplace-ului din aplica╚Ыia DROPi.docx",
+        "compressed_size": 13618,
+        "crc32": "14906624",
+        "filename": "08.X Absen╚Ыa marketplace-ului din aplica╚Ыia DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.X Absen╚Ыa marketplace-ului din aplica╚Ыia DROPi.docx",
+        "sha256": "32becfb28e5dd0afc4ef3298381fa24d5b6bbd7ee026caae948a6a2e343ca654",
+        "uncompressed_size": 16336
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "08.X AbsenтХЪ╨лa marketplace-ului din aplicaтХЪ╨лia DROPi.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.X AbsenтХЪ╨лa marketplace-ului din aplicaтХЪ╨лia DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.X AbsenтХЪ╨лa marketplace-ului din aplicaтХЪ╨лia DROPi.docx",
+        "sha256": "32becfb28e5dd0afc4ef3298381fa24d5b6bbd7ee026caae948a6a2e343ca654",
+        "size": 16336
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 99,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.X.1_ALINIERE CAP. 8 тЖФ CAP. 11.docx",
+        "compressed_size": 16052,
+        "crc32": "437d1196",
+        "filename": "08.X.1_ALINIERE CAP. 8 тЖФ CAP. 11.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.X.1_ALINIERE CAP. 8 тЖФ CAP. 11.docx",
+        "sha256": "1d3492a6debe6ced3f560c25b5d3b1c7335b2c1e649088c35d37602dcdc9cf7d",
+        "uncompressed_size": 18842
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "08.X.1_ALINIERE CAP. 8 ╤В╨Ц╨д CAP. 11.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.X.1_ALINIERE CAP. 8 ╤В╨Ц╨д CAP. 11.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.X.1_ALINIERE CAP. 8 ╤В╨Ц╨д CAP. 11.docx",
+        "sha256": "1d3492a6debe6ced3f560c25b5d3b1c7335b2c1e649088c35d37602dcdc9cf7d",
+        "size": 18842
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 118,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.X.2_DIAGRAM─В SECVEN╚ЪIAL─В CANONIC─В.docx",
+        "compressed_size": 14354,
+        "crc32": "1fd249e0",
+        "filename": "08.X.2_DIAGRAM─В SECVEN╚ЪIAL─В CANONIC─В.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.X.2_DIAGRAM─В SECVEN╚ЪIAL─В CANONIC─В.docx",
+        "sha256": "e10278fe345ba85d206c8a36157dcff95bc66f491169954d3ca58d8c8b75fca5",
+        "uncompressed_size": 17074
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "08.X.2_DIAGRAMтФА╨Т SECVENтХЪ╨кIALтФА╨Т CANONICтФА╨Т.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08.X.2_DIAGRAMтФА╨Т SECVENтХЪ╨кIALтФА╨Т CANONICтФА╨Т.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08.X.2_DIAGRAMтФА╨Т SECVENтХЪ╨кIALтФА╨Т CANONICтФА╨Т.docx",
+        "sha256": "e10278fe345ba85d206c8a36157dcff95bc66f491169954d3ca58d8c8b75fca5",
+        "size": 17074
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 32,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08_DEZVOLTAREA APLICA╚ЪIEI DROPi -EXECU╚ЪIE PAS CU PAS.docx",
+        "compressed_size": 15095,
+        "crc32": "a01b45d2",
+        "filename": "08_DEZVOLTAREA APLICA╚ЪIEI DROPi -EXECU╚ЪIE PAS CU PAS.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08_DEZVOLTAREA APLICA╚ЪIEI DROPi -EXECU╚ЪIE PAS CU PAS.docx",
+        "sha256": "ff8975c4130213743638906ddd2edd54151c1765fe6329d9143a725f9b3f5491",
+        "uncompressed_size": 17832
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "08_DEZVOLTAREA APLICAтХЪ╨кIEI DROPi -EXECUтХЪ╨кIE PAS CU PAS.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/08_DEZVOLTAREA APLICAтХЪ╨кIEI DROPi -EXECUтХЪ╨кIE PAS CU PAS.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/08_DEZVOLTAREA APLICAтХЪ╨кIEI DROPi -EXECUтХЪ╨кIE PAS CU PAS.docx",
+        "sha256": "ff8975c4130213743638906ddd2edd54151c1765fe6329d9143a725f9b3f5491",
+        "size": 17832
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 69,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0.1_ANEXA 9.A тАФ EVENIMENTE DRONEPORT ^0 LOGARE.docx",
+        "compressed_size": 13754,
+        "crc32": "59a3e469",
+        "filename": "09.0.0.1_ANEXA 9.A тАФ EVENIMENTE DRONEPORT ^0 LOGARE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/09.0.0.1_ANEXA 9.A тАФ EVENIMENTE DRONEPORT ^0 LOGARE.docx",
+        "sha256": "b330f722b287b610db231ff3e7cb505200ecbd231c786c75b8dcb887bfeec618",
+        "uncompressed_size": 16471
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "09.0.0.1_ANEXA 9.A ╤В╨Р╨д EVENIMENTE DRONEPORT ^0 LOGARE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/09.0.0.1_ANEXA 9.A ╤В╨Р╨д EVENIMENTE DRONEPORT ^0 LOGARE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0.1_ANEXA 9.A ╤В╨Р╨д EVENIMENTE DRONEPORT ^0 LOGARE.docx",
+        "sha256": "b330f722b287b610db231ff3e7cb505200ecbd231c786c75b8dcb887bfeec618",
+        "size": 16471
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 70,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0.2_ANEXA 9.B тАФ PROCESE PERMISE - INTERZISE DRONEPORT.docx",
+        "compressed_size": 13481,
+        "crc32": "93b29caa",
+        "filename": "09.0.0.2_ANEXA 9.B тАФ PROCESE PERMISE - INTERZISE DRONEPORT.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/09.0.0.2_ANEXA 9.B тАФ PROCESE PERMISE - INTERZISE DRONEPORT.docx",
+        "sha256": "747808a50a843e9539ebcdfa9a0476df66af7b48de6af6f87fe7924e2c5be0d2",
+        "uncompressed_size": 16241
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "09.0.0.2_ANEXA 9.B ╤В╨Р╨д PROCESE PERMISE - INTERZISE DRONEPORT.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/09.0.0.2_ANEXA 9.B ╤В╨Р╨д PROCESE PERMISE - INTERZISE DRONEPORT.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0.2_ANEXA 9.B ╤В╨Р╨д PROCESE PERMISE - INTERZISE DRONEPORT.docx",
+        "sha256": "747808a50a843e9539ebcdfa9a0476df66af7b48de6af6f87fe7924e2c5be0d2",
+        "size": 16241
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 68,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 9тАУ12.docx",
+        "compressed_size": 15529,
+        "crc32": "573826de",
+        "filename": "09.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 9тАУ12.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/09.0.0_AUDIT PACK OFICIAL тАФ CAPITOLELE 9тАУ12.docx",
+        "sha256": "18dcefa0139f5d3757c86410a0cb35c7d60f2180a201cd68dbfa11d1217a4c4e",
+        "uncompressed_size": 18344
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "09.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLELE 9╤В╨Р╨г12.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/09.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLELE 9╤В╨Р╨г12.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLELE 9╤В╨Р╨г12.docx",
+        "sha256": "18dcefa0139f5d3757c86410a0cb35c7d60f2180a201cd68dbfa11d1217a4c4e",
+        "size": 18344
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 71,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 9.docx",
+        "compressed_size": 14777,
+        "crc32": "e31712dd",
+        "filename": "09.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 9.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/09.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 9.docx",
+        "sha256": "3128178c1ad4ec58270e66ea96b43f6796e7959e88423b7f79f7541db27ac6bc",
+        "uncompressed_size": 17601
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "09.0.1_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 9.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/09.0.1_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 9.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09.0.1_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 9.docx",
+        "sha256": "3128178c1ad4ec58270e66ea96b43f6796e7959e88423b7f79f7541db27ac6bc",
+        "size": 17601
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 33,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09_INFRASTRUCTURA DRONEPORT -STANDARD^LJ HARDWARE-J SOFTWARE-J PROCEDURI.docx",
+        "compressed_size": 16597,
+        "crc32": "b37e20bf",
+        "filename": "09_INFRASTRUCTURA DRONEPORT -STANDARD^LJ HARDWARE-J SOFTWARE-J PROCEDURI.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/09_INFRASTRUCTURA DRONEPORT -STANDARD^LJ HARDWARE-J SOFTWARE-J PROCEDURI.docx",
+        "sha256": "091c67b0f6a92192606556d031e1c787a3d2ce0055a59fe0191e5dcec7bb86c4",
+        "uncompressed_size": 19413
+      },
+      "classification": "exact_path_and_content_match",
+      "local": {
+        "filename": "09_INFRASTRUCTURA DRONEPORT -STANDARD^LJ HARDWARE-J SOFTWARE-J PROCEDURI.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/09_INFRASTRUCTURA DRONEPORT -STANDARD^LJ HARDWARE-J SOFTWARE-J PROCEDURI.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/09_INFRASTRUCTURA DRONEPORT -STANDARD^LJ HARDWARE-J SOFTWARE-J PROCEDURI.docx",
+        "sha256": "091c67b0f6a92192606556d031e1c787a3d2ce0055a59fe0191e5dcec7bb86c4",
+        "size": 19413
+      },
+      "mapping_basis": "exact_relative_path"
+    },
+    {
+      "archive": {
+        "archive_index": 74,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0.0.1_ANEXA 10.A тАФ GUARDRAILS DSS -REGULI STRICTE.docx",
+        "compressed_size": 14775,
+        "crc32": "5a248be2",
+        "filename": "10.0.0.1_ANEXA 10.A тАФ GUARDRAILS DSS -REGULI STRICTE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/10.0.0.1_ANEXA 10.A тАФ GUARDRAILS DSS -REGULI STRICTE.docx",
+        "sha256": "59bff6602caccfa27e433cfbac0fdc8507471948b396a9158ac3feb93a0dbffe",
+        "uncompressed_size": 17597
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "10.0.0.1_ANEXA 10.A ╤В╨Р╨д GUARDRAILS DSS -REGULI STRICTE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/10.0.0.1_ANEXA 10.A ╤В╨Р╨д GUARDRAILS DSS -REGULI STRICTE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0.0.1_ANEXA 10.A ╤В╨Р╨д GUARDRAILS DSS -REGULI STRICTE.docx",
+        "sha256": "59bff6602caccfa27e433cfbac0fdc8507471948b396a9158ac3feb93a0dbffe",
+        "size": 17597
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 75,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0.0.2_ANEXA 10.B тАФ EXEMPLE DE RECOMAND─ВRI DSS.docx",
+        "compressed_size": 12871,
+        "crc32": "14c190be",
+        "filename": "10.0.0.2_ANEXA 10.B тАФ EXEMPLE DE RECOMAND─ВRI DSS.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/10.0.0.2_ANEXA 10.B тАФ EXEMPLE DE RECOMAND─ВRI DSS.docx",
+        "sha256": "6a13d3b305640bd8ff026d39a4fc8af768652312cd9ee0ac13fd90aed0e7bd2d",
+        "uncompressed_size": 15633
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "10.0.0.2_ANEXA 10.B ╤В╨Р╨д EXEMPLE DE RECOMANDтФА╨ТRI DSS.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/10.0.0.2_ANEXA 10.B ╤В╨Р╨д EXEMPLE DE RECOMANDтФА╨ТRI DSS.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0.0.2_ANEXA 10.B ╤В╨Р╨д EXEMPLE DE RECOMANDтФА╨ТRI DSS.docx",
+        "sha256": "6a13d3b305640bd8ff026d39a4fc8af768652312cd9ee0ac13fd90aed0e7bd2d",
+        "size": 15633
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 73,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 10.docx",
+        "compressed_size": 14845,
+        "crc32": "678ceee7",
+        "filename": "10.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 10.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/10.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 10.docx",
+        "sha256": "8e71fb5617d17a15c10c67a1be35513a8edd1b141b2b577f6bad555bf26c9ed9",
+        "uncompressed_size": 17678
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "10.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 10.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/10.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 10.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 10.docx",
+        "sha256": "8e71fb5617d17a15c10c67a1be35513a8edd1b141b2b577f6bad555bf26c9ed9",
+        "size": 17678
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 76,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.1_CAPITOLUL 10 тАФ AI ASISTAT -DSS.docx",
+        "compressed_size": 16306,
+        "crc32": "0a45065e",
+        "filename": "10.1_CAPITOLUL 10 тАФ AI ASISTAT -DSS.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/10.1_CAPITOLUL 10 тАФ AI ASISTAT -DSS.docx",
+        "sha256": "fd23eb346ca08e3f6ca69be41269876b60b5a5014276ff5758b52a76bda3eb88",
+        "uncompressed_size": 19129
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "10.1_CAPITOLUL 10 ╤В╨Р╨д AI ASISTAT -DSS.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/10.1_CAPITOLUL 10 ╤В╨Р╨д AI ASISTAT -DSS.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10.1_CAPITOLUL 10 ╤В╨Р╨д AI ASISTAT -DSS.docx",
+        "sha256": "fd23eb346ca08e3f6ca69be41269876b60b5a5014276ff5758b52a76bda3eb88",
+        "size": 19129
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 34,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10_AI ASISTAT-ARHITECTURA DECIZIONAL─В DROPi.docx",
+        "compressed_size": 16830,
+        "crc32": "7c5735c2",
+        "filename": "10_AI ASISTAT-ARHITECTURA DECIZIONAL─В DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/10_AI ASISTAT-ARHITECTURA DECIZIONAL─В DROPi.docx",
+        "sha256": "e0e79019a6e6cefce6a36d6d8089d84cd584a2c4dd10a1d495b9be29b1535023",
+        "uncompressed_size": 19670
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "10_AI ASISTAT-ARHITECTURA DECIZIONALтФА╨Т DROPi.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/10_AI ASISTAT-ARHITECTURA DECIZIONALтФА╨Т DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/10_AI ASISTAT-ARHITECTURA DECIZIONALтФА╨Т DROPi.docx",
+        "sha256": "e0e79019a6e6cefce6a36d6d8089d84cd584a2c4dd10a1d495b9be29b1535023",
+        "size": 19670
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 80,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+        "compressed_size": 15034,
+        "crc32": "a3df3c29",
+        "filename": "11.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/11.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+        "sha256": "01bf14842d6e6f4ad733948269ff6910a508dd11a3d6dca4eb5e4cb180a74a55",
+        "uncompressed_size": 17822
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "11.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 11.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/11.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 11.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 11.docx",
+        "sha256": "01bf14842d6e6f4ad733948269ff6910a508dd11a3d6dca4eb5e4cb180a74a55",
+        "size": 17822
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 119,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.1ANEXA 11.A тАФ SCENARII DE INTERVEN╚ЪIE PILOT.docx",
+        "compressed_size": 15157,
+        "crc32": "6f572c62",
+        "filename": "11.0.1ANEXA 11.A тАФ SCENARII DE INTERVEN╚ЪIE PILOT.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/11.0.1ANEXA 11.A тАФ SCENARII DE INTERVEN╚ЪIE PILOT.docx",
+        "sha256": "4699b46189c526430d158e0e917b3d48063d301b6014b5afa2ade66ded148552",
+        "uncompressed_size": 17981
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "11.0.1ANEXA 11.A ╤В╨Р╨д SCENARII DE INTERVENтХЪ╨кIE PILOT.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/11.0.1ANEXA 11.A ╤В╨Р╨д SCENARII DE INTERVENтХЪ╨кIE PILOT.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.1ANEXA 11.A ╤В╨Р╨д SCENARII DE INTERVENтХЪ╨кIE PILOT.docx",
+        "sha256": "4699b46189c526430d158e0e917b3d48063d301b6014b5afa2ade66ded148552",
+        "size": 17981
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 79,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.2_ANEXA 11.B тАФ GESTIONARE INCIDENTE OPERA╚ЪIONALE.docx",
+        "compressed_size": 15502,
+        "crc32": "36c01b37",
+        "filename": "11.0.2_ANEXA 11.B тАФ GESTIONARE INCIDENTE OPERA╚ЪIONALE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/11.0.2_ANEXA 11.B тАФ GESTIONARE INCIDENTE OPERA╚ЪIONALE.docx",
+        "sha256": "5965f1e4c5a15bdc29f7b619396c22b5c7efc01b98a8a6a703a5f203fca4db16",
+        "uncompressed_size": 18329
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "11.0.2_ANEXA 11.B ╤В╨Р╨д GESTIONARE INCIDENTE OPERAтХЪ╨кIONALE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/11.0.2_ANEXA 11.B ╤В╨Р╨д GESTIONARE INCIDENTE OPERAтХЪ╨кIONALE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0.2_ANEXA 11.B ╤В╨Р╨д GESTIONARE INCIDENTE OPERAтХЪ╨кIONALE.docx",
+        "sha256": "5965f1e4c5a15bdc29f7b619396c22b5c7efc01b98a8a6a703a5f203fca4db16",
+        "size": 18329
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 77,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+        "compressed_size": 14847,
+        "crc32": "445b4fc5",
+        "filename": "11.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/11.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 11.docx",
+        "sha256": "b0c1d301bb1ccdab07e677cdf879dedf7cfad682f8156be68065a3374739d55b",
+        "uncompressed_size": 17630
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "11.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 11.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/11.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 11.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 11.docx",
+        "sha256": "b0c1d301bb1ccdab07e677cdf879dedf7cfad682f8156be68065a3374739d55b",
+        "size": 17630
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 78,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.1_CAPITOLUL 11 тАФ LIVRARE AUTONOM─В SUPERVIZAT─В.docx",
+        "compressed_size": 14618,
+        "crc32": "a49b05fb",
+        "filename": "11.1_CAPITOLUL 11 тАФ LIVRARE AUTONOM─В SUPERVIZAT─В.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/11.1_CAPITOLUL 11 тАФ LIVRARE AUTONOM─В SUPERVIZAT─В.docx",
+        "sha256": "aa2fdcf267dec36cda447f69b7f6c086fa9949a28ea957cf56c56b0df78d789c",
+        "uncompressed_size": 17364
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "11.1_CAPITOLUL 11 ╤В╨Р╨д LIVRARE AUTONOMтФА╨Т SUPERVIZATтФА╨Т.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/11.1_CAPITOLUL 11 ╤В╨Р╨д LIVRARE AUTONOMтФА╨Т SUPERVIZATтФА╨Т.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11.1_CAPITOLUL 11 ╤В╨Р╨д LIVRARE AUTONOMтФА╨Т SUPERVIZATтФА╨Т.docx",
+        "sha256": "aa2fdcf267dec36cda447f69b7f6c086fa9949a28ea957cf56c56b0df78d789c",
+        "size": 17364
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 35,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11_LIVRAREA AUTONOM─В SUPERVIZAT─В _PROCEDURI_LIMITE_FALLBACK_ AUDIT.docx",
+        "compressed_size": 16181,
+        "crc32": "a12d864b",
+        "filename": "11_LIVRAREA AUTONOM─В SUPERVIZAT─В _PROCEDURI_LIMITE_FALLBACK_ AUDIT.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/11_LIVRAREA AUTONOM─В SUPERVIZAT─В _PROCEDURI_LIMITE_FALLBACK_ AUDIT.docx",
+        "sha256": "94b61e8b0b154e8e0cea62adfd6bf89c389a23d622495336c1190d4be907f49c",
+        "uncompressed_size": 18996
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "11_LIVRAREA AUTONOMтФА╨Т SUPERVIZATтФА╨Т _PROCEDURI_LIMITE_FALLBACK_ AUDIT.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/11_LIVRAREA AUTONOMтФА╨Т SUPERVIZATтФА╨Т _PROCEDURI_LIMITE_FALLBACK_ AUDIT.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/11_LIVRAREA AUTONOMтФА╨Т SUPERVIZATтФА╨Т _PROCEDURI_LIMITE_FALLBACK_ AUDIT.docx",
+        "sha256": "94b61e8b0b154e8e0cea62adfd6bf89c389a23d622495336c1190d4be907f49c",
+        "size": 18996
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 120,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.0_ANEXA 12.A тАФ STRUCTUR─В LOG-URI.docx",
+        "compressed_size": 15872,
+        "crc32": "50a04515",
+        "filename": "12.0.0_ANEXA 12.A тАФ STRUCTUR─В LOG-URI.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/12.0.0_ANEXA 12.A тАФ STRUCTUR─В LOG-URI.docx",
+        "sha256": "9b7fd3078f028ca40f4b0c922b38d1d6768d7f70088f19b805106dbf3fb9262d",
+        "uncompressed_size": 18660
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "12.0.0_ANEXA 12.A ╤В╨Р╨д STRUCTURтФА╨Т LOG-URI.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/12.0.0_ANEXA 12.A ╤В╨Р╨д STRUCTURтФА╨Т LOG-URI.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.0_ANEXA 12.A ╤В╨Р╨д STRUCTURтФА╨Т LOG-URI.docx",
+        "sha256": "9b7fd3078f028ca40f4b0c922b38d1d6768d7f70088f19b805106dbf3fb9262d",
+        "size": 18660
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 100,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.1_ANEXA 12.B тАФ POLITIC─В DE RETEN╚ЪIE DATE.docx",
+        "compressed_size": 15513,
+        "crc32": "fd8135c8",
+        "filename": "12.0.1_ANEXA 12.B тАФ POLITIC─В DE RETEN╚ЪIE DATE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/12.0.1_ANEXA 12.B тАФ POLITIC─В DE RETEN╚ЪIE DATE.docx",
+        "sha256": "16e50bd6a547382e156e99968833c08f79b6bc86fa7a88399e3ad3ece5e7108f",
+        "uncompressed_size": 18352
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "12.0.1_ANEXA 12.B ╤В╨Р╨д POLITICтФА╨Т DE RETENтХЪ╨кIE DATE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/12.0.1_ANEXA 12.B ╤В╨Р╨д POLITICтФА╨Т DE RETENтХЪ╨кIE DATE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.1_ANEXA 12.B ╤В╨Р╨д POLITICтФА╨Т DE RETENтХЪ╨кIE DATE.docx",
+        "sha256": "16e50bd6a547382e156e99968833c08f79b6bc86fa7a88399e3ad3ece5e7108f",
+        "size": 18352
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 101,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.2_ANEXA 12.C тАФ CHECKLIST GDPR COMPLIANCE.docx",
+        "compressed_size": 15239,
+        "crc32": "0fe3c42c",
+        "filename": "12.0.2_ANEXA 12.C тАФ CHECKLIST GDPR COMPLIANCE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/12.0.2_ANEXA 12.C тАФ CHECKLIST GDPR COMPLIANCE.docx",
+        "sha256": "d3650def87f6cd4bc9765a9752067a5d4c2b92241001bd88c198be509ac9bf04",
+        "uncompressed_size": 18070
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "12.0.2_ANEXA 12.C ╤В╨Р╨д CHECKLIST GDPR COMPLIANCE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/12.0.2_ANEXA 12.C ╤В╨Р╨д CHECKLIST GDPR COMPLIANCE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0.2_ANEXA 12.C ╤В╨Р╨д CHECKLIST GDPR COMPLIANCE.docx",
+        "sha256": "d3650def87f6cd4bc9765a9752067a5d4c2b92241001bd88c198be509ac9bf04",
+        "size": 18070
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 81,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+        "compressed_size": 15452,
+        "crc32": "b32e4c88",
+        "filename": "12.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/12.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+        "sha256": "1cbd0968af02e33f7a78933d9d6d6231b72a0ec712ce99391800dedf55024704",
+        "uncompressed_size": 18281
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "12.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 12.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/12.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 12.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 12.docx",
+        "sha256": "1cbd0968af02e33f7a78933d9d6d6231b72a0ec712ce99391800dedf55024704",
+        "size": 18281
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 82,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+        "compressed_size": 15530,
+        "crc32": "b38348c8",
+        "filename": "12.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/12.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 12.docx",
+        "sha256": "11aace1f0b5b1454b15c1111147d8670838f0102fabefe3e3429a2fb7fdfd05c",
+        "uncompressed_size": 18311
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "12.1_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 12.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/12.1_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 12.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12.1_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 12.docx",
+        "sha256": "11aace1f0b5b1454b15c1111147d8670838f0102fabefe3e3429a2fb7fdfd05c",
+        "size": 18311
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 36,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12_SISTEMUL DE DATE_ LOG-URI_ TRASABILITATE ╚ШI PROTEC╚ЪIA DATELOR.docx",
+        "compressed_size": 16920,
+        "crc32": "fda95aec",
+        "filename": "12_SISTEMUL DE DATE_ LOG-URI_ TRASABILITATE ╚ШI PROTEC╚ЪIA DATELOR.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/12_SISTEMUL DE DATE_ LOG-URI_ TRASABILITATE ╚ШI PROTEC╚ЪIA DATELOR.docx",
+        "sha256": "d9c32f49a38d844379649228e9a497fddb16f79c231b8dc038edfb9b17e3c477",
+        "uncompressed_size": 19759
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "12_SISTEMUL DE DATE_ LOG-URI_ TRASABILITATE тХЪ╨иI PROTECтХЪ╨кIA DATELOR.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/12_SISTEMUL DE DATE_ LOG-URI_ TRASABILITATE тХЪ╨иI PROTECтХЪ╨кIA DATELOR.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/12_SISTEMUL DE DATE_ LOG-URI_ TRASABILITATE тХЪ╨иI PROTECтХЪ╨кIA DATELOR.docx",
+        "sha256": "d9c32f49a38d844379649228e9a497fddb16f79c231b8dc038edfb9b17e3c477",
+        "size": 19759
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 103,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+        "compressed_size": 14917,
+        "crc32": "d0349a80",
+        "filename": "13.0.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+        "sha256": "f258996a614b31643fd9ace3b5aeb044ce222dc1ddb3601d4bd391df34591976",
+        "uncompressed_size": 17702
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "13.0.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 13.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 13.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 13.docx",
+        "sha256": "f258996a614b31643fd9ace3b5aeb044ce222dc1ddb3601d4bd391df34591976",
+        "size": 17702
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 84,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+        "compressed_size": 14961,
+        "crc32": "fe7d2bdd",
+        "filename": "13.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 13.docx",
+        "sha256": "df365bf871a39e12d82af73c71ae20aa3fcb05257b1f87cd8e7f6ffb2f2f9407",
+        "uncompressed_size": 17747
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "13.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 13.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 13.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 13.docx",
+        "sha256": "df365bf871a39e12d82af73c71ae20aa3fcb05257b1f87cd8e7f6ffb2f2f9407",
+        "size": 17747
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 102,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.1_CHECKLIST 13.A тАФ TESTARE FUNC╚ЪIONAL─В.docx",
+        "compressed_size": 13469,
+        "crc32": "cde2a089",
+        "filename": "13.0.1_CHECKLIST 13.A тАФ TESTARE FUNC╚ЪIONAL─В.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.1_CHECKLIST 13.A тАФ TESTARE FUNC╚ЪIONAL─В.docx",
+        "sha256": "45674f4631d24e7c77c5a40e0d46ce8e87945d7455f41d2b8048379bf3ca2b8c",
+        "uncompressed_size": 16234
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "13.0.1_CHECKLIST 13.A ╤В╨Р╨д TESTARE FUNCтХЪ╨кIONALтФА╨Т.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.1_CHECKLIST 13.A ╤В╨Р╨д TESTARE FUNCтХЪ╨кIONALтФА╨Т.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.1_CHECKLIST 13.A ╤В╨Р╨д TESTARE FUNCтХЪ╨кIONALтФА╨Т.docx",
+        "sha256": "45674f4631d24e7c77c5a40e0d46ce8e87945d7455f41d2b8048379bf3ca2b8c",
+        "size": 16234
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 140,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.2_CHECKLIST 13.B тАФ TESTARE DE INTEGRARE.docx",
+        "compressed_size": 14534,
+        "crc32": "b7189f51",
+        "filename": "13.0.2_CHECKLIST 13.B тАФ TESTARE DE INTEGRARE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.2_CHECKLIST 13.B тАФ TESTARE DE INTEGRARE.docx",
+        "sha256": "7f7b4ba1de5900872588281847f0c5e484d8ea5e88af07cfeea34f1086b40007",
+        "uncompressed_size": 17356
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "13.0.2_CHECKLIST 13.B ╤В╨Р╨д TESTARE DE INTEGRARE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.2_CHECKLIST 13.B ╤В╨Р╨д TESTARE DE INTEGRARE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.2_CHECKLIST 13.B ╤В╨Р╨д TESTARE DE INTEGRARE.docx",
+        "sha256": "7f7b4ba1de5900872588281847f0c5e484d8ea5e88af07cfeea34f1086b40007",
+        "size": 17356
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 141,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.3_CHECKLIST 13.C тАФ TESTARE DE SIGURAN╚Ъ─В.docx",
+        "compressed_size": 14634,
+        "crc32": "dcf585b5",
+        "filename": "13.0.3_CHECKLIST 13.C тАФ TESTARE DE SIGURAN╚Ъ─В.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.3_CHECKLIST 13.C тАФ TESTARE DE SIGURAN╚Ъ─В.docx",
+        "sha256": "7f9b1a40dfe9f7f236e5d637e26411b792a81f5169347c38ce54cf9cfa5011d1",
+        "uncompressed_size": 17447
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "13.0.3_CHECKLIST 13.C ╤В╨Р╨д TESTARE DE SIGURANтХЪ╨ктФА╨Т.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.3_CHECKLIST 13.C ╤В╨Р╨д TESTARE DE SIGURANтХЪ╨ктФА╨Т.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.3_CHECKLIST 13.C ╤В╨Р╨д TESTARE DE SIGURANтХЪ╨ктФА╨Т.docx",
+        "sha256": "7f9b1a40dfe9f7f236e5d637e26411b792a81f5169347c38ce54cf9cfa5011d1",
+        "size": 17447
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 87,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.4_CHECKLIST 13.D тАФ TESTARE RBAC -ROLURI ^0 PERMISIUNI.docx",
+        "compressed_size": 13758,
+        "crc32": "b5bfff99",
+        "filename": "13.0.4_CHECKLIST 13.D тАФ TESTARE RBAC -ROLURI ^0 PERMISIUNI.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.4_CHECKLIST 13.D тАФ TESTARE RBAC -ROLURI ^0 PERMISIUNI.docx",
+        "sha256": "191830910a4f5563cbc3444273218aea13b1d9f569c4e3c54444687ed0a4e7a0",
+        "uncompressed_size": 16522
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "13.0.4_CHECKLIST 13.D ╤В╨Р╨д TESTARE RBAC -ROLURI ^0 PERMISIUNI.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.4_CHECKLIST 13.D ╤В╨Р╨д TESTARE RBAC -ROLURI ^0 PERMISIUNI.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.4_CHECKLIST 13.D ╤В╨Р╨д TESTARE RBAC -ROLURI ^0 PERMISIUNI.docx",
+        "sha256": "191830910a4f5563cbc3444273218aea13b1d9f569c4e3c54444687ed0a4e7a0",
+        "size": 16522
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 83,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.5_CHECKLIST 13.E тАФ CHECKLIST DE RELEASE.docx",
+        "compressed_size": 14726,
+        "crc32": "4714cd86",
+        "filename": "13.0.5_CHECKLIST 13.E тАФ CHECKLIST DE RELEASE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.5_CHECKLIST 13.E тАФ CHECKLIST DE RELEASE.docx",
+        "sha256": "f34beef8dc66b3228239b69567244d4d9444a2c9597a65be02f58b504dc70428",
+        "uncompressed_size": 17515
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "13.0.5_CHECKLIST 13.E ╤В╨Р╨д CHECKLIST DE RELEASE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.5_CHECKLIST 13.E ╤В╨Р╨д CHECKLIST DE RELEASE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.5_CHECKLIST 13.E ╤В╨Р╨д CHECKLIST DE RELEASE.docx",
+        "sha256": "f34beef8dc66b3228239b69567244d4d9444a2c9597a65be02f58b504dc70428",
+        "size": 17515
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 85,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.6_CHECKLIST 13.F тАФ ROLLBACK READINESS.docx",
+        "compressed_size": 14990,
+        "crc32": "d7810840",
+        "filename": "13.0.6_CHECKLIST 13.F тАФ ROLLBACK READINESS.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.6_CHECKLIST 13.F тАФ ROLLBACK READINESS.docx",
+        "sha256": "515dad5b09b8c85715a99b4a55427a41378d6cb1437b2056c5c87061b01b9881",
+        "uncompressed_size": 17807
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "13.0.6_CHECKLIST 13.F ╤В╨Р╨д ROLLBACK READINESS.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0.6_CHECKLIST 13.F ╤В╨Р╨д ROLLBACK READINESS.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0.6_CHECKLIST 13.F ╤В╨Р╨д ROLLBACK READINESS.docx",
+        "sha256": "515dad5b09b8c85715a99b4a55427a41378d6cb1437b2056c5c87061b01b9881",
+        "size": 17807
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 86,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0_CAPITOLUL 13 тАФ TESTARE- QA - RELEASE DISCIPLINE.docx",
+        "compressed_size": 14003,
+        "crc32": "027d1d06",
+        "filename": "13.0_CAPITOLUL 13 тАФ TESTARE- QA - RELEASE DISCIPLINE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0_CAPITOLUL 13 тАФ TESTARE- QA - RELEASE DISCIPLINE.docx",
+        "sha256": "92216800cefdf3ec1a8772f021c7baa612da344524055780474b13d33c3bf0b4",
+        "uncompressed_size": 16754
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "13.0_CAPITOLUL 13 ╤В╨Р╨д TESTARE- QA - RELEASE DISCIPLINE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13.0_CAPITOLUL 13 ╤В╨Р╨д TESTARE- QA - RELEASE DISCIPLINE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13.0_CAPITOLUL 13 ╤В╨Р╨д TESTARE- QA - RELEASE DISCIPLINE.docx",
+        "sha256": "92216800cefdf3ec1a8772f021c7baa612da344524055780474b13d33c3bf0b4",
+        "size": 16754
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 37,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13_TESTARE_ QA_DISCIPLIN─В DE RELEASE ╚ШI ROLLBACK.docx",
+        "compressed_size": 16263,
+        "crc32": "8ae8874e",
+        "filename": "13_TESTARE_ QA_DISCIPLIN─В DE RELEASE ╚ШI ROLLBACK.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13_TESTARE_ QA_DISCIPLIN─В DE RELEASE ╚ШI ROLLBACK.docx",
+        "sha256": "5a436de255a0fe57057fc9926e709d5fd9de4cb220c3abf353ed7f2f0486dc74",
+        "uncompressed_size": 19089
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "13_TESTARE_ QA_DISCIPLINтФА╨Т DE RELEASE тХЪ╨иI ROLLBACK.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/13_TESTARE_ QA_DISCIPLINтФА╨Т DE RELEASE тХЪ╨иI ROLLBACK.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/13_TESTARE_ QA_DISCIPLINтФА╨Т DE RELEASE тХЪ╨иI ROLLBACK.docx",
+        "sha256": "5a436de255a0fe57057fc9926e709d5fd9de4cb220c3abf353ed7f2f0486dc74",
+        "size": 19089
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 142,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 14.docx",
+        "compressed_size": 15509,
+        "crc32": "7525787c",
+        "filename": "14.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 14.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/14.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 14.docx",
+        "sha256": "29ed49ec2ad06ff3a4227629863908a937efb6480e3e2d539e72836838c9e501",
+        "uncompressed_size": 18325
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "14.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 14.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/14.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 14.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 14.docx",
+        "sha256": "29ed49ec2ad06ff3a4227629863908a937efb6480e3e2d539e72836838c9e501",
+        "size": 18325
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 104,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14.0_CAPITOLUL 14 тАФ ARHITECTURA DIGITAL─В.docx",
+        "compressed_size": 16084,
+        "crc32": "cd9219f0",
+        "filename": "14.0_CAPITOLUL 14 тАФ ARHITECTURA DIGITAL─В.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/14.0_CAPITOLUL 14 тАФ ARHITECTURA DIGITAL─В.docx",
+        "sha256": "2b2e495fe8b952ddedb487e4c0f7886b76e4576b30c02d2f604b05b230f07e51",
+        "uncompressed_size": 18916
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "14.0_CAPITOLUL 14 ╤В╨Р╨д ARHITECTURA DIGITALтФА╨Т.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/14.0_CAPITOLUL 14 ╤В╨Р╨д ARHITECTURA DIGITALтФА╨Т.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14.0_CAPITOLUL 14 ╤В╨Р╨д ARHITECTURA DIGITALтФА╨Т.docx",
+        "sha256": "2b2e495fe8b952ddedb487e4c0f7886b76e4576b30c02d2f604b05b230f07e51",
+        "size": 18916
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 38,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14_ARHITECTURA INFRASTRUCTURII DIGITALE DROPi.docx",
+        "compressed_size": 16344,
+        "crc32": "4440a3bc",
+        "filename": "14_ARHITECTURA INFRASTRUCTURII DIGITALE DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/14_ARHITECTURA INFRASTRUCTURII DIGITALE DROPi.docx",
+        "sha256": "04335cb0d89f584a9c8e880545a7ed87e4ff2ec3dd5970ff5d1c6c0971abf844",
+        "uncompressed_size": 19160
+      },
+      "classification": "exact_path_and_content_match",
+      "local": {
+        "filename": "14_ARHITECTURA INFRASTRUCTURII DIGITALE DROPi.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/14_ARHITECTURA INFRASTRUCTURII DIGITALE DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/14_ARHITECTURA INFRASTRUCTURII DIGITALE DROPi.docx",
+        "sha256": "04335cb0d89f584a9c8e880545a7ed87e4ff2ec3dd5970ff5d1c6c0971abf844",
+        "size": 19160
+      },
+      "mapping_basis": "exact_relative_path"
+    },
+    {
+      "archive": {
+        "archive_index": 88,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 15.docx",
+        "compressed_size": 13770,
+        "crc32": "e05ed974",
+        "filename": "15.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 15.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 15.docx",
+        "sha256": "9520a50dc9fbc4c5016a6b1417f880ad6808e750c82d2053949384df2d61ab3f",
+        "uncompressed_size": 16522
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "15.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 15.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 15.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 15.docx",
+        "sha256": "9520a50dc9fbc4c5016a6b1417f880ad6808e750c82d2053949384df2d61ab3f",
+        "size": 16522
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 122,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.0_CAPITOLUL 15 тАФ INTEGRARE & ECOSISTEM.docx",
+        "compressed_size": 16210,
+        "crc32": "27057d42",
+        "filename": "15.0_CAPITOLUL 15 тАФ INTEGRARE & ECOSISTEM.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15.0_CAPITOLUL 15 тАФ INTEGRARE & ECOSISTEM.docx",
+        "sha256": "317755a5f084396cf8858ea4acf783642ce19b7a397b2624ad1cca1a3f142654",
+        "uncompressed_size": 18994
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "15.0_CAPITOLUL 15 ╤В╨Р╨д INTEGRARE & ECOSISTEM.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15.0_CAPITOLUL 15 ╤В╨Р╨д INTEGRARE & ECOSISTEM.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.0_CAPITOLUL 15 ╤В╨Р╨д INTEGRARE & ECOSISTEM.docx",
+        "sha256": "317755a5f084396cf8858ea4acf783642ce19b7a397b2624ad1cca1a3f142654",
+        "size": 18994
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 123,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.1_ANEXA 15.A тАФ TIPURI DE INTEGRARE & DREPTURI.docx",
+        "compressed_size": 15390,
+        "crc32": "0545f863",
+        "filename": "15.1_ANEXA 15.A тАФ TIPURI DE INTEGRARE & DREPTURI.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15.1_ANEXA 15.A тАФ TIPURI DE INTEGRARE & DREPTURI.docx",
+        "sha256": "3b831f49e81aae2a1a1d4e1f53225bf74e7ff0534dc8373e147d812c75dfbec7",
+        "uncompressed_size": 18213
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "15.1_ANEXA 15.A ╤В╨Р╨д TIPURI DE INTEGRARE & DREPTURI.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15.1_ANEXA 15.A ╤В╨Р╨д TIPURI DE INTEGRARE & DREPTURI.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.1_ANEXA 15.A ╤В╨Р╨д TIPURI DE INTEGRARE & DREPTURI.docx",
+        "sha256": "3b831f49e81aae2a1a1d4e1f53225bf74e7ff0534dc8373e147d812c75dfbec7",
+        "size": 18213
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 124,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.2_ANEXA 15.B тАФ MODEL API ^0 WEBHOOK.docx",
+        "compressed_size": 15620,
+        "crc32": "bf2daf09",
+        "filename": "15.2_ANEXA 15.B тАФ MODEL API ^0 WEBHOOK.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15.2_ANEXA 15.B тАФ MODEL API ^0 WEBHOOK.docx",
+        "sha256": "5cafd7a69b0ad3194373b48749be38c0e4931883649dbadd5cbfd7f4abf41a63",
+        "uncompressed_size": 18447
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "15.2_ANEXA 15.B ╤В╨Р╨д MODEL API ^0 WEBHOOK.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15.2_ANEXA 15.B ╤В╨Р╨д MODEL API ^0 WEBHOOK.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.2_ANEXA 15.B ╤В╨Р╨д MODEL API ^0 WEBHOOK.docx",
+        "sha256": "5cafd7a69b0ad3194373b48749be38c0e4931883649dbadd5cbfd7f4abf41a63",
+        "size": 18447
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 143,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.3_ANEXA 15.C тАФ CHECKLIST DE INTEGRARE PARTENER.docx",
+        "compressed_size": 15557,
+        "crc32": "7edb0830",
+        "filename": "15.3_ANEXA 15.C тАФ CHECKLIST DE INTEGRARE PARTENER.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15.3_ANEXA 15.C тАФ CHECKLIST DE INTEGRARE PARTENER.docx",
+        "sha256": "59ee3787b121da6c74f46b99ee6afce23e482a5c23d8f93dd4550106bfbb7047",
+        "uncompressed_size": 18387
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "15.3_ANEXA 15.C ╤В╨Р╨д CHECKLIST DE INTEGRARE PARTENER.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15.3_ANEXA 15.C ╤В╨Р╨д CHECKLIST DE INTEGRARE PARTENER.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.3_ANEXA 15.C ╤В╨Р╨д CHECKLIST DE INTEGRARE PARTENER.docx",
+        "sha256": "59ee3787b121da6c74f46b99ee6afce23e482a5c23d8f93dd4550106bfbb7047",
+        "size": 18387
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 125,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.4_ANEXA 15.D тАФ AUDIT - SUSPENDARE INTEGRARE.docx",
+        "compressed_size": 15489,
+        "crc32": "65b5f620",
+        "filename": "15.4_ANEXA 15.D тАФ AUDIT - SUSPENDARE INTEGRARE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15.4_ANEXA 15.D тАФ AUDIT - SUSPENDARE INTEGRARE.docx",
+        "sha256": "07487122e5864eb85905b094601340bedf8b1386bf07d3398a6c8266dfd6bfc2",
+        "uncompressed_size": 18309
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "15.4_ANEXA 15.D ╤В╨Р╨д AUDIT - SUSPENDARE INTEGRARE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15.4_ANEXA 15.D ╤В╨Р╨д AUDIT - SUSPENDARE INTEGRARE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15.4_ANEXA 15.D ╤В╨Р╨д AUDIT - SUSPENDARE INTEGRARE.docx",
+        "sha256": "07487122e5864eb85905b094601340bedf8b1386bf07d3398a6c8266dfd6bfc2",
+        "size": 18309
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 39,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15_INTEGRARE -INTEROPERABILITATE ╚ШI ECOSISTEM.docx",
+        "compressed_size": 16074,
+        "crc32": "63fd625b",
+        "filename": "15_INTEGRARE -INTEROPERABILITATE ╚ШI ECOSISTEM.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15_INTEGRARE -INTEROPERABILITATE ╚ШI ECOSISTEM.docx",
+        "sha256": "4af4fc35a1418c29621020bc07ddb5fd5ba1e3c545f26693a69758aac14bdd8b",
+        "uncompressed_size": 18896
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "15_INTEGRARE -INTEROPERABILITATE тХЪ╨иI ECOSISTEM.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/15_INTEGRARE -INTEROPERABILITATE тХЪ╨иI ECOSISTEM.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/15_INTEGRARE -INTEROPERABILITATE тХЪ╨иI ECOSISTEM.docx",
+        "sha256": "4af4fc35a1418c29621020bc07ddb5fd5ba1e3c545f26693a69758aac14bdd8b",
+        "size": 18896
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 144,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+        "compressed_size": 15632,
+        "crc32": "896efc8f",
+        "filename": "16.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+        "sha256": "b9e520d2d757590e65e8aac3931e3a03fe248462a86d6d64319731ab82c75abf",
+        "uncompressed_size": 18453
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "16.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 16.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 16.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 16.docx",
+        "sha256": "b9e520d2d757590e65e8aac3931e3a03fe248462a86d6d64319731ab82c75abf",
+        "size": 18453
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 105,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.0_ANEXA 16.A тАФ RACI DE GUVERNAN╚Ъ─В.docx",
+        "compressed_size": 14885,
+        "crc32": "a7125e8f",
+        "filename": "16.0.1.0_ANEXA 16.A тАФ RACI DE GUVERNAN╚Ъ─В.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.1.0_ANEXA 16.A тАФ RACI DE GUVERNAN╚Ъ─В.docx",
+        "sha256": "159b0ce636c30ec86e3e2d60fc9f268b7e98e065cdc8cd8cf277b243dbda008d",
+        "uncompressed_size": 17706
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "16.0.1.0_ANEXA 16.A ╤В╨Р╨д RACI DE GUVERNANтХЪ╨ктФА╨Т.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.1.0_ANEXA 16.A ╤В╨Р╨д RACI DE GUVERNANтХЪ╨ктФА╨Т.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.0_ANEXA 16.A ╤В╨Р╨д RACI DE GUVERNANтХЪ╨ктФА╨Т.docx",
+        "sha256": "159b0ce636c30ec86e3e2d60fc9f268b7e98e065cdc8cd8cf277b243dbda008d",
+        "size": 17706
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 146,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.1_ANEXA 16.B тАФ MATRICE DE DECIZIE.docx",
+        "compressed_size": 15530,
+        "crc32": "fe2ac6f4",
+        "filename": "16.0.1.1_ANEXA 16.B тАФ MATRICE DE DECIZIE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.1.1_ANEXA 16.B тАФ MATRICE DE DECIZIE.docx",
+        "sha256": "d3f8586e5bc0a8e8b99d5c427c8445d1228f019f5aa3cc5fcb3fa74ec14597df",
+        "uncompressed_size": 18362
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "16.0.1.1_ANEXA 16.B ╤В╨Р╨д MATRICE DE DECIZIE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.1.1_ANEXA 16.B ╤В╨Р╨д MATRICE DE DECIZIE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.1_ANEXA 16.B ╤В╨Р╨д MATRICE DE DECIZIE.docx",
+        "sha256": "d3f8586e5bc0a8e8b99d5c427c8445d1228f019f5aa3cc5fcb3fa74ec14597df",
+        "size": 18362
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 127,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.2_ANEXA 16.C тАФ FLUX DE ESCALADARE.docx",
+        "compressed_size": 15433,
+        "crc32": "00ea3467",
+        "filename": "16.0.1.2_ANEXA 16.C тАФ FLUX DE ESCALADARE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.1.2_ANEXA 16.C тАФ FLUX DE ESCALADARE.docx",
+        "sha256": "2169390ca46d4b95a016dbbbfadf8a0fad50dba86d7eb68fdb4b4b37b2da4537",
+        "uncompressed_size": 18224
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "16.0.1.2_ANEXA 16.C ╤В╨Р╨д FLUX DE ESCALADARE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.1.2_ANEXA 16.C ╤В╨Р╨д FLUX DE ESCALADARE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.2_ANEXA 16.C ╤В╨Р╨д FLUX DE ESCALADARE.docx",
+        "sha256": "2169390ca46d4b95a016dbbbfadf8a0fad50dba86d7eb68fdb4b4b37b2da4537",
+        "size": 18224
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 106,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.3_ANEXA 16.D тАФ REGISTRU POLITICI INTERNE.docx",
+        "compressed_size": 15151,
+        "crc32": "7cdb9852",
+        "filename": "16.0.1.3_ANEXA 16.D тАФ REGISTRU POLITICI INTERNE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.1.3_ANEXA 16.D тАФ REGISTRU POLITICI INTERNE.docx",
+        "sha256": "db1ff0679ca92174e1d910f9173af734e6cb15d96b9bcee897b1088eef7f14e8",
+        "uncompressed_size": 17982
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "16.0.1.3_ANEXA 16.D ╤В╨Р╨д REGISTRU POLITICI INTERNE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.1.3_ANEXA 16.D ╤В╨Р╨д REGISTRU POLITICI INTERNE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.3_ANEXA 16.D ╤В╨Р╨д REGISTRU POLITICI INTERNE.docx",
+        "sha256": "db1ff0679ca92174e1d910f9173af734e6cb15d96b9bcee897b1088eef7f14e8",
+        "size": 17982
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 128,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.4_ANEXA 16.E тАФ REGISTRU SUSPEND─ВRI -OPRIRI.docx",
+        "compressed_size": 15332,
+        "crc32": "a6c06ef9",
+        "filename": "16.0.1.4_ANEXA 16.E тАФ REGISTRU SUSPEND─ВRI -OPRIRI.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.1.4_ANEXA 16.E тАФ REGISTRU SUSPEND─ВRI -OPRIRI.docx",
+        "sha256": "5d41fcf2748138249cc1a1cd02b5e637c30afb99948333ca881f39b714b51222",
+        "uncompressed_size": 18159
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "16.0.1.4_ANEXA 16.E ╤В╨Р╨д REGISTRU SUSPENDтФА╨ТRI -OPRIRI.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.1.4_ANEXA 16.E ╤В╨Р╨д REGISTRU SUSPENDтФА╨ТRI -OPRIRI.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1.4_ANEXA 16.E ╤В╨Р╨д REGISTRU SUSPENDтФА╨ТRI -OPRIRI.docx",
+        "sha256": "5d41fcf2748138249cc1a1cd02b5e637c30afb99948333ca881f39b714b51222",
+        "size": 18159
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 145,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+        "compressed_size": 16223,
+        "crc32": "8b08ff2e",
+        "filename": "16.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.1_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+        "sha256": "ce9b212a1eac164d30101aa6e057a83fed2c8c368bf62afbba041a9cc9838019",
+        "uncompressed_size": 19005
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "16.0.1_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 16.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.1_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 16.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.1_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 16.docx",
+        "sha256": "ce9b212a1eac164d30101aa6e057a83fed2c8c368bf62afbba041a9cc9838019",
+        "size": 19005
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 89,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.2_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+        "compressed_size": 15797,
+        "crc32": "be774c82",
+        "filename": "16.0.2_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.2_AUDIT PACK OFICIAL тАФ CAPITOLUL 16.docx",
+        "sha256": "99dcce2109317874870cc662bddd1fa44c2743f225ad63fb02d77e111558ea26",
+        "uncompressed_size": 18617
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "16.0.2_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 16.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0.2_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 16.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0.2_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 16.docx",
+        "sha256": "99dcce2109317874870cc662bddd1fa44c2743f225ad63fb02d77e111558ea26",
+        "size": 18617
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 126,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0_CAPITOLUL 16 тАФ GUVERNAN╚Ъ─В.docx",
+        "compressed_size": 16366,
+        "crc32": "f297948d",
+        "filename": "16.0_CAPITOLUL 16 тАФ GUVERNAN╚Ъ─В.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0_CAPITOLUL 16 тАФ GUVERNAN╚Ъ─В.docx",
+        "sha256": "951aec9a9c99c720769f66755a702a5c934374d8fe16cd8e6d7872168cbedd29",
+        "uncompressed_size": 19190
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "16.0_CAPITOLUL 16 ╤В╨Р╨д GUVERNANтХЪ╨ктФА╨Т.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16.0_CAPITOLUL 16 ╤В╨Р╨д GUVERNANтХЪ╨ктФА╨Т.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16.0_CAPITOLUL 16 ╤В╨Р╨д GUVERNANтХЪ╨ктФА╨Т.docx",
+        "sha256": "951aec9a9c99c720769f66755a702a5c934374d8fe16cd8e6d7872168cbedd29",
+        "size": 19190
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 40,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16_GUVERNAN╚Ъ─В TEHNIC─В_OWNERSHIP ╚ШI RESPONSABILIT─В╚ЪI.docx",
+        "compressed_size": 15968,
+        "crc32": "5796ebe0",
+        "filename": "16_GUVERNAN╚Ъ─В TEHNIC─В_OWNERSHIP ╚ШI RESPONSABILIT─В╚ЪI.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16_GUVERNAN╚Ъ─В TEHNIC─В_OWNERSHIP ╚ШI RESPONSABILIT─В╚ЪI.docx",
+        "sha256": "dddcfe540084bbf51e387b0e1fde7fa5f580df81687f9182b081bdb54dcad056",
+        "uncompressed_size": 18792
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "16_GUVERNANтХЪ╨ктФА╨Т TEHNICтФА╨Т_OWNERSHIP тХЪ╨иI RESPONSABILITтФА╨ТтХЪ╨кI.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/16_GUVERNANтХЪ╨ктФА╨Т TEHNICтФА╨Т_OWNERSHIP тХЪ╨иI RESPONSABILITтФА╨ТтХЪ╨кI.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/16_GUVERNANтХЪ╨ктФА╨Т TEHNICтФА╨Т_OWNERSHIP тХЪ╨иI RESPONSABILITтФА╨ТтХЪ╨кI.docx",
+        "sha256": "dddcfe540084bbf51e387b0e1fde7fa5f580df81687f9182b081bdb54dcad056",
+        "size": 18792
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 150,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 17.docx",
+        "compressed_size": 14914,
+        "crc32": "85ccda94",
+        "filename": "17.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 17.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 17.docx",
+        "sha256": "c906a53c0089d6c6cb9905cf75f340488a8150ada3a951215338c8ad901e5d30",
+        "uncompressed_size": 17739
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "17.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 17.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 17.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 17.docx",
+        "sha256": "c906a53c0089d6c6cb9905cf75f340488a8150ada3a951215338c8ad901e5d30",
+        "size": 17739
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 90,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.1_ANEXA 17.A тАФ REGISTRU DE RISC.docx",
+        "compressed_size": 13714,
+        "crc32": "f35f9339",
+        "filename": "17.0.1_ANEXA 17.A тАФ REGISTRU DE RISC.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17.0.1_ANEXA 17.A тАФ REGISTRU DE RISC.docx",
+        "sha256": "e0083a6a59d34c1e36ac5dd0f8b58cdb82bc5b2cd3290f679450356db200cd43",
+        "uncompressed_size": 16465
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "17.0.1_ANEXA 17.A ╤В╨Р╨д REGISTRU DE RISC.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17.0.1_ANEXA 17.A ╤В╨Р╨д REGISTRU DE RISC.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.1_ANEXA 17.A ╤В╨Р╨д REGISTRU DE RISC.docx",
+        "sha256": "e0083a6a59d34c1e36ac5dd0f8b58cdb82bc5b2cd3290f679450356db200cd43",
+        "size": 16465
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 147,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.2_ANEXA 17.B тАФ MATRICE RISC -PROBABILITATE ├Ч IMPACT.docx",
+        "compressed_size": 13234,
+        "crc32": "bb06a289",
+        "filename": "17.0.2_ANEXA 17.B тАФ MATRICE RISC -PROBABILITATE ├Ч IMPACT.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17.0.2_ANEXA 17.B тАФ MATRICE RISC -PROBABILITATE ├Ч IMPACT.docx",
+        "sha256": "bdc0cd3475c2d054a1d21d55b8199cffbd26cc5f18679afea7f3135c25dc1af3",
+        "uncompressed_size": 15997
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "17.0.2_ANEXA 17.B ╤В╨Р╨д MATRICE RISC -PROBABILITATE тФЬ╨з IMPACT.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17.0.2_ANEXA 17.B ╤В╨Р╨д MATRICE RISC -PROBABILITATE тФЬ╨з IMPACT.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.2_ANEXA 17.B ╤В╨Р╨д MATRICE RISC -PROBABILITATE тФЬ╨з IMPACT.docx",
+        "sha256": "bdc0cd3475c2d054a1d21d55b8199cffbd26cc5f18679afea7f3135c25dc1af3",
+        "size": 15997
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 148,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.3_ANEXA 17.C тАФ PLANURI DE CONTINUITATE (BCP).docx",
+        "compressed_size": 15597,
+        "crc32": "8d890c7f",
+        "filename": "17.0.3_ANEXA 17.C тАФ PLANURI DE CONTINUITATE (BCP).docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17.0.3_ANEXA 17.C тАФ PLANURI DE CONTINUITATE (BCP).docx",
+        "sha256": "cc268902442ee92143db502d9a262061ce0840b3e5c3de92376963913cd00250",
+        "uncompressed_size": 18415
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "17.0.3_ANEXA 17.C ╤В╨Р╨д PLANURI DE CONTINUITATE (BCP).docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17.0.3_ANEXA 17.C ╤В╨Р╨д PLANURI DE CONTINUITATE (BCP).docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.3_ANEXA 17.C ╤В╨Р╨д PLANURI DE CONTINUITATE (BCP).docx",
+        "sha256": "cc268902442ee92143db502d9a262061ce0840b3e5c3de92376963913cd00250",
+        "size": 18415
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 149,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.4_ANEXA 17.D тАФ CHECKLIST MANAGEMENT RISC.docx",
+        "compressed_size": 15098,
+        "crc32": "86c6f2d9",
+        "filename": "17.0.4_ANEXA 17.D тАФ CHECKLIST MANAGEMENT RISC.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17.0.4_ANEXA 17.D тАФ CHECKLIST MANAGEMENT RISC.docx",
+        "sha256": "06624f993d4c93aff1eefef8782063c288ccda54baec2a345d2b80b1f0a53367",
+        "uncompressed_size": 17893
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "17.0.4_ANEXA 17.D ╤В╨Р╨д CHECKLIST MANAGEMENT RISC.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17.0.4_ANEXA 17.D ╤В╨Р╨д CHECKLIST MANAGEMENT RISC.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0.4_ANEXA 17.D ╤В╨Р╨д CHECKLIST MANAGEMENT RISC.docx",
+        "sha256": "06624f993d4c93aff1eefef8782063c288ccda54baec2a345d2b80b1f0a53367",
+        "size": 17893
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 107,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0_CAPITOLUL 17 тАФ MANAGEMENTUL RISCULUI.docx",
+        "compressed_size": 14141,
+        "crc32": "ea56c4ee",
+        "filename": "17.0_CAPITOLUL 17 тАФ MANAGEMENTUL RISCULUI.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17.0_CAPITOLUL 17 тАФ MANAGEMENTUL RISCULUI.docx",
+        "sha256": "86e06d0fecb08841c597f9869247eac1d536612d09856c90920abe51f682dd06",
+        "uncompressed_size": 16858
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "17.0_CAPITOLUL 17 ╤В╨Р╨д MANAGEMENTUL RISCULUI.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17.0_CAPITOLUL 17 ╤В╨Р╨д MANAGEMENTUL RISCULUI.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17.0_CAPITOLUL 17 ╤В╨Р╨д MANAGEMENTUL RISCULUI.docx",
+        "sha256": "86e06d0fecb08841c597f9869247eac1d536612d09856c90920abe51f682dd06",
+        "size": 16858
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 41,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17_MANAGEMENTUL RISCULUI _OPERA╚ЪIONAL_TEHNIC_ LEGAL ╚ШI REPUTA╚ЪIONAL.docx",
+        "compressed_size": 17115,
+        "crc32": "f7438a79",
+        "filename": "17_MANAGEMENTUL RISCULUI _OPERA╚ЪIONAL_TEHNIC_ LEGAL ╚ШI REPUTA╚ЪIONAL.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17_MANAGEMENTUL RISCULUI _OPERA╚ЪIONAL_TEHNIC_ LEGAL ╚ШI REPUTA╚ЪIONAL.docx",
+        "sha256": "14213c65caaa8ce369c736d734ab6945d5b4d404fd92f8e5ea111229825af79d",
+        "uncompressed_size": 19942
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "17_MANAGEMENTUL RISCULUI _OPERAтХЪ╨кIONAL_TEHNIC_ LEGAL тХЪ╨иI REPUTAтХЪ╨кIONAL.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/17_MANAGEMENTUL RISCULUI _OPERAтХЪ╨кIONAL_TEHNIC_ LEGAL тХЪ╨иI REPUTAтХЪ╨кIONAL.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/17_MANAGEMENTUL RISCULUI _OPERAтХЪ╨кIONAL_TEHNIC_ LEGAL тХЪ╨иI REPUTAтХЪ╨кIONAL.docx",
+        "sha256": "14213c65caaa8ce369c736d734ab6945d5b4d404fd92f8e5ea111229825af79d",
+        "size": 19942
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 93,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 18.docx",
+        "compressed_size": 13657,
+        "crc32": "f58eded5",
+        "filename": "18.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 18.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 18.docx",
+        "sha256": "e1b831937aac36eb7b5678e88e019303e7455ee70a98b63f09952bf9105cdd21",
+        "uncompressed_size": 16412
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "18.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 18.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 18.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 18.docx",
+        "sha256": "e1b831937aac36eb7b5678e88e019303e7455ee70a98b63f09952bf9105cdd21",
+        "size": 16412
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 108,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.1_ANEXA 18.A тАФ LIST─В KPI CANONICI.docx",
+        "compressed_size": 15789,
+        "crc32": "66c477db",
+        "filename": "18.0.1_ANEXA 18.A тАФ LIST─В KPI CANONICI.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18.0.1_ANEXA 18.A тАФ LIST─В KPI CANONICI.docx",
+        "sha256": "18b2b093cd6595513f97f48d2ea83f11eb2fba7e54122fe6ea357dc8ff74665d",
+        "uncompressed_size": 18624
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "18.0.1_ANEXA 18.A ╤В╨Р╨д LISTтФА╨Т KPI CANONICI.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18.0.1_ANEXA 18.A ╤В╨Р╨д LISTтФА╨Т KPI CANONICI.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.1_ANEXA 18.A ╤В╨Р╨д LISTтФА╨Т KPI CANONICI.docx",
+        "sha256": "18b2b093cd6595513f97f48d2ea83f11eb2fba7e54122fe6ea357dc8ff74665d",
+        "size": 18624
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 109,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.2_ANEXA 18.B тАФ STRUCTUR─В UNIT ECONOMICS.docx",
+        "compressed_size": 14924,
+        "crc32": "fb34b460",
+        "filename": "18.0.2_ANEXA 18.B тАФ STRUCTUR─В UNIT ECONOMICS.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18.0.2_ANEXA 18.B тАФ STRUCTUR─В UNIT ECONOMICS.docx",
+        "sha256": "f4ad87b914606373a425e48cae21e3bbd3b0d6a1302c5d5c1dcce97ecba6b5cb",
+        "uncompressed_size": 17751
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "18.0.2_ANEXA 18.B ╤В╨Р╨д STRUCTURтФА╨Т UNIT ECONOMICS.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18.0.2_ANEXA 18.B ╤В╨Р╨д STRUCTURтФА╨Т UNIT ECONOMICS.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.2_ANEXA 18.B ╤В╨Р╨д STRUCTURтФА╨Т UNIT ECONOMICS.docx",
+        "sha256": "f4ad87b914606373a425e48cae21e3bbd3b0d6a1302c5d5c1dcce97ecba6b5cb",
+        "size": 17751
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 151,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.3_ANEXA 18.C тАФ PRAGURI KPI ^0 ESCALADARE.docx",
+        "compressed_size": 14801,
+        "crc32": "d4bbc474",
+        "filename": "18.0.3_ANEXA 18.C тАФ PRAGURI KPI ^0 ESCALADARE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18.0.3_ANEXA 18.C тАФ PRAGURI KPI ^0 ESCALADARE.docx",
+        "sha256": "8ce39c29c51a864317c816f708cdefb2880f41d0520193b548267f402726816b",
+        "uncompressed_size": 17632
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "18.0.3_ANEXA 18.C ╤В╨Р╨д PRAGURI KPI ^0 ESCALADARE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18.0.3_ANEXA 18.C ╤В╨Р╨д PRAGURI KPI ^0 ESCALADARE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.3_ANEXA 18.C ╤В╨Р╨д PRAGURI KPI ^0 ESCALADARE.docx",
+        "sha256": "8ce39c29c51a864317c816f708cdefb2880f41d0520193b548267f402726816b",
+        "size": 17632
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 92,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.4_ANEXA 18.D тАФ RAPORTARE KPI & AUDIT.docx",
+        "compressed_size": 15427,
+        "crc32": "792ddc6f",
+        "filename": "18.0.4_ANEXA 18.D тАФ RAPORTARE KPI & AUDIT.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18.0.4_ANEXA 18.D тАФ RAPORTARE KPI & AUDIT.docx",
+        "sha256": "787ba1f3233a4cf4f6fd73bfc905168199898c8e373ba74240020a74563324d0",
+        "uncompressed_size": 18249
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "18.0.4_ANEXA 18.D ╤В╨Р╨д RAPORTARE KPI & AUDIT.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18.0.4_ANEXA 18.D ╤В╨Р╨д RAPORTARE KPI & AUDIT.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0.4_ANEXA 18.D ╤В╨Р╨д RAPORTARE KPI & AUDIT.docx",
+        "sha256": "787ba1f3233a4cf4f6fd73bfc905168199898c8e373ba74240020a74563324d0",
+        "size": 18249
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 112,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0_CAPITOLUL 18 тАФ KPI-METRICI ╚ШI UNIT ECONOMICS.docx",
+        "compressed_size": 14379,
+        "crc32": "d54be76e",
+        "filename": "18.0_CAPITOLUL 18 тАФ KPI-METRICI ╚ШI UNIT ECONOMICS.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18.0_CAPITOLUL 18 тАФ KPI-METRICI ╚ШI UNIT ECONOMICS.docx",
+        "sha256": "c2a9bc24b315bd5afa99ca3a7eb513bd3b6fbf59f1c175ee7638bd9f8778e225",
+        "uncompressed_size": 17094
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "18.0_CAPITOLUL 18 ╤В╨Р╨д KPI-METRICI тХЪ╨иI UNIT ECONOMICS.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18.0_CAPITOLUL 18 ╤В╨Р╨д KPI-METRICI тХЪ╨иI UNIT ECONOMICS.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18.0_CAPITOLUL 18 ╤В╨Р╨д KPI-METRICI тХЪ╨иI UNIT ECONOMICS.docx",
+        "sha256": "c2a9bc24b315bd5afa99ca3a7eb513bd3b6fbf59f1c175ee7638bd9f8778e225",
+        "size": 17094
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 42,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18_KPI_METRICI ╚ШI UNIT ECONOMICS.docx",
+        "compressed_size": 16161,
+        "crc32": "711e8e6a",
+        "filename": "18_KPI_METRICI ╚ШI UNIT ECONOMICS.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18_KPI_METRICI ╚ШI UNIT ECONOMICS.docx",
+        "sha256": "c10aea82ce8d73839a0a48ec53c9ef60cdaf4a8280f6e0117ae0298867a2cdd4",
+        "uncompressed_size": 18946
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "18_KPI_METRICI тХЪ╨иI UNIT ECONOMICS.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/18_KPI_METRICI тХЪ╨иI UNIT ECONOMICS.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/18_KPI_METRICI тХЪ╨иI UNIT ECONOMICS.docx",
+        "sha256": "c10aea82ce8d73839a0a48ec53c9ef60cdaf4a8280f6e0117ae0298867a2cdd4",
+        "size": 18946
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 113,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 19.docx",
+        "compressed_size": 13958,
+        "crc32": "14ff7aac",
+        "filename": "19.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 19.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.0.0_AUDIT PACK OFICIAL тАФ CAPITOLUL 19.docx",
+        "sha256": "5f9b57dbb8b936118df5680b20a130aee4ef9980a695f9ea32f5593f157a76c3",
+        "uncompressed_size": 16675
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "19.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 19.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 19.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.0.0_AUDIT PACK OFICIAL ╤В╨Р╨д CAPITOLUL 19.docx",
+        "sha256": "5f9b57dbb8b936118df5680b20a130aee4ef9980a695f9ea32f5593f157a76c3",
+        "size": 16675
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 94,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.0_CAPITOLUL 19 тАФ CE NU FACE DROPi.docx",
+        "compressed_size": 14537,
+        "crc32": "ff726c7d",
+        "filename": "19.0_CAPITOLUL 19 тАФ CE NU FACE DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.0_CAPITOLUL 19 тАФ CE NU FACE DROPi.docx",
+        "sha256": "cd7a177692e2ebb38e06a1397851e098152bdd4c000c0e57dcba0e7cdcc1a5e4",
+        "uncompressed_size": 17289
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "19.0_CAPITOLUL 19 ╤В╨Р╨д CE NU FACE DROPi.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.0_CAPITOLUL 19 ╤В╨Р╨д CE NU FACE DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.0_CAPITOLUL 19 ╤В╨Р╨д CE NU FACE DROPi.docx",
+        "sha256": "cd7a177692e2ebb38e06a1397851e098152bdd4c000c0e57dcba0e7cdcc1a5e4",
+        "size": 17289
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 129,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.1_ANEXA 19.A тАФ LIST─В DE EXCLUDERI OPERA╚ЪIONALE.docx",
+        "compressed_size": 12916,
+        "crc32": "ab0c90eb",
+        "filename": "19.1.1_ANEXA 19.A тАФ LIST─В DE EXCLUDERI OPERA╚ЪIONALE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1.1_ANEXA 19.A тАФ LIST─В DE EXCLUDERI OPERA╚ЪIONALE.docx",
+        "sha256": "4429fa2996cda5404cd3351e32945c9bc2ed6d68ca43a6e8e49da8a6f148a5de",
+        "uncompressed_size": 15677
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "19.1.1_ANEXA 19.A ╤В╨Р╨д LISTтФА╨Т DE EXCLUDERI OPERAтХЪ╨кIONALE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1.1_ANEXA 19.A ╤В╨Р╨д LISTтФА╨Т DE EXCLUDERI OPERAтХЪ╨кIONALE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.1_ANEXA 19.A ╤В╨Р╨д LISTтФА╨Т DE EXCLUDERI OPERAтХЪ╨кIONALE.docx",
+        "sha256": "4429fa2996cda5404cd3351e32945c9bc2ed6d68ca43a6e8e49da8a6f148a5de",
+        "size": 15677
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 130,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.2_ANEXA 19.B тАФ LIMIT─ВRI CONTRACTUALE STANDARD.docx",
+        "compressed_size": 13057,
+        "crc32": "0e7ab652",
+        "filename": "19.1.2_ANEXA 19.B тАФ LIMIT─ВRI CONTRACTUALE STANDARD.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1.2_ANEXA 19.B тАФ LIMIT─ВRI CONTRACTUALE STANDARD.docx",
+        "sha256": "763126d9c02215a90504c8bf71ec23e574bf76189459287f6828a9fbc48014e5",
+        "uncompressed_size": 15782
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "19.1.2_ANEXA 19.B ╤В╨Р╨д LIMITтФА╨ТRI CONTRACTUALE STANDARD.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1.2_ANEXA 19.B ╤В╨Р╨д LIMITтФА╨ТRI CONTRACTUALE STANDARD.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.2_ANEXA 19.B ╤В╨Р╨д LIMITтФА╨ТRI CONTRACTUALE STANDARD.docx",
+        "sha256": "763126d9c02215a90504c8bf71ec23e574bf76189459287f6828a9fbc48014e5",
+        "size": 15782
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 95,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.3_ANEXA 19.C тАФ GHID DE PREVENIRE A A╚ШTEPT─ВRILOR FALSE.docx",
+        "compressed_size": 14876,
+        "crc32": "24cbea63",
+        "filename": "19.1.3_ANEXA 19.C тАФ GHID DE PREVENIRE A A╚ШTEPT─ВRILOR FALSE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1.3_ANEXA 19.C тАФ GHID DE PREVENIRE A A╚ШTEPT─ВRILOR FALSE.docx",
+        "sha256": "fbbfd8eea475e8fe837c60682e09b6f12cc91a5936cb96c576d371d3b70782a5",
+        "uncompressed_size": 17707
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "19.1.3_ANEXA 19.C ╤В╨Р╨д GHID DE PREVENIRE A AтХЪ╨иTEPTтФА╨ТRILOR FALSE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1.3_ANEXA 19.C ╤В╨Р╨д GHID DE PREVENIRE A AтХЪ╨иTEPTтФА╨ТRILOR FALSE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.3_ANEXA 19.C ╤В╨Р╨д GHID DE PREVENIRE A AтХЪ╨иTEPTтФА╨ТRILOR FALSE.docx",
+        "sha256": "fbbfd8eea475e8fe837c60682e09b6f12cc91a5936cb96c576d371d3b70782a5",
+        "size": 17707
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 111,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.4_ANEXA 19.D тАФ UTILIZARE ├ОN AUDIT si DUE DILIGENCE.docx",
+        "compressed_size": 13539,
+        "crc32": "c52635eb",
+        "filename": "19.1.4_ANEXA 19.D тАФ UTILIZARE ├ОN AUDIT si DUE DILIGENCE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1.4_ANEXA 19.D тАФ UTILIZARE ├ОN AUDIT si DUE DILIGENCE.docx",
+        "sha256": "6ea1c8be45516157721b335ebc5ea684ded4bac4205d49a4e4f82135d2a86d87",
+        "uncompressed_size": 16297
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "19.1.4_ANEXA 19.D ╤В╨Р╨д UTILIZARE тФЬ╨ЮN AUDIT si DUE DILIGENCE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1.4_ANEXA 19.D ╤В╨Р╨д UTILIZARE тФЬ╨ЮN AUDIT si DUE DILIGENCE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.4_ANEXA 19.D ╤В╨Р╨д UTILIZARE тФЬ╨ЮN AUDIT si DUE DILIGENCE.docx",
+        "sha256": "6ea1c8be45516157721b335ebc5ea684ded4bac4205d49a4e4f82135d2a86d87",
+        "size": 16297
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 91,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.5_ANEXA 19.E тАФ MECANISM DE APLICARE INTERN─В.docx",
+        "compressed_size": 14967,
+        "crc32": "88c77fc7",
+        "filename": "19.1.5_ANEXA 19.E тАФ MECANISM DE APLICARE INTERN─В.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1.5_ANEXA 19.E тАФ MECANISM DE APLICARE INTERN─В.docx",
+        "sha256": "da4f270c0100183161f2aa839cbc556bbc0316c59f6af9cd141fbb0022e141f5",
+        "uncompressed_size": 17796
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "19.1.5_ANEXA 19.E ╤В╨Р╨д MECANISM DE APLICARE INTERNтФА╨Т.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1.5_ANEXA 19.E ╤В╨Р╨д MECANISM DE APLICARE INTERNтФА╨Т.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.5_ANEXA 19.E ╤В╨Р╨д MECANISM DE APLICARE INTERNтФА╨Т.docx",
+        "sha256": "da4f270c0100183161f2aa839cbc556bbc0316c59f6af9cd141fbb0022e141f5",
+        "size": 17796
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 131,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.6_ANEXA 19.F тАФ DECLARA╚ЪIE DE POZI╚ЪIONARE OFICIAL─В.docx",
+        "compressed_size": 14290,
+        "crc32": "3d43dc41",
+        "filename": "19.1.6_ANEXA 19.F тАФ DECLARA╚ЪIE DE POZI╚ЪIONARE OFICIAL─В.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1.6_ANEXA 19.F тАФ DECLARA╚ЪIE DE POZI╚ЪIONARE OFICIAL─В.docx",
+        "sha256": "f98bb785a5e4cd28694d768c6e8ac68b5d35a8ab4b924e44dc24be6b2ea2c909",
+        "uncompressed_size": 17115
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "19.1.6_ANEXA 19.F ╤В╨Р╨д DECLARAтХЪ╨кIE DE POZIтХЪ╨кIONARE OFICIALтФА╨Т.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1.6_ANEXA 19.F ╤В╨Р╨д DECLARAтХЪ╨кIE DE POZIтХЪ╨кIONARE OFICIALтФА╨Т.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1.6_ANEXA 19.F ╤В╨Р╨д DECLARAтХЪ╨кIE DE POZIтХЪ╨кIONARE OFICIALтФА╨Т.docx",
+        "sha256": "f98bb785a5e4cd28694d768c6e8ac68b5d35a8ab4b924e44dc24be6b2ea2c909",
+        "size": 17115
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 110,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1_ANEXE CAPITOLUL 19 тАФ тАЮCE NU FACE DROPiтАЭ.docx",
+        "compressed_size": 13371,
+        "crc32": "8ede5776",
+        "filename": "19.1_ANEXE CAPITOLUL 19 тАФ тАЮCE NU FACE DROPiтАЭ.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1_ANEXE CAPITOLUL 19 тАФ тАЮCE NU FACE DROPiтАЭ.docx",
+        "sha256": "9c2e83b6db671ce155c1299481e1ca238ff857a5abf452aa9f657688ddea06f3",
+        "uncompressed_size": 16119
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "19.1_ANEXE CAPITOLUL 19 ╤В╨Р╨д ╤В╨Р╨оCE NU FACE DROPi╤В╨Р╨н.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19.1_ANEXE CAPITOLUL 19 ╤В╨Р╨д ╤В╨Р╨оCE NU FACE DROPi╤В╨Р╨н.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19.1_ANEXE CAPITOLUL 19 ╤В╨Р╨д ╤В╨Р╨оCE NU FACE DROPi╤В╨Р╨н.docx",
+        "sha256": "9c2e83b6db671ce155c1299481e1ca238ff857a5abf452aa9f657688ddea06f3",
+        "size": 16119
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 43,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19_CE NU FACE DROPi _DELIMIT─ВRI STRATEGICE ╚ШI DEFENSIVE.docx",
+        "compressed_size": 14031,
+        "crc32": "691104b6",
+        "filename": "19_CE NU FACE DROPi _DELIMIT─ВRI STRATEGICE ╚ШI DEFENSIVE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19_CE NU FACE DROPi _DELIMIT─ВRI STRATEGICE ╚ШI DEFENSIVE.docx",
+        "sha256": "838c2d7438198f0621aed781d99f7579f3a8d95f4bb208274c7a4c9eedddf916",
+        "uncompressed_size": 16787
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "19_CE NU FACE DROPi _DELIMITтФА╨ТRI STRATEGICE тХЪ╨иI DEFENSIVE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/19_CE NU FACE DROPi _DELIMITтФА╨ТRI STRATEGICE тХЪ╨иI DEFENSIVE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/19_CE NU FACE DROPi _DELIMITтФА╨ТRI STRATEGICE тХЪ╨иI DEFENSIVE.docx",
+        "sha256": "838c2d7438198f0621aed781d99f7579f3a8d95f4bb208274c7a4c9eedddf916",
+        "size": 16787
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 152,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.1_ANEXA 20.A тАФ CHECKLIST DE ELIGIBILITATE VOLUMUL III.docx",
+        "compressed_size": 14215,
+        "crc32": "faa86ffc",
+        "filename": "20.0.1_ANEXA 20.A тАФ CHECKLIST DE ELIGIBILITATE VOLUMUL III.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/20.0.1_ANEXA 20.A тАФ CHECKLIST DE ELIGIBILITATE VOLUMUL III.docx",
+        "sha256": "54b6f6054f9cde9ee9580c348b84c7b0c34268b8f849234a63c7ce13d9616ff6",
+        "uncompressed_size": 17038
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "20.0.1_ANEXA 20.A ╤В╨Р╨д CHECKLIST DE ELIGIBILITATE VOLUMUL III.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/20.0.1_ANEXA 20.A ╤В╨Р╨д CHECKLIST DE ELIGIBILITATE VOLUMUL III.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.1_ANEXA 20.A ╤В╨Р╨д CHECKLIST DE ELIGIBILITATE VOLUMUL III.docx",
+        "sha256": "54b6f6054f9cde9ee9580c348b84c7b0c34268b8f849234a63c7ce13d9616ff6",
+        "size": 17038
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 96,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.2_ANEXA 20.B тАФ DECLARA╚ЪIE OFICIAL─В DE ├ОNCHIDERE VOLUMUL II.docx",
+        "compressed_size": 12599,
+        "crc32": "7a70b288",
+        "filename": "20.0.2_ANEXA 20.B тАФ DECLARA╚ЪIE OFICIAL─В DE ├ОNCHIDERE VOLUMUL II.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/20.0.2_ANEXA 20.B тАФ DECLARA╚ЪIE OFICIAL─В DE ├ОNCHIDERE VOLUMUL II.docx",
+        "sha256": "26fa08bfb0cb86aead6624cff7ba2b20d2fb4269b1170c5099f492c8dfd3c22a",
+        "uncompressed_size": 15354
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "20.0.2_ANEXA 20.B ╤В╨Р╨д DECLARAтХЪ╨кIE OFICIALтФА╨Т DE тФЬ╨ЮNCHIDERE VOLUMUL II.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/20.0.2_ANEXA 20.B ╤В╨Р╨д DECLARAтХЪ╨кIE OFICIALтФА╨Т DE тФЬ╨ЮNCHIDERE VOLUMUL II.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.2_ANEXA 20.B ╤В╨Р╨д DECLARAтХЪ╨кIE OFICIALтФА╨Т DE тФЬ╨ЮNCHIDERE VOLUMUL II.docx",
+        "sha256": "26fa08bfb0cb86aead6624cff7ba2b20d2fb4269b1170c5099f492c8dfd3c22a",
+        "size": 15354
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 132,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.3_ANEXA 20.C тАФ DECIZIE DE TRECERE -TEMPLATE.docx",
+        "compressed_size": 12825,
+        "crc32": "26439a8b",
+        "filename": "20.0.3_ANEXA 20.C тАФ DECIZIE DE TRECERE -TEMPLATE.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/20.0.3_ANEXA 20.C тАФ DECIZIE DE TRECERE -TEMPLATE.docx",
+        "sha256": "ec481202d9f2705ae02fedc3bffacb42fd83a0b82f7d40086f87897e2f6ae185",
+        "uncompressed_size": 15584
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "20.0.3_ANEXA 20.C ╤В╨Р╨д DECIZIE DE TRECERE -TEMPLATE.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/20.0.3_ANEXA 20.C ╤В╨Р╨д DECIZIE DE TRECERE -TEMPLATE.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0.3_ANEXA 20.C ╤В╨Р╨д DECIZIE DE TRECERE -TEMPLATE.docx",
+        "sha256": "ec481202d9f2705ae02fedc3bffacb42fd83a0b82f7d40086f87897e2f6ae185",
+        "size": 15584
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 114,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0_CAPITOLUL 20 тАФ CONCLUZIA VOLUMULUI II.docx",
+        "compressed_size": 14339,
+        "crc32": "deba7d16",
+        "filename": "20.0_CAPITOLUL 20 тАФ CONCLUZIA VOLUMULUI II.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/20.0_CAPITOLUL 20 тАФ CONCLUZIA VOLUMULUI II.docx",
+        "sha256": "dd5318de5767531d17aca052471def3d7139798dd140cd8640448374e281f00d",
+        "uncompressed_size": 17058
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "20.0_CAPITOLUL 20 ╤В╨Р╨д CONCLUZIA VOLUMULUI II.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/20.0_CAPITOLUL 20 ╤В╨Р╨д CONCLUZIA VOLUMULUI II.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20.0_CAPITOLUL 20 ╤В╨Р╨д CONCLUZIA VOLUMULUI II.docx",
+        "sha256": "dd5318de5767531d17aca052471def3d7139798dd140cd8640448374e281f00d",
+        "size": 17058
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 44,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20_CONCLUZIA VOLUMULUI II ╚ШI CRITERIILE DE TRECERE LA VOLUMUL III.docx",
+        "compressed_size": 13943,
+        "crc32": "2a5d5602",
+        "filename": "20_CONCLUZIA VOLUMULUI II ╚ШI CRITERIILE DE TRECERE LA VOLUMUL III.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "02_PRODUS & TEHNOLOGIE/20_CONCLUZIA VOLUMULUI II ╚ШI CRITERIILE DE TRECERE LA VOLUMUL III.docx",
+        "sha256": "8993f4fd2abada0db9b405fe506388609d422e96c26522c7ebd801792bf96e5a",
+        "uncompressed_size": 16705
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "20_CONCLUZIA VOLUMULUI II тХЪ╨иI CRITERIILE DE TRECERE LA VOLUMUL III.docx",
+        "relative_path": "02_PRODUS & TEHNOLOGIE/20_CONCLUZIA VOLUMULUI II тХЪ╨иI CRITERIILE DE TRECERE LA VOLUMUL III.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/02_PRODUS & TEHNOLOGIE/20_CONCLUZIA VOLUMULUI II тХЪ╨иI CRITERIILE DE TRECERE LA VOLUMUL III.docx",
+        "sha256": "8993f4fd2abada0db9b405fe506388609d422e96c26522c7ebd801792bf96e5a",
+        "size": 16705
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 6,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/21_MODELUL ECONOMIC COMPLET DROPi.docx",
+        "compressed_size": 16768,
+        "crc32": "402a3ff2",
+        "filename": "21_MODELUL ECONOMIC COMPLET DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/21_MODELUL ECONOMIC COMPLET DROPi.docx",
+        "sha256": "f1e01758aec675a2322fff7d0b0c1e294d79735421f8ba92dc8cea2b822b17e8",
+        "uncompressed_size": 19550
+      },
+      "classification": "exact_path_and_content_match",
+      "local": {
+        "filename": "21_MODELUL ECONOMIC COMPLET DROPi.docx",
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/21_MODELUL ECONOMIC COMPLET DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/21_MODELUL ECONOMIC COMPLET DROPi.docx",
+        "sha256": "f1e01758aec675a2322fff7d0b0c1e294d79735421f8ba92dc8cea2b822b17e8",
+        "size": 19550
+      },
+      "mapping_basis": "exact_relative_path"
+    },
+    {
+      "archive": {
+        "archive_index": 7,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/22_GO-TO-MARKET FILIPINE _ZONA 0.docx",
+        "compressed_size": 16315,
+        "crc32": "ce08d147",
+        "filename": "22_GO-TO-MARKET FILIPINE _ZONA 0.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/22_GO-TO-MARKET FILIPINE _ZONA 0.docx",
+        "sha256": "60b9a6ffa79f7637c4854c0c5faef359c3ce6efbc8ba30331a6d57e2873fd8f2",
+        "uncompressed_size": 19137
+      },
+      "classification": "exact_path_and_content_match",
+      "local": {
+        "filename": "22_GO-TO-MARKET FILIPINE _ZONA 0.docx",
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/22_GO-TO-MARKET FILIPINE _ZONA 0.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/22_GO-TO-MARKET FILIPINE _ZONA 0.docx",
+        "sha256": "60b9a6ffa79f7637c4854c0c5faef359c3ce6efbc8ba30331a6d57e2873fd8f2",
+        "size": 19137
+      },
+      "mapping_basis": "exact_relative_path"
+    },
+    {
+      "archive": {
+        "archive_index": 8,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/23_COMPLIANCE MULTI-╚ЪAR─В ╚ШI ADAPTAREA LA UNIUNEA EUROPEAN─В _EASA.docx",
+        "compressed_size": 15722,
+        "crc32": "01b3322c",
+        "filename": "23_COMPLIANCE MULTI-╚ЪAR─В ╚ШI ADAPTAREA LA UNIUNEA EUROPEAN─В _EASA.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/23_COMPLIANCE MULTI-╚ЪAR─В ╚ШI ADAPTAREA LA UNIUNEA EUROPEAN─В _EASA.docx",
+        "sha256": "008450d2076ce8e9bdc32b0c61ba34ea7d1db9cffb3b002ea916582c67db5633",
+        "uncompressed_size": 18545
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "23_COMPLIANCE MULTI-тХЪ╨кARтФА╨Т тХЪ╨иI ADAPTAREA LA UNIUNEA EUROPEANтФА╨Т _EASA.docx",
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/23_COMPLIANCE MULTI-тХЪ╨кARтФА╨Т тХЪ╨иI ADAPTAREA LA UNIUNEA EUROPEANтФА╨Т _EASA.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/23_COMPLIANCE MULTI-тХЪ╨кARтФА╨Т тХЪ╨иI ADAPTAREA LA UNIUNEA EUROPEANтФА╨Т _EASA.docx",
+        "sha256": "008450d2076ce8e9bdc32b0c61ba34ea7d1db9cffb3b002ea916582c67db5633",
+        "size": 18545
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 9,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/24_FRANCIZARE, OPERATORI ZONALI ╚ШI REPLICARE GLOBAL─В.docx",
+        "compressed_size": 16173,
+        "crc32": "d03e2e54",
+        "filename": "24_FRANCIZARE, OPERATORI ZONALI ╚ШI REPLICARE GLOBAL─В.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/24_FRANCIZARE, OPERATORI ZONALI ╚ШI REPLICARE GLOBAL─В.docx",
+        "sha256": "28e1fb91adc91876d3446f4fdcb03682cfbba70a9db63be7486a06edd4782b16",
+        "uncompressed_size": 18999
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "24_FRANCIZARE, OPERATORI ZONALI тХЪ╨иI REPLICARE GLOBALтФА╨Т.docx",
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/24_FRANCIZARE, OPERATORI ZONALI тХЪ╨иI REPLICARE GLOBALтФА╨Т.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/24_FRANCIZARE, OPERATORI ZONALI тХЪ╨иI REPLICARE GLOBALтФА╨Т.docx",
+        "sha256": "28e1fb91adc91876d3446f4fdcb03682cfbba70a9db63be7486a06edd4782b16",
+        "size": 18999
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 10,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/25_STRATEGIA DE INVESTI╚ЪII ╚ШI FINAN╚ЪARE DROPi.docx",
+        "compressed_size": 16301,
+        "crc32": "a0d13675",
+        "filename": "25_STRATEGIA DE INVESTI╚ЪII ╚ШI FINAN╚ЪARE DROPi.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/25_STRATEGIA DE INVESTI╚ЪII ╚ШI FINAN╚ЪARE DROPi.docx",
+        "sha256": "b988aa86d1334b32a835bce24413878ccde5c7ca5b706be7f86421c498971fd4",
+        "uncompressed_size": 19086
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "25_STRATEGIA DE INVESTIтХЪ╨кII тХЪ╨иI FINANтХЪ╨кARE DROPi.docx",
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/25_STRATEGIA DE INVESTIтХЪ╨кII тХЪ╨иI FINANтХЪ╨кARE DROPi.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/25_STRATEGIA DE INVESTIтХЪ╨кII тХЪ╨иI FINANтХЪ╨кARE DROPi.docx",
+        "sha256": "b988aa86d1334b32a835bce24413878ccde5c7ca5b706be7f86421c498971fd4",
+        "size": 19086
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 11,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/26_ROADMAP 0тАУ36 LUNI _EXECU╚ЪIE DISCIPLINAT─В.docx",
+        "compressed_size": 16373,
+        "crc32": "ee2da2b2",
+        "filename": "26_ROADMAP 0тАУ36 LUNI _EXECU╚ЪIE DISCIPLINAT─В.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/26_ROADMAP 0тАУ36 LUNI _EXECU╚ЪIE DISCIPLINAT─В.docx",
+        "sha256": "494db0c89cb824bca2e6a953f8b9d422712a04848b96689f9c84766ed96e3270",
+        "uncompressed_size": 19164
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "26_ROADMAP 0╤В╨Р╨г36 LUNI _EXECUтХЪ╨кIE DISCIPLINATтФА╨Т.docx",
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/26_ROADMAP 0╤В╨Р╨г36 LUNI _EXECUтХЪ╨кIE DISCIPLINATтФА╨Т.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/26_ROADMAP 0╤В╨Р╨г36 LUNI _EXECUтХЪ╨кIE DISCIPLINATтФА╨Т.docx",
+        "sha256": "494db0c89cb824bca2e6a953f8b9d422712a04848b96689f9c84766ed96e3270",
+        "size": 19164
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 12,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/27_SCENARII DE EXIT ╚ШI VIITORUL DROPi _REALIST_ NU SPECULATIV.docx",
+        "compressed_size": 15529,
+        "crc32": "42074deb",
+        "filename": "27_SCENARII DE EXIT ╚ШI VIITORUL DROPi _REALIST_ NU SPECULATIV.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/27_SCENARII DE EXIT ╚ШI VIITORUL DROPi _REALIST_ NU SPECULATIV.docx",
+        "sha256": "2f02455a374f52eea9d75adde3897150dafcb2b38d1956e17aa5b7238a2f7009",
+        "uncompressed_size": 18341
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "27_SCENARII DE EXIT тХЪ╨иI VIITORUL DROPi _REALIST_ NU SPECULATIV.docx",
+        "relative_path": "03_BUSINESS, LEGAL & SCALARE/27_SCENARII DE EXIT тХЪ╨иI VIITORUL DROPi _REALIST_ NU SPECULATIV.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/03_BUSINESS, LEGAL & SCALARE/27_SCENARII DE EXIT тХЪ╨иI VIITORUL DROPi _REALIST_ NU SPECULATIV.docx",
+        "sha256": "2f02455a374f52eea9d75adde3897150dafcb2b38d1956e17aa5b7238a2f7009",
+        "size": 18341
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 18,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/00.0_DROPi тАФ OFFICIAL PITCH DECK.docx",
+        "compressed_size": 15416,
+        "crc32": "52adb077",
+        "filename": "00.0_DROPi тАФ OFFICIAL PITCH DECK.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "04_PITCH/00.0_DROPi тАФ OFFICIAL PITCH DECK.docx",
+        "sha256": "0036339817c71f58494fbc4fa4952f17ed0bd3a1c9b4b018a7b8e15845bf29b3",
+        "uncompressed_size": 18170
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "00.0_DROPi ╤В╨Р╨д OFFICIAL PITCH DECK.docx",
+        "relative_path": "04_PITCH/00.0_DROPi ╤В╨Р╨д OFFICIAL PITCH DECK.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/04_PITCH/00.0_DROPi ╤В╨Р╨д OFFICIAL PITCH DECK.docx",
+        "sha256": "0036339817c71f58494fbc4fa4952f17ed0bd3a1c9b4b018a7b8e15845bf29b3",
+        "size": 18170
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 19,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/00.1_DROPi тАФ OFFICIAL SPEAKER NOTES (ENGLISH).docx",
+        "compressed_size": 15336,
+        "crc32": "7a510679",
+        "filename": "00.1_DROPi тАФ OFFICIAL SPEAKER NOTES (ENGLISH).docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "04_PITCH/00.1_DROPi тАФ OFFICIAL SPEAKER NOTES (ENGLISH).docx",
+        "sha256": "08dba02be32732dfef456b049a89b208fb7cca31837ec4d1cc73b6b3b61b4de3",
+        "uncompressed_size": 18086
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "00.1_DROPi ╤В╨Р╨д OFFICIAL SPEAKER NOTES (ENGLISH).docx",
+        "relative_path": "04_PITCH/00.1_DROPi ╤В╨Р╨д OFFICIAL SPEAKER NOTES (ENGLISH).docx",
+        "repository_path": "canonical/docs/00_MasterPlan/04_PITCH/00.1_DROPi ╤В╨Р╨д OFFICIAL SPEAKER NOTES (ENGLISH).docx",
+        "sha256": "08dba02be32732dfef456b049a89b208fb7cca31837ec4d1cc73b6b3b61b4de3",
+        "size": 18086
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 14,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/01.0_DROPi тАФ PITCH DECK OFICIAL_RO.docx",
+        "compressed_size": 15688,
+        "crc32": "d9ed7c5c",
+        "filename": "01.0_DROPi тАФ PITCH DECK OFICIAL_RO.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "04_PITCH/01.0_DROPi тАФ PITCH DECK OFICIAL_RO.docx",
+        "sha256": "0ef250c950c74109b5200abc4bfba33cceeb1dff27ba2aedec1507b9ddf8ab42",
+        "uncompressed_size": 18433
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "01.0_DROPi ╤В╨Р╨д PITCH DECK OFICIAL_RO.docx",
+        "relative_path": "04_PITCH/01.0_DROPi ╤В╨Р╨д PITCH DECK OFICIAL_RO.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/04_PITCH/01.0_DROPi ╤В╨Р╨д PITCH DECK OFICIAL_RO.docx",
+        "sha256": "0ef250c950c74109b5200abc4bfba33cceeb1dff27ba2aedec1507b9ddf8ab42",
+        "size": 18433
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 20,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/01.1_DROPi тАФ SPEAKER NOTES OFICIALE (ROM├ВN─В).docx",
+        "compressed_size": 15220,
+        "crc32": "29af6dd4",
+        "filename": "01.1_DROPi тАФ SPEAKER NOTES OFICIALE (ROM├ВN─В).docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "04_PITCH/01.1_DROPi тАФ SPEAKER NOTES OFICIALE (ROM├ВN─В).docx",
+        "sha256": "cfe6f295e2fa418010ac7bd1a3d724cf72962ee1f49063e83ec0d38bfbe38f8f",
+        "uncompressed_size": 17971
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "01.1_DROPi ╤В╨Р╨д SPEAKER NOTES OFICIALE (ROMтФЬ╨ТNтФА╨Т).docx",
+        "relative_path": "04_PITCH/01.1_DROPi ╤В╨Р╨д SPEAKER NOTES OFICIALE (ROMтФЬ╨ТNтФА╨Т).docx",
+        "repository_path": "canonical/docs/00_MasterPlan/04_PITCH/01.1_DROPi ╤В╨Р╨д SPEAKER NOTES OFICIALE (ROMтФЬ╨ТNтФА╨Т).docx",
+        "sha256": "cfe6f295e2fa418010ac7bd1a3d724cf72962ee1f49063e83ec0d38bfbe38f8f",
+        "size": 17971
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 15,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/02.0_DROPi тАФ OPISYAL NA PITCH DECK_TL.docx",
+        "compressed_size": 15810,
+        "crc32": "edf1c5bb",
+        "filename": "02.0_DROPi тАФ OPISYAL NA PITCH DECK_TL.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "04_PITCH/02.0_DROPi тАФ OPISYAL NA PITCH DECK_TL.docx",
+        "sha256": "f56579e10ec29a7e0302d01c19426a0bbb67933e70681b8cb0916ac4e3f056a1",
+        "uncompressed_size": 18556
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "02.0_DROPi ╤В╨Р╨д OPISYAL NA PITCH DECK_TL.docx",
+        "relative_path": "04_PITCH/02.0_DROPi ╤В╨Р╨д OPISYAL NA PITCH DECK_TL.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/04_PITCH/02.0_DROPi ╤В╨Р╨д OPISYAL NA PITCH DECK_TL.docx",
+        "sha256": "f56579e10ec29a7e0302d01c19426a0bbb67933e70681b8cb0916ac4e3f056a1",
+        "size": 18556
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 17,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/02.1_DROPi тАФ SPEAKER NOTES (TAGALOG)_Para sa Opisyal na Pitch Deck.docx",
+        "compressed_size": 15054,
+        "crc32": "bed9afbd",
+        "filename": "02.1_DROPi тАФ SPEAKER NOTES (TAGALOG)_Para sa Opisyal na Pitch Deck.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "04_PITCH/02.1_DROPi тАФ SPEAKER NOTES (TAGALOG)_Para sa Opisyal na Pitch Deck.docx",
+        "sha256": "c5bf74d6e8be2c28c2e432d5f987858e2f2dfe7015637373f9102355e41962a7",
+        "uncompressed_size": 17802
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "02.1_DROPi ╤В╨Р╨д SPEAKER NOTES (TAGALOG)_Para sa Opisyal na Pitch Deck.docx",
+        "relative_path": "04_PITCH/02.1_DROPi ╤В╨Р╨д SPEAKER NOTES (TAGALOG)_Para sa Opisyal na Pitch Deck.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/04_PITCH/02.1_DROPi ╤В╨Р╨д SPEAKER NOTES (TAGALOG)_Para sa Opisyal na Pitch Deck.docx",
+        "sha256": "c5bf74d6e8be2c28c2e432d5f987858e2f2dfe7015637373f9102355e41962a7",
+        "size": 17802
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 16,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/04_PITCH/03.0_DROPi тАФ OFFICIAL LGU -- GOVERNMENT PITCH.docx",
+        "compressed_size": 15161,
+        "crc32": "1d31d69f",
+        "filename": "03.0_DROPi тАФ OFFICIAL LGU -- GOVERNMENT PITCH.docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "04_PITCH/03.0_DROPi тАФ OFFICIAL LGU -- GOVERNMENT PITCH.docx",
+        "sha256": "7729be7c8ba2089650a245b88de88d0efb95a5ba0d623b762e1ca6a5fbc7a056",
+        "uncompressed_size": 17912
+      },
+      "classification": "content_identical_path_encoding_variant",
+      "local": {
+        "filename": "03.0_DROPi ╤В╨Р╨д OFFICIAL LGU -- GOVERNMENT PITCH.docx",
+        "relative_path": "04_PITCH/03.0_DROPi ╤В╨Р╨д OFFICIAL LGU -- GOVERNMENT PITCH.docx",
+        "repository_path": "canonical/docs/00_MasterPlan/04_PITCH/03.0_DROPi ╤В╨Р╨д OFFICIAL LGU -- GOVERNMENT PITCH.docx",
+        "sha256": "7729be7c8ba2089650a245b88de88d0efb95a5ba0d623b762e1ca6a5fbc7a056",
+        "size": 17912
+      },
+      "mapping_basis": "unique_sha256"
+    },
+    {
+      "archive": {
+        "archive_index": 4,
+        "archive_path": "04/DROPI_CANONICAL/01_CANONICAL_DOCS/00_MasterPlan/Masterplan Dropi ( detaliat).docx",
+        "compressed_size": 195613,
+        "crc32": "ffeec859",
+        "filename": "Masterplan Dropi ( detaliat).docx",
+        "read_error": null,
+        "readable": true,
+        "relative_path": "Masterplan Dropi ( detaliat).docx",
+        "sha256": "7b5d6f64670b0a49491be72f6c9fc17eab09ee7ce551e34331b7d7f7941b686e",
+        "uncompressed_size": 214121
+      },
+      "classification": "exact_path_and_content_match",
+      "local": {
+        "filename": "Masterplan Dropi ( detaliat).docx",
+        "relative_path": "Masterplan Dropi ( detaliat).docx",
+        "repository_path": "canonical/docs/00_MasterPlan/Masterplan Dropi ( detaliat).docx",
+        "sha256": "7b5d6f64670b0a49491be72f6c9fc17eab09ee7ce551e34331b7d7f7941b686e",
+        "size": 214121
+      },
+      "mapping_basis": "exact_relative_path"
+    }
+  ],
+  "missing_archive_sources": [],
+  "schema_version": 2,
+  "summary": {
+    "additional_local_file_count": 0,
+    "ambiguous_hash_group_count": 0,
+    "archive_docx_count": 147,
+    "archive_duplicate_path_count": 0,
+    "archive_unreadable_count": 0,
+    "content_identical_path_encoding_variant_count": 138,
+    "exact_path_and_content_match_count": 9,
+    "local_docx_count": 147,
+    "local_duplicate_path_count": 0,
+    "mapped_archive_count": 147,
+    "mapped_local_count": 147,
+    "mapping_count": 147,
+    "missing_archive_source_count": 0,
+    "same_path_divergent_content_count": 0
+  }
+}
