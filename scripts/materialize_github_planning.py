@@ -275,7 +275,10 @@ class GitHubClient:
         return result.stdout.strip()
 
     def _gh_api(self, path: str, method: str = "GET", data: dict[str, Any] | None = None) -> Any:
-        args = ["api", f"/repos/{self.repo}/{path.lstrip('/')}"]
+        base_path = f"/repos/{self.repo}"
+        suffix = path.lstrip("/")
+        endpoint = base_path if not suffix else f"{base_path}/{suffix}"
+        args = ["api", endpoint]
         if method != "GET":
             args.extend(["--method", method])
         payload = None
