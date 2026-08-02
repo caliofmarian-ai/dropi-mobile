@@ -1,0 +1,101 @@
+{
+  "meta": {
+    "mode": "apply",
+    "dry_run": false,
+    "plan_version": "1.0.0",
+    "archive_sha256": "82a6015b8c968645307e36c8e4aa0351515f50333c08a6c5402a7819b7b747e5",
+    "deterministic_output": true
+  },
+  "apply": {
+    "labels": {
+      "summary": {
+        "planned": 212,
+        "existing": 0,
+        "created": 0,
+        "updated": 0,
+        "skipped": 0,
+        "failed": 1,
+        "verified": 0
+      },
+      "entries": []
+    },
+    "milestones": {
+      "summary": {
+        "planned": 7,
+        "existing": 0,
+        "created": 0,
+        "updated": 0,
+        "skipped": 0,
+        "failed": 1,
+        "verified": 0
+      },
+      "entries": []
+    },
+    "issues": {
+      "summary": {
+        "planned": 228,
+        "existing": 0,
+        "created": 0,
+        "updated": 0,
+        "skipped": 0,
+        "failed": 1,
+        "verified": 0
+      },
+      "entries": [],
+      "issue_type_summary": {}
+    },
+    "issue_number_mappings": {},
+    "milestone_number_mappings": {},
+    "label_names": [],
+    "failed_operations": [
+      "gh command failed: gh api /repos/caliofmarian-ai/dropi-mobile/\nstdout: Blocked by DNS monitoring proxy\nstderr: gh: HTTP 403\n"
+    ]
+  },
+  "first_verify": {
+    "passed": false,
+    "failures": [
+      "gh command failed: gh api /repos/caliofmarian-ai/dropi-mobile/\nstdout: Blocked by DNS monitoring proxy\nstderr: gh: HTTP 403\n"
+    ]
+  },
+  "summary": {
+    "labels": {
+      "planned": 212,
+      "existing": 0,
+      "created": 0,
+      "updated": 0,
+      "skipped": 0,
+      "failed": 1,
+      "verified": 0
+    },
+    "milestones": {
+      "planned": 7,
+      "existing": 0,
+      "created": 0,
+      "updated": 0,
+      "skipped": 0,
+      "failed": 1,
+      "verified": 0
+    },
+    "issues": {
+      "planned": 228,
+      "existing": 0,
+      "created": 0,
+      "updated": 0,
+      "skipped": 0,
+      "failed": 1,
+      "verified": 0
+    },
+    "issue_types": {},
+    "idempotency": {
+      "duplicate_labels_created": 0,
+      "duplicate_milestones_created": 0,
+      "duplicate_issues_created": 0,
+      "passed": false
+    }
+  },
+  "verify_result": {
+    "first": false,
+    "second": null,
+    "final": false
+  }
+}

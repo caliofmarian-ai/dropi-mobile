@@ -1,0 +1,706 @@
+meta:
+  version: 1.0.0
+  created_at: '2026-08-02T11:08:44Z'
+  repo: caliofmarian-ai/dropi-mobile
+  archive_sha256: 82a6015b8c968645307e36c8e4aa0351515f50333c08a6c5402a7819b7b747e5
+  canonical_sources_inspected: 47
+  conflicts_found: 3
+  note: Generated from complete canonical corpus inspection
+milestones:
+- id: M0
+  title: 'M0: Canonical Recovery & Certification'
+  description: Recover, certify, and index all canonical source materials. CAN-001–CAN-008 completed.
+  state: closed
+- id: M1
+  title: 'M1: Application Core Foundation'
+  description: 'Authentication, accounts, data persistence, order management, marketplace C1, payments, real-time. Entry:
+    M0 complete. Exit: All L2 phases implemented and tested.'
+  state: open
+- id: M2
+  title: 'M2: Audit Core Activation'
+  description: 'Complete audit logging, GDPR compliance, operational traceability from day 1. Entry: M1 core auth done. Exit:
+    All L6 phases verified.'
+  state: open
+- id: M3
+  title: 'M3: Logic Core — AI/DSS'
+  description: '29 AI agent framework, C1/C2/C3/Admin agents, eligibility engine, route optimization. Entry: M1+M2 complete.
+    Exit: 1-month simulation passed.'
+  state: open
+- id: M4
+  title: 'M4: Physical Core — DronePort'
+  description: 'DronePort digital management, multimodal transfer, battery management, safety points. Entry: M3 complete.
+    Exit: DronePort ops digital twin functional.'
+  state: open
+- id: M5
+  title: 'M5: Operational Core — Supervised Delivery'
+  description: 'Delivery execution engine, STOP/FALLBACK, GPS/geofencing, fleet management. Entry: M4 complete. Exit: Live
+    Zone 0 pilot delivery possible.'
+  state: open
+- id: M6
+  title: 'M6: Public Front — Website & Launch'
+  description: 'Marketing website, investor pitch assets, public-facing DROPi brand presence. Entry: M5 complete. Exit: Zone
+    0 launch ready.'
+  state: open
+label_taxonomy:
+  type:
+  - name: type:program
+    color: '#0075ca'
+    description: Program-level planning and orchestration item
+  - name: type:phase
+    color: '#0075ca'
+    description: Phase-level roadmap control item
+  - name: type:milestone
+    color: '#0075ca'
+    description: Milestone-level delivery marker
+  - name: type:epic
+    color: '#0075ca'
+    description: Epic grouping of related capability work
+  - name: type:batch
+    color: '#0075ca'
+    description: Batch grouping for implementation sequencing
+  - name: type:implementation
+    color: '#0075ca'
+    description: Executable implementation task
+  - name: type:design
+    color: '#0075ca'
+    description: Design and architecture definition task
+  - name: type:audit
+    color: '#0075ca'
+    description: Audit or audit follow-up task
+  - name: type:documentation
+    color: '#0075ca'
+    description: Documentation materialization or maintenance task
+  - name: type:verification
+    color: '#0075ca'
+    description: Verification and coverage confirmation task
+  - name: type:testing
+    color: '#0075ca'
+    description: Testing-specific execution task
+  - name: type:security
+    color: '#0075ca'
+    description: Security engineering or hardening task
+  - name: type:compliance
+    color: '#0075ca'
+    description: Compliance, privacy, or legal task
+  - name: type:operations
+    color: '#0075ca'
+    description: Operational readiness or execution task
+  - name: type:owner-decision
+    color: '#0075ca'
+    description: Founder or owner decision required
+  - name: type:canonical-resolution
+    color: '#0075ca'
+    description: Canonical conflict resolution task
+  - name: type:migration
+    color: '#0075ca'
+    description: Migration or data transition task
+  - name: type:release
+    color: '#0075ca'
+    description: Release, distribution, or launch task
+  status:
+  - name: status:ready
+    color: '#e4e669'
+    description: Ready to be executed in the planning queue
+  - name: status:in-progress
+    color: '#e4e669'
+    description: Work is actively underway
+  - name: status:blocked
+    color: '#e4e669'
+    description: Blocked by dependency or unresolved decision
+  - name: status:needs-design
+    color: '#e4e669'
+    description: Needs design clarification before implementation
+  - name: status:needs-audit
+    color: '#e4e669'
+    description: Needs audit or verification before progression
+  - name: status:needs-owner-decision
+    color: '#e4e669'
+    description: Requires founder decision before execution
+  - name: status:future
+    color: '#e4e669'
+    description: Planned for a later roadmap window
+  - name: status:historical
+    color: '#e4e669'
+    description: Historical reference item preserved for traceability
+  - name: status:superseded
+    color: '#e4e669'
+    description: Superseded by a newer canonical direction
+  - name: status:done
+    color: '#e4e669'
+    description: Completed and verified
+  priority:
+  - name: priority:p0
+    color: '#d93f0b'
+    description: Critical priority
+  - name: priority:p1
+    color: '#d93f0b'
+    description: High priority
+  - name: priority:p2
+    color: '#d93f0b'
+    description: Medium priority
+  - name: priority:p3
+    color: '#d93f0b'
+    description: Low priority
+  risk:
+  - name: risk:critical
+    color: '#b60205'
+    description: Critical delivery or safety risk
+  - name: risk:high
+    color: '#b60205'
+    description: High architectural or operational risk
+  - name: risk:medium
+    color: '#b60205'
+    description: Manageable but material risk
+  - name: risk:low
+    color: '#b60205'
+    description: Low residual delivery risk
+  authority:
+  - name: authority:04-zip
+    color: '#0e8a16'
+    description: Grounded in the archived canonical ZIP corpus
+  - name: authority:active-canon
+    color: '#0e8a16'
+    description: Directly grounded in current canonical docs
+  - name: authority:blueprint
+    color: '#0e8a16'
+    description: Directly grounded in BLUEPRINT roadmap sources
+  - name: authority:implementation
+    color: '#0e8a16'
+    description: Grounded in observed repository implementation
+  - name: authority:conflicted
+    color: '#0e8a16'
+    description: Contains or resolves canonical conflicts
+  - name: authority:derived
+    color: '#0e8a16'
+    description: Derived planning artifact from inspected sources
+  platform:
+  - name: platform:web
+    color: '#5319e7'
+    description: Web surface or browser-facing experience
+  - name: platform:android
+    color: '#5319e7'
+    description: Android mobile delivery surface
+  - name: platform:backend
+    color: '#5319e7'
+    description: Backend service and server runtime
+  - name: platform:database
+    color: '#5319e7'
+    description: Database, schema, or persistence layer
+  - name: platform:infrastructure
+    color: '#5319e7'
+    description: Infrastructure, CI/CD, or environment work
+  - name: platform:drone
+    color: '#5319e7'
+    description: Drone-side or drone operations surface
+  - name: platform:ground-logistics
+    color: '#5319e7'
+    description: Ground fleet or logistics surface
+  - name: platform:operations
+    color: '#5319e7'
+    description: Operational control surface
+  domain:
+  - name: domain:auth
+    color: '#1d76db'
+    description: Authentication and identity domain
+  - name: domain:accounts
+    color: '#1d76db'
+    description: Account management and lifecycle domain
+  - name: domain:email-verification
+    color: '#1d76db'
+    description: Email verification domain
+  - name: domain:password-reset
+    color: '#1d76db'
+    description: Password reset and recovery domain
+  - name: domain:roles-permissions
+    color: '#1d76db'
+    description: Roles, permissions, and RBAC domain
+  - name: domain:marketplace
+    color: '#1d76db'
+    description: Marketplace business domain
+  - name: domain:product-catalog
+    color: '#1d76db'
+    description: Product catalog and listing domain
+  - name: domain:checkout
+    color: '#1d76db'
+    description: Checkout and cart domain
+  - name: domain:orders
+    color: '#1d76db'
+    description: Order lifecycle domain
+  - name: domain:p2p-parcels
+    color: '#1d76db'
+    description: Peer-to-peer parcel domain
+  - name: domain:delivery-selection
+    color: '#1d76db'
+    description: Delivery mode selection domain
+  - name: domain:ground-delivery
+    color: '#1d76db'
+    description: Ground delivery domain
+  - name: domain:van-delivery
+    color: '#1d76db'
+    description: Van delivery domain
+  - name: domain:drone-delivery
+    color: '#1d76db'
+    description: Drone delivery domain
+  - name: domain:weather-fallback
+    color: '#1d76db'
+    description: Weather-driven fallback domain
+  - name: domain:client-presence
+    color: '#1d76db'
+    description: Client presence and handoff rules domain
+  - name: domain:lockers
+    color: '#1d76db'
+    description: Locker or buffer storage domain
+  - name: domain:wallet
+    color: '#1d76db'
+    description: Wallet and balance domain
+  - name: domain:payments
+    color: '#1d76db'
+    description: Payments processing domain
+  - name: domain:commissions
+    color: '#1d76db'
+    description: Commission and payout domain
+  - name: domain:pricing
+    color: '#1d76db'
+    description: Pricing and fee policy domain
+  - name: domain:promotions
+    color: '#1d76db'
+    description: Promotions and incentives domain
+  - name: domain:notifications
+    color: '#1d76db'
+    description: Notifications domain
+  - name: domain:messaging
+    color: '#1d76db'
+    description: Messaging and communication domain
+  - name: domain:tracking
+    color: '#1d76db'
+    description: Tracking and telemetry visualization domain
+  - name: domain:maps
+    color: '#1d76db'
+    description: Maps and map UX domain
+  - name: domain:geolocation
+    color: '#1d76db'
+    description: Geolocation and device location domain
+  - name: domain:zones
+    color: '#1d76db'
+    description: Zone control and geographical segmentation domain
+  - name: domain:dispatch
+    color: '#1d76db'
+    description: Dispatch and assignment domain
+  - name: domain:routing
+    color: '#1d76db'
+    description: Routing and optimization domain
+  - name: domain:delivery-lifecycle
+    color: '#1d76db'
+    description: Delivery lifecycle orchestration domain
+  - name: domain:proof-of-delivery
+    color: '#1d76db'
+    description: Proof of delivery domain
+  - name: domain:incident-handling
+    color: '#1d76db'
+    description: Incident and emergency handling domain
+  - name: domain:audit-logs
+    color: '#1d76db'
+    description: Audit logging and traceability domain
+  - name: domain:observability
+    color: '#1d76db'
+    description: Observability and monitoring domain
+  - name: domain:analytics
+    color: '#1d76db'
+    description: Analytics and reporting domain
+  - name: domain:kpi
+    color: '#1d76db'
+    description: KPI definition and measurement domain
+  - name: domain:privacy
+    color: '#1d76db'
+    description: Privacy management domain
+  - name: domain:security
+    color: '#1d76db'
+    description: Security engineering domain
+  - name: domain:data-protection
+    color: '#1d76db'
+    description: Data protection and handling domain
+  - name: domain:legal-compliance
+    color: '#1d76db'
+    description: Legal and regulatory compliance domain
+  - name: domain:drone-compliance
+    color: '#1d76db'
+    description: Drone regulatory compliance domain
+  - name: domain:pilot-governance
+    color: '#1d76db'
+    description: Pilot onboarding and governance domain
+  - name: domain:partner-governance
+    color: '#1d76db'
+    description: Partner governance domain
+  - name: domain:operator-governance
+    color: '#1d76db'
+    description: Operational role governance domain
+  - name: domain:droneport
+    color: '#1d76db'
+    description: DronePort domain
+  - name: domain:drone-fleet
+    color: '#1d76db'
+    description: Drone fleet domain
+  - name: domain:ground-fleet
+    color: '#1d76db'
+    description: Ground fleet domain
+  - name: domain:maintenance
+    color: '#1d76db'
+    description: Maintenance domain
+  - name: domain:telemetry
+    color: '#1d76db'
+    description: Telemetry and sensor domain
+  - name: domain:autonomous-delivery
+    color: '#1d76db'
+    description: Autonomous or semi-autonomous delivery domain
+  - name: domain:ai-agents
+    color: '#1d76db'
+    description: AI agent organization domain
+  - name: domain:testing
+    color: '#1d76db'
+    description: Testing and QA domain
+  - name: domain:deployment
+    color: '#1d76db'
+    description: Deployment and publishing domain
+  - name: domain:mobile
+    color: '#1d76db'
+    description: Mobile client domain
+  - name: domain:web-app
+    color: '#1d76db'
+    description: Web application domain
+  - name: domain:api-backend
+    color: '#1d76db'
+    description: API backend domain
+  - name: domain:database-schema
+    color: '#1d76db'
+    description: Database schema domain
+  - name: domain:localization
+    color: '#1d76db'
+    description: Localization and language domain
+  - name: domain:support
+    color: '#1d76db'
+    description: Support operations domain
+  - name: domain:business-model
+    color: '#1d76db'
+    description: Business model domain
+  - name: domain:gtm
+    color: '#1d76db'
+    description: Go-to-market domain
+  - name: domain:franchise
+    color: '#1d76db'
+    description: Franchise and territory expansion domain
+  - name: domain:investment
+    color: '#1d76db'
+    description: Investment and investor readiness domain
+  - name: domain:roadmap
+    color: '#1d76db'
+    description: Roadmap governance domain
+  phase:
+  - name: phase:m0-canonical-recovery
+    color: '#006b75'
+    description: Canonical recovery and certification phase
+  - name: phase:m1-application-core
+    color: '#006b75'
+    description: Application Core foundation phase
+  - name: phase:m2-audit-core
+    color: '#006b75'
+    description: Audit Core activation phase
+  - name: phase:m3-logic-core
+    color: '#006b75'
+    description: Logic Core AI/DSS phase
+  - name: phase:m4-physical-core
+    color: '#006b75'
+    description: Physical Core DronePort phase
+  - name: phase:m5-operational-core
+    color: '#006b75'
+    description: Operational Core supervised delivery phase
+  - name: phase:m6-public-front
+    color: '#006b75'
+    description: Public Front launch phase
+  epic:
+  - name: epic:auth-accounts
+    color: '#f9d0c4'
+    description: Epic label for Auth & Accounts
+  - name: epic:data-persistence
+    color: '#f9d0c4'
+    description: Epic label for Data Persistence & Sync
+  - name: epic:order-management
+    color: '#f9d0c4'
+    description: Epic label for Order Management
+  - name: epic:marketplace-c1
+    color: '#f9d0c4'
+    description: Epic label for Marketplace C1
+  - name: epic:cos-c2
+    color: '#f9d0c4'
+    description: Epic label for COS C2
+  - name: epic:eoc-c3
+    color: '#f9d0c4'
+    description: Epic label for EOC C3
+  - name: epic:admin-operations
+    color: '#f9d0c4'
+    description: Epic label for Admin Operations
+  - name: epic:payments-wallet
+    color: '#f9d0c4'
+    description: Epic label for Payments & Wallet
+  - name: epic:realtime-notifications
+    color: '#f9d0c4'
+    description: Epic label for Real-Time & Notifications
+  - name: epic:audit-compliance
+    color: '#f9d0c4'
+    description: Epic label for Audit Logging
+  - name: epic:gdpr-privacy
+    color: '#f9d0c4'
+    description: Epic label for GDPR & Privacy
+  - name: epic:traceability
+    color: '#f9d0c4'
+    description: Epic label for Operational Traceability
+  - name: epic:ai-agents-framework
+    color: '#f9d0c4'
+    description: Epic label for AI Agents Framework
+  - name: epic:ai-agents-c1
+    color: '#f9d0c4'
+    description: Epic label for AI Agents C1
+  - name: epic:ai-agents-c2
+    color: '#f9d0c4'
+    description: Epic label for AI Agents C2
+  - name: epic:ai-agents-c3
+    color: '#f9d0c4'
+    description: Epic label for AI Agents C3
+  - name: epic:ai-agents-admin
+    color: '#f9d0c4'
+    description: Epic label for AI Agents Admin & Support
+  - name: epic:eligibility-engine
+    color: '#f9d0c4'
+    description: Epic label for Eligibility Engine & Route Optimization
+  - name: epic:droneport-management
+    color: '#f9d0c4'
+    description: Epic label for DronePort Management
+  - name: epic:multimodal-transfer
+    color: '#f9d0c4'
+    description: Epic label for Multimodal Transfer
+  - name: epic:battery-management
+    color: '#f9d0c4'
+    description: Epic label for Battery & Charging Management
+  - name: epic:safety-points
+    color: '#f9d0c4'
+    description: Epic label for Safety Points & Emergency Landing
+  - name: epic:delivery-execution
+    color: '#f9d0c4'
+    description: Epic label for Delivery Execution Engine
+  - name: epic:stop-fallback
+    color: '#f9d0c4'
+    description: Epic label for STOP & FALLBACK
+  - name: epic:gps-geofencing
+    color: '#f9d0c4'
+    description: Epic label for GPS & Geofencing
+  - name: epic:fleet-management
+    color: '#f9d0c4'
+    description: Epic label for Fleet Management
+  - name: epic:website-marketing
+    color: '#f9d0c4'
+    description: Epic label for Website Marketing
+  - name: epic:security-module
+    color: '#f9d0c4'
+    description: Epic label for Security Module
+  - name: epic:testing-qa
+    color: '#f9d0c4'
+    description: Epic label for Testing & QA
+  - name: epic:deployment-release
+    color: '#f9d0c4'
+    description: Epic label for Deployment & Release
+  batch:
+  - name: batch:b001
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-001
+  - name: batch:b002
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-002
+  - name: batch:b003
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-003
+  - name: batch:b004
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-004
+  - name: batch:b005
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-005
+  - name: batch:b006
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-006
+  - name: batch:b007
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-007
+  - name: batch:b008
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-008
+  - name: batch:b009
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-009
+  - name: batch:b010
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-010
+  - name: batch:b011
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-011
+  - name: batch:b012
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-012
+  - name: batch:b013
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-013
+  - name: batch:b014
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-014
+  - name: batch:b015
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-015
+  - name: batch:b016
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-016
+  - name: batch:b017
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-017
+  - name: batch:b018
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-018
+  - name: batch:b019
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-019
+  - name: batch:b020
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-020
+  - name: batch:b021
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-021
+  - name: batch:b022
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-022
+  - name: batch:b023
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-023
+  - name: batch:b024
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-024
+  - name: batch:b025
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-025
+  - name: batch:b026
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-026
+  - name: batch:b027
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-027
+  - name: batch:b028
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-028
+  - name: batch:b029
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-029
+  - name: batch:b030
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-030
+  - name: batch:b031
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-031
+  - name: batch:b032
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-032
+  - name: batch:b033
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-033
+  - name: batch:b034
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-034
+  - name: batch:b035
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-035
+  - name: batch:b036
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-036
+  - name: batch:b037
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-037
+  - name: batch:b038
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-038
+  - name: batch:b039
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-039
+  - name: batch:b040
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-040
+  - name: batch:b041
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-041
+  - name: batch:b042
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-042
+  - name: batch:b043
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-043
+  - name: batch:b044
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-044
+  - name: batch:b045
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-045
+  - name: batch:b046
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-046
+  - name: batch:b047
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-047
+  - name: batch:b048
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-048
+  - name: batch:b049
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-049
+  - name: batch:b050
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-050
+  - name: batch:b051
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-051
+  - name: batch:b052
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-052
+  - name: batch:b053
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-053
+  - name: batch:b054
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-054
+  - name: batch:b055
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-055
+  - name: batch:b056
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-056
+  - name: batch:b057
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-057
+  - name: batch:b058
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-058
+  - name: batch:b059
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-059
+  - name: batch:b060
+    color: '#e99695'
+    description: Batch label for delivery batch BATCH-060
+issue_summary:
+  total: 228
+  by_type:
+    program: 1
+    phase: 6
+    epic: 30
+    batch: 60
+    implementation: 120
+    owner-decision: 5
+    canonical-resolution: 3
+    audit: 1
+    verification: 1
+    documentation: 1
+  notes:
+  - Issue bodies are intentionally omitted from YAML to keep the summary material manageable.
+  - 'Closed historical issues #42-#50 (CAN-001–CAN-008) are preserved outside this planned creation set.'
