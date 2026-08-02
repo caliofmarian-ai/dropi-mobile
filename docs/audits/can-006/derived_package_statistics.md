@@ -107,13 +107,14 @@ Package control documents (explicitly labelled in CANONICAL_MANIFEST.md):
 | CLAIM-001 | `DROPi_Canonical_Reference/AI_CANONICAL_REFERENCE_AUDIT_REPORT.md` | 199 | total_files_in_package_including_package_control_docs | 217 | **stale** |
 | CLAIM-002 | `DROPi_Canonical_Reference/AI_CANONICAL_REFERENCE_AUDIT_REPORT.md` | 195 | source_document_count_in_final_package | 213 | **stale** |
 | CLAIM-003 | `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md` | 217 | total_files_packaged | 217 | **current_exact** |
-| CLAIM-004 | `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md` | 52 | canonical_markdown_document_count | — | **contradictory** |
-| CLAIM-005 | `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md` | 147 | historical_docx_document_count | — | **contradictory** |
-| CLAIM-006 | `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md` | 18 | recovered_zip_only_markdown_count | — | **contradictory** |
+| CLAIM-004 | `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md` | 52 | canonical_markdown_document_count | — | **ambiguous_metric** |
+| CLAIM-005 | `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md` | 147 | historical_docx_document_count | 147 | **current_exact** |
+| CLAIM-006 | `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md` | 18 | recovered_zip_only_markdown_count | — | **ambiguous_metric** |
 | CLAIM-007 | `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md` | 4 | package_control_document_count | 4 | **current_exact** |
 | CLAIM-008 | `canonical/SESSION_HANDOVER.md` | 217 | dropi_canonical_reference_file_count | 217 | **current_exact** |
 | CLAIM-009 | `canonical/SESSION_HANDOVER.md` | 199 | total_files_in_package_at_earlier_state | 217 | **stale** |
 | CLAIM-010 | `DROPi_Canonical_Reference/09_Reference/Package_Metadata/inventory.json` | 195 | manifest_source_document_count | 213 | **stale** |
+| CLAIM-011 | `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md` | 221 | knowledge_index_breakdown_sum | 217 | **contradictory** |
 
 ## 9. Status of Each Claim
 
@@ -147,7 +148,7 @@ Package control documents (explicitly labelled in CANONICAL_MANIFEST.md):
 
 **Explanation**: Claimed value 217 matches the actual computed value for metric 'total_files_packaged'.
 
-### CLAIM-004 — CONTRADICTORY
+### CLAIM-004 — AMBIGUOUS_METRIC
 
 **Source**: `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md`
 
@@ -155,19 +156,19 @@ Package control documents (explicitly labelled in CANONICAL_MANIFEST.md):
 
 **Claimed**: 52  |  **Actual**: —
 
-**Explanation**: CANONICAL_KNOWLEDGE_INDEX.md breakdown rows (52 canonical md + 147 docx + 18 ZIP-only md + 4 package control = 221) do not sum to the stated total of 217. These subcategory counts are internally inconsistent; no safe actual value can be derived for this specific subcategory without resolving the document's internal contradiction.
+**Explanation**: Metric 'canonical_markdown_document_count' cannot be mapped to a single unambiguous computed value given the evidence available; subcategory definitions in the source document are not independently verifiable without additional authorial context.
 
-### CLAIM-005 — CONTRADICTORY
+### CLAIM-005 — CURRENT_EXACT
 
 **Source**: `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md`
 
 **Context**: | Historical `.docx` documents (from 04.zip masterplan) | 147 |
 
-**Claimed**: 147  |  **Actual**: —
+**Claimed**: 147  |  **Actual**: 147
 
-**Explanation**: CANONICAL_KNOWLEDGE_INDEX.md breakdown rows (52 canonical md + 147 docx + 18 ZIP-only md + 4 package control = 221) do not sum to the stated total of 217. These subcategory counts are internally inconsistent; no safe actual value can be derived for this specific subcategory without resolving the document's internal contradiction.
+**Explanation**: Claimed value 147 matches the independently computed package extension count: counts_by_extension[".docx"] = 147. The individual DOCX claim is confirmed by the actual package file scan.
 
-### CLAIM-006 — CONTRADICTORY
+### CLAIM-006 — AMBIGUOUS_METRIC
 
 **Source**: `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md`
 
@@ -175,7 +176,7 @@ Package control documents (explicitly labelled in CANONICAL_MANIFEST.md):
 
 **Claimed**: 18  |  **Actual**: —
 
-**Explanation**: CANONICAL_KNOWLEDGE_INDEX.md breakdown rows (52 canonical md + 147 docx + 18 ZIP-only md + 4 package control = 221) do not sum to the stated total of 217. These subcategory counts are internally inconsistent; no safe actual value can be derived for this specific subcategory without resolving the document's internal contradiction.
+**Explanation**: Metric 'recovered_zip_only_markdown_count' cannot be mapped to a single unambiguous computed value given the evidence available; subcategory definitions in the source document are not independently verifiable without additional authorial context.
 
 ### CLAIM-007 — CURRENT_EXACT
 
@@ -216,6 +217,16 @@ Package control documents (explicitly labelled in CANONICAL_MANIFEST.md):
 **Claimed**: 195  |  **Actual**: 213
 
 **Explanation**: Claimed value 195 does not match the actual computed value of 213 for metric 'manifest_source_document_count'. The claim appears to have been accurate at an earlier state of the package and has not been updated to reflect the current 213 files.
+
+### CLAIM-011 — CONTRADICTORY
+
+**Source**: `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md`
+
+**Context**: Component breakdown: 52 canonical md + 147 docx + 18 ZIP-only md + 4 package control = 221 (stated package total: 217)
+
+**Claimed**: 221  |  **Actual**: 217
+
+**Explanation**: CANONICAL_KNOWLEDGE_INDEX.md states a package total of 217 files, but the four component breakdown rows sum to 221 (52 canonical md + 147 docx + 18 ZIP-only md + 4 package control). The component breakdown exceeds the stated total by 4.
 
 ## 10. Reconciliation
 
@@ -281,6 +292,16 @@ Files in actual package but absent from manifest:
 - Breakdown status: **contradictory**
 
 The KI total of 217 matches the actual file count. However, the four breakdown rows sum to 221, not 217. The breakdown is internally inconsistent.
+
+### 10.3a Knowledge-Index Breakdown Sum (CLAIM-011)
+
+- Source: `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md`
+
+- Claim identifier: **CLAIM-011**
+
+- Claimed component sum: **221**  |  Stated package total: **217**  |  Status: **contradictory**
+
+The component breakdown (52 canonical md + 147 docx + 18 ZIP-only md + 4 package control = 221) exceeds the stated package total of 217 by 4. Individual component claims must be evaluated against their own independently reproducible metric rather than against this inconsistent sum.
 
 ### 10.4 Audit Report (AI_CANONICAL_REFERENCE_AUDIT_REPORT.md)
 

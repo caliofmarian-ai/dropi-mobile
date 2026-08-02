@@ -525,5 +525,111 @@ class TestSchemaCompleteness(unittest.TestCase):
                 )
 
 
+class TestClaimIndependence(unittest.TestCase):
+    """Tests 23–27: per-claim correctness and independent assessment."""
+
+    def _get_claim(self, report: dict, claim_id: str) -> dict:
+        for c in report["statistical_claims"]:
+            if c["claim_identifier"] == claim_id:
+                return c
+        self.fail(f"Claim {claim_id} not found in statistical_claims.")
+        raise AssertionError  # unreachable; satisfies type checker
+
+    def test_23_claim_005_docx_is_current_exact(self) -> None:
+        """CLAIM-005: 147 DOCX documents is current_exact with actual_value 147."""
+        report = load_report()
+        c = self._get_claim(report, "CLAIM-005")
+        self.assertEqual(
+            c["status"],
+            "current_exact",
+            f"CLAIM-005 status should be current_exact, got {c['status']}.",
+        )
+        self.assertEqual(
+            c["actual_value"],
+            147,
+            f"CLAIM-005 actual_value should be 147, got {c['actual_value']}.",
+        )
+
+    def test_24_knowledge_index_breakdown_sum_is_contradictory(self) -> None:
+        """CLAIM-011: knowledge_index_breakdown_sum (221) contradicts stated total (217)."""
+        report = load_report()
+        c = self._get_claim(report, "CLAIM-011")
+        self.assertEqual(
+            c["status"],
+            "contradictory",
+            f"CLAIM-011 status should be contradictory, got {c['status']}.",
+        )
+        self.assertEqual(c["claimed_value"], 221)
+        self.assertEqual(c["actual_value"], 217)
+        self.assertEqual(c["claimed_metric"], "knowledge_index_breakdown_sum")
+
+    def test_25_claim_004_and_006_not_contradictory(self) -> None:
+        """CLAIM-004 and CLAIM-006 are not contradictory merely because the aggregate is."""
+        report = load_report()
+        for cid in ("CLAIM-004", "CLAIM-006"):
+            c = self._get_claim(report, cid)
+            self.assertNotEqual(
+                c["status"],
+                "contradictory",
+                f"{cid} must not be contradictory just because the aggregate is. "
+                f"Got status={c['status']}.",
+            )
+
+    def test_26_summary_claim_counts_match_actual_records(self) -> None:
+        """Summary claim-status counts equal the actual claim records."""
+        report = load_report()
+        claims = report["statistical_claims"]
+        s = report["summary"]
+        exact = sum(1 for c in claims if c["status"] == "current_exact")
+        stale = sum(1 for c in claims if c["status"] == "stale")
+        contradictory = sum(1 for c in claims if c["status"] == "contradictory")
+        ambiguous = sum(1 for c in claims if c["status"] == "ambiguous_metric")
+        unsupported = sum(1 for c in claims if c["status"] == "unsupported")
+        self.assertEqual(s["exact_claim_count"], exact, "exact_claim_count mismatch.")
+        self.assertEqual(s["stale_claim_count"], stale, "stale_claim_count mismatch.")
+        self.assertEqual(
+            s["contradictory_claim_count"], contradictory, "contradictory_claim_count mismatch."
+        )
+        self.assertEqual(
+            s["ambiguous_claim_count"], ambiguous, "ambiguous_claim_count mismatch."
+        )
+        self.assertEqual(
+            s["unsupported_claim_count"], unsupported, "unsupported_claim_count mismatch."
+        )
+        self.assertEqual(
+            s["discovered_statistical_claim_count"],
+            len(claims),
+            "discovered_statistical_claim_count mismatch.",
+        )
+
+    def test_27_docx_extension_count_matches_claim_005(self) -> None:
+        """counts_by_extension['.docx'] independently equals CLAIM-005 actual_value."""
+        report = load_report()
+        docx_count = report["counts_by_extension"].get(".docx", 0)
+        c = next(
+            (c for c in report["statistical_claims"] if c["claim_identifier"] == "CLAIM-005"),
+            None,
+        )
+        self.assertIsNotNone(c, "CLAIM-005 not found.")
+        assert c is not None
+        self.assertEqual(
+            docx_count,
+            c["actual_value"],
+            f"counts_by_extension['.docx'] ({docx_count}) != CLAIM-005 actual_value "
+            f"({c['actual_value']}).",
+        )
+
+    def test_27b_knowledge_index_breakdown_sum_reconciliation_present(self) -> None:
+        """reconciliation.knowledge_index_breakdown_sum object is present and contradictory."""
+        report = load_report()
+        ki_sum = report["reconciliation"].get("knowledge_index_breakdown_sum")
+        self.assertIsNotNone(
+            ki_sum, "reconciliation.knowledge_index_breakdown_sum is missing."
+        )
+        self.assertEqual(ki_sum["status"], "contradictory")
+        self.assertEqual(ki_sum["claimed_component_sum"], 221)
+        self.assertEqual(ki_sum["stated_package_total"], 217)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

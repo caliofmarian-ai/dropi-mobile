@@ -590,7 +590,7 @@ KNOWN_CLAIMS: list[dict[str, Any]] = [
         "claim_identifier": "CLAIM-005",
         "claimed_value": 147,
         "claimed_metric": "historical_docx_document_count",
-        "actual_metric_key": None,
+        "actual_metric_key": "ext_docx_count",
         "claim_context": (
             "| Historical `.docx` documents (from 04.zip masterplan) | 147 |"
         ),
@@ -648,6 +648,19 @@ KNOWN_CLAIMS: list[dict[str, Any]] = [
             "(does not list package control documents)."
         ),
     },
+    {
+        "source_path": (
+            "DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md"
+        ),
+        "claim_identifier": "CLAIM-011",
+        "claimed_value": 221,
+        "claimed_metric": "knowledge_index_breakdown_sum",
+        "actual_metric_key": None,
+        "claim_context": (
+            "Component breakdown: 52 canonical md + 147 docx + 18 ZIP-only md "
+            "+ 4 package control = 221 (stated package total: 217)"
+        ),
+    },
 ]
 
 
@@ -690,23 +703,29 @@ def resolve_claims(
         claim.pop("actual_metric_key", None)
         result.append(claim)
 
-    # CLAIM-004 (canonical markdown: 52) — cross-check against CLAIM-005, CLAIM-006, CLAIM-007
-    # The four KI breakdown rows sum to 52+147+18+4=221 but KI total says 217;
-    # mark CLAIM-004 through CLAIM-006 as contradictory.
+    # CLAIM-005: refine explanation to cite the independent extension-count evidence
+    for item in result:
+        if item["claim_identifier"] == "CLAIM-005" and item["status"] == "current_exact":
+            item["explanation"] = (
+                f"Claimed value {item['claimed_value']} matches the independently computed "
+                f"package extension count: counts_by_extension[\".docx\"] = {item['actual_value']}. "
+                "The individual DOCX claim is confirmed by the actual package file scan."
+            )
+
+    # CLAIM-011: knowledge_index_breakdown_sum is directly contradicted by the stated package total
     ki_breakdown_sum = 52 + 147 + 18 + 4  # 221
-    ki_total = 217
-    if ki_breakdown_sum != ki_total:
-        for item in result:
-            if item["claim_identifier"] in ("CLAIM-004", "CLAIM-005", "CLAIM-006"):
-                item["status"] = "contradictory"
-                item["explanation"] = (
-                    f"CANONICAL_KNOWLEDGE_INDEX.md breakdown rows "
-                    f"(52 canonical md + 147 docx + 18 ZIP-only md + 4 package control = {ki_breakdown_sum}) "
-                    f"do not sum to the stated total of {ki_total}. "
-                    "These subcategory counts are internally inconsistent; "
-                    "no safe actual value can be derived for this specific subcategory without "
-                    "resolving the document's internal contradiction."
-                )
+    ki_stated_total = 217
+    for item in result:
+        if item["claim_identifier"] == "CLAIM-011":
+            item["actual_value"] = ki_stated_total
+            item["status"] = "contradictory"
+            item["explanation"] = (
+                f"CANONICAL_KNOWLEDGE_INDEX.md states a package total of {ki_stated_total} files, "
+                f"but the four component breakdown rows sum to {ki_breakdown_sum} "
+                f"(52 canonical md + 147 docx + 18 ZIP-only md + 4 package control). "
+                f"The component breakdown exceeds the stated total by "
+                f"{ki_breakdown_sum - ki_stated_total}."
+            )
 
     return result
 
@@ -816,6 +835,7 @@ def build_report(
         "source_document_count": source_count,
         "package_control_document_count": control_count,
         "directory_count": dir_count,
+        "ext_docx_count": ext_counts.get(".docx", 0),
     }
     resolved_claims = resolve_claims(KNOWN_CLAIMS, actuals_for_claims)
 
@@ -943,6 +963,21 @@ def build_report(
                     "The KI total of 217 matches the actual file count. "
                     "However, the four breakdown rows sum to 221, not 217. "
                     "The breakdown is internally inconsistent."
+                ),
+            },
+            "knowledge_index_breakdown_sum": {
+                "source_path": (
+                    "DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md"
+                ),
+                "claim_identifier": "CLAIM-011",
+                "claimed_component_sum": 221,
+                "stated_package_total": 217,
+                "status": "contradictory",
+                "explanation": (
+                    "The component breakdown (52 canonical md + 147 docx + 18 ZIP-only md "
+                    "+ 4 package control = 221) exceeds the stated package total of 217 by 4. "
+                    "Individual component claims must be evaluated against their own "
+                    "independently reproducible metric rather than against this inconsistent sum."
                 ),
             },
             "audit_report": {
@@ -1337,6 +1372,16 @@ def build_markdown(report: dict[str, Any]) -> str:
       f"(sum={ki['breakdown_claimed']['breakdown_sum']})")
     p(f"- Breakdown status: **{ki['breakdown_status']}**")
     p(ki["notes"])
+
+    h3("10.3a Knowledge-Index Breakdown Sum (CLAIM-011)")
+
+    ki_sum = report["reconciliation"]["knowledge_index_breakdown_sum"]
+    p(f"- Source: `{ki_sum['source_path']}`")
+    p(f"- Claim identifier: **{ki_sum['claim_identifier']}**")
+    p(f"- Claimed component sum: **{ki_sum['claimed_component_sum']}**  |  "
+      f"Stated package total: **{ki_sum['stated_package_total']}**  |  "
+      f"Status: **{ki_sum['status']}**")
+    p(ki_sum["explanation"])
 
     h3("10.4 Audit Report (AI_CANONICAL_REFERENCE_AUDIT_REPORT.md)")
 
