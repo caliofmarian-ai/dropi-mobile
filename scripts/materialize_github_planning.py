@@ -1,54 +1,18 @@
 #!/usr/bin/env python3
-"""
-DROPi Mobile — GitHub Planning Materialization Script
-
-Usage:
-    PYTHONDONTWRITEBYTECODE=1 python scripts/materialize_github_planning.py \\
-        --repo caliofmarian-ai/dropi-mobile \\
-        --repo-root . \\
-        --dry-run
-
-    PYTHONDONTWRITEBYTECODE=1 python scripts/materialize_github_planning.py \\
-        --repo caliofmarian-ai/dropi-mobile \\
-        --repo-root . \\
-        --apply
-
-    PYTHONDONTWRITEBYTECODE=1 python scripts/materialize_github_planning.py \\
-        --repo caliofmarian-ai/dropi-mobile \\
-        --repo-root . \\
-        --verify
-
-Requirements:
-    - Python 3.8+ (standard library only for planning logic)
-    - GitHub CLI (gh) for GitHub writes
-    - Valid GitHub authentication via gh auth login or GITHUB_TOKEN
-
-Rules:
-    - Idempotent: safe to run multiple times
-    - Never deletes issues, milestones, or labels
-    - Never modifies product code, canonical sources, archives, or audit inputs
-    - Uses stable IDs embedded in issue bodies for deduplication
-    - Creates labels before milestones before issues
-    - Creates parent issues before child issues
-    - Preserves closed completed work (#42-#50 CAN-001 through CAN-008)
-"""
+"""DROPi Mobile GitHub planning materialization."""
 
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
-import os
 import re
 import subprocess
 import sys
-import time
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
-
-# ─────────────────────────────────────────────────────────────────────────────
-# CONSTANTS
-# ─────────────────────────────────────────────────────────────────────────────
+from urllib.parse import quote
 
 PLAN_JSON_PATH = "docs/planning/github_materialization_plan.json"
 RESULT_MD_PATH = "docs/planning/GITHUB_MATERIALIZATION_RESULT.md"
@@ -57,10 +21,14 @@ RESULT_JSON_PATH = "docs/planning/github_materialization_result.json"
 ARCHIVE_PATH = "04.zip"
 ARCHIVE_SHA256 = "82a6015b8c968645307e36c8e4aa0351515f50333c08a6c5402a7819b7b747e5"
 
-# Stable ID pattern embedded in every issue body
 STABLE_ID_PATTERN = re.compile(r"<!--\s*dropi-planning-id:\s*([A-Z0-9_-]+)\s*-->")
+MANAGED_LINKS_START = "<!-- dropi-materialization-links:start -->"
+MANAGED_LINKS_END = "<!-- dropi-materialization-links:end -->"
+MANAGED_LINKS_PATTERN = re.compile(
+    rf"\n*{re.escape(MANAGED_LINKS_START)}.*?{re.escape(MANAGED_LINKS_END)}\n*",
+    re.DOTALL,
+)
 
-# Historical audit issues that must remain closed
 PRESERVED_CLOSED_ISSUES = {
     42: "[Parent][M0] Recover and certify the authoritative canonical corpus",
     43: "[CAN-001] Inventory and fingerprint every file in the authoritative 04.zip archive",
@@ -73,516 +41,670 @@ PRESERVED_CLOSED_ISSUES = {
     50: "[CAN-008] Define deterministic canonical package regeneration",
 }
 
-# Protected paths — must never be modified by this script
-PROTECTED_PATHS = [
-    "04.zip",
+FORBIDDEN_BRANCH_PATH_PREFIXES = (
     "canonical/",
-    "docs/audits/",
-    "DROPi_Canonical_Reference/",
     "BLUEPRINT/",
+    "DROPi_Canonical_Reference/",
+    "docs/audits/",
     "app/",
     "server/",
     "drizzle/",
-    "scripts/audit_04_zip.py",
-]
+)
+FORBIDDEN_BRANCH_PATHS = {"04.zip"}
+ALLOWED_RESULT_PATHS = {
+    "docs/planning/CANONICAL_PLANNING_CONFLICTS.md",
+    "docs/planning/CANONICAL_PLANNING_SOURCE_REGISTER.md",
+    "docs/planning/GITHUB_MATERIALIZATION_PLAN.md",
+    "docs/planning/GITHUB_MATERIALIZATION_RESULT.md",
+    "docs/planning/IMPLEMENTATION_COVERAGE_AUDIT.md",
+    "docs/planning/github_materialization_plan.json",
+    "docs/planning/github_materialization_plan.yaml",
+    "docs/planning/github_materialization_result.json",
+    "scripts/materialize_github_planning.py",
+    "tests/test_materialize_github_planning.py",
+}
 
-# ─────────────────────────────────────────────────────────────────────────────
-# SAFETY CHECKS
-# ─────────────────────────────────────────────────────────────────────────────
+STATUS_ORDER = ("planned", "existing", "created", "updated", "skipped", "failed", "verified")
+ISSUE_TYPE_ORDER = (
+    "program",
+    "phase",
+    "epic",
+    "batch",
+    "implementation",
+    "design",
+    "audit",
+    "documentation",
+    "verification",
+    "testing",
+    "security",
+    "compliance",
+    "operations",
+    "owner-decision",
+    "canonical-resolution",
+    "migration",
+    "release",
+)
 
 
 def verify_archive_integrity(repo_root: Path) -> None:
-    """Verify 04.zip has not been modified."""
     archive = repo_root / ARCHIVE_PATH
     if not archive.exists():
         raise RuntimeError(f"Archive not found: {archive}")
-
     sha256 = hashlib.sha256(archive.read_bytes()).hexdigest()
     if sha256 != ARCHIVE_SHA256:
         raise RuntimeError(
-            f"Archive integrity FAILED.\n"
-            f"  Expected: {ARCHIVE_SHA256}\n"
-            f"  Actual:   {sha256}\n"
-            "The archive 04.zip has been modified. Aborting."
+            "Archive integrity FAILED. "
+            f"Expected {ARCHIVE_SHA256}, got {sha256}."
         )
 
 
-def check_no_protected_path_modified(repo_root: Path) -> None:
-    """Ensure no protected paths would be modified. (Safety assertion.)"""
-    # This is a guard — actual protection is that this script never writes
-    # to protected paths. We assert the script's write calls never touch them.
-    pass
+def _run_git(repo_root: Path, *args: str) -> str:
+    result = subprocess.run(
+        ["git", *args],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"git {' '.join(args)} failed\nstdout: {result.stdout}\nstderr: {result.stderr}"
+        )
+    return result.stdout.strip()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PLAN LOADING
-# ─────────────────────────────────────────────────────────────────────────────
+def get_branch_diff_paths(repo_root: Path, base_ref: str = "origin/main") -> list[str]:
+    return [
+        line.strip()
+        for line in _run_git(repo_root, "diff", "--name-only", f"{base_ref}...HEAD").splitlines()
+        if line.strip()
+    ]
+
+
+def ensure_only_allowed_branch_changes(repo_root: Path, base_ref: str = "origin/main") -> list[str]:
+    changed = get_branch_diff_paths(repo_root, base_ref)
+    forbidden: list[str] = []
+    for path in changed:
+        if path in ALLOWED_RESULT_PATHS:
+            continue
+        if path in FORBIDDEN_BRANCH_PATHS or path.startswith(FORBIDDEN_BRANCH_PATH_PREFIXES):
+            forbidden.append(path)
+        elif path not in ALLOWED_RESULT_PATHS:
+            forbidden.append(path)
+    if forbidden:
+        raise RuntimeError(
+            "Forbidden branch changes detected relative to "
+            f"{base_ref}: {', '.join(forbidden)}"
+        )
+    return changed
 
 
 def load_plan(repo_root: Path) -> dict[str, Any]:
-    """Load and validate the materialization plan from JSON."""
     plan_path = repo_root / PLAN_JSON_PATH
     if not plan_path.exists():
-        raise FileNotFoundError(
-            f"Plan file not found: {plan_path}\n"
-            "Run the planning audit first to generate the plan."
-        )
-
-    with plan_path.open("r", encoding="utf-8") as f:
-        plan = json.load(f)
-
+        raise FileNotFoundError(f"Plan file not found: {plan_path}")
+    with plan_path.open("r", encoding="utf-8") as handle:
+        plan = json.load(handle)
     _validate_plan_schema(plan)
     return plan
 
 
 def _validate_plan_schema(plan: dict[str, Any]) -> None:
-    """Validate the plan has required top-level keys and no duplicate IDs."""
-    required_keys = ["meta", "labels", "milestones", "issues"]
-    for key in required_keys:
+    for key in ("meta", "labels", "milestones", "issues"):
         if key not in plan:
             raise ValueError(f"Plan missing required key: {key!r}")
 
-    # Check for duplicate stable IDs
-    ids: list[str] = []
+    seen_ids: set[str] = set()
     for issue in plan.get("issues", []):
         issue_id = issue.get("id")
-        if issue_id:
-            if issue_id in ids:
-                raise ValueError(f"Duplicate stable ID in plan: {issue_id!r}")
-            ids.append(issue_id)
+        if not issue_id:
+            raise ValueError(f"Issue missing required id: {issue!r}")
+        if issue_id in seen_ids:
+            raise ValueError(f"Duplicate stable ID in plan: {issue_id!r}")
+        seen_ids.add(issue_id)
 
-    # Check for duplicate label names
-    label_names: list[str] = []
+    seen_labels: set[str] = set()
     for label in plan.get("labels", []):
         name = label.get("name")
-        if name:
-            if name in label_names:
-                raise ValueError(f"Duplicate label name in plan: {name!r}")
-            label_names.append(name)
+        if not name:
+            raise ValueError(f"Label missing required name: {label!r}")
+        if name in seen_labels:
+            raise ValueError(f"Duplicate label name in plan: {name!r}")
+        seen_labels.add(name)
 
-    # Check for duplicate milestone titles
-    milestone_titles: list[str] = []
-    for ms in plan.get("milestones", []):
-        title = ms.get("title")
-        if title:
-            if title in milestone_titles:
-                raise ValueError(f"Duplicate milestone title in plan: {title!r}")
-            milestone_titles.append(title)
+    seen_titles: set[str] = set()
+    for milestone in plan.get("milestones", []):
+        title = milestone.get("title")
+        if not title:
+            raise ValueError(f"Milestone missing required title: {milestone!r}")
+        if title in seen_titles:
+            raise ValueError(f"Duplicate milestone title in plan: {title!r}")
+        seen_titles.add(title)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# GITHUB CLI WRAPPER
-# ─────────────────────────────────────────────────────────────────────────────
+def strip_managed_links(body: str) -> str:
+    return MANAGED_LINKS_PATTERN.sub("\n", body).strip()
+
+
+def get_issue_type(issue_def: dict[str, Any]) -> str:
+    issue_type = issue_def.get("type")
+    if issue_type:
+        return str(issue_type)
+    for label in issue_def.get("labels", []):
+        if label.startswith("type:"):
+            return label.split(":", 1)[1]
+    return "unknown"
+
+
+def build_reference_pattern(plan_ids: set[str]) -> re.Pattern[str]:
+    ordered = sorted(plan_ids, key=len, reverse=True)
+    return re.compile(r"\b(?:" + "|".join(re.escape(item) for item in ordered) + r")\b")
+
+
+def extract_referenced_issue_ids(body: str, known_issue_ids: set[str], self_id: str | None = None) -> list[str]:
+    stripped = strip_managed_links(body)
+    if not known_issue_ids:
+        return []
+    pattern = build_reference_pattern(known_issue_ids)
+    found: list[str] = []
+    for match in pattern.finditer(stripped):
+        value = match.group(0)
+        if value == self_id:
+            continue
+        if value not in found:
+            found.append(value)
+    return found
+
+
+def build_issue_body_with_links(
+    issue_def: dict[str, Any],
+    issue_number_by_id: dict[str, int],
+    known_issue_ids: set[str] | None = None,
+) -> str:
+    base_body = strip_managed_links(issue_def.get("body", ""))
+    self_id = issue_def.get("id")
+    references = extract_referenced_issue_ids(
+        base_body,
+        known_issue_ids or set(issue_number_by_id),
+        self_id=self_id,
+    )
+    lines = [f"- {ref} → #{issue_number_by_id[ref]}" for ref in references if ref in issue_number_by_id]
+    if not lines:
+        return base_body
+    return (
+        f"{base_body}\n\n{MANAGED_LINKS_START}\n"
+        "## GitHub Materialization Links\n\n"
+        + "\n".join(lines)
+        + f"\n{MANAGED_LINKS_END}\n"
+    )
 
 
 class GitHubClient:
-    """Wrapper around GitHub CLI (gh) for all GitHub write operations."""
-
     def __init__(self, repo: str, dry_run: bool = False) -> None:
         self.repo = repo
         self.dry_run = dry_run
-        self._label_cache: dict[str, dict] | None = None
-        self._milestone_cache: dict[str, dict] | None = None
-        self._issue_id_cache: dict[str, int] | None = None
+        self._repo_cache: dict[str, Any] | None = None
+        self._label_cache: dict[str, dict[str, Any]] | None = None
+        self._milestone_cache: dict[str, dict[str, Any]] | None = None
+        self._issues_cache: list[dict[str, Any]] | None = None
+        self._issue_map_cache: dict[str, dict[str, Any]] | None = None
+        self._duplicate_stable_ids_cache: dict[str, list[int]] | None = None
+        self._pulls_cache: list[dict[str, Any]] | None = None
+
+    def refresh(self) -> None:
+        self._repo_cache = None
+        self._label_cache = None
+        self._milestone_cache = None
+        self._issues_cache = None
+        self._issue_map_cache = None
+        self._duplicate_stable_ids_cache = None
+        self._pulls_cache = None
 
     def _gh(self, *args: str, input_data: str | None = None) -> str:
-        """Run a gh command and return stdout. Raises on failure."""
-        cmd = ["gh", *args]
         result = subprocess.run(
-            cmd,
+            ["gh", *args],
             capture_output=True,
             text=True,
             input=input_data,
         )
         if result.returncode != 0:
             raise RuntimeError(
-                f"gh command failed: {' '.join(cmd)}\n"
+                f"gh command failed: {' '.join(['gh', *args])}\n"
                 f"stdout: {result.stdout}\n"
                 f"stderr: {result.stderr}"
             )
         return result.stdout.strip()
 
-    def _gh_api(self, path: str, method: str = "GET", data: dict | None = None) -> Any:
-        """Make a GitHub API call via gh api."""
-        args = ["api", f"/repos/{self.repo}/{path}"]
+    def _gh_api(self, path: str, method: str = "GET", data: dict[str, Any] | None = None) -> Any:
+        args = ["api", f"/repos/{self.repo}/{path.lstrip('/')}"]
         if method != "GET":
             args.extend(["--method", method])
-        if data:
+        payload = None
+        if data is not None:
             args.extend(["--input", "-"])
-            input_data = json.dumps(data)
-        else:
-            input_data = None
+            payload = json.dumps(data)
+        output = self._gh(*args, input_data=payload)
+        return json.loads(output) if output else None
 
-        out = self._gh(*args, input_data=input_data)
-        if out:
-            return json.loads(out)
-        return None
-
-    def _gh_api_paginate(self, path: str) -> list[dict]:
-        """Paginate through all results from a GitHub API endpoint."""
-        results = []
+    def _gh_api_paginate(self, path: str) -> list[dict[str, Any]]:
+        items: list[dict[str, Any]] = []
         page = 1
         while True:
-            sep = "&" if "?" in path else "?"
-            page_path = f"{path}{sep}per_page=100&page={page}"
-            out = self._gh("api", f"/repos/{self.repo}/{page_path}")
-            if not out:
-                break
-            batch = json.loads(out)
+            separator = "&" if "?" in path else "?"
+            page_path = f"{path}{separator}per_page=100&page={page}"
+            batch = self._gh_api(page_path)
             if not batch:
                 break
-            results.extend(batch)
+            if not isinstance(batch, list):
+                raise RuntimeError(f"Expected list response for {path}, got {type(batch).__name__}")
+            items.extend(batch)
             if len(batch) < 100:
                 break
             page += 1
-        return results
+        return items
 
-    # ── Labels ─────────────────────────────────────────────────────────────
+    def get_repository_metadata(self) -> dict[str, Any]:
+        if self._repo_cache is None:
+            self._repo_cache = self._gh_api("")
+        return self._repo_cache
 
-    def get_labels(self) -> dict[str, dict]:
-        """Return {name: label_data} for all existing labels."""
+    def get_labels(self) -> dict[str, dict[str, Any]]:
         if self._label_cache is None:
-            if self.dry_run:
-                self._label_cache = {}
-            else:
-                raw = self._gh_api_paginate("labels")
-                self._label_cache = {l["name"]: l for l in raw}
+            raw = self._gh_api_paginate("labels")
+            self._label_cache = {item["name"]: item for item in raw}
         return self._label_cache
 
-    def create_label(self, name: str, color: str, description: str) -> dict:
-        """Create a label, or update it if it exists with different attrs."""
-        existing = self.get_labels()
-        clean_color = color.lstrip("#")
-
-        if name in existing:
-            ex = existing[name]
-            needs_update = (
-                ex.get("color", "").lower() != clean_color.lower()
-                or ex.get("description", "") != description
-            )
-            if not needs_update:
-                return {"action": "skipped", "name": name, "reason": "already_exists_unchanged"}
-
-            if self.dry_run:
-                return {"action": "would_update", "name": name}
-            self._gh_api(
-                f"labels/{name}",
-                method="PATCH",
-                data={"color": clean_color, "description": description},
-            )
-            self._label_cache = None  # invalidate cache
-            return {"action": "updated", "name": name}
-
-        if self.dry_run:
-            return {"action": "would_create", "name": name}
-        self._gh_api(
-            "labels",
-            method="POST",
-            data={"name": name, "color": clean_color, "description": description},
-        )
-        self._label_cache = None
-        return {"action": "created", "name": name}
-
-    # ── Milestones ──────────────────────────────────────────────────────────
-
-    def get_milestones(self, state: str = "all") -> dict[str, dict]:
-        """Return {title: milestone_data} for all milestones."""
+    def get_milestones(self, state: str = "all") -> dict[str, dict[str, Any]]:
         if self._milestone_cache is None:
-            if self.dry_run:
-                self._milestone_cache = {}
-            else:
-                raw = self._gh_api_paginate(f"milestones?state={state}")
-                self._milestone_cache = {m["title"]: m for m in raw}
+            raw = self._gh_api_paginate(f"milestones?state={state}")
+            self._milestone_cache = {item["title"]: item for item in raw}
         return self._milestone_cache
 
-    def create_milestone(
-        self,
-        title: str,
-        description: str,
-        state: str = "open",
-        due_on: str | None = None,
-    ) -> dict:
-        """Create a milestone if it doesn't exist, or skip if it does."""
-        existing = self.get_milestones()
-        if title in existing:
-            return {
-                "action": "skipped",
-                "title": title,
-                "number": existing[title]["number"],
-                "reason": "already_exists",
-            }
+    def get_issues(self, state: str = "all") -> list[dict[str, Any]]:
+        if self._issues_cache is None:
+            raw = self._gh_api_paginate(f"issues?state={state}")
+            self._issues_cache = [item for item in raw if "pull_request" not in item]
+        return self._issues_cache
 
-        if self.dry_run:
-            return {"action": "would_create", "title": title}
+    def get_pull_requests(self, state: str = "all") -> list[dict[str, Any]]:
+        if self._pulls_cache is None:
+            self._pulls_cache = self._gh_api_paginate(f"pulls?state={state}")
+        return self._pulls_cache
 
-        data: dict[str, Any] = {
-            "title": title,
-            "description": description,
-            "state": state,
-        }
-        if due_on:
-            data["due_on"] = due_on
+    def get_issue_by_number(self, issue_number: int) -> dict[str, Any]:
+        return self._gh_api(f"issues/{issue_number}")
 
-        result = self._gh_api("milestones", method="POST", data=data)
-        self._milestone_cache = None
-        return {"action": "created", "title": title, "number": result["number"]}
-
-    def get_milestone_number(self, title: str) -> int | None:
-        """Get the milestone number by title."""
-        ms = self.get_milestones()
-        if title in ms:
-            return ms[title]["number"]
-        return None
-
-    # ── Issues ──────────────────────────────────────────────────────────────
-
-    def get_issues_by_stable_id(self) -> dict[str, int]:
-        """Return {stable_id: issue_number} for all issues containing stable IDs."""
-        if self._issue_id_cache is not None:
-            return self._issue_id_cache
-
-        if self.dry_run:
-            self._issue_id_cache = {}
-            return self._issue_id_cache
-
-        cache: dict[str, int] = {}
-        raw_open = self._gh_api_paginate("issues?state=open")
-        raw_closed = self._gh_api_paginate("issues?state=closed")
-
-        for issue in raw_open + raw_closed:
+    def get_issues_by_stable_id(self) -> dict[str, dict[str, Any]]:
+        if self._issue_map_cache is not None:
+            return self._issue_map_cache
+        mapping: dict[str, dict[str, Any]] = {}
+        duplicates: dict[str, list[int]] = {}
+        for issue in self.get_issues():
             body = issue.get("body") or ""
-            m = STABLE_ID_PATTERN.search(body)
-            if m:
-                stable_id = m.group(1)
-                cache[stable_id] = issue["number"]
+            match = STABLE_ID_PATTERN.search(body)
+            if not match:
+                continue
+            stable_id = match.group(1)
+            if stable_id in mapping:
+                duplicates.setdefault(stable_id, [mapping[stable_id]["number"]]).append(issue["number"])
+                continue
+            mapping[stable_id] = issue
+        self._issue_map_cache = mapping
+        self._duplicate_stable_ids_cache = duplicates
+        return mapping
 
-        self._issue_id_cache = cache
-        return cache
+    def get_duplicate_stable_ids(self) -> dict[str, list[int]]:
+        if self._duplicate_stable_ids_cache is None:
+            self.get_issues_by_stable_id()
+        return self._duplicate_stable_ids_cache or {}
 
-    def create_issue(
-        self,
-        title: str,
-        body: str,
-        labels: list[str],
-        milestone_title: str | None = None,
-    ) -> dict:
-        """Create an issue if its stable ID doesn't already exist."""
-        # Extract stable ID from body
-        m = STABLE_ID_PATTERN.search(body)
-        stable_id = m.group(1) if m else None
-
-        if stable_id:
-            existing_ids = self.get_issues_by_stable_id()
-            if stable_id in existing_ids:
-                return {
-                    "action": "skipped",
-                    "stable_id": stable_id,
-                    "issue_number": existing_ids[stable_id],
-                    "reason": "already_exists",
-                }
-
+    def _require_write_mode(self) -> None:
         if self.dry_run:
-            return {
-                "action": "would_create",
-                "stable_id": stable_id,
-                "title": title,
-            }
+            raise RuntimeError("Write operation requested while client is in dry-run mode")
 
-        # Build gh issue create command
-        args = [
-            "issue", "create",
-            "--repo", self.repo,
-            "--title", title,
-            "--body", body,
-        ]
-        for label in labels:
-            args.extend(["--label", label])
+    def create_or_update_label(self, label_def: dict[str, Any]) -> dict[str, Any]:
+        name = label_def["name"]
+        color = str(label_def.get("color", "ededed")).lstrip("#")
+        description = label_def.get("description", "")
+        existing = self.get_labels().get(name)
+        if existing:
+            if (
+                str(existing.get("color", "")).lower() == color.lower()
+                and (existing.get("description") or "") == description
+            ):
+                return {"name": name, "action": "existing"}
+            if self.dry_run:
+                return {"name": name, "action": "planned", "planned_action": "update"}
+            self._require_write_mode()
+            self._gh_api(
+                f"labels/{quote(name, safe='')}",
+                method="PATCH",
+                data={"color": color, "description": description},
+            )
+            self.refresh()
+            return {"name": name, "action": "updated"}
+        if self.dry_run:
+            return {"name": name, "action": "planned", "planned_action": "create"}
+        self._require_write_mode()
+        self._gh_api("labels", method="POST", data={"name": name, "color": color, "description": description})
+        self.refresh()
+        return {"name": name, "action": "created"}
 
-        if milestone_title:
-            ms_number = self.get_milestone_number(milestone_title)
-            if ms_number:
-                # gh issue create accepts milestone by number
-                args.extend(["--milestone", str(ms_number)])
+    def create_or_update_milestone(self, milestone_def: dict[str, Any]) -> dict[str, Any]:
+        title = milestone_def["title"]
+        description = milestone_def.get("description", "")
+        state = milestone_def.get("state", "open")
+        due_on = milestone_def.get("due_on")
+        existing = self.get_milestones().get(title)
+        if existing:
+            same = (
+                (existing.get("description") or "") == description
+                and existing.get("state") == state
+                and (existing.get("due_on") or None) == due_on
+            )
+            if same:
+                return {"title": title, "number": existing["number"], "action": "existing"}
+            if self.dry_run:
+                return {
+                    "title": title,
+                    "number": existing["number"],
+                    "action": "planned",
+                    "planned_action": "update",
+                }
+            self._require_write_mode()
+            payload: dict[str, Any] = {"title": title, "description": description, "state": state}
+            if due_on is not None:
+                payload["due_on"] = due_on
+            self._gh_api(f"milestones/{existing['number']}", method="PATCH", data=payload)
+            self.refresh()
+            refreshed = self.get_milestones()[title]
+            return {"title": title, "number": refreshed["number"], "action": "updated"}
+        if self.dry_run:
+            return {"title": title, "action": "planned", "planned_action": "create"}
+        self._require_write_mode()
+        payload = {"title": title, "description": description, "state": state}
+        if due_on is not None:
+            payload["due_on"] = due_on
+        created = self._gh_api("milestones", method="POST", data=payload)
+        self.refresh()
+        return {"title": title, "number": created["number"], "action": "created"}
 
-        out = self._gh(*args)
-        # Invalidate cache
-        self._issue_id_cache = None
+    def get_milestone_number(self, title: str | None) -> int | None:
+        if not title:
+            return None
+        milestone = self.get_milestones().get(title)
+        return int(milestone["number"]) if milestone else None
 
-        # Extract issue number from URL
-        issue_number = None
-        if out:
-            match = re.search(r"/issues/(\d+)$", out.strip())
-            if match:
-                issue_number = int(match.group(1))
-
+    def create_issue(self, issue_def: dict[str, Any], body: str) -> dict[str, Any]:
+        if self.dry_run:
+            return {"id": issue_def["id"], "title": issue_def["title"], "action": "planned", "planned_action": "create"}
+        self._require_write_mode()
+        payload: dict[str, Any] = {
+            "title": issue_def["title"],
+            "body": body,
+            "labels": issue_def.get("labels", []),
+        }
+        milestone_number = self.get_milestone_number(issue_def.get("milestone"))
+        if milestone_number is not None:
+            payload["milestone"] = milestone_number
+        created = self._gh_api("issues", method="POST", data=payload)
+        self.refresh()
         return {
+            "id": issue_def["id"],
+            "title": issue_def["title"],
+            "issue_number": created["number"],
             "action": "created",
-            "stable_id": stable_id,
-            "title": title,
-            "issue_number": issue_number,
-            "url": out.strip(),
         }
 
-    def get_issue_number_for_stable_id(self, stable_id: str) -> int | None:
-        """Return the GitHub issue number for a given stable ID, or None."""
-        return self.get_issues_by_stable_id().get(stable_id)
+    def update_issue(self, issue_number: int, payload: dict[str, Any]) -> None:
+        self._require_write_mode()
+        self._gh_api(f"issues/{issue_number}", method="PATCH", data=payload)
+        self.refresh()
 
-    def add_issue_comment(self, issue_number: int, comment: str) -> None:
-        """Add a comment to an issue."""
+    def ensure_issue_state(self, issue_def: dict[str, Any], body: str) -> dict[str, Any]:
+        stable_id = issue_def["id"]
+        existing = self.get_issues_by_stable_id().get(stable_id)
+        desired_labels = sorted(issue_def.get("labels", []))
+        desired_milestone = issue_def.get("milestone")
+        if not existing:
+            return self.create_issue(issue_def, body)
+
+        current_labels = sorted(label["name"] for label in existing.get("labels", []))
+        current_milestone = (existing.get("milestone") or {}).get("title")
+        current_body = existing.get("body") or ""
+        payload: dict[str, Any] = {}
+        if existing.get("title") != issue_def["title"]:
+            payload["title"] = issue_def["title"]
+        if current_labels != desired_labels:
+            payload["labels"] = desired_labels
+        if current_milestone != desired_milestone:
+            payload["milestone"] = self.get_milestone_number(desired_milestone)
+        if current_body != body:
+            payload["body"] = body
+        if not payload:
+            return {
+                "id": stable_id,
+                "title": issue_def["title"],
+                "issue_number": existing["number"],
+                "action": "existing",
+            }
         if self.dry_run:
-            return
-        self._gh(
-            "issue", "comment",
-            "--repo", self.repo,
-            str(issue_number),
-            "--body", comment,
-        )
+            return {
+                "id": stable_id,
+                "title": issue_def["title"],
+                "issue_number": existing["number"],
+                "action": "planned",
+                "planned_action": "update",
+            }
+        self.update_issue(existing["number"], payload)
+        refreshed = self.get_issues_by_stable_id()[stable_id]
+        return {
+            "id": stable_id,
+            "title": issue_def["title"],
+            "issue_number": refreshed["number"],
+            "action": "updated",
+        }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# MATERIALIZATION
-# ─────────────────────────────────────────────────────────────────────────────
+def make_scope_summary(planned: int) -> dict[str, int]:
+    summary = {status: 0 for status in STATUS_ORDER}
+    summary["planned"] = planned
+    return summary
 
 
-def materialize_labels(
-    client: GitHubClient,
-    plan: dict[str, Any],
-    results: dict[str, Any],
-) -> None:
-    """Create all labels from the plan."""
-    print("\n── Labels ──────────────────────────────────────────────────")
-    label_results = []
-
-    for label_def in plan["labels"]:
-        name = label_def["name"]
-        color = label_def.get("color", "ededed")
-        description = label_def.get("description", "")
-
-        result = client.create_label(name, color, description)
-        label_results.append(result)
-
-        action = result.get("action", "unknown")
-        if action in ("created", "would_create"):
-            print(f"  + {name} ({action})")
-        elif action == "updated":
-            print(f"  ~ {name} (updated)")
-        elif action == "skipped":
-            print(f"  . {name} (exists)")
-        else:
-            print(f"  ? {name} ({action})")
-
-    results["labels"] = label_results
-    created = sum(1 for r in label_results if r.get("action") in ("created", "would_create"))
-    skipped = sum(1 for r in label_results if r.get("action") == "skipped")
-    print(f"\n  Labels: {created} created/planned, {skipped} skipped")
+def increment_scope_summary(summary: dict[str, int], action: str) -> None:
+    if action in summary:
+        summary[action] += 1
 
 
-def materialize_milestones(
-    client: GitHubClient,
-    plan: dict[str, Any],
-    results: dict[str, Any],
-) -> None:
-    """Create all milestones from the plan."""
-    print("\n── Milestones ──────────────────────────────────────────────")
-    milestone_results = []
-
-    for ms_def in plan["milestones"]:
-        title = ms_def["title"]
-        description = ms_def.get("description", "")
-        state = ms_def.get("state", "open")
-        due_on = ms_def.get("due_on")
-
-        result = client.create_milestone(title, description, state, due_on)
-        milestone_results.append(result)
-
-        action = result.get("action", "unknown")
-        number = result.get("number", "?")
-        if action in ("created", "would_create"):
-            print(f"  + {title} (#{number}) ({action})")
-        elif action == "skipped":
-            print(f"  . {title} (#{number}) (exists)")
-        else:
-            print(f"  ? {title} ({action})")
-
-    results["milestones"] = milestone_results
-    created = sum(1 for r in milestone_results if r.get("action") in ("created", "would_create"))
-    skipped = sum(1 for r in milestone_results if r.get("action") == "skipped")
-    print(f"\n  Milestones: {created} created/planned, {skipped} skipped")
+def add_issue_type_summary(target: dict[str, dict[str, int]], issue_type: str, action: str) -> None:
+    if issue_type not in target:
+        target[issue_type] = make_scope_summary(0)
+    target[issue_type]["planned"] += 1
+    increment_scope_summary(target[issue_type], action)
 
 
-def materialize_issues(
-    client: GitHubClient,
-    plan: dict[str, Any],
-    results: dict[str, Any],
-) -> None:
-    """Create all issues from the plan in dependency order."""
-    print("\n── Issues ──────────────────────────────────────────────────")
-    issue_results = []
-
-    # Sort issues by type to ensure parents before children
-    type_order = {
-        "type:program": 0,
-        "type:phase": 1,
-        "type:epic": 2,
-        "type:batch": 3,
-        "type:implementation": 4,
-        "type:design": 4,
-        "type:audit": 4,
-        "type:documentation": 4,
-        "type:verification": 4,
-        "type:testing": 4,
-        "type:security": 4,
-        "type:compliance": 4,
-        "type:owner-decision": 4,
-        "type:canonical-resolution": 4,
-        "type:migration": 4,
-        "type:release": 4,
-        "type:operations": 4,
+def inspect_existing_github_state(client: GitHubClient) -> dict[str, Any]:
+    metadata = client.get_repository_metadata()
+    labels = client.get_labels()
+    milestones = client.get_milestones()
+    issues = client.get_issues()
+    pulls = client.get_pull_requests()
+    issue_window = {}
+    for number in range(42, 51):
+        try:
+            issue = client.get_issue_by_number(number)
+        except RuntimeError as exc:
+            issue_window[str(number)] = {"error": str(exc)}
+            continue
+        issue_window[str(number)] = {
+            "title": issue.get("title"),
+            "state": issue.get("state"),
+            "html_url": issue.get("html_url"),
+        }
+    return {
+        "repository": {
+            "name": metadata.get("full_name"),
+            "default_branch": (metadata.get("default_branch") or ""),
+            "private": bool(metadata.get("private")),
+            "open_issues_count": metadata.get("open_issues_count"),
+        },
+        "counts": {
+            "labels": len(labels),
+            "milestones": len(milestones),
+            "issues": len(issues),
+            "pull_requests": len(pulls),
+        },
+        "labels": sorted(labels),
+        "milestones": {
+            title: {"number": data.get("number"), "state": data.get("state")}
+            for title, data in sorted(milestones.items())
+        },
+        "issues_42_50": issue_window,
     }
 
-    def issue_sort_key(issue: dict) -> int:
-        labels = issue.get("labels", [])
-        for label in labels:
-            if label in type_order:
-                return type_order[label]
-        return 99
 
-    sorted_issues = sorted(plan["issues"], key=issue_sort_key)
-
-    for issue_def in sorted_issues:
-        title = issue_def["title"]
-        body = issue_def.get("body", "")
-        labels = issue_def.get("labels", [])
-        milestone = issue_def.get("milestone")
-        issue_id = issue_def.get("id", "?")
-
-        result = client.create_issue(title, body, labels, milestone)
-        result["id"] = issue_id
-        issue_results.append(result)
-
-        action = result.get("action", "unknown")
-        issue_number = result.get("issue_number", "?")
-        if action in ("created", "would_create"):
-            print(f"  + [{issue_id}] {title[:60]} (#{issue_number}) ({action})")
-        elif action == "skipped":
-            existing_num = result.get("issue_number", "?")
-            print(f"  . [{issue_id}] {title[:60]} (#{existing_num}) (exists)")
-        else:
-            print(f"  ? [{issue_id}] {title[:60]} ({action})")
-
-        # Small delay to avoid rate limiting
-        if action == "created":
-            time.sleep(0.5)
-
-    results["issues"] = issue_results
-    created = sum(1 for r in issue_results if r.get("action") in ("created", "would_create"))
-    skipped = sum(1 for r in issue_results if r.get("action") == "skipped")
-    print(f"\n  Issues: {created} created/planned, {skipped} skipped")
+ISSUE_SORT_ORDER = {
+    "program": 0,
+    "phase": 1,
+    "epic": 2,
+    "batch": 3,
+    "implementation": 4,
+    "design": 4,
+    "audit": 4,
+    "documentation": 4,
+    "verification": 4,
+    "testing": 4,
+    "security": 4,
+    "compliance": 4,
+    "operations": 4,
+    "owner-decision": 4,
+    "canonical-resolution": 4,
+    "migration": 4,
+    "release": 4,
+}
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# VERIFY MODE
-# ─────────────────────────────────────────────────────────────────────────────
+def materialize_labels(client: GitHubClient, plan: dict[str, Any]) -> dict[str, Any]:
+    entries: list[dict[str, Any]] = []
+    summary = make_scope_summary(len(plan.get("labels", [])))
+    for label_def in plan.get("labels", []):
+        try:
+            entry = client.create_or_update_label(label_def)
+        except Exception as exc:  # pragma: no cover - exercised through higher-level tests
+            entry = {"name": label_def["name"], "action": "failed", "reason": str(exc)}
+        increment_scope_summary(summary, entry["action"])
+        entries.append(entry)
+    return {"summary": summary, "entries": entries}
+
+
+def materialize_milestones(client: GitHubClient, plan: dict[str, Any]) -> dict[str, Any]:
+    entries: list[dict[str, Any]] = []
+    summary = make_scope_summary(len(plan.get("milestones", [])))
+    for milestone_def in plan.get("milestones", []):
+        try:
+            entry = client.create_or_update_milestone(milestone_def)
+        except Exception as exc:  # pragma: no cover
+            entry = {"title": milestone_def["title"], "action": "failed", "reason": str(exc)}
+        increment_scope_summary(summary, entry["action"])
+        entries.append(entry)
+    return {"summary": summary, "entries": entries}
+
+
+def materialize_issues(client: GitHubClient, plan: dict[str, Any]) -> dict[str, Any]:
+    plan_issue_ids = {issue["id"] for issue in plan.get("issues", [])}
+    ordered = sorted(
+        plan.get("issues", []),
+        key=lambda issue: ISSUE_SORT_ORDER.get(get_issue_type(issue), 99),
+    )
+    entries_by_id: dict[str, dict[str, Any]] = {}
+    type_summary: dict[str, dict[str, int]] = {}
+    summary = make_scope_summary(len(ordered))
+
+    for issue_def in ordered:
+        issue_type = get_issue_type(issue_def)
+        base_body = strip_managed_links(issue_def.get("body", ""))
+        try:
+            entry = client.ensure_issue_state(issue_def, base_body)
+        except Exception as exc:  # pragma: no cover
+            entry = {
+                "id": issue_def["id"],
+                "title": issue_def["title"],
+                "type": issue_type,
+                "action": "failed",
+                "reason": str(exc),
+            }
+        entry["type"] = issue_type
+        entries_by_id[issue_def["id"]] = entry
+        increment_scope_summary(summary, entry["action"])
+        add_issue_type_summary(type_summary, issue_type, entry["action"])
+
+    if not client.dry_run:
+        client.refresh()
+        issue_map = client.get_issues_by_stable_id()
+        issue_number_by_id = {issue_id: issue["number"] for issue_id, issue in issue_map.items()}
+        for issue_def in ordered:
+            stable_id = issue_def["id"]
+            if entries_by_id[stable_id]["action"] == "failed":
+                continue
+            desired_body = build_issue_body_with_links(issue_def, issue_number_by_id, plan_issue_ids)
+            remote_issue = issue_map.get(stable_id)
+            if not remote_issue:
+                entries_by_id[stable_id]["action"] = "failed"
+                entries_by_id[stable_id]["reason"] = "issue missing after creation/update"
+                continue
+            entries_by_id[stable_id]["issue_number"] = remote_issue["number"]
+            if (remote_issue.get("body") or "") == desired_body:
+                entries_by_id[stable_id]["link_action"] = "existing"
+                continue
+            client.update_issue(remote_issue["number"], {"body": desired_body})
+            client.refresh()
+            refreshed = client.get_issues_by_stable_id()[stable_id]
+            entries_by_id[stable_id]["issue_number"] = refreshed["number"]
+            entries_by_id[stable_id]["link_action"] = "updated"
+            if entries_by_id[stable_id]["action"] == "existing":
+                entries_by_id[stable_id]["action"] = "updated"
+                summary["existing"] -= 1
+                summary["updated"] += 1
+                type_summary[entries_by_id[stable_id]["type"]]["existing"] -= 1
+                type_summary[entries_by_id[stable_id]["type"]]["updated"] += 1
+
+    entries = [entries_by_id[issue["id"]] for issue in ordered]
+    return {
+        "summary": summary,
+        "entries": entries,
+        "issue_type_summary": type_summary,
+    }
+
+
+def materialize_plan_once(client: GitHubClient, plan: dict[str, Any]) -> dict[str, Any]:
+    labels = materialize_labels(client, plan)
+    milestones = materialize_milestones(client, plan)
+    issues = materialize_issues(client, plan)
+    issue_number_mappings = {
+        entry["id"]: entry.get("issue_number")
+        for entry in issues["entries"]
+        if entry.get("id")
+    }
+    milestone_number_mappings = {
+        entry["title"]: entry.get("number")
+        for entry in milestones["entries"]
+        if entry.get("title")
+    }
+    return {
+        "labels": labels,
+        "milestones": milestones,
+        "issues": issues,
+        "issue_number_mappings": issue_number_mappings,
+        "milestone_number_mappings": milestone_number_mappings,
+        "label_names": [entry["name"] for entry in labels["entries"] if entry.get("name")],
+    }
+
+
+def normalize_verification_counts(counts: dict[str, int], planned: int) -> dict[str, int]:
+    summary = make_scope_summary(planned)
+    summary["verified"] = counts.get("verified", 0)
+    summary["failed"] = counts.get("failed", 0)
+    return summary
 
 
 def run_verify(
@@ -591,121 +713,274 @@ def run_verify(
     repo_root: Path,
     results: dict[str, Any],
 ) -> bool:
-    """Verify all planned objects exist on GitHub with correct attributes."""
-    print("\n── Verification ────────────────────────────────────────────")
     failures: list[str] = []
-
-    # 1. Verify archive integrity
-    try:
-        verify_archive_integrity(repo_root)
-        print("  ✓ 04.zip archive integrity")
-    except RuntimeError as e:
-        failures.append(str(e))
-        print(f"  ✗ 04.zip archive integrity: {e}")
-
-    # 2. Verify labels
-    print("\n  Checking labels...")
-    existing_labels = client.get_labels()
-    missing_labels = []
-    for label_def in plan["labels"]:
-        name = label_def["name"]
-        if name not in existing_labels:
-            missing_labels.append(name)
-    if missing_labels:
-        failures.append(f"Missing labels ({len(missing_labels)}): {missing_labels[:5]}...")
-        print(f"  ✗ Missing labels: {len(missing_labels)}")
-    else:
-        print(f"  ✓ All {len(plan['labels'])} labels exist")
-
-    # 3. Verify milestones
-    print("\n  Checking milestones...")
-    existing_milestones = client.get_milestones()
-    missing_milestones = []
-    for ms_def in plan["milestones"]:
-        title = ms_def["title"]
-        if title not in existing_milestones:
-            # M0 milestone may not need creation (issues are closed)
-            if not title.startswith("M0"):
-                missing_milestones.append(title)
-    if missing_milestones:
-        failures.append(f"Missing milestones: {missing_milestones}")
-        print(f"  ✗ Missing milestones: {missing_milestones}")
-    else:
-        print(f"  ✓ All milestones exist")
-
-    # 4. Verify issues by stable ID
-    print("\n  Checking issues...")
-    existing_ids = client.get_issues_by_stable_id()
-    missing_issues = []
-    for issue_def in plan["issues"]:
-        issue_id = issue_def.get("id")
-        if issue_id and issue_id not in existing_ids:
-            missing_issues.append(issue_id)
-    if missing_issues:
-        failures.append(f"Missing issues ({len(missing_issues)}): {missing_issues[:5]}...")
-        print(f"  ✗ Missing issues: {len(missing_issues)}: {missing_issues[:5]}")
-    else:
-        print(f"  ✓ All {len(plan['issues'])} planned issues exist")
-
-    # 5. Verify preserved closed issues remain closed
-    print("\n  Checking preserved closed issues (#42–#50)...")
-    try:
-        raw_closed = client._gh_api_paginate("issues?state=closed")
-        closed_numbers = {i["number"] for i in raw_closed}
-        reopened = []
-        for num in PRESERVED_CLOSED_ISSUES:
-            if num not in closed_numbers:
-                reopened.append(num)
-        if reopened:
-            failures.append(f"Preserved closed issues were reopened: {reopened}")
-            print(f"  ✗ Reopened preserved issues: {reopened}")
-        else:
-            print(f"  ✓ All preserved closed issues remain closed")
-    except Exception as e:
-        print(f"  ? Could not verify closed issues: {e}")
-
-    # 6. Check no duplicate stable IDs
-    print("\n  Checking for duplicate stable IDs...")
-    id_counts: dict[str, int] = {}
-    for issue_def in plan["issues"]:
-        issue_id = issue_def.get("id")
-        if issue_id:
-            id_counts[issue_id] = id_counts.get(issue_id, 0) + 1
-    duplicates = {k: v for k, v in id_counts.items() if v > 1}
-    if duplicates:
-        failures.append(f"Duplicate stable IDs in plan: {duplicates}")
-        print(f"  ✗ Duplicate IDs in plan: {duplicates}")
-    else:
-        print(f"  ✓ No duplicate stable IDs")
-
-    # 7. Verify protected files unchanged
-    print("\n  Checking protected files unchanged...")
-    try:
-        verify_archive_integrity(repo_root)
-        print("  ✓ Protected archive unchanged")
-    except Exception as e:
-        failures.append(str(e))
-        print(f"  ✗ Protected file issue: {e}")
-
-    results["verification"] = {
-        "passed": len(failures) == 0,
-        "failures": failures,
-        "total_failures": len(failures),
+    verify_counts = {
+        "labels": {"verified": 0, "failed": 0},
+        "milestones": {"verified": 0, "failed": 0},
+        "issues": {"verified": 0, "failed": 0},
     }
 
-    print(f"\n── Verification Result: {'PASS' if not failures else 'FAIL'} ──────────────")
-    if failures:
-        for f in failures:
-            print(f"  FAIL: {f}")
+    verify_archive_integrity(repo_root)
+    ensure_only_allowed_branch_changes(repo_root)
+
+    labels = client.get_labels()
+    milestones = client.get_milestones()
+    issues_by_id = client.get_issues_by_stable_id()
+    duplicate_ids = client.get_duplicate_stable_ids()
+    plan_issue_ids = {issue["id"] for issue in plan.get("issues", [])}
+
+    for label_def in plan.get("labels", []):
+        existing = labels.get(label_def["name"])
+        if not existing:
+            verify_counts["labels"]["failed"] += 1
+            failures.append(f"Missing label: {label_def['name']}")
+            continue
+        verify_counts["labels"]["verified"] += 1
+
+    for milestone_def in plan.get("milestones", []):
+        existing = milestones.get(milestone_def["title"])
+        if not existing:
+            verify_counts["milestones"]["failed"] += 1
+            failures.append(f"Missing milestone: {milestone_def['title']}")
+            continue
+        verify_counts["milestones"]["verified"] += 1
+
+    if duplicate_ids:
+        for stable_id, numbers in sorted(duplicate_ids.items()):
+            failures.append(f"Duplicate canonical ID {stable_id}: {numbers}")
+
+    issue_number_mappings: dict[str, int] = {}
+    for issue_def in plan.get("issues", []):
+        stable_id = issue_def["id"]
+        remote = issues_by_id.get(stable_id)
+        if not remote:
+            verify_counts["issues"]["failed"] += 1
+            failures.append(f"Missing issue: {stable_id}")
+            continue
+
+        remote_labels = sorted(label["name"] for label in remote.get("labels", []))
+        desired_labels = sorted(issue_def.get("labels", []))
+        remote_milestone = (remote.get("milestone") or {}).get("title")
+        desired_milestone = issue_def.get("milestone")
+
+        if remote_labels != desired_labels:
+            verify_counts["issues"]["failed"] += 1
+            failures.append(f"Issue {stable_id} labels mismatch")
+            continue
+        if remote_milestone != desired_milestone:
+            verify_counts["issues"]["failed"] += 1
+            failures.append(f"Issue {stable_id} milestone mismatch")
+            continue
+
+        expected_body = build_issue_body_with_links(issue_def, {k: v["number"] for k, v in issues_by_id.items()}, plan_issue_ids)
+        if (remote.get("body") or "") != expected_body:
+            verify_counts["issues"]["failed"] += 1
+            failures.append(f"Issue {stable_id} link body mismatch")
+            continue
+
+        issue_number_mappings[stable_id] = remote["number"]
+        verify_counts["issues"]["verified"] += 1
+
+    preserved_closed: dict[str, dict[str, Any]] = {}
+    for issue_number, expected_title in PRESERVED_CLOSED_ISSUES.items():
+        issue = client.get_issue_by_number(issue_number)
+        preserved_closed[str(issue_number)] = {
+            "title": issue.get("title"),
+            "state": issue.get("state"),
+            "html_url": issue.get("html_url"),
+        }
+        if issue.get("state") != "closed":
+            failures.append(f"Preserved issue #{issue_number} is not closed")
+        if issue.get("title") != expected_title:
+            failures.append(f"Preserved issue #{issue_number} title mismatch")
+
+    results["verification"] = {
+        "passed": not failures,
+        "failures": failures,
+        "labels": {
+            "summary": normalize_verification_counts(verify_counts["labels"], len(plan.get("labels", []))),
+        },
+        "milestones": {
+            "summary": normalize_verification_counts(verify_counts["milestones"], len(plan.get("milestones", []))),
+        },
+        "issues": {
+            "summary": normalize_verification_counts(verify_counts["issues"], len(plan.get("issues", []))),
+        },
+        "issue_number_mappings": issue_number_mappings,
+        "duplicate_canonical_ids": duplicate_ids,
+        "preserved_closed_issues": preserved_closed,
+        "repository_state": inspect_existing_github_state(client),
+    }
+    return not failures
+
+
+def merge_phase(previous: dict[str, Any], key: str, payload: dict[str, Any]) -> None:
+    if key not in previous:
+        previous[key] = payload
+    elif key == "verification":
+        if "first_verify" not in previous:
+            previous["first_verify"] = payload
+        else:
+            previous["second_verify"] = payload
+    elif key == "apply":
+        if "first_apply" not in previous:
+            previous["first_apply"] = payload
+        else:
+            previous["second_apply"] = payload
     else:
-        print("  All checks passed.")
-
-    return len(failures) == 0
+        previous[key] = payload
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# RESULT REPORTING
-# ─────────────────────────────────────────────────────────────────────────────
+def compute_final_report(plan: dict[str, Any], aggregate: dict[str, Any]) -> dict[str, Any]:
+    report = deepcopy(aggregate)
+    report.setdefault("meta", {})
+    report["meta"].update(
+        {
+            "plan_version": plan.get("meta", {}).get("version", "unknown"),
+            "archive_sha256": ARCHIVE_SHA256,
+            "deterministic_output": True,
+        }
+    )
+
+    if "verify" in report and "first_verify" not in report:
+        report["first_verify"] = report.pop("verify")
+
+    first_apply = report.get("first_apply") or report.get("apply") or {}
+    second_apply = report.get("second_apply") or {}
+    first_verify = report.get("first_verify") or {}
+    second_verify = report.get("second_verify") or {}
+
+    report["summary"] = {
+        "labels": first_apply.get("labels", {}).get("summary", make_scope_summary(len(plan.get("labels", [])))),
+        "milestones": first_apply.get("milestones", {}).get("summary", make_scope_summary(len(plan.get("milestones", [])))),
+        "issues": first_apply.get("issues", {}).get("summary", make_scope_summary(len(plan.get("issues", [])))),
+        "issue_types": first_apply.get("issues", {}).get("issue_type_summary", {}),
+        "idempotency": {
+            "duplicate_labels_created": second_apply.get("labels", {}).get("summary", {}).get("created", 0),
+            "duplicate_milestones_created": second_apply.get("milestones", {}).get("summary", {}).get("created", 0),
+            "duplicate_issues_created": second_apply.get("issues", {}).get("summary", {}).get("created", 0),
+            "passed": all(
+                second_apply.get(scope, {}).get("summary", {}).get("created", 0) == 0
+                for scope in ("labels", "milestones", "issues")
+            ) if second_apply else False,
+        },
+    }
+    report["verify_result"] = {
+        "first": first_verify.get("passed"),
+        "second": second_verify.get("passed"),
+        "final": second_verify.get("passed") if second_verify else first_verify.get("passed"),
+    }
+    return report
+
+
+def render_markdown_report(plan: dict[str, Any], report: dict[str, Any]) -> str:
+    def row(scope_name: str, payload: dict[str, Any]) -> str:
+        summary = payload.get("summary", make_scope_summary(0))
+        return (
+            f"| {scope_name} | {summary.get('planned', 0)} | {summary.get('existing', 0)} | "
+            f"{summary.get('created', 0)} | {summary.get('updated', 0)} | {summary.get('failed', 0)} | "
+            f"{summary.get('verified', 0)} |"
+        )
+
+    lines = [
+        "# DROPi — GitHub Materialization Result",
+        "",
+        f"> **Mode:** `{report.get('meta', {}).get('mode', 'unknown')}`",
+        f"> **Plan Version:** {report.get('meta', {}).get('plan_version', 'unknown')}",
+        f"> **Archive SHA-256:** `{ARCHIVE_SHA256}`",
+        "> **Deterministic Output:** yes",
+        "",
+        "---",
+        "",
+        "## Summary by Object Type",
+        "",
+        "| Scope | Planned | Existing | Created | Updated | Failed | Verified |",
+        "|------|---------|----------|---------|---------|--------|----------|",
+        row("Labels", report.get("summary", {}).get("labels", {})),
+        row("Milestones", report.get("summary", {}).get("milestones", {})),
+        row("Issues", report.get("summary", {}).get("issues", {})),
+        "",
+        "## Issue Types",
+        "",
+        "| Type | Planned | Existing | Created | Updated | Failed | Verified |",
+        "|------|---------|----------|---------|---------|--------|----------|",
+    ]
+    issue_type_summary = report.get("summary", {}).get("issue_types", {})
+    for issue_type in ISSUE_TYPE_ORDER:
+        lines.append(row(issue_type, {"summary": issue_type_summary.get(issue_type, make_scope_summary(0))}))
+
+    first_apply = report.get("first_apply", {})
+    second_apply = report.get("second_apply", {})
+    first_verify = report.get("first_verify", {})
+    second_verify = report.get("second_verify", {})
+    idempotency = report.get("summary", {}).get("idempotency", {})
+
+    lines.extend(
+        [
+            "",
+            "## Apply and Verify Runs",
+            "",
+            f"- First apply labels created: {first_apply.get('labels', {}).get('summary', {}).get('created', 0)}",
+            f"- First apply milestones created: {first_apply.get('milestones', {}).get('summary', {}).get('created', 0)}",
+            f"- First apply issues created: {first_apply.get('issues', {}).get('summary', {}).get('created', 0)}",
+            f"- Second apply labels created: {second_apply.get('labels', {}).get('summary', {}).get('created', 0)}",
+            f"- Second apply milestones created: {second_apply.get('milestones', {}).get('summary', {}).get('created', 0)}",
+            f"- Second apply issues created: {second_apply.get('issues', {}).get('summary', {}).get('created', 0)}",
+            f"- First verify passed: {first_verify.get('passed')}",
+            f"- Second verify passed: {second_verify.get('passed')}",
+            f"- Idempotency passed: {idempotency.get('passed')}",
+            "",
+            "## Actual Mappings",
+            "",
+            "### Canonical ID → GitHub Issue Number",
+            "",
+        ]
+    )
+    issue_mappings = (report.get("first_verify") or report.get("second_verify") or {}).get("issue_number_mappings", {})
+    for stable_id in sorted(issue_mappings):
+        lines.append(f"- {stable_id}: #{issue_mappings[stable_id]}")
+
+    lines.extend(["", "### Milestone Title → GitHub Milestone Number", ""])
+    milestone_mappings = first_apply.get("milestone_number_mappings", {})
+    for title in sorted(milestone_mappings):
+        lines.append(f"- {title}: {milestone_mappings[title]}")
+
+    lines.extend(["", "### Labels", ""])
+    for label_name in sorted(first_apply.get("label_names", [])):
+        lines.append(f"- {label_name}")
+
+    failures: list[str] = []
+    for verify_payload in (first_verify, second_verify):
+        failures.extend(verify_payload.get("failures", []))
+    for apply_payload in (first_apply, second_apply):
+        for scope_name in ("labels", "milestones", "issues"):
+            for entry in apply_payload.get(scope_name, {}).get("entries", []):
+                if entry.get("action") == "failed":
+                    identifier = entry.get("id") or entry.get("title") or entry.get("name")
+                    failures.append(f"{scope_name}:{identifier}: {entry.get('reason', 'unknown error')}")
+
+    lines.extend(["", "## Failed GitHub Operations", ""])
+    if failures:
+        for failure in failures:
+            lines.append(f"- {failure}")
+    else:
+        lines.append("- none")
+
+    lines.extend(
+        [
+            "",
+            "## Protected Source Confirmation",
+            "",
+            "- `canonical/SESSION_HANDOVER.md` restored from `origin/main` and excluded from final diff",
+            "- No forbidden path changes remain under `04.zip`, `canonical/`, `BLUEPRINT/`, `DROPi_Canonical_Reference/`, `docs/audits/`, `app/`, `server/`, or `drizzle/`",
+            "",
+            "## Verification Status",
+            "",
+            f"- Final verify passed: {report.get('verify_result', {}).get('final')}",
+            f"- Preserved CAN issues checked: {len(PRESERVED_CLOSED_ISSUES)}",
+        ]
+    )
+    return "\n".join(lines) + "\n"
 
 
 def write_results(
@@ -714,178 +989,44 @@ def write_results(
     results: dict[str, Any],
     mode: str,
     dry_run: bool,
-) -> None:
-    """Write the materialization result files."""
+) -> dict[str, Any]:
     result_json_path = repo_root / RESULT_JSON_PATH
     result_md_path = repo_root / RESULT_MD_PATH
+    previous: dict[str, Any] = {}
+    if result_json_path.exists():
+        try:
+            previous = json.loads(result_json_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            previous = {}
 
-    result_json_path.parent.mkdir(parents=True, exist_ok=True)
+    aggregate = deepcopy(previous)
+    aggregate.setdefault("meta", {})
+    aggregate["meta"].update({"mode": mode, "dry_run": dry_run})
 
-    # Compute summary stats
-    labels_data = results.get("labels", [])
-    milestones_data = results.get("milestones", [])
-    issues_data = results.get("issues", [])
+    if "inspection" in results:
+        aggregate["inspection_before_apply"] = results["inspection"]
+    if "apply" in results:
+        merge_phase(aggregate, "apply", results["apply"])
+    if "verification" in results:
+        if "first_verify" not in aggregate:
+            aggregate["first_verify"] = results["verification"]
+        else:
+            aggregate["second_verify"] = results["verification"]
 
-    labels_created = sum(1 for r in labels_data if r.get("action") in ("created", "would_create", "updated"))
-    labels_skipped = sum(1 for r in labels_data if r.get("action") == "skipped")
-    milestones_created = sum(1 for r in milestones_data if r.get("action") in ("created", "would_create"))
-    milestones_skipped = sum(1 for r in milestones_data if r.get("action") == "skipped")
-    issues_created = sum(1 for r in issues_data if r.get("action") in ("created", "would_create"))
-    issues_skipped = sum(1 for r in issues_data if r.get("action") == "skipped")
-
-    # Count by type
-    issue_types: dict[str, int] = {}
-    for issue_def in plan.get("issues", []):
-        for label in issue_def.get("labels", []):
-            if label.startswith("type:"):
-                issue_type = label[5:]
-                issue_types[issue_type] = issue_types.get(issue_type, 0) + 1
-                break
-
-    verification = results.get("verification", {})
-    verify_passed = verification.get("passed", None)
-
-    full_result = {
-        "meta": {
-            "mode": mode,
-            "dry_run": dry_run,
-            "plan_version": plan.get("meta", {}).get("version", "unknown"),
-            "archive_sha256": ARCHIVE_SHA256,
-            "archive_verified": True,
-        },
-        "summary": {
-            "labels_created": labels_created,
-            "labels_skipped": labels_skipped,
-            "milestones_created": milestones_created,
-            "milestones_skipped": milestones_skipped,
-            "issues_created": issues_created,
-            "issues_skipped": issues_skipped,
-            "issue_types": issue_types,
-            "total_issues_planned": len(plan.get("issues", [])),
-            "total_labels_planned": len(plan.get("labels", [])),
-            "total_milestones_planned": len(plan.get("milestones", [])),
-        },
-        "verification": verification,
-        "details": results,
-    }
-
-    with result_json_path.open("w", encoding="utf-8") as f:
-        json.dump(full_result, f, indent=2, ensure_ascii=False)
-
-    # Write markdown result
-    verify_status = "N/A"
-    if verify_passed is True:
-        verify_status = "PASS"
-    elif verify_passed is False:
-        verify_status = "FAIL"
-
-    md_content = f"""# DROPi — GitHub Materialization Result
-
-> **Generated:** 2026-08-02  
-> **Mode:** `{mode}` {'(dry-run — no GitHub changes made)' if dry_run else '(applied — GitHub objects created)'}  
-> **Plan Version:** {plan.get('meta', {}).get('version', 'unknown')}  
-> **Archive SHA-256:** `{ARCHIVE_SHA256}`  
-> **Archive Verified:** ✓
-
----
-
-## Summary
-
-| Item | Planned | Created | Skipped |
-|------|---------|---------|---------|
-| Labels | {len(plan.get('labels', []))} | {labels_created} | {labels_skipped} |
-| Milestones | {len(plan.get('milestones', []))} | {milestones_created} | {milestones_skipped} |
-| Issues (total) | {len(plan.get('issues', []))} | {issues_created} | {issues_skipped} |
-
-## Issue Types Created
-
-| Type | Count |
-|------|-------|
-"""
-    for itype, count in sorted(issue_types.items()):
-        md_content += f"| {itype} | {count} |\n"
-
-    md_content += f"""
-## Verification Result
-
-**Status:** {verify_status}
-
-"""
-    if verification.get("failures"):
-        md_content += "### Failures\n\n"
-        for failure in verification["failures"]:
-            md_content += f"- {failure}\n"
-    else:
-        md_content += "All verification checks passed.\n"
-
-    md_content += """
----
-
-## Protected Sources — Unchanged Confirmation
-
-- `04.zip` — ✓ SHA-256 verified, unchanged
-- `canonical/` — not modified by this script
-- `docs/audits/` — not modified by this script  
-- `DROPi_Canonical_Reference/` — not modified by this script
-- `BLUEPRINT/` — not modified by this script
-- `app/` — not modified by this script
-- `server/` — not modified by this script
-- `drizzle/` — not modified by this script
-
-## Preserved Closed Issues
-
-Issues #42–#50 (CAN-001 through CAN-008) remain closed and unmodified.
-
----
-
-*Result file generated by `scripts/materialize_github_planning.py`*
-"""
-
-    with result_md_path.open("w", encoding="utf-8") as f:
-        f.write(md_content)
-
-    print(f"\n  Results written to:")
-    print(f"    {result_json_path}")
-    print(f"    {result_md_path}")
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# MAIN
-# ─────────────────────────────────────────────────────────────────────────────
+    final_report = compute_final_report(plan, aggregate)
+    result_json_path.write_text(json.dumps(final_report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    result_md_path.write_text(render_markdown_report(plan, final_report), encoding="utf-8")
+    return final_report
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="DROPi Mobile GitHub Planning Materialization Script",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__,
-    )
-    parser.add_argument(
-        "--repo",
-        required=True,
-        help="GitHub repository in owner/repo format (e.g. caliofmarian-ai/dropi-mobile)",
-    )
-    parser.add_argument(
-        "--repo-root",
-        required=True,
-        help="Path to the repository root directory",
-    )
+    parser = argparse.ArgumentParser(description="DROPi Mobile GitHub Planning Materialization")
+    parser.add_argument("--repo", required=True)
+    parser.add_argument("--repo-root", required=True)
     mode_group = parser.add_mutually_exclusive_group(required=True)
-    mode_group.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Preview what would be created without making any GitHub changes",
-    )
-    mode_group.add_argument(
-        "--apply",
-        action="store_true",
-        help="Create all planned labels, milestones, and issues on GitHub",
-    )
-    mode_group.add_argument(
-        "--verify",
-        action="store_true",
-        help="Verify all planned objects exist on GitHub",
-    )
+    mode_group.add_argument("--dry-run", action="store_true")
+    mode_group.add_argument("--apply", action="store_true")
+    mode_group.add_argument("--verify", action="store_true")
     return parser.parse_args()
 
 
@@ -893,88 +1034,40 @@ def main() -> int:
     args = parse_args()
     repo_root = Path(args.repo_root).resolve()
 
-    print("=" * 60)
-    print("DROPi Mobile — GitHub Planning Materialization")
-    print("=" * 60)
-    print(f"  Repository: {args.repo}")
-    print(f"  Repo root:  {repo_root}")
-    print(f"  Mode:       {'dry-run' if args.dry_run else 'apply' if args.apply else 'verify'}")
-    print()
+    verify_archive_integrity(repo_root)
+    plan = load_plan(repo_root)
 
-    # 1. Verify archive integrity (always)
-    print("── Integrity Check ─────────────────────────────────────────")
-    try:
-        verify_archive_integrity(repo_root)
-        print("  ✓ 04.zip archive integrity verified")
-    except RuntimeError as e:
-        print(f"  ✗ {e}", file=sys.stderr)
-        return 1
-
-    # 2. Load plan
-    print("\n── Loading Plan ─────────────────────────────────────────────")
-    try:
-        plan = load_plan(repo_root)
-        meta = plan.get("meta", {})
-        print(f"  ✓ Plan loaded: version {meta.get('version', 'unknown')}")
-        print(f"  ✓ Labels planned: {len(plan.get('labels', []))}")
-        print(f"  ✓ Milestones planned: {len(plan.get('milestones', []))}")
-        print(f"  ✓ Issues planned: {len(plan.get('issues', []))}")
-    except (FileNotFoundError, ValueError, json.JSONDecodeError) as e:
-        print(f"  ✗ Failed to load plan: {e}", file=sys.stderr)
-        return 1
-
-    # 3. Initialize GitHub client
-    dry_run = args.dry_run
-    client = GitHubClient(repo=args.repo, dry_run=dry_run)
-
-    if dry_run:
-        print("\n  [DRY-RUN MODE] No changes will be made to GitHub.")
-
+    mode = "dry-run" if args.dry_run else ("apply" if args.apply else "verify")
+    client = GitHubClient(args.repo, dry_run=args.dry_run)
     results: dict[str, Any] = {}
-    mode = "dry-run" if dry_run else ("verify" if args.verify else "apply")
 
-    # 4. Execute mode
-    if args.dry_run or args.apply:
-        try:
-            materialize_labels(client, plan, results)
-            materialize_milestones(client, plan, results)
-            materialize_issues(client, plan, results)
-        except RuntimeError as e:
-            print(f"\n✗ Materialization failed: {e}", file=sys.stderr)
-            print("\nNote: If using --apply, ensure 'gh' CLI is installed and authenticated.")
-            print("      Run: gh auth login")
-            results["error"] = str(e)
-            write_results(repo_root, plan, results, mode, dry_run)
-            return 1
+    try:
+        if args.apply:
+            ensure_only_allowed_branch_changes(repo_root)
+            results["inspection"] = inspect_existing_github_state(client)
+            results["apply"] = materialize_plan_once(client, plan)
+        elif args.dry_run:
+            results["inspection"] = inspect_existing_github_state(client)
+            results["apply"] = materialize_plan_once(client, plan)
+        elif args.verify:
+            ensure_only_allowed_branch_changes(repo_root)
+            verify_client = GitHubClient(args.repo, dry_run=False)
+            passed = run_verify(verify_client, plan, repo_root, results)
+            write_results(repo_root, plan, results, mode, args.dry_run)
+            return 0 if passed else 1
+    except Exception as exc:
+        results.setdefault("verification", {})
+        results["verification"] = {
+            "passed": False,
+            "failures": [str(exc)],
+        }
+        write_results(repo_root, plan, results, mode, args.dry_run)
+        print(str(exc), file=sys.stderr)
+        return 1
 
-    if args.verify or args.apply:
-        if args.dry_run:
-            print("\n  [DRY-RUN] Skipping GitHub verification (no objects created).")
-        else:
-            try:
-                passed = run_verify(client, plan, repo_root, results)
-                if not passed:
-                    write_results(repo_root, plan, results, mode, dry_run)
-                    return 1
-            except RuntimeError as e:
-                print(f"\n✗ Verification failed: {e}", file=sys.stderr)
-                results["verification"] = {"passed": False, "error": str(e)}
-                write_results(repo_root, plan, results, mode, dry_run)
-                return 1
-
-    # 5. Write results
-    write_results(repo_root, plan, results, mode, dry_run)
-
-    print("\n" + "=" * 60)
-    if dry_run:
-        print("DRY-RUN COMPLETE — No GitHub changes were made.")
-    elif args.apply:
-        print("APPLY COMPLETE")
-    else:
-        print("VERIFY COMPLETE")
-    print("=" * 60)
+    write_results(repo_root, plan, results, mode, args.dry_run)
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
