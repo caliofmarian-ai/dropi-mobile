@@ -70,3 +70,7 @@ Thumbs.db
 
 # local secrets
 .env
+
+# Python bytecode
+__pycache__/
+*.py[cod]
