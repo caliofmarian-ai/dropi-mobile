@@ -2,46 +2,72 @@
 
 ## Purpose
 
-This audit defines and validates the deterministic, reproducible, read-only
-regeneration process for `DROPi_Canonical_Reference/`.
+This audit defines the deterministic, read-only regeneration procedure for
+`DROPi_Canonical_Reference/` and records the current certification blockers.
 
 ## Scope
 
 - **Audit**: CAN-008
 - **Package**: `DROPi_Canonical_Reference/` (217 files)
 - **Tool**: `scripts/regenerate_canonical_reference.py`
-- **Provenance source**: CAN-007 (`docs/audits/can-007/derived_package_provenance.json`)
+- **Primary audited inputs**:
+  - `docs/audits/can-006/derived_package_statistics.json`
+  - `docs/audits/can-007/derived_package_provenance.json`
+  - `04.zip`
 
 ## Certification status
 
 **NOT CERTIFIABLE**
 
-Four files prevent full certification:
+Current blockers: **8**
 
 - `00_Project/Governance/SESSION_HANDOVER.md` — `derived_transformation_algorithm_not_documented`
 - `00_Project/Status_Reports/AUDIT_TRACKING.md` — `unsupported_no_deterministic_source`
 - `00_Project/Status_Reports/SESSION_STATE.md` — `unsupported_no_deterministic_source`
 - `09_Reference/Package_Metadata/inventory.json` — `unsupported_no_deterministic_source`
+- `AI_CANONICAL_REFERENCE_AUDIT_REPORT.md` — `package_control_audit_report_checked_in_bytes_depend_on_undocumented_curated_audit_narrative`
+- `CANONICAL_KNOWLEDGE_INDEX.md` — `package_control_knowledge_index_checked_in_bytes_depend_on_undocumented_curated_navigation_text`
+- `CANONICAL_MANIFEST.md` — `package_control_manifest_checked_in_bytes_depend_on_undocumented_curated_per_document_metadata`
+- `README_FOR_DROPi_TYCOON.md` — `package_control_readme_checked_in_bytes_depend_on_undocumented_branch_commit_generation_metadata`
 
-The 213 remaining files (209 copied + 4 package-control) are deterministically
-reproduced and byte-identical.
+## Exact package-control paths
+
+1. `AI_CANONICAL_REFERENCE_AUDIT_REPORT.md`
+2. `CANONICAL_KNOWLEDGE_INDEX.md`
+3. `CANONICAL_MANIFEST.md`
+4. `README_FOR_DROPi_TYCOON.md`
+
+## Package-control generation rules
+
+| Path | Semantic role | Deterministic generator inputs |
+| --- | --- | --- |
+| `AI_CANONICAL_REFERENCE_AUDIT_REPORT.md` | Recovery audit summary | CAN-006 statistics, CAN-007 provenance, `04.zip` SHA-256 evidence |
+| `CANONICAL_KNOWLEDGE_INDEX.md` | Navigation index | CAN-006 statistics and section counts, CAN-007 provenance |
+| `CANONICAL_MANIFEST.md` | Package inventory manifest | CAN-006 package inventory metadata, CAN-007 provenance |
+| `README_FOR_DROPi_TYCOON.md` | Consumer usage readme | CAN-006 package totals, CAN-007 provenance, `04.zip` SHA-256 evidence |
+
+These files are generated from documented inputs only. Existing bytes inside
+`DROPi_Canonical_Reference/` are not used as the source for regenerated
+package-control output.
+
+## Current regeneration summary
+
+- Expected package files: 217
+- Actually regenerated from documented inputs: 213
+- Retained existing fallback files: 4
+- Package-control files regenerated: 4
+- Package-control files not exactly reproducible: 4
+- Certifiable files: 209
+- Non-certifiable files: 8
 
 ## Output files
 
 | File | Description |
 | --- | --- |
-| `regeneration_manifest.json` | Full per-file regeneration results |
-| `regeneration_report.md` | Human-readable regeneration report |
-| `README.md` | This file |
-
-## Related audits
-
-| Audit | Purpose |
-| --- | --- |
-| CAN-001 | 04.zip inventory and SHA-256 evidence |
-| CAN-006 | Package statistics reconciliation |
-| CAN-007 | Per-file provenance records (primary input) |
+| `regeneration_manifest.json` | Full per-file results with source category, counters, and blockers |
+| `regeneration_report.md` | Human-readable report with package-control evidence |
+| `README.md` | This audit overview |
 
 ## Procedure
 
-See `docs/CANONICAL_PACKAGE_REGENERATION.md` for operational commands.
+See `/home/runner/work/dropi-mobile/dropi-mobile/docs/CANONICAL_PACKAGE_REGENERATION.md` for the operational commands and validation workflow.
