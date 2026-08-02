@@ -4,6 +4,8 @@ import hashlib
 import json
 import pathlib
 import re
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -152,6 +154,77 @@ class TestVerifyDerivedPackageProvenance(unittest.TestCase):
         self.assertEqual(canonical_before, tree_fingerprint(self.repo_root / "canonical"))
         self.assertEqual(blueprint_before, tree_fingerprint(self.repo_root / "BLUEPRINT"))
         self.assertEqual(package_before, tree_fingerprint(self.repo_root / "DROPi_Canonical_Reference"))
+
+    def test_cli_output_dir_flag_honoured_byte_identical_to_checked_in(self) -> None:
+        """--output-dir passed on the CLI must be used (not ignored) and produce
+        output byte-identical to the checked-in docs/audits/can-007 files."""
+        checked_json = (self.repo_root / "docs/audits/can-007/derived_package_provenance.json").read_bytes()
+        checked_md = (self.repo_root / "docs/audits/can-007/derived_package_provenance.md").read_bytes()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_dir = pathlib.Path(tmpdir)
+            result = subprocess.run(
+                [sys.executable, str(self.repo_root / "scripts/verify_derived_package_provenance.py"),
+                 "--repo-root", str(self.repo_root),
+                 "--output-dir", tmpdir],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            gen_json = (out_dir / "derived_package_provenance.json").read_bytes()
+            gen_md = (out_dir / "derived_package_provenance.md").read_bytes()
+
+        self.assertEqual(gen_json, checked_json, "CLI-generated JSON must be byte-identical to checked-in")
+        self.assertEqual(gen_md, checked_md, "CLI-generated Markdown must be byte-identical to checked-in")
+
+    def test_relative_cwd_output_byte_identical_to_absolute_output(self) -> None:
+        """A relative --output-dir (resolved from CWD) must produce the same bytes
+        as an absolute --output-dir, verifying CWD-relative anchoring works."""
+        with tempfile.TemporaryDirectory() as cwd_tmp, tempfile.TemporaryDirectory() as abs_tmp:
+            rel_subdir = "out"
+            rel_out = pathlib.Path(cwd_tmp) / rel_subdir
+
+            result_rel = subprocess.run(
+                [sys.executable, str(self.repo_root / "scripts/verify_derived_package_provenance.py"),
+                 "--repo-root", str(self.repo_root),
+                 "--output-dir", rel_subdir],
+                capture_output=True, text=True, cwd=cwd_tmp,
+            )
+            self.assertEqual(result_rel.returncode, 0, result_rel.stderr)
+
+            result_abs = subprocess.run(
+                [sys.executable, str(self.repo_root / "scripts/verify_derived_package_provenance.py"),
+                 "--repo-root", str(self.repo_root),
+                 "--output-dir", abs_tmp],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(result_abs.returncode, 0, result_abs.stderr)
+
+            rel_json = (rel_out / "derived_package_provenance.json").read_bytes()
+            abs_json = (pathlib.Path(abs_tmp) / "derived_package_provenance.json").read_bytes()
+            rel_md = (rel_out / "derived_package_provenance.md").read_bytes()
+            abs_md = (pathlib.Path(abs_tmp) / "derived_package_provenance.md").read_bytes()
+
+        self.assertEqual(rel_json, abs_json, "relative-CWD JSON must be byte-identical to absolute-path JSON")
+        self.assertEqual(rel_md, abs_md, "relative-CWD Markdown must be byte-identical to absolute-path Markdown")
+        # Output must not land inside repo_root when a relative CWD outside it is used
+        self.assertFalse((self.repo_root / rel_subdir).exists(), "output must not be written inside repo_root")
+
+    def test_no_output_path_in_report_content(self) -> None:
+        """The output directory path must not appear anywhere in the generated JSON or Markdown."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_dir = pathlib.Path(tmpdir)
+            result = subprocess.run(
+                [sys.executable, str(self.repo_root / "scripts/verify_derived_package_provenance.py"),
+                 "--repo-root", str(self.repo_root),
+                 "--output-dir", tmpdir],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            gen_json = (out_dir / "derived_package_provenance.json").read_text(encoding="utf-8")
+            gen_md = (out_dir / "derived_package_provenance.md").read_text(encoding="utf-8")
+
+        self.assertNotIn(tmpdir, gen_json, "output dir path must not appear in generated JSON")
+        self.assertNotIn(tmpdir, gen_md, "output dir path must not appear in generated Markdown")
 
     def test_no_timestamps_in_generated_outputs(self) -> None:
         md = build_markdown(self.report)

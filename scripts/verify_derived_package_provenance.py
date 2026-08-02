@@ -567,7 +567,7 @@ def build_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def parse_args(argv: list[str]) -> argparse.Namespace:
+def parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="CAN-007 derived package provenance verifier")
     parser.add_argument("--repo-root", default=str(DEFAULT_REPO_ROOT))
     parser.add_argument("--package-root", default=DEFAULT_PACKAGE_ROOT)
@@ -576,11 +576,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = parse_args(argv if argv is not None else [])
+    args = parse_args(argv)
     repo_root = pathlib.Path(args.repo_root).resolve()
     report = build_report(repo_root=repo_root, package_root_name=args.package_root)
 
-    output_dir = (repo_root / args.output_dir).resolve()
+    output_dir = pathlib.Path(args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
     json_path = output_dir / "derived_package_provenance.json"
