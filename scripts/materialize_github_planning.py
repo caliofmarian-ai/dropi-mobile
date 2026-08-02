@@ -819,12 +819,14 @@ def merge_phase(previous: dict[str, Any], key: str, payload: dict[str, Any]) -> 
         previous[key] = payload
     elif key == "verification":
         if "first_verify" not in previous:
-            previous["first_verify"] = payload
+            previous["first_verify"] = previous.pop("verification")
+            previous["second_verify"] = payload
         else:
             previous["second_verify"] = payload
     elif key == "apply":
         if "first_apply" not in previous:
-            previous["first_apply"] = payload
+            previous["first_apply"] = previous.pop("apply")
+            previous["second_apply"] = payload
         else:
             previous["second_apply"] = payload
     else:
