@@ -153,6 +153,25 @@ class TestVerifyDerivedPackageProvenance(unittest.TestCase):
         self.assertEqual(blueprint_before, tree_fingerprint(self.repo_root / "BLUEPRINT"))
         self.assertEqual(package_before, tree_fingerprint(self.repo_root / "DROPi_Canonical_Reference"))
 
+    def test_output_dir_resolves_from_cwd_not_repo_root(self) -> None:
+        """--output-dir with a relative path must resolve from CWD, not from repo_root."""
+        import os
+
+        with tempfile.TemporaryDirectory() as cwd_tmp:
+            rel_subdir = "out"
+            expected_out = pathlib.Path(cwd_tmp) / rel_subdir
+            prev_cwd = os.getcwd()
+            try:
+                os.chdir(cwd_tmp)
+                rc = main(["--repo-root", str(self.repo_root), "--output-dir", rel_subdir])
+            finally:
+                os.chdir(prev_cwd)
+            self.assertEqual(rc, 0)
+            self.assertTrue((expected_out / "derived_package_provenance.json").exists())
+            self.assertTrue((expected_out / "derived_package_provenance.md").exists())
+            wrong_out = self.repo_root / rel_subdir
+            self.assertFalse(wrong_out.exists(), "output must not be written inside repo_root")
+
     def test_no_timestamps_in_generated_outputs(self) -> None:
         md = build_markdown(self.report)
         js = json.dumps(self.report, ensure_ascii=False, indent=2, sort_keys=True)

@@ -580,7 +580,7 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = pathlib.Path(args.repo_root).resolve()
     report = build_report(repo_root=repo_root, package_root_name=args.package_root)
 
-    output_dir = (repo_root / args.output_dir).resolve()
+    output_dir = pathlib.Path(args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
     json_path = output_dir / "derived_package_provenance.json"
