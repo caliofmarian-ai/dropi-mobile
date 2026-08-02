@@ -910,11 +910,13 @@ def build_manifest(
         "compatibility_notes": (
             "Requires Python 3.9+, standard library only. "
             "GitHub Actions compatibility was assessed for a clean checkout and was not exercised in an actual workflow run for this PR. "
+            "Android shared storage cannot safely host Node symlink-heavy dependency installation, but this Python standard-library tool itself is compatible. "
             "Termux requires the python package. All modes run without network access."
         ),
         "limitations": (
             "04.zip must be present. canonical/docs/00_MasterPlan/ must be present. "
-            "CAN-007 provenance records must exist at docs/audits/can-007/derived_package_provenance.json."
+            "CAN-007 provenance records must exist at docs/audits/can-007/derived_package_provenance.json. "
+            "No package mutation is performed. No 04.zip mutation is performed."
         ),
     }
 
@@ -966,7 +968,7 @@ def build_report_markdown(manifest: dict[str, Any]) -> str:
         f"- Validation mode: `{manifest['mode']}`",
         "- Package-control files are regenerated from documented inputs; existing package bytes are never used as the generation source.",
         "",
-        "## 2. GitHub Actions assessment",
+        "## 2. GitHub Actions compatibility assessment",
         "",
         "| Field | Value |",
         "| --- | --- |",

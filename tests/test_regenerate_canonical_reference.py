@@ -25,6 +25,7 @@ _MANIFEST_PATH = _REPO_ROOT / "docs/audits/can-008/regeneration_manifest.json"
 _REPORT_PATH = _REPO_ROOT / "docs/audits/can-008/regeneration_report.md"
 _PROCEDURE_PATH = _REPO_ROOT / "docs/CANONICAL_PACKAGE_REGENERATION.md"
 _README_PATH = _REPO_ROOT / "docs/audits/can-008/README.md"
+_CANONICAL_TERMUX_PATH = "~/storage/shared/AI-Projects/dropi-mobile"
 
 EXPECTED_PACKAGE_CONTROL_PATHS = [
     "AI_CANONICAL_REFERENCE_AUDIT_REPORT.md",
@@ -52,6 +53,21 @@ def run_main(args: list[str]) -> int:
         return regen.main(args)
     except SystemExit as exc:
         return int(exc.code) if exc.code is not None else 0
+
+
+def assert_no_serialized_runtime_paths(
+    test_case: unittest.TestCase,
+    text: str,
+    *,
+    forbidden_resolved_paths: list[str] | None = None,
+) -> None:
+    test_case.assertNotIn("/home/runner/", text)
+    test_case.assertNotIn("/data/data/com.termux/", text)
+    test_case.assertNotIn("/storage/emulated/", text)
+    test_case.assertNotRegex(text, r"/tmp/[^\s`\"']+")
+    for resolved_path in forbidden_resolved_paths or []:
+        if resolved_path:
+            test_case.assertNotIn(resolved_path, text)
 
 
 def fresh_manifest(repo_root: pathlib.Path = _REPO_ROOT) -> dict[str, object]:
@@ -272,12 +288,34 @@ class TestRegenerateCanonicalReference(unittest.TestCase):
             ])
             manifest_text = (pathlib.Path(audit_tmp) / "regeneration_manifest.json").read_text(encoding="utf-8")
             report_text = (pathlib.Path(audit_tmp) / "regeneration_report.md").read_text(encoding="utf-8")
-            self.assertNotIn(out_dir, manifest_text)
-            self.assertNotIn(out_dir, report_text)
+            assert_no_serialized_runtime_paths(
+                self,
+                manifest_text,
+                forbidden_resolved_paths=[str(_REPO_ROOT), out_dir, audit_tmp],
+            )
+            assert_no_serialized_runtime_paths(
+                self,
+                report_text,
+                forbidden_resolved_paths=[str(_REPO_ROOT), out_dir, audit_tmp],
+            )
             self.assertNotRegex(manifest_text, r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
             self.assertNotRegex(report_text, r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
 
-    def test_15_github_actions_wording_is_honest(self) -> None:
+    def test_15_checked_in_outputs_and_procedure_are_portable(self) -> None:
+        manifest_text = _MANIFEST_PATH.read_text(encoding="utf-8")
+        report_text = _REPORT_PATH.read_text(encoding="utf-8")
+        readme_text = _README_PATH.read_text(encoding="utf-8")
+        procedure_text = _PROCEDURE_PATH.read_text(encoding="utf-8")
+
+        for text in (manifest_text, report_text, readme_text, procedure_text):
+            assert_no_serialized_runtime_paths(self, text, forbidden_resolved_paths=[str(_REPO_ROOT)])
+
+        self.assertIn(_CANONICAL_TERMUX_PATH, procedure_text)
+        self.assertNotIn(_CANONICAL_TERMUX_PATH, manifest_text)
+        self.assertNotIn(_CANONICAL_TERMUX_PATH, report_text)
+        self.assertNotIn(_CANONICAL_TERMUX_PATH, readme_text)
+
+    def test_16_github_actions_wording_is_honest(self) -> None:
         manifest = fresh_manifest()
         env = manifest["environment_compatibility"]
         self.assertEqual(env["github_actions"], "assessed_compatible_with_clean_checkout")
@@ -287,13 +325,50 @@ class TestRegenerateCanonicalReference(unittest.TestCase):
         )
         procedure_text = _PROCEDURE_PATH.read_text(encoding="utf-8")
         report_text = _REPORT_PATH.read_text(encoding="utf-8")
+        readme_text = _README_PATH.read_text(encoding="utf-8")
         self.assertIn("assessed_compatible_with_clean_checkout", procedure_text)
         self.assertIn("not_exercised_in_actual_github_actions_for_this_pr", procedure_text)
         self.assertIn("assessed_compatible_with_clean_checkout", report_text)
-        self.assertNotIn("tested with ubuntu-latest", procedure_text)
+        self.assertIn("assessed_compatible_with_clean_checkout", readme_text)
+        self.assertIn("not_exercised_in_actual_github_actions_for_this_pr", readme_text)
         self.assertNotIn("tested with ubuntu-latest", report_text)
+        self.assertIn("Do not claim `tested with ubuntu-latest`", procedure_text)
+        self.assertIn("`validated on GitHub Actions`", procedure_text)
+        self.assertIn("`executed in CI`", procedure_text)
+        self.assertIn("does not claim `tested with ubuntu-latest`", readme_text)
+        self.assertIn("`validated on GitHub\nActions`", readme_text)
+        self.assertIn("`executed in CI`", readme_text)
+        self.assertNotIn("tested with ubuntu-latest", report_text)
+        self.assertNotIn("validated on GitHub Actions", report_text)
+        self.assertNotIn("executed in CI", report_text)
 
-    def test_16_checked_in_outputs_match_fresh_generation(self) -> None:
+    def test_17_procedure_contains_required_structure(self) -> None:
+        procedure_text = _PROCEDURE_PATH.read_text(encoding="utf-8")
+        required_snippets = [
+            "## A. Termux/Android",
+            "## B. Standard Linux",
+            "## C. GitHub Actions compatibility assessment",
+            "cd ~/storage/shared/AI-Projects/dropi-mobile || exit 1",
+            "cd /path/to/dropi-mobile",
+            "Validation-only command",
+            "External regeneration command",
+            "Deterministic comparison command",
+            "Exit-code table",
+            "Failure recovery",
+            "Prohibition on manual package edits",
+            "Prohibition on modifying 04.zip",
+            "Future safe replacement PR procedure",
+            "Review checklist",
+            "pnpm lint`: PASS",
+            "pnpm test`: PASS",
+            "pnpm build`: PASS",
+            "pnpm check`: PRE-EXISTING FAILURE",
+            "Unrelated TypeScript errors must not be repaired during CAN-008.",
+        ]
+        for snippet in required_snippets:
+            self.assertIn(snippet, procedure_text)
+
+    def test_18_checked_in_outputs_match_fresh_generation(self) -> None:
         with tempfile.TemporaryDirectory() as audit_tmp:
             code = run_main([
                 "--repo-root", str(_REPO_ROOT),
@@ -310,7 +385,7 @@ class TestRegenerateCanonicalReference(unittest.TestCase):
                 (pathlib.Path(audit_tmp) / "regeneration_report.md").read_bytes(),
             )
 
-    def test_17_compare_with_checked_in_package_reports_divergence(self) -> None:
+    def test_19_compare_with_checked_in_package_reports_divergence(self) -> None:
         with tempfile.TemporaryDirectory() as out_dir, tempfile.TemporaryDirectory() as audit_tmp:
             code = run_main([
                 "--repo-root", str(_REPO_ROOT),
@@ -320,7 +395,7 @@ class TestRegenerateCanonicalReference(unittest.TestCase):
             ])
         self.assertEqual(code, regen.EXIT_DIVERGENT)
 
-    def test_18_unsafe_output_paths_rejected(self) -> None:
+    def test_20_unsafe_output_paths_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as audit_tmp:
             code = run_main([
                 "--repo-root", str(_REPO_ROOT),
@@ -335,7 +410,7 @@ class TestRegenerateCanonicalReference(unittest.TestCase):
             ])
             self.assertEqual(code, regen.EXIT_UNSAFE_PATH)
 
-    def test_19_requires_validate_or_output_dir(self) -> None:
+    def test_21_requires_validate_or_output_dir(self) -> None:
         with tempfile.TemporaryDirectory() as audit_tmp:
             code = run_main([
                 "--repo-root", str(_REPO_ROOT),
@@ -343,7 +418,7 @@ class TestRegenerateCanonicalReference(unittest.TestCase):
             ])
         self.assertEqual(code, regen.EXIT_UNSAFE_PATH)
 
-    def test_20_docs_state_non_certifiable_package_control_status(self) -> None:
+    def test_22_docs_state_non_certifiable_package_control_status(self) -> None:
         readme_text = _README_PATH.read_text(encoding="utf-8")
         self.assertIn("NOT CERTIFIABLE", readme_text)
         self.assertIn("package-control", readme_text.lower())

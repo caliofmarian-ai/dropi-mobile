@@ -6,13 +6,13 @@
 - Validation mode: `validate_existing`
 - Package-control files are regenerated from documented inputs; existing package bytes are never used as the generation source.
 
-## 2. GitHub Actions assessment
+## 2. GitHub Actions compatibility assessment
 
 | Field | Value |
 | --- | --- |
 | Assessment | assessed_compatible_with_clean_checkout |
 | Execution evidence for this PR | not_exercised_in_actual_github_actions_for_this_pr |
-| Notes | Requires Python 3.9+, standard library only. GitHub Actions compatibility was assessed for a clean checkout and was not exercised in an actual workflow run for this PR. Termux requires the python package. All modes run without network access. |
+| Notes | Requires Python 3.9+, standard library only. GitHub Actions compatibility was assessed for a clean checkout and was not exercised in an actual workflow run for this PR. Android shared storage cannot safely host Node symlink-heavy dependency installation, but this Python standard-library tool itself is compatible. Termux requires the python package. All modes run without network access. |
 
 ## 3. Package-control generation rules
 

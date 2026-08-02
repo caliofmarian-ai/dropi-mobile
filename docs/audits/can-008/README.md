@@ -60,6 +60,15 @@ package-control output.
 - Certifiable files: 209
 - Non-certifiable files: 8
 
+## GitHub Actions compatibility assessment
+
+- `github_actions`: `assessed_compatible_with_clean_checkout`
+- `github_actions_execution`:
+  `not_exercised_in_actual_github_actions_for_this_pr`
+
+This audit does not claim `tested with ubuntu-latest`, `validated on GitHub
+Actions`, or `executed in CI` for this PR.
+
 ## Output files
 
 | File | Description |
@@ -70,4 +79,6 @@ package-control output.
 
 ## Procedure
 
-See `/home/runner/work/dropi-mobile/dropi-mobile/docs/CANONICAL_PACKAGE_REGENERATION.md` for the operational commands and validation workflow.
+See `docs/CANONICAL_PACKAGE_REGENERATION.md` for the Termux/Android procedure,
+the Standard Linux procedure, the validation-only command, the external
+regeneration command, and the deterministic comparison command.
