@@ -557,5 +557,92 @@ class TestOptimization(unittest.TestCase):
                              f"Managed-links section must be stable across strip+rebuild for {issue_def['id']}")
 
 
+class TestWorkflowDefinition(unittest.TestCase):
+    """Structural tests for .github/workflows/materialize-dropi-planning.yml."""
+
+    WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "materialize-dropi-planning.yml"
+
+    def _workflow_text(self) -> str:
+        self.assertTrue(
+            self.WORKFLOW_PATH.exists(),
+            f"Workflow file not found: {self.WORKFLOW_PATH}",
+        )
+        return self.WORKFLOW_PATH.read_text(encoding="utf-8")
+
+    def _workflow_lines(self) -> list[str]:
+        return self._workflow_text().splitlines()
+
+    def test_workflow_file_exists(self):
+        self.assertTrue(self.WORKFLOW_PATH.exists(), "materialize-dropi-planning.yml must exist")
+
+    def test_trigger_workflow_dispatch_only(self):
+        text = self._workflow_text()
+        self.assertIn("workflow_dispatch:", text, "Must have workflow_dispatch trigger")
+        for forbidden in ("on:\n  push", "on:\n  pull_request", "schedule:", "push:", "pull_request:"):
+            self.assertNotIn(forbidden, text, f"Must NOT have trigger: {forbidden!r}")
+
+    def test_permissions(self):
+        text = self._workflow_text()
+        self.assertIn("contents: write", text, "Must have contents: write permission")
+        self.assertIn("issues: write", text, "Must have issues: write permission")
+        self.assertIn("pull-requests: read", text, "Must have pull-requests: read permission")
+
+    def test_concurrency_group(self):
+        text = self._workflow_text()
+        self.assertIn("concurrency:", text, "Must define concurrency")
+        self.assertIn("dropi-planning-materialization", text, "concurrency group name must be dropi-planning-materialization")
+        self.assertIn("cancel-in-progress: false", text, "cancel-in-progress must be false")
+
+    def test_apply_before_verify(self):
+        lines = self._workflow_lines()
+        apply_idx = next((i for i, l in enumerate(lines) if "--apply" in l), None)
+        verify_idx = next((i for i, l in enumerate(lines) if "--verify" in l), None)
+        self.assertIsNotNone(apply_idx, "--apply step must be present")
+        self.assertIsNotNone(verify_idx, "--verify step must be present")
+        self.assertLess(apply_idx, verify_idx, "--apply must appear before --verify in the workflow")
+
+    def test_protected_source_validation(self):
+        text = self._workflow_text()
+        self.assertIn("canonical/SESSION_HANDOVER.md", text, "Must check SESSION_HANDOVER.md against origin/main")
+        self.assertIn("sha256sum", text, "Must verify 04.zip checksum")
+        self.assertIn("82a6015b8c968645307e36c8e4aa0351515f50333c08a6c5402a7819b7b747e5", text,
+                      "Must include canonical 04.zip SHA256")
+        self.assertIn("Protected sources", text, "Must guard against protected source modifications")
+
+    def test_result_file_restrictions(self):
+        text = self._workflow_text()
+        self.assertIn("GITHUB_MATERIALIZATION_RESULT.md", text,
+                      "Must reference allowed result file GITHUB_MATERIALIZATION_RESULT.md")
+        self.assertIn("github_materialization_result.json", text,
+                      "Must reference allowed result file github_materialization_result.json")
+        self.assertIn("Unexpected", text, "Must fail on unexpected file changes")
+
+    def test_no_pat_usage(self):
+        text = self._workflow_text()
+        import re
+        pat_refs = re.findall(r"\$\{\{\s*secrets\.[A-Za-z_]+\s*\}\}", text)
+        self.assertEqual(pat_refs, [], f"Must not use secrets.* variables (PAT); found: {pat_refs}")
+        self.assertIn("github.token", text, "Must use github.token instead of a PAT")
+
+    def test_no_merge(self):
+        text = self._workflow_text()
+        for forbidden in ("git merge", "git rebase"):
+            self.assertNotIn(forbidden, text, f"Must not contain: {forbidden!r}")
+
+    def test_no_issue_closing(self):
+        text = self._workflow_text()
+        for forbidden in ("state: closed", '"state":"closed"', "close_issue", "--state closed"):
+            self.assertNotIn(forbidden, text, f"Must not contain issue-closing command: {forbidden!r}")
+
+    def test_checkout_uses_github_ref(self):
+        text = self._workflow_text()
+        self.assertIn("github.ref", text, "Checkout must use github.ref to run on the dispatched branch")
+
+    def test_commit_message(self):
+        text = self._workflow_text()
+        self.assertIn("planning: record verified cloud materialization results", text,
+                      "Commit message must be 'planning: record verified cloud materialization results'")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

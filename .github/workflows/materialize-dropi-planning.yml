@@ -1,0 +1,233 @@
+name: Materialize DROPi Planning
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: dropi-planning-materialization
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    name: Apply & Verify GitHub Planning
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Safety checks
+        run: |
+          set -euo pipefail
+
+          # 1. Repository guard
+          if [ "${{ github.repository }}" != "caliofmarian-ai/dropi-mobile" ]; then
+            echo "::error::Wrong repository: ${{ github.repository }}"
+            exit 1
+          fi
+
+          # 2. canonical/SESSION_HANDOVER.md must be byte-identical to origin/main
+          git fetch origin main
+          if ! git diff --exit-code FETCH_HEAD -- canonical/SESSION_HANDOVER.md; then
+            echo "::error::canonical/SESSION_HANDOVER.md differs from origin/main — restore it before running this workflow"
+            exit 1
+          fi
+
+          # 3. 04.zip checksum must match canonical SHA
+          EXPECTED="82a6015b8c968645307e36c8e4aa0351515f50333c08a6c5402a7819b7b747e5"
+          ACTUAL=$(sha256sum 04.zip | awk '{print $1}')
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "::error::04.zip checksum mismatch. Expected=$EXPECTED Got=$ACTUAL"
+            exit 1
+          fi
+
+          # 4. No protected canonical sources may differ from origin/main on this branch
+          PROTECTED=$(git diff --name-only FETCH_HEAD -- \
+            canonical/ BLUEPRINT/ DROPi_Canonical_Reference/ docs/audits/ \
+            app/ server/ drizzle/ 04.zip 2>/dev/null || true)
+          if [ -n "$PROTECTED" ]; then
+            echo "::error::Protected sources modified on this branch vs origin/main: $PROTECTED"
+            exit 1
+          fi
+
+          echo "All safety checks passed."
+
+      - name: Run planning tests
+        run: |
+          set -euo pipefail
+          PYTHONDONTWRITEBYTECODE=1 python -m unittest -v tests/test_materialize_github_planning.py
+          git diff --check
+
+      - name: APPLY – materialize plan
+        id: apply
+        run: |
+          set -euo pipefail
+          START=$(date +%s)
+          python scripts/materialize_github_planning.py \
+            --repo caliofmarian-ai/dropi-mobile \
+            --repo-root . \
+            --apply
+          END=$(date +%s)
+          echo "apply_runtime=$((END - START))s" >> "$GITHUB_OUTPUT"
+
+      - name: VERIFY – check remote state
+        id: verify
+        run: |
+          set -euo pipefail
+          START=$(date +%s)
+          python scripts/materialize_github_planning.py \
+            --repo caliofmarian-ai/dropi-mobile \
+            --repo-root . \
+            --verify
+          END=$(date +%s)
+          echo "verify_runtime=$((END - START))s" >> "$GITHUB_OUTPUT"
+
+      - name: Validate results
+        run: |
+          set -euo pipefail
+          python3 - <<'PYEOF'
+          import json, sys
+          from pathlib import Path
+
+          result_path = Path("docs/planning/github_materialization_result.json")
+          result = json.loads(result_path.read_text(encoding="utf-8"))
+
+          errors = []
+
+          # Verification must pass
+          verify_result = result.get("verify_result", {})
+          if not verify_result.get("final"):
+              first_verify = result.get("first_verify", {})
+              failures = first_verify.get("failures", [])
+              errors.append(f"Verification FAILED. Sample failures: {failures[:5]}")
+
+          # No duplicate stable IDs
+          first_verify = result.get("first_verify", {})
+          dup_failures = [f for f in first_verify.get("failures", []) if "Duplicate" in f or "duplicate" in f]
+          if dup_failures:
+              errors.extend(dup_failures)
+
+          if errors:
+              for e in errors:
+                  print(f"::error::{e}", flush=True)
+              sys.exit(1)
+
+          print("Validation passed: no duplicates, verification PASS.")
+          PYEOF
+
+      - name: Check result-file restrictions
+        run: |
+          set -euo pipefail
+          ALLOWED_1="docs/planning/GITHUB_MATERIALIZATION_RESULT.md"
+          ALLOWED_2="docs/planning/github_materialization_result.json"
+
+          CHANGED=$(git diff --name-only)
+          if [ -z "$CHANGED" ]; then
+            echo "No files changed; restriction check passed."
+            exit 0
+          fi
+
+          UNEXPECTED=""
+          while IFS= read -r f; do
+            if [ "$f" != "$ALLOWED_1" ] && [ "$f" != "$ALLOWED_2" ]; then
+              UNEXPECTED="$UNEXPECTED $f"
+            fi
+          done <<< "$CHANGED"
+
+          if [ -n "$UNEXPECTED" ]; then
+            echo "::error::Unexpected tracked files changed:$UNEXPECTED"
+            exit 1
+          fi
+          echo "Result-file restriction check passed."
+
+      - name: Commit result files
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          CHANGED=$(git diff --name-only -- \
+            docs/planning/GITHUB_MATERIALIZATION_RESULT.md \
+            docs/planning/github_materialization_result.json)
+
+          if [ -z "$CHANGED" ]; then
+            echo "No result files changed; skipping commit."
+            exit 0
+          fi
+
+          git add docs/planning/GITHUB_MATERIALIZATION_RESULT.md \
+                  docs/planning/github_materialization_result.json
+          git commit -m "planning: record verified cloud materialization results"
+          git push origin HEAD:${{ github.ref_name }}
+          echo "Committed and pushed result files."
+
+      - name: Publish job summary
+        if: always()
+        env:
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+          APPLY_RUNTIME: ${{ steps.apply.outputs.apply_runtime }}
+          VERIFY_RUNTIME: ${{ steps.verify.outputs.verify_runtime }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, sys
+          from pathlib import Path
+
+          result_path = Path("docs/planning/github_materialization_result.json")
+          if not result_path.exists():
+              summary = "Result file not found – workflow may have failed before APPLY completed.\n"
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as fh:
+                  fh.write(summary)
+              sys.exit(0)
+
+          result = json.loads(result_path.read_text(encoding="utf-8"))
+          summary_data = result.get("summary", {})
+          verify_result = result.get("verify_result", {})
+
+          labels_s = summary_data.get("labels", {})
+          milestones_s = summary_data.get("milestones", {})
+          issues_s = summary_data.get("issues", {})
+
+          first_verify = result.get("first_verify", {})
+          dup_failures = [f for f in first_verify.get("failures", []) if "Duplicate" in f or "duplicate" in f]
+          verification_pass = verify_result.get("final") is True
+          idempotency_pass = verification_pass and len(dup_failures) == 0
+
+          branch = os.environ.get("BRANCH", "unknown")
+          commit_sha = os.environ.get("COMMIT_SHA", "unknown")
+          apply_rt = os.environ.get("APPLY_RUNTIME", "n/a")
+          verify_rt = os.environ.get("VERIFY_RUNTIME", "n/a")
+
+          lines = [
+              "## DROPi Planning Materialization Summary",
+              "",
+              "| Field | Value |",
+              "|---|---|",
+              f"| Branch | `{branch}` |",
+              f"| Commit | `{commit_sha}` |",
+              f"| APPLY runtime | {apply_rt} |",
+              f"| VERIFY runtime | {verify_rt} |",
+              f"| Labels verified | {labels_s.get('verified', 'n/a')} |",
+              f"| Milestones verified | {milestones_s.get('verified', 'n/a')} |",
+              f"| Issues verified | {issues_s.get('verified', 'n/a')} |",
+              f"| Duplicates found | {len(dup_failures)} |",
+              f"| Idempotency result | {'✅ PASS' if idempotency_pass else '❌ FAIL'} |",
+              f"| Verification result | {'✅ PASS' if verification_pass else '❌ FAIL'} |",
+          ]
+
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as fh:
+              fh.write("\n".join(lines) + "\n")
+
+          print("Job summary published.")
+          PYEOF
