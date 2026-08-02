@@ -549,9 +549,77 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.22.0**
+Acest document: **v1.23.0**
 Data creării: 2026-07-07
-Ultima actualizare: 2026-07-13
-Actualizat de: GitHub Copilot Coding Agent — RCA + fix SMTP IPv6 ENETUNREACH (Railway) + JWT empty-appId auth (`Please login 10001`); versiune incrementată la v1.22.0.
+Ultima actualizare: 2026-08-02
+Actualizat de: GitHub Copilot Coding Agent — GitHub Planning Materialization (PR #60); versiune incrementată la v1.23.0.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
+
+---
+
+## Sesiunea 2026-08-02: GitHub Planning Materialization
+
+**Branch:** `copilot/create-github-planning-materialization`  
+**PR:** #60 — `[PLANNING] Materialize complete canonical DROPi Mobile roadmap`
+
+### Ce s-a făcut
+
+- Inspectat complet toate sursele canonice (47 documente, 22 grupuri de surse)
+- Verificat integritatea `04.zip` (SHA-256: `82a6015b8c968645307e36c8e4aa0351515f50333c08a6c5402a7819b7b747e5`) ✅
+- Detectat și documentat 5 conflicte canonice (niciun conflict rezolvat silențios)
+- Creat inventarul complet de acoperire a implementării (122 capabilități clasificate)
+- Generat planul complet GitHub: 212 etichete, 7 milestone-uri, 228 issues
+- Creat script de materializare Python idempotent cu moduri --dry-run / --apply / --verify
+- 74 teste Python — toate trec ✅
+- Dry-run complet: 212 labels + 7 milestones + 228 issues (would_create) ✅
+- Apply mode necesită `gh auth login` cu credențiale valide (accesul direct la api.github.com blocat în sandbox)
+
+### Fișiere noi create
+
+```
+docs/planning/CANONICAL_PLANNING_SOURCE_REGISTER.md
+docs/planning/CANONICAL_PLANNING_CONFLICTS.md
+docs/planning/IMPLEMENTATION_COVERAGE_AUDIT.md
+docs/planning/GITHUB_MATERIALIZATION_PLAN.md
+docs/planning/github_materialization_plan.json     (5468 linii)
+docs/planning/github_materialization_plan.yaml
+docs/planning/GITHUB_MATERIALIZATION_RESULT.md
+docs/planning/github_materialization_result.json
+scripts/materialize_github_planning.py             (980 linii)
+tests/test_materialize_github_planning.py          (693 linii)
+```
+
+### Pasul Următor Concret (prioritate sporită)
+
+1. **Merge PR #60** după review
+2. **Rulează apply mode** cu credențiale GitHub valide:
+   ```bash
+   gh auth login
+   PYTHONDONTWRITEBYTECODE=1 python scripts/materialize_github_planning.py \
+     --repo caliofmarian-ai/dropi-mobile \
+     --repo-root . \
+     --apply
+   ```
+3. **Verifică** obiectele create:
+   ```bash
+   PYTHONDONTWRITEBYTECODE=1 python scripts/materialize_github_planning.py \
+     --repo caliofmarian-ai/dropi-mobile \
+     --repo-root . \
+     --verify
+   ```
+4. **Sprint 6A immediate priorities** (din `AUDIT_TRACKING.md`):
+   - IMPL-001: Delivery partner unverified status display
+   - IMPL-002: Guard on mission endpoints
+   - IMPL-003: Admin approval gate for operational roles
+   - IMPL-004: Admin approval panel UI
+
+### Conflicte deschise (necesită decizie fondator)
+
+| ID | Severitate | Descriere | Issue |
+|----|-----------|-----------|-------|
+| CONFLICT-001 | MEDIUM | Marketplace separată (site) vs. integrată în app | CANON-RES-001 |
+| CONFLICT-002 | HIGH | EASA compliance vs. CAAP Philippines pentru Zone 0 | OWNER-004 |
+| CONFLICT-003 | MEDIUM | Reguli client-presence pentru drone — mecanism nespecificat | CANON-RES-002 |
+| CONFLICT-004 | LOW | WebSocket real-time vs. polling pentru Zone 0 | OWNER-002 |
+| CONFLICT-005 | MEDIUM | Secvența de activare a agenților AI (M1 vs. M3) | OWNER-005 |
