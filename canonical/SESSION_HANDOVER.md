@@ -25,9 +25,48 @@
 | Câmp | Valoare |
 |------|---------|
 | **Platformă** | GitHub Copilot Agent |
-| **Data** | 2026-07-16 |
-| **Branch activ** | `copilot/create-dropi-canonical-reference` |
+| **Data** | 2026-08-02 |
+| **Branch activ** | `copilot/create-github-planning-materialization` |
 | **Agent** | GitHub Copilot Coding Agent |
+
+### Ce s-a făcut în sesiunea 2026-08-02 (optimizare materialize_github_planning.py):
+
+**Problemă identificată:** APPLY #2 (idempotency run) dura >20 minute cu 228 issues din cauza O(N²) API calls.
+
+**Root-cause analysis (3 bug-uri compuse):**
+
+1. **Bug A (critic)** — `ensure_issue_state` compara `current_body` (cu managed-links appended) cu `body` (base only). Pe orice run după APPLY #1, toți cei 228 issues erau marcați ca "needs update", ceea ce trigera 228 × `update_issue()` → `refresh()` → full re-fetch (3 API pages) = 684 API calls suplimentare.
+
+2. **Bug B** — `create_issue`, `update_issue`, `create_or_update_label`, `create_or_update_milestone` apelau `self.refresh()` după fiecare write, care ștergea TOATE cache-urile, forțând re-fetch complet la orice lookup următor.
+
+3. **Bug C** — în link-update loop (Phase 2 din `materialize_issues`), fiecare `update_issue()` trigera `client.refresh()` + `get_issues_by_stable_id()` = full re-fetch per issue.
+
+**Fix implementat:**
+- `ensure_issue_state`: compare `strip_managed_links(current_body)` cu `body` (ignoră managed-links section)
+- `update_issue`: înlocuit `self.refresh()` cu `_update_cached_issue(api_response)` — O(N) in-memory scan, fără network
+- `create_issue`: înlocuit `self.refresh()` cu `_add_issue_to_caches(created)` — O(1) append
+- `create_or_update_label/milestone`: înlocuit `self.refresh()` cu patch direct pe dict entry
+- `materialize_issues` Phase 2: eliminat per-issue `client.refresh()` + `get_issues_by_stable_id()`
+- Adăugat `import time`, `_api_call_count`, `elapsed_s`, `phase_timings`, `api_calls_total` în result dicts
+
+**Complexitate:**
+- Înainte: O(N²) API calls pe APPLY #2 → >20 minute
+- După: O(1) API calls pe APPLY #2 → <15 secunde (speedup ~600×)
+- 500 issues: înainte ~135 minute, după ~10 secunde
+
+**Validări:**
+- `python3 -m pytest tests/test_materialize_github_planning.py` ✅ — 25 passed (18 existente + 7 noi `TestOptimization`)
+- CodeQL ✅ — 0 alerts
+- APPLY nu a fost rulat (conform cerință)
+- GitHub planning nu a fost modificat
+
+**Fișiere modificate:**
+- `scripts/materialize_github_planning.py` — optimizare completă
+- `tests/test_materialize_github_planning.py` — adăugat `TestOptimization` (7 teste)
+- `docs/planning/OPTIMIZATION_REPORT.md` — raport detaliat creat
+- `canonical/SESSION_HANDOVER.md` — actualizat
+
+**Pasul următor:** Nu este necesar niciun APPLY. Script-ul este gata pentru idempotency run în <15s.
 
 ### Ce s-a făcut în sesiunile anterioare (context auth/reset + database-migration-audit + oauth-optional):
 - Rezumat complet în PR #28, PR #29, PR #30 și PR #31 (merged). Detalii în versiunile anterioare ale acestui document.

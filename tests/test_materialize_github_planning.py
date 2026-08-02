@@ -317,5 +317,245 @@ class TestResultReporting(unittest.TestCase):
         self.assertEqual(final["summary"]["idempotency"]["duplicate_issues_created"], 1)
 
 
+
+
+class TestOptimization(unittest.TestCase):
+    """Regression and benchmark tests proving O(1) lookup behaviour."""
+
+    # ------------------------------------------------------------------ helpers
+
+    def _make_idempotent_issue_map(self, plan: dict) -> dict:
+        """Build an issue_map as it would exist after a successful APPLY #1.
+
+        Every issue has its full body (base content + managed-links section)
+        and all fields in sync with the plan definition.
+        """
+        issues_list = plan["issues"]
+        issue_number_by_id = {item["id"]: i + 100 for i, item in enumerate(issues_list)}
+        plan_issue_ids = {item["id"] for item in issues_list}
+        issue_map: dict = {}
+        for i, issue_def in enumerate(issues_list):
+            full_body = mat.build_issue_body_with_links(
+                issue_def, issue_number_by_id, plan_issue_ids
+            )
+            issue_map[issue_def["id"]] = {
+                "number": i + 100,
+                "title": issue_def["title"],
+                "body": full_body,
+                "labels": [{"name": n} for n in sorted(issue_def.get("labels", []))],
+                "milestone": (
+                    {"title": issue_def["milestone"], "number": 1}
+                    if issue_def.get("milestone")
+                    else None
+                ),
+                "state": "open",
+            }
+        return issue_map
+
+    # --------------------------------------------------------------- Fix #1 tests
+
+    def test_ensure_issue_state_existing_when_body_has_managed_links(self):
+        """ensure_issue_state must return 'existing' when the only diff is the
+        managed-links section already appended by a previous APPLY run."""
+        plan = load_plan()
+        issue_def = plan["issues"][0]
+        base_body = mat.strip_managed_links(issue_def.get("body", ""))
+        body_with_links = (
+            f"{base_body}\n\n{mat.MANAGED_LINKS_START}\n"
+            "## GitHub Materialization Links\n\n"
+            f"- SOME-REF → #42\n{mat.MANAGED_LINKS_END}\n"
+        )
+        client = mat.GitHubClient(repo="test/repo", dry_run=False)
+        client._issue_map_cache = {
+            issue_def["id"]: {
+                "number": 100,
+                "title": issue_def["title"],
+                "body": body_with_links,
+                "labels": [{"name": n} for n in sorted(issue_def.get("labels", []))],
+                "milestone": (
+                    {"title": issue_def.get("milestone")} if issue_def.get("milestone") else None
+                ),
+                "state": "open",
+            }
+        }
+        result = client.ensure_issue_state(issue_def, base_body)
+        self.assertEqual(result["action"], "existing",
+                         "ensure_issue_state must not trigger an update when body differs only by managed links")
+
+    def test_full_idempotency_all_issues_return_existing(self):
+        """Regression: every issue returns 'existing' on idempotency run.
+
+        Simulates the state after a successful APPLY #1: all issues exist on
+        GitHub with managed-links sections already appended.  A second APPLY
+        must classify every issue as 'existing', not 'updated'.
+        """
+        plan = load_plan()
+        client = mat.GitHubClient(repo="test/repo", dry_run=False)
+        client._issue_map_cache = self._make_idempotent_issue_map(plan)
+
+        non_existing: list[str] = []
+        for issue_def in plan["issues"]:
+            base_body = mat.strip_managed_links(issue_def.get("body", ""))
+            result = client.ensure_issue_state(issue_def, base_body)
+            if result["action"] != "existing":
+                non_existing.append(f"{issue_def['id']}: {result['action']}")
+
+        self.assertEqual(
+            non_existing, [],
+            "All issues must be 'existing' on idempotency run. Non-existing: "
+            + ", ".join(non_existing[:5]),
+        )
+
+    # --------------------------------------------------------------- Fix #2 tests
+
+    def test_update_issue_patches_cache_without_full_refresh(self):
+        """update_issue must patch the caches in-place; api_call_count must
+        not jump by more than 1 (the PATCH call itself)."""
+
+        class _FakeGH(mat.GitHubClient):
+            def _gh(self, *args: str, input_data: str | None = None) -> str:  # type: ignore[override]
+                self._api_call_count += 1
+                # Simulate a PATCH response with the updated body
+                import json as _json
+                return _json.dumps({"number": 99, "body": "new body", "title": "T", "labels": [], "milestone": None})
+
+        client = _FakeGH(repo="test/repo", dry_run=False)
+        client._issues_cache = [{"number": 99, "body": "old body", "title": "T", "labels": [], "milestone": None}]
+        client._issue_map_cache = {"STABLE-001": {"number": 99, "body": "old body", "title": "T", "labels": [], "milestone": None}}
+
+        before = client._api_call_count
+        client.update_issue(99, {"body": "new body"})
+        self.assertEqual(client._api_call_count - before, 1, "Exactly one API call for update_issue")
+        # Cache must now reflect the new body — no extra fetch required
+        self.assertEqual(client._issue_map_cache["STABLE-001"]["body"], "new body")
+        self.assertEqual(client._issues_cache[0]["body"], "new body")
+
+    def test_create_issue_adds_to_cache_without_full_refresh(self):
+        """create_issue must add the new issue to caches; api_call_count must
+        not jump by more than 1 (the POST call itself)."""
+
+        class _FakeGH(mat.GitHubClient):
+            def _gh(self, *args: str, input_data: str | None = None) -> str:  # type: ignore[override]
+                self._api_call_count += 1
+                import json as _json
+                body = "<!-- dropi-planning-id: NEW-001 -->\nbody"
+                return _json.dumps({"number": 200, "body": body, "title": "New", "labels": [], "milestone": None})
+
+        client = _FakeGH(repo="test/repo", dry_run=False)
+        client._issues_cache = []
+        client._issue_map_cache = {}
+        client._milestone_cache = {}
+
+        issue_def = {"id": "NEW-001", "title": "New", "body": "<!-- dropi-planning-id: NEW-001 -->\nbody", "labels": []}
+        before = client._api_call_count
+        result = client.create_issue(issue_def, issue_def["body"])
+        self.assertEqual(client._api_call_count - before, 1, "Exactly one API call for create_issue")
+        self.assertEqual(result["action"], "created")
+        self.assertIn("NEW-001", client._issue_map_cache, "Created issue must be in issue_map_cache")
+        self.assertEqual(len(client._issues_cache), 1, "Created issue must be in issues_cache")
+
+    # --------------------------------------------------------------- Benchmark tests
+
+    def test_api_call_count_is_bounded_on_idempotency_run(self):
+        """Benchmark: the total number of _gh() calls during a full idempotency
+        run of ensure_issue_state over all plan issues must be O(1), not O(N).
+
+        Because caches are pre-populated and no writes occur, the only calls
+        are the initial cache-population fetches (label/milestone/issue pages).
+        The hard upper bound is set conservatively at 20 calls for N=228 issues.
+        """
+        plan = load_plan()
+        N = len(plan["issues"])
+
+        class _CountingGH(mat.GitHubClient):
+            def _gh(self, *args: str, input_data: str | None = None) -> str:  # type: ignore[override]
+                self._api_call_count += 1
+                raise RuntimeError("Unexpected network call during idempotency test")
+
+        client = _CountingGH(repo="test/repo", dry_run=False)
+        client._issue_map_cache = self._make_idempotent_issue_map(plan)
+        # Labels and milestones are not checked in ensure_issue_state unless
+        # they differ; with caches pre-populated, no network call should occur.
+
+        before = client._api_call_count
+        for issue_def in plan["issues"]:
+            base_body = mat.strip_managed_links(issue_def.get("body", ""))
+            client.ensure_issue_state(issue_def, base_body)
+        total_calls = client._api_call_count - before
+
+        self.assertEqual(
+            total_calls, 0,
+            f"Zero API calls expected on full idempotency run over {N} issues, "
+            f"got {total_calls}. Old code would have made ~{N * 3} calls.",
+        )
+
+    def test_timing_fields_present_in_materialize_plan_once_result(self):
+        """timing and api_calls_total fields must be present in the result."""
+        plan = {
+            "meta": {"version": "1.0"},
+            "labels": [{"name": "type:program", "color": "ededed", "description": ""}],
+            "milestones": [{"title": "M1", "description": "", "state": "open"}],
+            "issues": [{"id": "P-001", "type": "program", "title": "T", "body": "<!-- dropi-planning-id: P-001 -->", "labels": ["type:program"], "milestone": "M1"}],
+        }
+
+        class _FakeGH(mat.GitHubClient):
+            def _gh(self, *args: str, input_data: str | None = None) -> str:  # type: ignore[override]
+                self._api_call_count += 1
+                import json as _json
+                if "issues" in args and "--method" not in args:
+                    return _json.dumps([])
+                if "issues" in args and "POST" in args:
+                    body = "<!-- dropi-planning-id: P-001 -->"
+                    return _json.dumps({"number": 51, "body": body, "title": "T", "labels": [], "milestone": None})
+                if "labels" in args and "--method" not in args:
+                    return _json.dumps([])
+                if "labels" in args and "POST" in args:
+                    return _json.dumps({"name": "type:program", "color": "ededed", "description": ""})
+                if "milestones" in args and "--method" not in args:
+                    return _json.dumps([])
+                if "milestones" in args and "POST" in args:
+                    return _json.dumps({"number": 1, "title": "M1", "state": "open", "description": "", "due_on": None})
+                return _json.dumps([])
+
+        client = _FakeGH(repo="test/repo", dry_run=True)
+        client._issues_cache = []
+        client._issue_map_cache = {}
+        client._label_cache = {}
+        client._milestone_cache = {}
+
+        result = mat.materialize_plan_once(client, plan)
+        self.assertIn("timing", result)
+        self.assertIn("total_s", result["timing"])
+        self.assertIn("api_calls_total", result)
+        self.assertIsInstance(result["timing"]["total_s"], float)
+
+    def test_byte_identical_issue_bodies_across_runs(self):
+        """Regression: build_issue_body_with_links must produce byte-identical
+        output on repeated calls with the same inputs (determinism check)."""
+        plan = load_plan()
+        issues_list = plan["issues"]
+        issue_number_by_id = {item["id"]: i + 100 for i, item in enumerate(issues_list)}
+        plan_issue_ids = {item["id"] for item in issues_list}
+
+        for issue_def in issues_list[:10]:  # spot-check first 10
+            body1 = mat.build_issue_body_with_links(issue_def, issue_number_by_id, plan_issue_ids)
+            body2 = mat.build_issue_body_with_links(issue_def, issue_number_by_id, plan_issue_ids)
+            self.assertEqual(body1, body2,
+                             f"build_issue_body_with_links must be deterministic for {issue_def['id']}")
+            # Idempotency: stripping managed links from the built body and
+            # re-building should yield the same body
+            stripped = mat.strip_managed_links(body1)
+            body3 = mat.build_issue_body_with_links(
+                {**issue_def, "body": stripped + "\n<!-- dropi-planning-id: " + issue_def["id"] + " -->"},
+                issue_number_by_id,
+                plan_issue_ids,
+            )
+            # strip+rebuild result must have the same links section
+            links1 = body1[body1.find(mat.MANAGED_LINKS_START):] if mat.MANAGED_LINKS_START in body1 else ""
+            links3 = body3[body3.find(mat.MANAGED_LINKS_START):] if mat.MANAGED_LINKS_START in body3 else ""
+            self.assertEqual(links1, links3,
+                             f"Managed-links section must be stable across strip+rebuild for {issue_def['id']}")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

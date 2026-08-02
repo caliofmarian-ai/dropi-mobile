@@ -9,6 +9,7 @@ import json
 import re
 import subprocess
 import sys
+import time
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -57,6 +58,7 @@ ALLOWED_RESULT_PATHS = {
     "docs/planning/GITHUB_MATERIALIZATION_PLAN.md",
     "docs/planning/GITHUB_MATERIALIZATION_RESULT.md",
     "docs/planning/IMPLEMENTATION_COVERAGE_AUDIT.md",
+    "docs/planning/OPTIMIZATION_REPORT.md",
     "docs/planning/github_materialization_plan.json",
     "docs/planning/github_materialization_plan.yaml",
     "docs/planning/github_materialization_result.json",
@@ -249,6 +251,7 @@ class GitHubClient:
         self._issue_map_cache: dict[str, dict[str, Any]] | None = None
         self._duplicate_stable_ids_cache: dict[str, list[int]] | None = None
         self._pulls_cache: list[dict[str, Any]] | None = None
+        self._api_call_count: int = 0
 
     def refresh(self) -> None:
         self._repo_cache = None
@@ -259,7 +262,40 @@ class GitHubClient:
         self._duplicate_stable_ids_cache = None
         self._pulls_cache = None
 
+    def _add_issue_to_caches(self, issue: dict[str, Any]) -> None:
+        """Add a newly created issue to caches without a full re-fetch (O(1))."""
+        if "pull_request" in issue:
+            return
+        if self._issues_cache is not None:
+            self._issues_cache.append(issue)
+        if self._issue_map_cache is not None:
+            body = issue.get("body") or ""
+            match = STABLE_ID_PATTERN.search(body)
+            if match:
+                self._issue_map_cache[match.group(1)] = issue
+        self._duplicate_stable_ids_cache = None
+
+    def _update_cached_issue(self, fresh_issue: dict[str, Any]) -> None:
+        """Replace a single cached issue with a fresh API response (O(N) scan, not O(N) re-fetch)."""
+        issue_number = fresh_issue.get("number")
+        if issue_number is None:
+            self._issue_map_cache = None
+            self._duplicate_stable_ids_cache = None
+            return
+        if self._issues_cache is not None:
+            for i, iss in enumerate(self._issues_cache):
+                if iss["number"] == issue_number:
+                    self._issues_cache[i] = fresh_issue
+                    break
+        if self._issue_map_cache is not None:
+            for stable_id, iss in list(self._issue_map_cache.items()):
+                if iss["number"] == issue_number:
+                    self._issue_map_cache[stable_id] = fresh_issue
+                    break
+        self._duplicate_stable_ids_cache = None
+
     def _gh(self, *args: str, input_data: str | None = None) -> str:
+        self._api_call_count += 1
         result = subprocess.run(
             ["gh", *args],
             capture_output=True,
@@ -378,18 +414,20 @@ class GitHubClient:
             if self.dry_run:
                 return {"name": name, "action": "planned", "planned_action": "update"}
             self._require_write_mode()
-            self._gh_api(
+            updated = self._gh_api(
                 f"labels/{quote(name, safe='')}",
                 method="PATCH",
                 data={"color": color, "description": description},
             )
-            self.refresh()
+            if self._label_cache is not None:
+                self._label_cache[name] = updated if isinstance(updated, dict) else {"name": name, "color": color, "description": description}
             return {"name": name, "action": "updated"}
         if self.dry_run:
             return {"name": name, "action": "planned", "planned_action": "create"}
         self._require_write_mode()
-        self._gh_api("labels", method="POST", data={"name": name, "color": color, "description": description})
-        self.refresh()
+        created = self._gh_api("labels", method="POST", data={"name": name, "color": color, "description": description})
+        if self._label_cache is not None:
+            self._label_cache[name] = created if isinstance(created, dict) else {"name": name, "color": color, "description": description}
         return {"name": name, "action": "created"}
 
     def create_or_update_milestone(self, milestone_def: dict[str, Any]) -> dict[str, Any]:
@@ -417,10 +455,10 @@ class GitHubClient:
             payload: dict[str, Any] = {"title": title, "description": description, "state": state}
             if due_on is not None:
                 payload["due_on"] = due_on
-            self._gh_api(f"milestones/{existing['number']}", method="PATCH", data=payload)
-            self.refresh()
-            refreshed = self.get_milestones()[title]
-            return {"title": title, "number": refreshed["number"], "action": "updated"}
+            updated_ms = self._gh_api(f"milestones/{existing['number']}", method="PATCH", data=payload)
+            if self._milestone_cache is not None:
+                self._milestone_cache[title] = updated_ms if isinstance(updated_ms, dict) else {**existing, **payload}
+            return {"title": title, "number": existing["number"], "action": "updated"}
         if self.dry_run:
             return {"title": title, "action": "planned", "planned_action": "create"}
         self._require_write_mode()
@@ -428,7 +466,8 @@ class GitHubClient:
         if due_on is not None:
             payload["due_on"] = due_on
         created = self._gh_api("milestones", method="POST", data=payload)
-        self.refresh()
+        if self._milestone_cache is not None:
+            self._milestone_cache[title] = created if isinstance(created, dict) else payload
         return {"title": title, "number": created["number"], "action": "created"}
 
     def get_milestone_number(self, title: str | None) -> int | None:
@@ -450,7 +489,7 @@ class GitHubClient:
         if milestone_number is not None:
             payload["milestone"] = milestone_number
         created = self._gh_api("issues", method="POST", data=payload)
-        self.refresh()
+        self._add_issue_to_caches(created)
         return {
             "id": issue_def["id"],
             "title": issue_def["title"],
@@ -458,10 +497,16 @@ class GitHubClient:
             "action": "created",
         }
 
-    def update_issue(self, issue_number: int, payload: dict[str, Any]) -> None:
+    def update_issue(self, issue_number: int, payload: dict[str, Any]) -> dict[str, Any]:
         self._require_write_mode()
-        self._gh_api(f"issues/{issue_number}", method="PATCH", data=payload)
-        self.refresh()
+        result = self._gh_api(f"issues/{issue_number}", method="PATCH", data=payload)
+        if isinstance(result, dict):
+            self._update_cached_issue(result)
+            return result
+        # Fallback: invalidate derived maps only, avoid full re-fetch
+        self._issue_map_cache = None
+        self._duplicate_stable_ids_cache = None
+        return {"number": issue_number}
 
     def ensure_issue_state(self, issue_def: dict[str, Any], body: str) -> dict[str, Any]:
         stable_id = issue_def["id"]
@@ -481,7 +526,9 @@ class GitHubClient:
             payload["labels"] = desired_labels
         if current_milestone != desired_milestone:
             payload["milestone"] = self.get_milestone_number(desired_milestone)
-        if current_body != body:
+        # Compare base body only (strip managed-links section from remote body to avoid
+        # spurious updates on idempotency runs where links have already been appended)
+        if strip_managed_links(current_body) != body:
             payload["body"] = body
         if not payload:
             return {
@@ -498,12 +545,11 @@ class GitHubClient:
                 "action": "planned",
                 "planned_action": "update",
             }
-        self.update_issue(existing["number"], payload)
-        refreshed = self.get_issues_by_stable_id()[stable_id]
+        updated = self.update_issue(existing["number"], payload)
         return {
             "id": stable_id,
             "title": issue_def["title"],
-            "issue_number": refreshed["number"],
+            "issue_number": updated.get("number", existing["number"]),
             "action": "updated",
         }
 
@@ -590,6 +636,8 @@ ISSUE_SORT_ORDER = {
 def materialize_labels(client: GitHubClient, plan: dict[str, Any]) -> dict[str, Any]:
     entries: list[dict[str, Any]] = []
     summary = make_scope_summary(len(plan.get("labels", [])))
+    t0 = time.monotonic()
+    api_start = client._api_call_count
     for label_def in plan.get("labels", []):
         try:
             entry = client.create_or_update_label(label_def)
@@ -597,12 +645,19 @@ def materialize_labels(client: GitHubClient, plan: dict[str, Any]) -> dict[str, 
             entry = {"name": label_def["name"], "action": "failed", "reason": str(exc)}
         increment_scope_summary(summary, entry["action"])
         entries.append(entry)
-    return {"summary": summary, "entries": entries}
+    return {
+        "summary": summary,
+        "entries": entries,
+        "elapsed_s": round(time.monotonic() - t0, 3),
+        "api_calls": client._api_call_count - api_start,
+    }
 
 
 def materialize_milestones(client: GitHubClient, plan: dict[str, Any]) -> dict[str, Any]:
     entries: list[dict[str, Any]] = []
     summary = make_scope_summary(len(plan.get("milestones", [])))
+    t0 = time.monotonic()
+    api_start = client._api_call_count
     for milestone_def in plan.get("milestones", []):
         try:
             entry = client.create_or_update_milestone(milestone_def)
@@ -610,7 +665,12 @@ def materialize_milestones(client: GitHubClient, plan: dict[str, Any]) -> dict[s
             entry = {"title": milestone_def["title"], "action": "failed", "reason": str(exc)}
         increment_scope_summary(summary, entry["action"])
         entries.append(entry)
-    return {"summary": summary, "entries": entries}
+    return {
+        "summary": summary,
+        "entries": entries,
+        "elapsed_s": round(time.monotonic() - t0, 3),
+        "api_calls": client._api_call_count - api_start,
+    }
 
 
 def materialize_issues(client: GitHubClient, plan: dict[str, Any]) -> dict[str, Any]:
@@ -623,6 +683,11 @@ def materialize_issues(client: GitHubClient, plan: dict[str, Any]) -> dict[str, 
     type_summary: dict[str, dict[str, int]] = {}
     summary = make_scope_summary(len(ordered))
 
+    # Phase 1: ensure every issue exists with correct metadata.
+    # Each lookup is O(1) via the indexed issue map.  Writes use targeted
+    # cache updates so subsequent lookups remain O(1) without a full re-fetch.
+    phase1_t0 = time.monotonic()
+    phase1_api_start = client._api_call_count
     for issue_def in ordered:
         issue_type = get_issue_type(issue_def)
         base_body = strip_managed_links(issue_def.get("body", ""))
@@ -640,7 +705,15 @@ def materialize_issues(client: GitHubClient, plan: dict[str, Any]) -> dict[str, 
         entries_by_id[issue_def["id"]] = entry
         increment_scope_summary(summary, entry["action"])
         add_issue_type_summary(type_summary, issue_type, entry["action"])
+    phase1_elapsed = round(time.monotonic() - phase1_t0, 3)
+    phase1_api_calls = client._api_call_count - phase1_api_start
 
+    # Phase 2: update cross-issue link bodies.
+    # A single refresh is performed once at the start of this phase to obtain
+    # the authoritative issue numbers from GitHub.  After that each body update
+    # uses a targeted cache patch — no full re-fetch per issue.
+    phase2_t0 = time.monotonic()
+    phase2_api_start = client._api_call_count
     if not client.dry_run:
         client.refresh()
         issue_map = client.get_issues_by_stable_id()
@@ -659,10 +732,9 @@ def materialize_issues(client: GitHubClient, plan: dict[str, Any]) -> dict[str, 
             if (remote_issue.get("body") or "") == desired_body:
                 entries_by_id[stable_id]["link_action"] = "existing"
                 continue
+            # update_issue patches the cache in-place — no full re-fetch needed
             client.update_issue(remote_issue["number"], {"body": desired_body})
-            client.refresh()
-            refreshed = client.get_issues_by_stable_id()[stable_id]
-            entries_by_id[stable_id]["issue_number"] = refreshed["number"]
+            entries_by_id[stable_id]["issue_number"] = remote_issue["number"]
             entries_by_id[stable_id]["link_action"] = "updated"
             if entries_by_id[stable_id]["action"] == "existing":
                 entries_by_id[stable_id]["action"] = "updated"
@@ -670,19 +742,30 @@ def materialize_issues(client: GitHubClient, plan: dict[str, Any]) -> dict[str, 
                 summary["updated"] += 1
                 type_summary[entries_by_id[stable_id]["type"]]["existing"] -= 1
                 type_summary[entries_by_id[stable_id]["type"]]["updated"] += 1
+    phase2_elapsed = round(time.monotonic() - phase2_t0, 3)
+    phase2_api_calls = client._api_call_count - phase2_api_start
 
     entries = [entries_by_id[issue["id"]] for issue in ordered]
     return {
         "summary": summary,
         "entries": entries,
         "issue_type_summary": type_summary,
+        "phase_timings": {
+            "phase1_ensure_state_s": phase1_elapsed,
+            "phase2_link_update_s": phase2_elapsed,
+            "total_s": round(phase1_elapsed + phase2_elapsed, 3),
+        },
+        "api_calls": {"phase1": phase1_api_calls, "phase2": phase2_api_calls},
     }
 
 
 def materialize_plan_once(client: GitHubClient, plan: dict[str, Any]) -> dict[str, Any]:
+    t0 = time.monotonic()
+    api_start = client._api_call_count
     labels = materialize_labels(client, plan)
     milestones = materialize_milestones(client, plan)
     issues = materialize_issues(client, plan)
+    total_elapsed = round(time.monotonic() - t0, 3)
     issue_number_mappings = {
         entry["id"]: entry.get("issue_number")
         for entry in issues["entries"]
@@ -700,6 +783,14 @@ def materialize_plan_once(client: GitHubClient, plan: dict[str, Any]) -> dict[st
         "issue_number_mappings": issue_number_mappings,
         "milestone_number_mappings": milestone_number_mappings,
         "label_names": [entry["name"] for entry in labels["entries"] if entry.get("name")],
+        "timing": {
+            "labels_s": labels.get("elapsed_s", 0),
+            "milestones_s": milestones.get("elapsed_s", 0),
+            "issues_phase1_s": (issues.get("phase_timings") or {}).get("phase1_ensure_state_s", 0),
+            "issues_phase2_s": (issues.get("phase_timings") or {}).get("phase2_link_update_s", 0),
+            "total_s": total_elapsed,
+        },
+        "api_calls_total": client._api_call_count - api_start,
     }
 
 
