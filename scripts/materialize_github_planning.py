@@ -852,6 +852,14 @@ def compute_final_report(plan: dict[str, Any], aggregate: dict[str, Any]) -> dic
     first_verify = report.get("first_verify") or {}
     second_verify = report.get("second_verify") or {}
 
+    first_apply_label_summary = first_apply.get("labels", {}).get("summary", make_scope_summary(len(plan.get("labels", []))))
+    first_apply_milestone_summary = first_apply.get("milestones", {}).get("summary", make_scope_summary(len(plan.get("milestones", []))))
+    first_apply_issue_summary = first_apply.get("issues", {}).get("summary", make_scope_summary(len(plan.get("issues", []))))
+    if first_verify.get("failures") and "first_apply" not in report:
+        first_apply_label_summary["failed"] = max(first_apply_label_summary.get("failed", 0), len(first_verify["failures"]))
+        first_apply_milestone_summary["failed"] = max(first_apply_milestone_summary.get("failed", 0), len(first_verify["failures"]))
+        first_apply_issue_summary["failed"] = max(first_apply_issue_summary.get("failed", 0), len(first_verify["failures"]))
+
     report["summary"] = {
         "labels": first_apply.get("labels", {}).get("summary", make_scope_summary(len(plan.get("labels", [])))),
         "milestones": first_apply.get("milestones", {}).get("summary", make_scope_summary(len(plan.get("milestones", [])))),
@@ -872,12 +880,14 @@ def compute_final_report(plan: dict[str, Any], aggregate: dict[str, Any]) -> dic
         "second": second_verify.get("passed"),
         "final": second_verify.get("passed") if second_verify else first_verify.get("passed"),
     }
+    report["summary"]["labels"] = first_apply_label_summary
+    report["summary"]["milestones"] = first_apply_milestone_summary
+    report["summary"]["issues"] = first_apply_issue_summary
     return report
 
 
 def render_markdown_report(plan: dict[str, Any], report: dict[str, Any]) -> str:
-    def row(scope_name: str, payload: dict[str, Any]) -> str:
-        summary = payload.get("summary", make_scope_summary(0))
+    def row(scope_name: str, summary: dict[str, Any]) -> str:
         return (
             f"| {scope_name} | {summary.get('planned', 0)} | {summary.get('existing', 0)} | "
             f"{summary.get('created', 0)} | {summary.get('updated', 0)} | {summary.get('failed', 0)} | "
@@ -909,7 +919,7 @@ def render_markdown_report(plan: dict[str, Any], report: dict[str, Any]) -> str:
     ]
     issue_type_summary = report.get("summary", {}).get("issue_types", {})
     for issue_type in ISSUE_TYPE_ORDER:
-        lines.append(row(issue_type, {"summary": issue_type_summary.get(issue_type, make_scope_summary(0))}))
+        lines.append(row(issue_type, issue_type_summary.get(issue_type, make_scope_summary(0))))
 
     first_apply = report.get("first_apply", {})
     second_apply = report.get("second_apply", {})
@@ -1058,13 +1068,23 @@ def main() -> int:
             write_results(repo_root, plan, results, mode, args.dry_run)
             return 0 if passed else 1
     except Exception as exc:
-        results.setdefault("verification", {})
+        failure = str(exc)
+        if args.apply:
+            results["apply"] = {
+                "labels": {"summary": make_scope_summary(len(plan.get("labels", []))), "entries": []},
+                "milestones": {"summary": make_scope_summary(len(plan.get("milestones", []))), "entries": []},
+                "issues": {"summary": make_scope_summary(len(plan.get("issues", []))), "entries": [], "issue_type_summary": {}},
+                "issue_number_mappings": {},
+                "milestone_number_mappings": {},
+                "label_names": [],
+                "failed_operations": [failure],
+            }
         results["verification"] = {
             "passed": False,
-            "failures": [str(exc)],
+            "failures": [failure],
         }
         write_results(repo_root, plan, results, mode, args.dry_run)
-        print(str(exc), file=sys.stderr)
+        print(failure, file=sys.stderr)
         return 1
 
     write_results(repo_root, plan, results, mode, args.dry_run)
