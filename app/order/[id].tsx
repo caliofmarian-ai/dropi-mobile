@@ -1,4 +1,4 @@
-import { Text, View, ScrollView, TouchableOpacity } from "react-native";
+import { Text, View, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
@@ -41,6 +41,15 @@ export default function OrderDetailScreen() {
     { id: orderId },
     { enabled: Number.isFinite(orderId) },
   );
+  const timelineQuery = trpc.operations.myOrderTimeline.useQuery(
+    { orderId },
+    { enabled: Number.isFinite(orderId) },
+  );
+  const transitionOrder = trpc.operations.transitionOrder.useMutation({
+    onSuccess: async () => {
+      await Promise.all([orderQuery.refetch(), timelineQuery.refetch()]);
+    },
+  });
   const order = orderQuery.data;
 
   if (orderQuery.isLoading) {
@@ -62,6 +71,33 @@ export default function OrderDetailScreen() {
   const currentStep = getStepIndex(order.status);
   const modeInfo = DELIVERY_MODE_INFO[order.deliveryMode as keyof typeof DELIVERY_MODE_INFO];
   const fallbackInfo = order.fallbackMode ? DELIVERY_MODE_INFO[order.fallbackMode as keyof typeof DELIVERY_MODE_INFO] : null;
+  const canCancel = ["initiated", "validated", "preparing", "ready"].includes(order.status);
+  const auditEvents = timelineQuery.data?.events ?? [];
+
+  const handleCancel = () => {
+    Alert.alert(
+      "Cancel Order",
+      "Cancel this order before a delivery partner accepts it?",
+      [
+        { text: "Keep Order", style: "cancel" },
+        {
+          text: "Cancel Order",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await transitionOrder.mutateAsync({
+                orderId,
+                newStatus: "cancelled",
+                reason: "Cancelled by customer before pilot acceptance",
+              });
+            } catch (error: any) {
+              Alert.alert("Cancellation blocked", error?.message || "Order could not be cancelled.");
+            }
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <ScreenContainer edges={["top", "bottom", "left", "right"]}>
@@ -206,6 +242,23 @@ export default function OrderDetailScreen() {
           })}
         </View>
 
+        {/* Verified audit history */}
+        <View className="mx-4 bg-surface border border-border rounded-xl p-4 mb-4">
+          <Text className="text-base font-semibold text-foreground mb-2">Verified History</Text>
+          {auditEvents.length === 0 ? (
+            <Text className="text-xs text-muted">No audit events recorded yet.</Text>
+          ) : (
+            auditEvents.slice(0, 12).map((event) => (
+              <View key={event.id} className="py-2 border-b border-border">
+                <Text className="text-sm text-foreground">{event.action.replace(/\./g, " ")}</Text>
+                <Text className="text-xs text-muted">
+                  {event.actorRole} • {new Date(event.createdAt).toLocaleString()}
+                </Text>
+              </View>
+            ))
+          )}
+        </View>
+
         {/* Items */}
         <View className="mx-4 bg-surface border border-border rounded-xl p-4 mb-4">
           <Text className="text-base font-semibold text-foreground mb-2">Products</Text>
@@ -241,6 +294,19 @@ export default function OrderDetailScreen() {
               showRoute={true}
               showETA={true}
             />
+          </View>
+        )}
+
+        {canCancel && (
+          <View className="mx-4 mb-4">
+            <TouchableOpacity
+              className="border border-error rounded-xl py-3 items-center"
+              activeOpacity={0.8}
+              disabled={transitionOrder.isPending}
+              onPress={handleCancel}
+            >
+              <Text className="text-error font-semibold">Cancel Order</Text>
+            </TouchableOpacity>
           </View>
         )}
 

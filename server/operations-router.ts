@@ -3,6 +3,13 @@ import { z } from "zod";
 import { b2bDeliveries, deliveries, orders, stores, users } from "../drizzle/schema";
 import { getDb } from "./db";
 import { protectedProcedure, router } from "./_core/trpc";
+import {
+  createMarketplaceOrder,
+  getMarketplaceOrderTimeline,
+  listAssignedMarketplaceOrders,
+  listReadyMarketplaceOrders,
+  transitionMarketplaceOrder,
+} from "./order-management-service";
 
 const ORDER_STATUS_VALUES = [
   "initiated",
@@ -56,7 +63,125 @@ function parseOrderItems(raw: unknown): Array<{ name: string; quantity: number; 
     .filter((item): item is NonNullable<typeof item> => item !== null);
 }
 
+function toMarketplacePilotCard(
+  row: typeof orders.$inferSelect,
+  merchantName: string,
+) {
+  return {
+    id: row.id,
+    orderId: row.id,
+    orderUid: row.orderUid,
+    pickupZone: row.pickupAddress || "",
+    deliveryZone: row.deliveryAddress || "",
+    packageWeight: toNumber(row.packageWeight, 0),
+    distance: 0,
+    estimatedTime: row.estimatedTime ?? 0,
+    merchantName,
+    status: row.status,
+    vehicleType: "auto" as const,
+    deliveryMode: "auto" as const,
+  };
+}
+
 export const operationsRouter = router({
+  placeOrder: protectedProcedure
+    .input(
+      z.object({
+        storeId: z.number().int().positive(),
+        items: z.array(z.object({ productId: z.number().int().positive(), quantity: z.number().int().positive() })).min(1),
+        deliveryAddress: z.string().trim().min(3).max(1000),
+      }),
+    )
+    .mutation(async ({ ctx, input }) =>
+      createMarketplaceOrder({
+        actor: ctx.user as any,
+        storeId: input.storeId,
+        items: input.items,
+        deliveryAddress: input.deliveryAddress,
+      }),
+    ),
+
+  transitionOrder: protectedProcedure
+    .input(
+      z.object({
+        orderId: z.number().int().positive(),
+        newStatus: z.enum(ORDER_STATUS_VALUES),
+        reason: z.string().trim().min(1).max(500).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) =>
+      transitionMarketplaceOrder({
+        actor: ctx.user as any,
+        orderId: input.orderId,
+        newStatus: input.newStatus,
+        reason: input.reason,
+      }),
+    ),
+
+  availableMarketplaceOrders: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx.user as any;
+    const rows = await listReadyMarketplaceOrders(user);
+    if (rows.length === 0) return { orders: [] };
+
+    const db = await getDb();
+    if (!db) return { orders: [] };
+    const merchantIds = [...new Set(rows.map((row) => row.merchantId))];
+    const merchants = await db.select().from(users).where(inArray(users.id, merchantIds));
+    const merchantNames = new Map(merchants.map((merchant) => [merchant.id, merchant.name || merchant.email || `Merchant #${merchant.id}`]));
+
+    return {
+      orders: rows.map((row) => toMarketplacePilotCard(row, merchantNames.get(row.merchantId) || `Merchant #${row.merchantId}`)),
+    };
+  }),
+
+  myMarketplacePilotOrders: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx.user as any;
+    const rows = await listAssignedMarketplaceOrders(user);
+    if (rows.length === 0) return { orders: [] };
+
+    const db = await getDb();
+    if (!db) return { orders: [] };
+    const merchantIds = [...new Set(rows.map((row) => row.merchantId))];
+    const merchants = await db.select().from(users).where(inArray(users.id, merchantIds));
+    const merchantNames = new Map(merchants.map((merchant) => [merchant.id, merchant.name || merchant.email || `Merchant #${merchant.id}`]));
+
+    return {
+      orders: rows.map((row) => toMarketplacePilotCard(row, merchantNames.get(row.merchantId) || `Merchant #${row.merchantId}`)),
+    };
+  }),
+
+  myOrderTimeline: protectedProcedure
+    .input(z.object({ orderId: z.number().int().positive() }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) return { events: [] };
+
+      const rows = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
+      const order = rows[0];
+      if (!order) return { events: [] };
+
+      const user = ctx.user as any;
+      const authorized =
+        order.customerId === user.id ||
+        order.merchantId === user.id ||
+        order.pilotId === user.id ||
+        user.role === "admin" ||
+        user.dropiRole === "system_administrator";
+      if (!authorized) throw new Error("Order timeline not accessible for current user");
+
+      const events = await getMarketplaceOrderTimeline(order.id);
+      return {
+        events: events.map((event) => ({
+          id: event.id,
+          action: event.action,
+          actorRole: event.userRole,
+          details: event.details,
+          severity: event.severity,
+          createdAt: event.createdAt.toISOString(),
+        })),
+      };
+    }),
+
   myOrders: protectedProcedure
     .input(
       z
@@ -338,9 +463,5 @@ export const operationsRouter = router({
     };
   }),
 
-  orderStatusValues: protectedProcedure.query(() => {
-    return {
-      values: ORDER_STATUS_VALUES,
-    };
-  }),
+  orderStatusValues: protectedProcedure.query(() => ({ values: ORDER_STATUS_VALUES })),
 });
