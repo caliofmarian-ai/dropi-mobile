@@ -24,6 +24,7 @@ import { apiKeys, stores, b2bDeliveries, webhookEndpoints, apiRequestLogs } from
 import { eq, and, desc, sql } from "drizzle-orm";
 import crypto from "crypto";
 import { triggerWebhooks, buildWebhookPayload, getWebhookEvents } from "./webhook-trigger";
+import { notifyB2bDeliveryTransition } from "./b2b-transition-notifications";
 
 // ===== TYPES =====
 
@@ -410,6 +411,16 @@ export function createRestGateway(): Router {
       for (const event of events) {
         triggerWebhooks(store.id, deliveryId, event, { ...payload, event });
       }
+
+      await notifyB2bDeliveryTransition({
+        deliveryId: delivery[0].id,
+        trackingCode: delivery[0].trackingCode,
+        previousStatus,
+        newStatus: "cancelled",
+        storeOwnerId: store.ownerId,
+        assignedPilotId: delivery[0].assignedPilotId,
+        actorUserId: store.ownerId,
+      });
 
       res.json({
         success: true,
