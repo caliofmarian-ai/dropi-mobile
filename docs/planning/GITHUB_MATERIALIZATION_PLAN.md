@@ -169,6 +169,8 @@ PR #60 is ready to merge only when its PR validation proves:
 - live GitHub verification matches the machine-readable plan;
 - no duplicate stable IDs exist.
 
+Final-head certification must be observed on the actual PR head commit; bot-authored self-mutating repair commits are not treated as certification evidence because follow-on workflow execution can be suppressed by GitHub Actions token rules.
+
 After merge, the manual materialization workflow may be invoked to execute apply → verify → second apply → second verify and record an idempotency result.
 
 ---
