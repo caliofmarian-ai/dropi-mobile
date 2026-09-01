@@ -6,6 +6,7 @@ on:
       - m1/secure-live-tracking
     paths:
       - .github/workflows/apply-secure-live-tracking.yml
+      - scripts/apply_live_tracking_ui_patch.py
 
 permissions:
   contents: write
@@ -53,5 +54,3 @@ jobs:
           git add -A
           git commit -m "fix: wire authenticated live tracking through real mission context"
           git push origin HEAD:m1/secure-live-tracking
-
-# Trigger marker: simplified workflow definition is now active.
