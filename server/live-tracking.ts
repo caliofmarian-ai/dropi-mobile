@@ -1,21 +1,27 @@
 /**
- * Live Tracking WebSocket Server — Sprint E++
+ * Live Tracking WebSocket Server
  *
- * Provides real-time pilot position broadcasting for delivery tracking.
- * Uses native Node.js WebSocket via the 'ws' library (already available via express).
- *
- * Architecture:
- * - Pilots send position updates via WS message: { type: "position", deliveryId, lat, lng, heading, speed, altitude? }
- * - Subscribers (merchants, customers) connect and subscribe to a deliveryId
- * - Server broadcasts position updates to all subscribers of that delivery
- * - Heartbeat mechanism ensures stale connections are cleaned up
+ * Security contract:
+ * - URL carries only the tracking namespace (`target`) and resource ID (`deliveryId`).
+ * - The first client message MUST authenticate with the existing DROPi session token.
+ * - Pilot identity is derived server-side from the authenticated session; `pilotId` is never trusted from the client.
+ * - Subscriber access is checked against order/B2B ownership before a socket joins a tracking stream.
+ * - `order:<id>` and `b2b:<id>` are distinct stream keys so equal numeric IDs cannot collide.
  */
 import { Server as HttpServer } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { URL } from "url";
 import { createInAppNotification } from "./create-notification";
+import {
+  authorizeTrackingSession,
+  TrackingAccessError,
+  type TrackingAuthorization,
+  type TrackingMode,
+  type TrackingTarget,
+} from "./live-tracking-access";
 
 interface PositionUpdate {
+  target: TrackingTarget;
   deliveryId: number;
   pilotId: number;
   lat: number;
@@ -28,26 +34,114 @@ interface PositionUpdate {
 }
 
 interface TrackedDelivery {
-  lastPosition: PositionUpdate;
+  lastPosition: PositionUpdate | null;
   subscribers: Set<WebSocket>;
   dropoff?: { lat: number; lng: number };
   geofenceTriggered?: boolean;
   etaSeconds?: number;
 }
 
-// In-memory tracking state
-const activeDeliveries = new Map<number, TrackedDelivery>();
-const pilotConnections = new Map<WebSocket, { pilotId: number; deliveryId: number }>();
+interface PilotConnection {
+  pilotId: number;
+  target: TrackingTarget;
+  deliveryId: number;
+  streamKey: string;
+  notificationRecipientId: number | null;
+}
 
-// Geofence radius in meters
+type AuthenticateMessage = {
+  type: "authenticate";
+  token?: string;
+  mode?: TrackingMode;
+};
+
+const activeDeliveries = new Map<string, TrackedDelivery>();
+const pilotConnections = new Map<WebSocket, PilotConnection>();
 const GEOFENCE_RADIUS_M = 500;
+const AUTH_TIMEOUT_MS = 10_000;
+const ALLOWED_VEHICLE_TYPES = new Set(["drone", "auto", "van", "ebike", "terrestrial"]);
 
-/**
- * Calculate distance between two coordinates using Haversine formula.
- * Returns distance in meters.
- */
+function streamKey(target: TrackingTarget, deliveryId: number): string {
+  return `${target}:${deliveryId}`;
+}
+
+function parseTarget(value: string | null): TrackingTarget | null {
+  return value === "order" || value === "b2b" ? value : null;
+}
+
+function sendJson(ws: WebSocket, payload: unknown): void {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(payload));
+  }
+}
+
+function closeWithPolicyError(ws: WebSocket, code: string, message: string): void {
+  sendJson(ws, { type: "error", code, message });
+  ws.close(1008, message.slice(0, 120));
+}
+
+function parseMessage(raw: WebSocket.RawData): Record<string, unknown> | null {
+  try {
+    const parsed = JSON.parse(raw.toString());
+    return parsed && typeof parsed === "object" ? parsed as Record<string, unknown> : null;
+  } catch {
+    return null;
+  }
+}
+
+function finiteNumber(value: unknown): number | null {
+  const numeric = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function parsePositionMessage(
+  msg: Record<string, unknown>,
+  authorization: TrackingAuthorization,
+): PositionUpdate | null {
+  const lat = finiteNumber(msg.lat);
+  const lng = finiteNumber(msg.lng);
+  const speed = finiteNumber(msg.speed) ?? 0;
+  const heading = finiteNumber(msg.heading) ?? 0;
+  const altitudeValue = msg.altitude == null ? null : finiteNumber(msg.altitude);
+
+  if (lat == null || lng == null || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return null;
+  }
+  if (speed < 0 || speed > 200 || heading < 0 || heading > 360) {
+    return null;
+  }
+  if (msg.altitude != null && altitudeValue == null) {
+    return null;
+  }
+
+  const rawVehicleType = typeof msg.vehicleType === "string" ? msg.vehicleType : "auto";
+  const vehicleType = ALLOWED_VEHICLE_TYPES.has(rawVehicleType) ? rawVehicleType : "auto";
+
+  return {
+    target: authorization.target,
+    deliveryId: authorization.resourceId,
+    pilotId: authorization.pilotId!,
+    lat,
+    lng,
+    heading,
+    speed,
+    altitude: altitudeValue ?? undefined,
+    vehicleType,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+function parseDropoff(url: URL): { lat: number; lng: number } | null {
+  const lat = finiteNumber(url.searchParams.get("dropoffLat"));
+  const lng = finiteNumber(url.searchParams.get("dropoffLng"));
+  if (lat == null || lng == null || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return null;
+  }
+  return { lat, lng };
+}
+
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371000; // Earth radius in meters
+  const R = 6371000;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLng = (lng2 - lng1) * Math.PI / 180;
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -57,243 +151,289 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c;
 }
 
-/**
- * Calculate ETA in seconds based on distance and current speed.
- * If speed is 0, uses a default average speed for the vehicle type.
- */
 function calculateETA(distanceM: number, speedMs: number, vehicleType: string): number {
-  // Default speeds (m/s) if pilot is stationary
   const defaultSpeeds: Record<string, number> = {
-    drone: 15,   // ~54 km/h
-    auto: 8.3,   // ~30 km/h (urban)
-    van: 6.9,    // ~25 km/h (urban)
-    ebike: 5.6,  // ~20 km/h
+    drone: 15,
+    auto: 8.3,
+    van: 6.9,
+    ebike: 5.6,
+    terrestrial: 8.3,
   };
   const effectiveSpeed = speedMs > 1 ? speedMs : (defaultSpeeds[vehicleType] || 8.3);
   return Math.round(distanceM / effectiveSpeed);
 }
 
-/**
- * Initialize WebSocket server on the existing HTTP server.
- * Path: /ws/tracking
- */
+function getOrCreateDelivery(key: string): TrackedDelivery {
+  let delivery = activeDeliveries.get(key);
+  if (!delivery) {
+    delivery = { lastPosition: null, subscribers: new Set() };
+    activeDeliveries.set(key, delivery);
+  }
+  return delivery;
+}
+
+function hasPilotForStream(key: string): boolean {
+  for (const info of pilotConnections.values()) {
+    if (info.streamKey === key) return true;
+  }
+  return false;
+}
+
+function attachSubscriber(ws: WebSocket, authorization: TrackingAuthorization): string {
+  const key = streamKey(authorization.target, authorization.resourceId);
+  const delivery = getOrCreateDelivery(key);
+  delivery.subscribers.add(ws);
+
+  if (delivery.lastPosition) {
+    sendJson(ws, { type: "position", data: delivery.lastPosition });
+  } else {
+    sendJson(ws, { type: "waiting", message: "Waiting for pilot position..." });
+  }
+  return key;
+}
+
+function attachPilot(ws: WebSocket, url: URL, authorization: TrackingAuthorization): PilotConnection {
+  const key = streamKey(authorization.target, authorization.resourceId);
+  const delivery = getOrCreateDelivery(key);
+  const dropoff = parseDropoff(url);
+  if (dropoff) {
+    delivery.dropoff = dropoff;
+    delivery.geofenceTriggered = false;
+  }
+
+  const connection: PilotConnection = {
+    pilotId: authorization.pilotId!,
+    target: authorization.target,
+    deliveryId: authorization.resourceId,
+    streamKey: key,
+    notificationRecipientId: authorization.notificationRecipientId,
+  };
+  pilotConnections.set(ws, connection);
+  return connection;
+}
+
+function broadcastToSubscribers(delivery: TrackedDelivery, payload: unknown): void {
+  for (const subscriber of delivery.subscribers) {
+    sendJson(subscriber, payload);
+  }
+}
+
+async function handlePilotMessage(
+  ws: WebSocket,
+  msg: Record<string, unknown>,
+  authorization: TrackingAuthorization,
+): Promise<void> {
+  const key = streamKey(authorization.target, authorization.resourceId);
+  const delivery = activeDeliveries.get(key);
+  if (!delivery) {
+    closeWithPolicyError(ws, "TRACKING_STATE_MISSING", "Tracking state is no longer active.");
+    return;
+  }
+
+  if (msg.type === "delivery_complete") {
+    const completedAt = new Date().toISOString();
+    const payload = {
+      type: "delivery_completed",
+      target: authorization.target,
+      deliveryId: authorization.resourceId,
+      pilotId: authorization.pilotId,
+      completedAt,
+      message: "Delivery has been completed successfully.",
+    };
+    broadcastToSubscribers(delivery, payload);
+    activeDeliveries.delete(key);
+
+    if (authorization.notificationRecipientId) {
+      createInAppNotification({
+        userId: authorization.notificationRecipientId,
+        title: "Delivery Completed! 🎉",
+        body: `Delivery #${authorization.resourceId} has been completed successfully.`,
+        category: "orders",
+        metadata: {
+          target: authorization.target,
+          deliveryId: authorization.resourceId,
+          pilotId: authorization.pilotId,
+          completedAt,
+        },
+      }).catch(() => {});
+    }
+
+    sendJson(ws, { type: "completion_confirmed", deliveryId: authorization.resourceId });
+    pilotConnections.delete(ws);
+    ws.close(1000, "Delivery completed");
+    return;
+  }
+
+  if (msg.type !== "position") {
+    sendJson(ws, { type: "error", code: "UNSUPPORTED_MESSAGE", message: "Unsupported pilot message type." });
+    return;
+  }
+
+  const position = parsePositionMessage(msg, authorization);
+  if (!position) {
+    sendJson(ws, { type: "error", code: "INVALID_POSITION", message: "Position payload is invalid." });
+    return;
+  }
+
+  delivery.lastPosition = position;
+
+  let etaSeconds: number | null = null;
+  let distanceM: number | null = null;
+  if (delivery.dropoff) {
+    distanceM = haversineDistance(position.lat, position.lng, delivery.dropoff.lat, delivery.dropoff.lng);
+    etaSeconds = calculateETA(distanceM, position.speed, position.vehicleType);
+    delivery.etaSeconds = etaSeconds;
+
+    if (!delivery.geofenceTriggered && distanceM <= GEOFENCE_RADIUS_M) {
+      delivery.geofenceTriggered = true;
+      broadcastToSubscribers(delivery, {
+        type: "geofence_entered",
+        target: authorization.target,
+        deliveryId: authorization.resourceId,
+        pilotId: authorization.pilotId,
+        distanceM: Math.round(distanceM),
+        etaSeconds,
+        message: `Pilot is within ${GEOFENCE_RADIUS_M}m of delivery point. Estimated arrival: ${Math.ceil(etaSeconds / 60)} min.`,
+      });
+    }
+  }
+
+  broadcastToSubscribers(delivery, {
+    type: "position",
+    data: position,
+    eta: etaSeconds != null && distanceM != null
+      ? { seconds: etaSeconds, distanceM: Math.round(distanceM) }
+      : undefined,
+  });
+}
+
 export function initLiveTracking(server: HttpServer): void {
   const wss = new WebSocketServer({ server, path: "/ws/tracking" });
 
   wss.on("connection", (ws, req) => {
-    const url = new URL(req.url || "/", `http://${req.headers.host}`);
-    const role = url.searchParams.get("role"); // "pilot" or "subscriber"
-    const deliveryId = parseInt(url.searchParams.get("deliveryId") || "0");
+    const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+    const target = parseTarget(url.searchParams.get("target"));
+    const deliveryId = Number.parseInt(url.searchParams.get("deliveryId") || "0", 10);
 
-    if (!deliveryId) {
-      ws.send(JSON.stringify({ type: "error", message: "deliveryId query param required" }));
-      ws.close();
+    if (!target) {
+      closeWithPolicyError(ws, "TARGET_REQUIRED", "target query param must be 'order' or 'b2b'.");
+      return;
+    }
+    if (!Number.isSafeInteger(deliveryId) || deliveryId <= 0) {
+      closeWithPolicyError(ws, "DELIVERY_ID_REQUIRED", "A positive deliveryId query param is required.");
       return;
     }
 
-    if (role === "subscriber") {
-      // Subscribe to position updates for a delivery
-      if (!activeDeliveries.has(deliveryId)) {
-        activeDeliveries.set(deliveryId, { lastPosition: null as any, subscribers: new Set() });
+    let authorization: TrackingAuthorization | null = null;
+    let subscriberStreamKey: string | null = null;
+    let authenticating = false;
+
+    const authTimeout = setTimeout(() => {
+      if (!authorization) {
+        closeWithPolicyError(ws, "AUTH_TIMEOUT", "Live-tracking authentication timed out.");
       }
-      const delivery = activeDeliveries.get(deliveryId)!;
-      delivery.subscribers.add(ws);
+    }, AUTH_TIMEOUT_MS);
 
-      // Send last known position immediately if available
-      if (delivery.lastPosition) {
-        ws.send(JSON.stringify({ type: "position", data: delivery.lastPosition }));
-      } else {
-        ws.send(JSON.stringify({ type: "waiting", message: "Waiting for pilot position..." }));
-      }
-
-      ws.on("close", () => {
-        delivery.subscribers.delete(ws);
-        // Clean up empty deliveries
-        if (delivery.subscribers.size === 0 && !hasPilotForDelivery(deliveryId)) {
-          activeDeliveries.delete(deliveryId);
-        }
-      });
-    } else if (role === "pilot") {
-      const pilotId = parseInt(url.searchParams.get("pilotId") || "0");
-      if (!pilotId) {
-        ws.send(JSON.stringify({ type: "error", message: "pilotId query param required for pilots" }));
-        ws.close();
-        return;
-      }
-
-      pilotConnections.set(ws, { pilotId, deliveryId });
-
-      // Parse optional dropoff coordinates for ETA + geofence
-      const dropoffLat = parseFloat(url.searchParams.get("dropoffLat") || "0");
-      const dropoffLng = parseFloat(url.searchParams.get("dropoffLng") || "0");
-
-      if (!activeDeliveries.has(deliveryId)) {
-        activeDeliveries.set(deliveryId, { lastPosition: null as any, subscribers: new Set() });
-      }
-
-      const deliveryEntry = activeDeliveries.get(deliveryId)!;
-      if (dropoffLat && dropoffLng) {
-        deliveryEntry.dropoff = { lat: dropoffLat, lng: dropoffLng };
-        deliveryEntry.geofenceTriggered = false;
-      }
-
-      ws.send(JSON.stringify({ type: "connected", message: "Pilot tracking active", deliveryId }));
-
-      ws.on("message", (raw) => {
-        try {
-          const msg = JSON.parse(raw.toString());
-
-          // Handle delivery completion
-          if (msg.type === "delivery_complete") {
-            const delivery = activeDeliveries.get(deliveryId);
-            if (delivery) {
-              const completionPayload = JSON.stringify({
-                type: "delivery_completed",
-                deliveryId,
-                pilotId,
-                completedAt: new Date().toISOString(),
-                message: "Delivery has been completed successfully!",
-              });
-              // Notify all subscribers via WebSocket
-              delivery.subscribers.forEach((sub) => {
-                if (sub.readyState === WebSocket.OPEN) {
-                  sub.send(completionPayload);
-                }
-              });
-              // Clean up delivery tracking state
-              activeDeliveries.delete(deliveryId);
-              console.log(`[ws] Delivery #${deliveryId} completed by pilot #${pilotId}`);
-            }
-
-            // Send in-app notification to customer (using customerId from msg or deliveryId lookup)
-            const customerId = msg.customerId;
-            if (customerId) {
-              createInAppNotification({
-                userId: customerId,
-                title: "Delivery Completed! 🎉",
-                body: `Your delivery #${deliveryId} has been successfully completed. Thank you for using DROPi!`,
-                category: "orders",
-                metadata: { deliveryId, pilotId, completedAt: new Date().toISOString() },
-              }).catch(() => {});
-            }
-
-            // Confirm to pilot
-            ws.send(JSON.stringify({ type: "completion_confirmed", deliveryId }));
-            // Close pilot connection gracefully
-            pilotConnections.delete(ws);
-            ws.close(1000, "Delivery completed");
-            return;
-          }
-
-          if (msg.type === "position") {
-            const position: PositionUpdate = {
-              deliveryId,
-              pilotId,
-              lat: msg.lat,
-              lng: msg.lng,
-              heading: msg.heading || 0,
-              speed: msg.speed || 0,
-              altitude: msg.altitude,
-              vehicleType: msg.vehicleType || "auto",
-              timestamp: new Date().toISOString(),
-            };
-
-            const delivery = activeDeliveries.get(deliveryId);
-            if (delivery) {
-              delivery.lastPosition = position;
-
-              // Calculate ETA if dropoff is known
-              let etaSeconds: number | null = null;
-              let distanceM: number | null = null;
-              if (delivery.dropoff) {
-                distanceM = haversineDistance(position.lat, position.lng, delivery.dropoff.lat, delivery.dropoff.lng);
-                etaSeconds = calculateETA(distanceM, position.speed, position.vehicleType);
-                delivery.etaSeconds = etaSeconds;
-
-                // Geofence check: trigger once when entering 500m radius
-                if (!delivery.geofenceTriggered && distanceM <= GEOFENCE_RADIUS_M) {
-                  delivery.geofenceTriggered = true;
-                  const geofencePayload = JSON.stringify({
-                    type: "geofence_entered",
-                    deliveryId,
-                    pilotId,
-                    distanceM: Math.round(distanceM),
-                    etaSeconds,
-                    message: `Pilot is within ${GEOFENCE_RADIUS_M}m of delivery point. Estimated arrival: ${Math.ceil(etaSeconds / 60)} min.`,
-                  });
-                  delivery.subscribers.forEach((sub) => {
-                    if (sub.readyState === WebSocket.OPEN) {
-                      sub.send(geofencePayload);
-                    }
-                  });
-                }
-              }
-
-              // Broadcast position + ETA to all subscribers
-              const payload = JSON.stringify({
-                type: "position",
-                data: position,
-                eta: etaSeconds != null ? { seconds: etaSeconds, distanceM: Math.round(distanceM!) } : undefined,
-              });
-              delivery.subscribers.forEach((sub) => {
-                if (sub.readyState === WebSocket.OPEN) {
-                  sub.send(payload);
-                }
-              });
-            }
-          }
-        } catch (e) {
-          ws.send(JSON.stringify({ type: "error", message: "Invalid message format" }));
-        }
-      });
-
-      ws.on("close", () => {
-        pilotConnections.delete(ws);
-        const delivery = activeDeliveries.get(deliveryId);
-        if (delivery) {
-          // Notify subscribers that pilot disconnected
-          const payload = JSON.stringify({ type: "pilot_disconnected", deliveryId });
-          delivery.subscribers.forEach((sub) => {
-            if (sub.readyState === WebSocket.OPEN) {
-              sub.send(payload);
-            }
-          });
-          // Clean up if no subscribers
-          if (delivery.subscribers.size === 0) {
-            activeDeliveries.delete(deliveryId);
-          }
-        }
-      });
-    } else {
-      ws.send(JSON.stringify({ type: "error", message: "role query param must be 'pilot' or 'subscriber'" }));
-      ws.close();
-    }
-
-    // Heartbeat / ping-pong
     const pingInterval = setInterval(() => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.ping();
       } else {
         clearInterval(pingInterval);
       }
-    }, 30000);
+    }, 30_000);
 
-    ws.on("close", () => clearInterval(pingInterval));
+    ws.on("message", async (raw) => {
+      const msg = parseMessage(raw);
+      if (!msg) {
+        sendJson(ws, { type: "error", code: "INVALID_JSON", message: "Invalid message format." });
+        return;
+      }
+
+      if (!authorization) {
+        if (authenticating) return;
+        const authMessage = msg as AuthenticateMessage;
+        if (authMessage.type !== "authenticate" || (authMessage.mode !== "pilot" && authMessage.mode !== "subscriber")) {
+          closeWithPolicyError(ws, "AUTH_REQUIRED", "The first WebSocket message must authenticate the tracking session.");
+          return;
+        }
+
+        authenticating = true;
+        try {
+          authorization = await authorizeTrackingSession({
+            token: typeof authMessage.token === "string" ? authMessage.token : null,
+            target,
+            resourceId: deliveryId,
+            mode: authMessage.mode,
+          });
+          clearTimeout(authTimeout);
+
+          if (authorization.mode === "subscriber") {
+            subscriberStreamKey = attachSubscriber(ws, authorization);
+          } else {
+            attachPilot(ws, url, authorization);
+          }
+
+          sendJson(ws, {
+            type: "authenticated",
+            mode: authorization.mode,
+            target: authorization.target,
+            deliveryId: authorization.resourceId,
+            pilotId: authorization.pilotId,
+          });
+        } catch (error) {
+          const accessError = error instanceof TrackingAccessError
+            ? error
+            : new TrackingAccessError("AUTH_INVALID", "Live-tracking authorization failed.");
+          closeWithPolicyError(ws, accessError.code, accessError.message);
+        } finally {
+          authenticating = false;
+        }
+        return;
+      }
+
+      if (authorization.mode !== "pilot") {
+        sendJson(ws, { type: "error", code: "SUBSCRIBER_READ_ONLY", message: "Subscriber tracking sockets are read-only." });
+        return;
+      }
+
+      await handlePilotMessage(ws, msg, authorization);
+    });
+
+    ws.on("close", () => {
+      clearTimeout(authTimeout);
+      clearInterval(pingInterval);
+
+      if (subscriberStreamKey) {
+        const delivery = activeDeliveries.get(subscriberStreamKey);
+        if (delivery) {
+          delivery.subscribers.delete(ws);
+          if (delivery.subscribers.size === 0 && !hasPilotForStream(subscriberStreamKey)) {
+            activeDeliveries.delete(subscriberStreamKey);
+          }
+        }
+      }
+
+      const pilot = pilotConnections.get(ws);
+      if (pilot) {
+        pilotConnections.delete(ws);
+        const delivery = activeDeliveries.get(pilot.streamKey);
+        if (delivery) {
+          broadcastToSubscribers(delivery, {
+            type: "pilot_disconnected",
+            target: pilot.target,
+            deliveryId: pilot.deliveryId,
+          });
+          if (delivery.subscribers.size === 0) {
+            activeDeliveries.delete(pilot.streamKey);
+          }
+        }
+      }
+    });
   });
 
-  console.log("[ws] Live tracking WebSocket initialized at /ws/tracking");
+  console.log("[ws] Authenticated live tracking initialized at /ws/tracking");
 }
 
-function hasPilotForDelivery(deliveryId: number): boolean {
-  for (const [, info] of pilotConnections) {
-    if (info.deliveryId === deliveryId) return true;
-  }
-  return false;
-}
-
-/**
- * Get current tracking stats (for admin/monitoring).
- */
 export function getTrackingStats() {
   return {
     activeDeliveries: activeDeliveries.size,
