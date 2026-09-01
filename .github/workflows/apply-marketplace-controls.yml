@@ -31,11 +31,15 @@ jobs:
       - name: Apply governed Marketplace controls
         run: python3 scripts/apply_marketplace_controls.py
 
-      - name: Run Marketplace control and regression certification
+      - name: Run Marketplace policy certification
         run: >-
           node --import tsx --test
           tests/marketplace-policy.test.ts
           tests/marketplace-controls-contract.test.ts
+
+      - name: Run M1 regression certification
+        run: >-
+          pnpm exec vitest run
           tests/order-state-machine.test.ts
           tests/order-transition-notifications.test.ts
           tests/order-management-integration-contract.test.ts
