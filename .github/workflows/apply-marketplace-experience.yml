@@ -1,0 +1,43 @@
+name: Apply Marketplace experience
+
+on:
+  push:
+    branches: [m1/marketplace-experience-core]
+
+permissions:
+  contents: write
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply wiring
+        run: python3 scripts/apply_marketplace_experience_core.py
+      - name: Marketplace tests
+        run: node --import tsx --test tests/marketplace-review-policy.test.ts tests/merchant-portfolio-summary.test.ts tests/marketplace-experience-contract.test.ts tests/marketplace-policy.test.ts tests/marketplace-controls-contract.test.ts
+      - name: Regression tests
+        run: pnpm exec vitest run tests/order-state-machine.test.ts tests/order-transition-notifications.test.ts tests/order-management-integration-contract.test.ts tests/push-state-notifications.test.ts tests/push-state-integration-contract.test.ts tests/live-tracking-security.test.ts tests/live-tracking-client-contract.test.ts tests/operational-safety-certification.test.ts
+      - name: TypeScript check
+        run: pnpm check
+      - name: Whitespace check
+        run: git diff --check
+      - name: Commit verified changes
+        run: |
+          rm .github/workflows/apply-marketplace-experience.yml scripts/apply_marketplace_experience_core.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "feat: harden verified reputation and merchant portfolio"
+          git push origin HEAD:m1/marketplace-experience-core
