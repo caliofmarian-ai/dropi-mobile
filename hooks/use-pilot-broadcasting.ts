@@ -1,20 +1,22 @@
 /**
- * Pilot Broadcasting Hook — Sprint 7+
+ * Pilot Broadcasting Hook
  *
- * Connects to /ws/tracking as a pilot and broadcasts GPS position updates
- * using expo-location's watchPositionAsync. Supports start/stop control.
+ * The pilot authenticates with the existing DROPi session. Pilot identity is
+ * derived server-side and is never supplied as a route/query parameter.
  */
 import { useState, useRef, useCallback } from "react";
-import { Platform, AppState } from "react-native";
+import { Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getRequiredApiBaseUrl } from "@/constants/oauth";
 
-// Conditionally import expo-location (not available on web in dev)
 let Location: any = null;
 if (Platform.OS !== "web") {
   try {
     Location = require("expo-location");
   } catch { /* not available */ }
 }
+
+export type PilotTrackingTarget = "order" | "b2b";
 
 export interface BroadcastState {
   isBroadcasting: boolean;
@@ -27,14 +29,21 @@ export interface BroadcastState {
 
 interface UsePilotBroadcastingOptions {
   deliveryId: number;
-  pilotId: number;
+  target?: PilotTrackingTarget;
   vehicleType?: string;
   dropoffLat?: number;
   dropoffLng?: number;
-  customerId?: number;
 }
 
-export function usePilotBroadcasting({ deliveryId, pilotId, vehicleType = "drone", dropoffLat, dropoffLng, customerId }: UsePilotBroadcastingOptions) {
+const TOKEN_KEY = "@dropi_token";
+
+export function usePilotBroadcasting({
+  deliveryId,
+  target = "b2b",
+  vehicleType = "drone",
+  dropoffLat,
+  dropoffLng,
+}: UsePilotBroadcastingOptions) {
   const [state, setState] = useState<BroadcastState>({
     isBroadcasting: false,
     lastPosition: null,
@@ -48,149 +57,157 @@ export function usePilotBroadcasting({ deliveryId, pilotId, vehicleType = "drone
   const locationSubRef = useRef<any>(null);
   const updateCountRef = useRef(0);
 
+  const stopLocationWatch = useCallback(() => {
+    if (locationSubRef.current) {
+      locationSubRef.current.remove();
+      locationSubRef.current = null;
+    }
+  }, []);
+
   const startBroadcasting = useCallback(async () => {
+    if (!Number.isSafeInteger(deliveryId) || deliveryId <= 0) {
+      setState((s) => ({ ...s, error: "A valid assigned delivery is required for broadcasting." }));
+      return;
+    }
     if (Platform.OS === "web") {
       setState((s) => ({ ...s, error: "GPS broadcasting requires a native device (iOS/Android)" }));
       return;
     }
-
     if (!Location) {
       setState((s) => ({ ...s, error: "expo-location not available" }));
       return;
     }
 
     try {
-      // Request location permission
+      const token = await AsyncStorage.getItem(TOKEN_KEY);
+      if (!token) {
+        setState((s) => ({ ...s, error: "Authentication required for live tracking." }));
+        return;
+      }
+
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         setState((s) => ({ ...s, error: "Location permission denied. Enable in Settings." }));
         return;
       }
 
-      // Check if location services are enabled
       const servicesEnabled = await Location.hasServicesEnabledAsync();
       if (!servicesEnabled) {
         setState((s) => ({ ...s, error: "Location services are disabled. Please enable GPS." }));
         return;
       }
 
-      // Connect to WebSocket as pilot (include dropoff for ETA/geofence)
       const apiUrl = getRequiredApiBaseUrl("pilot tracking websocket");
-      let wsUrl = apiUrl.replace(/^http/, "ws") + `/ws/tracking?role=pilot&deliveryId=${deliveryId}&pilotId=${pilotId}`;
-      if (dropoffLat && dropoffLng) {
-        wsUrl += `&dropoffLat=${dropoffLat}&dropoffLng=${dropoffLng}`;
+      const params = new URLSearchParams({
+        target,
+        deliveryId: String(deliveryId),
+      });
+      if (dropoffLat != null && dropoffLng != null) {
+        params.set("dropoffLat", String(dropoffLat));
+        params.set("dropoffLng", String(dropoffLng));
       }
 
+      const wsUrl = `${apiUrl.replace(/^http/, "ws")}/ws/tracking?${params.toString()}`;
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
-        setState((s) => ({ ...s, connected: true, error: null }));
+        ws.send(JSON.stringify({ type: "authenticate", mode: "pilot", token }));
       };
 
-      ws.onmessage = (event) => {
+      ws.onmessage = async (event) => {
         try {
           const data = JSON.parse(event.data as string);
-          if (data.type === "error") {
-            setState((s) => ({ ...s, error: data.message }));
-          } else if (data.type === "completion_confirmed") {
-            setState((s) => ({ ...s, deliveryCompleted: true, isBroadcasting: false, connected: false }));
-            // Stop location after confirmation
-            if (locationSubRef.current) {
-              locationSubRef.current.remove();
-              locationSubRef.current = null;
+
+          if (data.type === "authenticated") {
+            setState((s) => ({ ...s, connected: true, error: null }));
+
+            if (!locationSubRef.current) {
+              const subscriber = await Location.watchPositionAsync(
+                {
+                  accuracy: Location.Accuracy.High,
+                  timeInterval: 3000,
+                  distanceInterval: 5,
+                },
+                (location: any) => {
+                  const { latitude, longitude, speed, heading, altitude } = location.coords;
+                  const positionMsg = {
+                    type: "position",
+                    lat: latitude,
+                    lng: longitude,
+                    speed: speed || 0,
+                    heading: heading || 0,
+                    altitude: altitude ?? undefined,
+                    vehicleType,
+                  };
+
+                  if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+                    wsRef.current.send(JSON.stringify(positionMsg));
+                  }
+
+                  updateCountRef.current++;
+                  setState((s) => ({
+                    ...s,
+                    lastPosition: {
+                      lat: latitude,
+                      lng: longitude,
+                      speed: speed || 0,
+                      heading: heading || 0,
+                      altitude: altitude ?? undefined,
+                    },
+                    updateCount: updateCountRef.current,
+                  }));
+                },
+              );
+              locationSubRef.current = subscriber;
+              setState((s) => ({ ...s, isBroadcasting: true, error: null }));
             }
+          } else if (data.type === "error") {
+            setState((s) => ({ ...s, error: data.message || "Live tracking authorization failed." }));
+            if (["AUTH_REQUIRED", "AUTH_INVALID", "ACCOUNT_INACTIVE", "FORBIDDEN", "PILOT_NOT_VERIFIED", "TARGET_NOT_FOUND"].includes(data.code)) {
+              stopLocationWatch();
+              ws.close();
+            }
+          } else if (data.type === "completion_confirmed") {
+            stopLocationWatch();
+            setState((s) => ({ ...s, deliveryCompleted: true, isBroadcasting: false, connected: false }));
           }
-        } catch { /* ignore */ }
+        } catch {
+          setState((s) => ({ ...s, error: "Invalid live tracking response." }));
+        }
       };
 
       ws.onerror = () => {
-        setState((s) => ({ ...s, error: "WebSocket connection error", connected: false }));
+        stopLocationWatch();
+        setState((s) => ({ ...s, error: "WebSocket connection error", connected: false, isBroadcasting: false }));
       };
 
       ws.onclose = () => {
-        setState((s) => ({ ...s, connected: false }));
+        stopLocationWatch();
+        setState((s) => ({ ...s, connected: false, isBroadcasting: false }));
         wsRef.current = null;
       };
-
-      // Start watching position
-      const subscriber = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 3000, // every 3 seconds
-          distanceInterval: 5, // or every 5 meters
-        },
-        (location: any) => {
-          const { latitude, longitude, speed, heading, altitude } = location.coords;
-
-          const positionMsg = {
-            type: "position",
-            lat: latitude,
-            lng: longitude,
-            speed: speed || 0,
-            heading: heading || 0,
-            altitude: altitude || undefined,
-            vehicleType,
-          };
-
-          // Send via WebSocket if connected
-          if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-            wsRef.current.send(JSON.stringify(positionMsg));
-          }
-
-          updateCountRef.current++;
-          setState((s) => ({
-            ...s,
-            lastPosition: {
-              lat: latitude,
-              lng: longitude,
-              speed: speed || 0,
-              heading: heading || 0,
-              altitude: altitude || undefined,
-            },
-            updateCount: updateCountRef.current,
-          }));
-        }
-      );
-
-      locationSubRef.current = subscriber;
-      setState((s) => ({ ...s, isBroadcasting: true, error: null }));
     } catch (e: any) {
-      setState((s) => ({ ...s, error: e.message || "Failed to start broadcasting" }));
+      stopLocationWatch();
+      setState((s) => ({ ...s, error: e.message || "Failed to start broadcasting", connected: false, isBroadcasting: false }));
     }
-  }, [deliveryId, pilotId, vehicleType]);
+  }, [deliveryId, target, vehicleType, dropoffLat, dropoffLng, stopLocationWatch]);
 
   const stopBroadcasting = useCallback(() => {
-    // Stop location subscription
-    if (locationSubRef.current) {
-      locationSubRef.current.remove();
-      locationSubRef.current = null;
-    }
-
-    // Close WebSocket
+    stopLocationWatch();
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
     }
-
-    setState((s) => ({
-      ...s,
-      isBroadcasting: false,
-      connected: false,
-    }));
-  }, []);
+    setState((s) => ({ ...s, isBroadcasting: false, connected: false }));
+  }, [stopLocationWatch]);
 
   const completeDelivery = useCallback(() => {
-    // Send delivery_complete event via WebSocket (include customerId for notification)
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: "delivery_complete", customerId }));
+      wsRef.current.send(JSON.stringify({ type: "delivery_complete" }));
     }
-    // Stop location subscription immediately
-    if (locationSubRef.current) {
-      locationSubRef.current.remove();
-      locationSubRef.current = null;
-    }
-  }, []);
+    stopLocationWatch();
+  }, [stopLocationWatch]);
 
   return {
     ...state,
