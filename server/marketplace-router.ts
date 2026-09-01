@@ -13,11 +13,14 @@
 import { router, protectedProcedure, adminProcedure, publicProcedure } from "./_core/trpc";
 import { getDb } from "./db";
 import { stores, products, productReviews, sellerBadges, deliveryBadges, storeAnalytics } from "../drizzle/schema";
-import { eq, and, desc, sql, like, or } from "drizzle-orm";
+import { eq, and, desc, sql, like, or, gt, gte, lte, isNull, inArray } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "crypto";
 import { moderateProduct, formatViolationsForNote, type ProductForModeration, type StoreContext } from "./moderation-engine";
 import { notifyOwner } from "./_core/notification";
+import { MARKETPLACE_CATEGORY_POLICIES, normalizeMarketplaceCategory, normalizeMarketplaceZone, sameMarketplaceZone } from "../shared/marketplace-policy";
+
+const MARKETPLACE_CATEGORY_LABELS = MARKETPLACE_CATEGORY_POLICIES.map((policy) => policy.label);
 
 // ===== DELIVERY MODE CALCULATION =====
 // Based on Blueprint: drone ≤2kg & ≤30×30×30cm, terrestrial always, multimodal if both eligible
@@ -66,6 +69,9 @@ export const storeRouter = router({
         throw new Error("You already have a store. Each merchant can have one store.");
       }
 
+      const normalizedZone = normalizeMarketplaceZone(input.zone);
+      const normalizedCategory = normalizeMarketplaceCategory(input.category);
+
       // Generate API key for external stores
       const apiKey = input.type === "external" ? crypto.randomBytes(32).toString("hex") : null;
 
@@ -76,8 +82,8 @@ export const storeRouter = router({
         type: input.type,
         externalUrl: input.externalUrl || null,
         apiKey,
-        zone: input.zone,
-        category: input.category,
+        zone: normalizedZone,
+        category: normalizedCategory,
         status: "pending",
         workingHours: input.workingHours || null,
         physicalAddress: input.physicalAddress || null,
@@ -114,8 +120,8 @@ export const storeRouter = router({
       if (input.name) updateData.name = input.name;
       if (input.description !== undefined) updateData.description = input.description;
       if (input.externalUrl !== undefined) updateData.externalUrl = input.externalUrl;
-      if (input.zone) updateData.zone = input.zone;
-      if (input.category) updateData.category = input.category;
+      if (input.zone) updateData.zone = normalizeMarketplaceZone(input.zone);
+      if (input.category) updateData.category = normalizeMarketplaceCategory(input.category);
       if (input.workingHours !== undefined) updateData.workingHours = input.workingHours;
       if (input.physicalAddress !== undefined) updateData.physicalAddress = input.physicalAddress;
       if (input.contactPhone !== undefined) updateData.contactPhone = input.contactPhone;
@@ -124,6 +130,9 @@ export const storeRouter = router({
       if (input.webhookUrl !== undefined) updateData.webhookUrl = input.webhookUrl;
 
       await db.update(stores).set(updateData).where(eq(stores.id, store.id));
+      if (updateData.zone) {
+        await db.update(products).set({ zone: updateData.zone }).where(eq(products.storeId, store.id));
+      }
       return { success: true };
     }),
 
@@ -137,21 +146,26 @@ export const storeRouter = router({
     return store || null;
   }),
 
-  // Get store by ID (public)
+  // Get store by ID (public marketplace view — active and zone-scoped only)
   getById: publicProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({ id: z.number(), zone: z.string().min(1).max(100) }))
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) return null;
+      const zone = normalizeMarketplaceZone(input.zone);
 
-      const [store] = await db.select().from(stores).where(eq(stores.id, input.id)).limit(1);
+      const [store] = await db.select().from(stores).where(and(
+        eq(stores.id, input.id),
+        eq(stores.status, "active"),
+        eq(stores.zone, zone),
+      )).limit(1);
       return store || null;
     }),
 
   // List all active stores (public - for marketplace browsing)
   listActive: publicProcedure
     .input(z.object({
-      zone: z.string().optional(),
+      zone: z.string().min(1).max(100),
       category: z.string().optional(),
       limit: z.number().min(1).max(50).default(20),
       offset: z.number().min(0).default(0),
@@ -160,9 +174,9 @@ export const storeRouter = router({
       const db = await getDb();
       if (!db) return { stores: [], total: 0 };
 
-      const conditions = [eq(stores.status, "active")];
-      if (input.zone) conditions.push(eq(stores.zone, input.zone));
-      if (input.category) conditions.push(eq(stores.category, input.category));
+      const zone = normalizeMarketplaceZone(input.zone);
+      const conditions = [eq(stores.status, "active"), eq(stores.zone, zone)];
+      if (input.category) conditions.push(eq(stores.category, normalizeMarketplaceCategory(input.category)));
 
       const where = conditions.length === 1 ? conditions[0] : and(...conditions);
       const results = await db.select().from(stores).where(where).orderBy(desc(stores.trustScore)).limit(input.limit).offset(input.offset);
@@ -246,7 +260,7 @@ export const productRouter = router({
       weight: z.number().positive(), // grams
       dimensions: z.object({ l: z.number(), w: z.number(), h: z.number() }).optional(),
       stock: z.number().int().min(0).optional(),
-      zone: z.string().min(1).max(100),
+      zone: z.string().min(1).max(100).optional(),
       isFragile: z.boolean().default(false),
       requiresSpecialPackaging: z.boolean().default(false),
       cancellationPolicy: z.any().optional(),
@@ -261,6 +275,12 @@ export const productRouter = router({
       if (!store) throw new Error("You must create a store first");
       if (store.status !== "active") throw new Error("Your store must be active to add products");
 
+      const normalizedCategory = normalizeMarketplaceCategory(input.category);
+      const storeZone = normalizeMarketplaceZone(store.zone);
+      if (input.zone && !sameMarketplaceZone(input.zone, storeZone)) {
+        throw new Error("Product zone must match the merchant store operating zone.");
+      }
+
       // Calculate delivery modes
       const deliveryModes = calculateDeliveryModes(input.weight, input.dimensions);
 
@@ -271,13 +291,13 @@ export const productRouter = router({
         price: input.price.toFixed(2),
         currency: input.currency,
         images: input.images || [],
-        category: input.category,
+        category: normalizedCategory,
         subcategory: input.subcategory || null,
         weight: input.weight.toFixed(2),
         dimensions: input.dimensions || null,
         deliveryModes,
         stock: input.stock ?? null,
-        zone: input.zone,
+        zone: storeZone,
         isFragile: input.isFragile,
         requiresSpecialPackaging: input.requiresSpecialPackaging,
         cancellationPolicy: input.cancellationPolicy || null,
@@ -333,7 +353,7 @@ export const productRouter = router({
       if (input.description !== undefined) updateData.description = input.description;
       if (input.price) updateData.price = input.price.toFixed(2);
       if (input.images) updateData.images = input.images;
-      if (input.category) updateData.category = input.category;
+      if (input.category) updateData.category = normalizeMarketplaceCategory(input.category);
       if (input.subcategory !== undefined) updateData.subcategory = input.subcategory;
       if (input.stock !== undefined) updateData.stock = input.stock;
       if (input.isFragile !== undefined) updateData.isFragile = input.isFragile;
@@ -358,7 +378,7 @@ export const productRouter = router({
       }
 
       // If product was approved and key fields changed, reset to pending_review
-      if (product.status === "approved" && (input.name || input.description || input.price || input.weight || input.dimensions)) {
+      if (product.status === "approved" && (input.name || input.description || input.price || input.category || input.weight || input.dimensions)) {
         updateData.status = "pending_review";
         updateData.isActive = false;
       }
@@ -517,22 +537,47 @@ export const productRouter = router({
       return { products: results, total: countResult?.count || 0 };
     }),
 
-  // Get single product by ID (public)
-  getById: publicProcedure
+  // Get single owned product by ID (merchant private view)
+  getOwnedById: protectedProcedure
     .input(z.object({ id: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) return null;
+      const user = ctx.user as any;
+      const [store] = await db.select().from(stores).where(eq(stores.ownerId, user.id)).limit(1);
+      if (!store) return null;
+      const [product] = await db.select().from(products).where(and(eq(products.id, input.id), eq(products.storeId, store.id))).limit(1);
+      if (!product) return null;
+      const badges = await db.select().from(deliveryBadges).where(eq(deliveryBadges.productId, input.id));
+      const reviews = await db.select().from(productReviews).where(eq(productReviews.productId, input.id)).orderBy(desc(productReviews.createdAt)).limit(10);
+      return { ...product, deliveryBadges: badges, reviews };
+    }),
+
+  // Get single product by ID (public marketplace view — approved, active, stocked and zone-scoped)
+  getById: publicProcedure
+    .input(z.object({ id: z.number(), zone: z.string().min(1).max(100) }))
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) return null;
+      const zone = normalizeMarketplaceZone(input.zone);
 
-      const [product] = await db.select().from(products).where(eq(products.id, input.id)).limit(1);
+      const [row] = await db.select().from(products)
+        .innerJoin(stores, eq(products.storeId, stores.id))
+        .where(and(
+          eq(products.id, input.id),
+          eq(products.status, "approved"),
+          eq(products.isActive, true),
+          eq(stores.status, "active"),
+          eq(products.zone, zone),
+          eq(stores.zone, zone),
+          inArray(products.category, MARKETPLACE_CATEGORY_LABELS),
+          or(isNull(products.stock), gt(products.stock, 0)),
+        )).limit(1);
+      const product = row?.products;
       if (!product) return null;
 
-      // Get delivery badges
       const badges = await db.select().from(deliveryBadges).where(eq(deliveryBadges.productId, input.id));
-
-      // Get reviews
       const reviews = await db.select().from(productReviews).where(eq(productReviews.productId, input.id)).orderBy(desc(productReviews.createdAt)).limit(10);
-
       return { ...product, deliveryBadges: badges, reviews };
     }),
 
@@ -540,7 +585,7 @@ export const productRouter = router({
   listActive: publicProcedure
     .input(z.object({
       storeId: z.number().optional(),
-      zone: z.string().optional(),
+      zone: z.string().min(1).max(100),
       category: z.string().optional(),
       search: z.string().optional(),
       minPrice: z.number().optional(),
@@ -553,17 +598,35 @@ export const productRouter = router({
       const db = await getDb();
       if (!db) return { products: [], total: 0 };
 
-      const conditions: any[] = [eq(products.status, "approved"), eq(products.isActive, true)];
+      const zone = normalizeMarketplaceZone(input.zone);
+      const conditions: any[] = [
+        eq(products.status, "approved"),
+        eq(products.isActive, true),
+        eq(stores.status, "active"),
+        eq(products.zone, zone),
+        eq(stores.zone, zone),
+        inArray(products.category, MARKETPLACE_CATEGORY_LABELS),
+        or(isNull(products.stock), gt(products.stock, 0)),
+      ];
       if (input.storeId) conditions.push(eq(products.storeId, input.storeId));
-      if (input.zone) conditions.push(eq(products.zone, input.zone));
-      if (input.category) conditions.push(eq(products.category, input.category));
+      if (input.category) conditions.push(eq(products.category, normalizeMarketplaceCategory(input.category)));
       if (input.search) conditions.push(like(products.name, `%${input.search}%`));
+      if (input.minPrice !== undefined) conditions.push(gte(products.price, input.minPrice.toFixed(2)));
+      if (input.maxPrice !== undefined) conditions.push(lte(products.price, input.maxPrice.toFixed(2)));
+      if (input.deliveryMode) conditions.push(sql`JSON_CONTAINS(${products.deliveryModes}, ${JSON.stringify(input.deliveryMode)})`);
 
       const where = and(...conditions);
-      const results = await db.select().from(products).where(where).orderBy(desc(products.orderCount)).limit(input.limit).offset(input.offset);
-      const [countResult] = await db.select({ count: sql<number>`count(*)` }).from(products).where(where!);
+      const joined = await db.select().from(products)
+        .innerJoin(stores, eq(products.storeId, stores.id))
+        .where(where)
+        .orderBy(desc(products.orderCount))
+        .limit(input.limit)
+        .offset(input.offset);
+      const [countResult] = await db.select({ count: sql<number>`count(*)` }).from(products)
+        .innerJoin(stores, eq(products.storeId, stores.id))
+        .where(where!);
 
-      return { products: results, total: countResult?.count || 0 };
+      return { products: joined.map((row) => row.products), total: countResult?.count || 0 };
     }),
 
   // Admin: Moderate product (approve/reject)
@@ -578,6 +641,33 @@ export const productRouter = router({
       if (!db) throw new Error("Database unavailable");
 
       const user = ctx.user as any;
+      const [product] = await db.select().from(products).where(eq(products.id, input.productId)).limit(1);
+      if (!product) throw new Error("Product not found");
+
+      if (input.action === "approve") {
+        const [store] = await db.select().from(stores).where(eq(stores.id, product.storeId)).limit(1);
+        if (!store || store.status !== "active") throw new Error("Product store must be active before approval");
+        if (!sameMarketplaceZone(product.zone, store.zone)) throw new Error("Product zone no longer matches its store zone");
+        const [rejCount] = await db.select({ count: sql<number>`count(*)` }).from(products)
+          .where(and(eq(products.storeId, store.id), eq(products.status, "rejected")));
+        const policyCheck = moderateProduct({
+          name: product.name,
+          description: product.description,
+          price: parseFloat(product.price as any),
+          currency: product.currency,
+          category: product.category,
+          weight: parseFloat(product.weight as any),
+          dimensions: product.dimensions as any,
+          images: product.images as string[] | null,
+          isFragile: product.isFragile,
+          requiresSpecialPackaging: product.requiresSpecialPackaging,
+          stock: product.stock,
+        }, { trustScore: store.trustScore, totalOrders: store.totalOrders, previousRejections: rejCount?.count || 0 });
+        if (policyCheck.violations.some((violation) => violation.severity === "critical")) {
+          throw new Error(formatViolationsForNote(policyCheck));
+        }
+      }
+
       const newStatus = input.action === "approve" ? "approved" : "rejected";
 
       await db.update(products).set({

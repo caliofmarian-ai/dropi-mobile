@@ -36,7 +36,7 @@ export default function MarketplaceOverviewScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   // Fetch marketplace stats from multiple endpoints
-  const pendingProducts = trpc.product.listActive.useQuery({ limit: 1 });
+  const pendingProducts = trpc.product.pendingReview.useQuery({ limit: 1, offset: 0 });
   const storeList = trpc.store.adminList.useQuery({});
 
   // Compute stats from available data
@@ -49,11 +49,11 @@ export default function MarketplaceOverviewScreen() {
     : 0;
   const lowTrustStores = stores.filter((s: any) => (s.trustScore || 0) < 40).length;
 
-  const isLoading = storeList.isLoading;
+  const isLoading = storeList.isLoading || pendingProducts.isLoading;
 
   const onRefresh = () => {
     setRefreshing(true);
-    Promise.all([storeList.refetch()]).finally(() => setRefreshing(false));
+    Promise.all([storeList.refetch(), pendingProducts.refetch()]).finally(() => setRefreshing(false));
   };
 
   if (isLoading) {
@@ -89,7 +89,7 @@ export default function MarketplaceOverviewScreen() {
         <View className="flex-row gap-3 mb-3">
           <MetricCard
             label="Pending Moderation"
-            value="—"
+            value={String(pendingProducts.data?.total || 0)}
             icon="📋"
             color="#F59E0B"
             onPress={() => router.push("/admin/moderation")}

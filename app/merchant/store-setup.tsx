@@ -11,6 +11,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
 import { trpc } from "@/lib/trpc";
 import { safeGoBack } from "@/lib/safe-back";
+import { MARKETPLACE_CATEGORY_POLICIES } from "@/shared/marketplace-policy";
 
 type StoreType = "internal" | "external";
 
@@ -33,6 +34,7 @@ export default function StoreSetupScreen() {
   const [externalUrl, setExternalUrl] = useState("");
   const [zone, setZone] = useState("");
   const [category, setCategory] = useState("");
+  const [showCategories, setShowCategories] = useState(false);
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [saving, setSaving] = useState(false);
@@ -60,6 +62,14 @@ export default function StoreSetupScreen() {
       Alert.alert("Error", "External URL is required for external stores");
       return;
     }
+    if (!zone.trim()) {
+      Alert.alert("Error", "Operating zone is required");
+      return;
+    }
+    if (!category) {
+      Alert.alert("Error", "Select a controlled Marketplace category");
+      return;
+    }
 
     setSaving(true);
     try {
@@ -68,8 +78,8 @@ export default function StoreSetupScreen() {
         description: description.trim(),
         type: storeType,
         externalUrl: storeType === "external" ? externalUrl.trim() : undefined,
-        zone: zone.trim() || "default",
-        category: category.trim() || "general",
+        zone: zone.trim(),
+        category,
         contactPhone: phone.trim() || undefined,
         physicalAddress: address.trim() || undefined,
       };
@@ -192,15 +202,24 @@ export default function StoreSetupScreen() {
         />
 
         {/* Category */}
-        <Text className="text-sm font-semibold text-foreground mb-2">Store Category</Text>
-        <TextInput
-          className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground mb-4"
-          value={category}
-          onChangeText={setCategory}
-          placeholder="e.g., Food & Groceries, Electronics"
-          placeholderTextColor="#9BA1A6"
-          returnKeyType="next"
-        />
+        <Text className="text-sm font-semibold text-foreground mb-2">Store Category *</Text>
+        <TouchableOpacity
+          className="bg-surface border border-border rounded-xl px-4 py-3 mb-1"
+          activeOpacity={0.7}
+          onPress={() => setShowCategories(!showCategories)}
+        >
+          <Text className={category ? "text-foreground" : "text-muted"}>{category || "Select a controlled category..."}</Text>
+        </TouchableOpacity>
+        {showCategories && (
+          <View className="bg-surface border border-border rounded-xl mb-4 overflow-hidden">
+            {MARKETPLACE_CATEGORY_POLICIES.map((policy) => (
+              <TouchableOpacity key={policy.id} className={`px-4 py-3 border-b border-border ${category === policy.label ? "bg-primary/10" : ""}`} onPress={() => { setCategory(policy.label); setShowCategories(false); }}>
+                <Text className={`text-sm ${category === policy.label ? "text-primary font-semibold" : "text-foreground"}`}>{policy.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+        {!showCategories && <View className="mb-3" />}
 
         {/* Phone */}
         <Text className="text-sm font-semibold text-foreground mb-2">Contact Phone</Text>

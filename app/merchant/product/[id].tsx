@@ -38,7 +38,7 @@ export default function MerchantProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [deleting, setDeleting] = useState(false);
 
-  const productQuery = trpc.product.getById.useQuery({ id: parseInt(id || "0") });
+  const productQuery = trpc.product.getOwnedById.useQuery({ id: parseInt(id || "0") });
   const removeMutation = trpc.product.remove.useMutation();
 
   const product = productQuery.data;
