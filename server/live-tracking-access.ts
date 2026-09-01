@@ -47,9 +47,11 @@ export class TrackingAccessError extends Error {
   }
 }
 
+type VerifiedSession = { openId: string; appId: string; name: string } | null;
+
 type AccessDependencies = {
-  verifySession: typeof sdk.verifySession.bind;
-  getUserByOpenId: typeof db.getUserByOpenId;
+  verifySession: (token: string) => Promise<VerifiedSession>;
+  getUserByOpenId: (openId: string) => Promise<User | undefined>;
   loadResource: (target: TrackingTarget, resourceId: number) => Promise<TrackingResource | null>;
 };
 
