@@ -100,7 +100,7 @@ function MerchantDashboard() {
   const router = useRouter();
   const ordersQuery = trpc.operations.myOrders.useQuery({ includeCompleted: true });
   const allOrders = ordersQuery.data?.orders ?? [];
-  const newOrders = allOrders.filter((o) => o.status === "validated");
+  const newOrders = allOrders.filter((o) => o.status === "initiated" || o.status === "validated");
   const preparingOrders = allOrders.filter((o) => o.status === "preparing");
   const readyOrders = allOrders.filter((o) => o.status === "ready");
   const onRefresh = useCallback(async () => {
@@ -152,10 +152,23 @@ function DeliveryPartnerDashboard() {
   const router = useRouter();
   const { user } = useDropiAuth();
   const missionsQuery = trpc.operations.myPilotMissions.useQuery();
+  const marketplaceAvailableQuery = trpc.operations.availableMarketplaceOrders.useQuery();
+  const marketplaceAssignedQuery = trpc.operations.myMarketplacePilotOrders.useQuery();
+  const transitionMarketplaceOrder = trpc.operations.transitionOrder.useMutation({
+    onSuccess: async () => {
+      await Promise.all([marketplaceAvailableQuery.refetch(), marketplaceAssignedQuery.refetch()]);
+    },
+  });
   const availableMissions = (missionsQuery.data?.missions ?? []).filter((m) => m.status === "available");
+  const marketplaceAvailable = marketplaceAvailableQuery.data?.orders ?? [];
+  const marketplaceAssigned = marketplaceAssignedQuery.data?.orders ?? [];
   const onRefresh = useCallback(async () => {
-    await missionsQuery.refetch();
-  }, [missionsQuery]);
+    await Promise.all([
+      missionsQuery.refetch(),
+      marketplaceAvailableQuery.refetch(),
+      marketplaceAssignedQuery.refetch(),
+    ]);
+  }, [missionsQuery, marketplaceAvailableQuery, marketplaceAssignedQuery]);
 
   // Sprint 6A: Check if delivery partner is verified
   const isUnverified = user && !(user as any).isVerified;
@@ -185,7 +198,75 @@ function DeliveryPartnerDashboard() {
           </TouchableOpacity>
         </View>
       </View>
-      <Text className="text-sm text-muted mb-4">{availableMissions.length} missions available in your area</Text>
+      <Text className="text-sm text-muted mb-4">
+        {availableMissions.length + marketplaceAvailable.length} missions available in your area
+      </Text>
+
+      {marketplaceAvailable.length > 0 && (
+        <View className="mb-4">
+          <Text className="text-base font-semibold text-foreground mb-2">Marketplace — READY</Text>
+          {marketplaceAvailable.slice(0, 5).map((item) => (
+            <View key={`market-ready-${item.id}`} className="bg-surface border border-border rounded-xl p-3 mb-2">
+              <Text className="text-sm font-semibold text-foreground">{item.merchantName}</Text>
+              <Text className="text-xs text-muted mt-1">{item.orderUid}</Text>
+              <Text className="text-xs text-muted mt-1">{item.pickupZone} → {item.deliveryZone}</Text>
+              <TouchableOpacity
+                className="bg-success rounded-lg py-2 items-center mt-3"
+                activeOpacity={0.8}
+                disabled={transitionMarketplaceOrder.isPending}
+                onPress={() => transitionMarketplaceOrder.mutate({ orderId: item.id, newStatus: "accepted" })}
+              >
+                <Text className="text-white text-sm font-bold">Accept Voluntarily</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {marketplaceAssigned.length > 0 && (
+        <View className="mb-4">
+          <Text className="text-base font-semibold text-foreground mb-2">My Marketplace Deliveries</Text>
+          {marketplaceAssigned.slice(0, 5).map((item) => (
+            <View key={`market-assigned-${item.id}`} className="bg-surface border border-border rounded-xl p-3 mb-2">
+              <View className="flex-row justify-between items-start">
+                <View className="flex-1">
+                  <Text className="text-sm font-semibold text-foreground">{item.merchantName}</Text>
+                  <Text className="text-xs text-muted mt-1">{item.orderUid}</Text>
+                  <Text className="text-xs text-muted mt-1">{item.status.replace(/_/g, " ").toUpperCase()}</Text>
+                </View>
+                {(item.status === "accepted" || item.status === "in_execution") && (
+                  <TouchableOpacity
+                    className="bg-primary/10 rounded-lg px-3 py-2"
+                    onPress={() => router.push({ pathname: '/pilot/live-tracking', params: { deliveryId: String(item.id), target: 'order' } } as any)}
+                  >
+                    <Text className="text-primary text-xs font-semibold">Live Track</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              {item.status === "accepted" && (
+                <TouchableOpacity
+                  className="bg-primary rounded-lg py-2 items-center mt-3"
+                  disabled={transitionMarketplaceOrder.isPending}
+                  onPress={() => transitionMarketplaceOrder.mutate({ orderId: item.id, newStatus: "in_execution" })}
+                >
+                  <Text className="text-white text-sm font-bold">Start Delivery</Text>
+                </TouchableOpacity>
+              )}
+              {(item.status === "in_execution" || item.status === "fallback") && (
+                <TouchableOpacity
+                  className="bg-success rounded-lg py-2 items-center mt-3"
+                  disabled={transitionMarketplaceOrder.isPending}
+                  onPress={() => transitionMarketplaceOrder.mutate({ orderId: item.id, newStatus: "completed" })}
+                >
+                  <Text className="text-white text-sm font-bold">Complete Delivery</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
+        </View>
+      )}
+
+      <Text className="text-base font-semibold text-foreground mb-2">B2B Missions</Text>
       <FlatList
         data={availableMissions}
         keyExtractor={(item) => item.id.toString()}

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Text, View, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -25,13 +24,11 @@ export default function MerchantOrderDetailScreen() {
     { enabled: Number.isFinite(orderId) },
   );
   const order = orderQuery.data;
-  const [currentStatus, setCurrentStatus] = useState(order?.status || "validated");
-
-  useEffect(() => {
-    if (order?.status) {
-      setCurrentStatus(order.status);
-    }
-  }, [order?.status]);
+  const transitionOrder = trpc.operations.transitionOrder.useMutation({
+    onSuccess: async () => {
+      await orderQuery.refetch();
+    },
+  });
 
   if (orderQuery.isLoading) {
     return (
@@ -49,16 +46,34 @@ export default function MerchantOrderDetailScreen() {
     );
   }
 
+  const currentStatus = order.status;
   const modeInfo = DELIVERY_MODE_INFO[order.deliveryMode];
 
-  const handleStartPreparing = () => {
-    setCurrentStatus("preparing");
-    Alert.alert("Status Updated", "Order is now in preparation.");
+  const handleValidateOrder = async () => {
+    try {
+      await transitionOrder.mutateAsync({ orderId, newStatus: "validated" });
+      Alert.alert("Order Validated", "The order is validated and can enter preparation.");
+    } catch (error: any) {
+      Alert.alert("Transition blocked", error?.message || "Order validation failed.");
+    }
   };
 
-  const handleMarkReady = () => {
-    setCurrentStatus("ready");
-    Alert.alert("Package Ready", "Order marked as ready for pickup. A pilot/driver will be assigned.");
+  const handleStartPreparing = async () => {
+    try {
+      await transitionOrder.mutateAsync({ orderId, newStatus: "preparing" });
+      Alert.alert("Status Updated", "Order is now in preparation.");
+    } catch (error: any) {
+      Alert.alert("Transition blocked", error?.message || "Preparation could not start.");
+    }
+  };
+
+  const handleMarkReady = async () => {
+    try {
+      await transitionOrder.mutateAsync({ orderId, newStatus: "ready" });
+      Alert.alert("Package Ready", "Order is READY. Eligible verified delivery partners may now accept it voluntarily.");
+    } catch (error: any) {
+      Alert.alert("Transition blocked", error?.message || "Order could not be marked READY.");
+    }
   };
 
   const handleReportIssue = () => {
@@ -148,10 +163,22 @@ export default function MerchantOrderDetailScreen() {
 
         {/* Actions */}
         <View className="mx-4 gap-3">
+          {currentStatus === "initiated" && (
+            <TouchableOpacity
+              className="bg-primary rounded-xl py-4 items-center"
+              activeOpacity={0.8}
+              disabled={transitionOrder.isPending}
+              onPress={handleValidateOrder}
+            >
+              <Text className="text-white font-bold text-base">Validate Order</Text>
+            </TouchableOpacity>
+          )}
+
           {currentStatus === "validated" && (
             <TouchableOpacity
               className="bg-warning rounded-xl py-4 items-center"
               activeOpacity={0.8}
+              disabled={transitionOrder.isPending}
               onPress={handleStartPreparing}
             >
               <Text className="text-white font-bold text-base">Start Preparation</Text>
@@ -162,6 +189,7 @@ export default function MerchantOrderDetailScreen() {
             <TouchableOpacity
               className="bg-success rounded-xl py-4 items-center"
               activeOpacity={0.8}
+              disabled={transitionOrder.isPending}
               onPress={handleMarkReady}
             >
               <Text className="text-white font-bold text-base">Mark as Ready (Colet)</Text>
