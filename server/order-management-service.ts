@@ -189,16 +189,24 @@ async function notifyReadyPilots(order: typeof orders.$inferSelect): Promise<num
 
   let recipients = 0;
   for (const pilot of eligible) {
+    const message = `Order ${order.orderUid} is READY and available for voluntary acceptance.`;
     await sendPreferenceAwarePush({
       userId: pilot.id,
       preference: "pushMissions",
       message: {
         title: "Delivery available",
-        body: `Order ${order.orderUid} is READY and available for voluntary acceptance.`,
+        body: message,
         data: { type: "order_ready", target: "order", orderId: order.id, orderUid: order.orderUid, status: "ready" },
         channelId: "missions",
         priority: "high",
       },
+    });
+    await createInAppNotification({
+      userId: pilot.id,
+      title: "Delivery available",
+      body: message,
+      category: "missions",
+      metadata: { type: "order_ready", target: "order", orderId: order.id, orderUid: order.orderUid, status: "ready" },
     });
     recipients++;
   }
