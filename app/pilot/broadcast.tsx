@@ -16,9 +16,9 @@ import { safeGoBack } from "@/lib/safe-back";
 export default function PilotBroadcastScreen() {
   const router = useRouter();
   const colors = useColors();
-  const params = useLocalSearchParams<{ deliveryId: string; pilotId: string; vehicleType: string }>();
-  const deliveryId = parseInt(params.deliveryId || "1");
-  const pilotId = parseInt(params.pilotId || "1");
+  const params = useLocalSearchParams<{ deliveryId: string; target?: string; vehicleType: string }>();
+  const deliveryId = parseInt(params.deliveryId || "0", 10);
+  const target = params.target === "order" ? "order" : "b2b";
   const vehicleType = params.vehicleType || "drone";
   const [showConfirmComplete, setShowConfirmComplete] = useState(false);
 
@@ -32,7 +32,19 @@ export default function PilotBroadcastScreen() {
     startBroadcasting,
     stopBroadcasting,
     completeDelivery,
-  } = usePilotBroadcasting({ deliveryId, pilotId, vehicleType });
+  } = usePilotBroadcasting({ deliveryId, target, vehicleType });
+
+  if (!Number.isSafeInteger(deliveryId) || deliveryId <= 0) {
+    return (
+      <ScreenContainer className="p-4" edges={["top", "left", "right", "bottom"]}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 12 }}>
+          <Text style={{ fontSize: 48 }}>📡</Text>
+          <Text style={{ fontSize: 18, fontWeight: "700", color: colors.foreground }}>Assigned delivery required</Text>
+          <Text style={{ fontSize: 13, color: colors.muted, textAlign: "center" }}>Open broadcasting from an active mission. Pilot identity is taken from your authenticated DROPi session.</Text>
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   const handleCompleteDelivery = () => {
     if (Platform.OS === "web") {

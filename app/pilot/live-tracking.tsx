@@ -33,14 +33,25 @@ function headingToCompass(heading: number): string {
 export default function LiveTrackingScreen() {
   const router = useRouter();
   const colors = useColors();
-  const params = useLocalSearchParams<{ deliveryId: string }>();
-  const deliveryId = parseInt(params.deliveryId || "0");
+  const params = useLocalSearchParams<{ deliveryId: string; target?: string }>();
+  const deliveryId = parseInt(params.deliveryId || "0", 10);
+  const target = params.target === "b2b" ? "b2b" : "order";
   const [trail, setTrail] = useState<{ latitude: number; longitude: number }[]>([]);
 
   const { position, eta, geofenceAlert, connected, error } = useLiveTracking({
     deliveryId,
+    target,
     enabled: deliveryId > 0,
   });
+
+  if (!Number.isSafeInteger(deliveryId) || deliveryId <= 0) {
+    return (
+      <ScreenContainer edges={["top", "left", "right", "bottom"]} className="items-center justify-center px-6">
+        <Text className="text-base font-semibold text-foreground">Tracking target not selected</Text>
+        <Text className="text-sm text-muted text-center mt-2">Open live tracking from an order or an assigned mission.</Text>
+      </ScreenContainer>
+    );
+  }
 
   // Update trail when position changes
   useEffect(() => {

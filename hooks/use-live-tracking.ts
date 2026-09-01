@@ -1,14 +1,18 @@
 /**
- * Live Tracking Hook — Sprint 7+
+ * Live Tracking Hook
  *
- * Connects to the /ws/tracking WebSocket as a subscriber to receive
- * real-time pilot position updates, ETA calculations, and geofence alerts.
+ * Authenticates with the existing DROPi session before receiving a tracking stream.
+ * `target` disambiguates marketplace orders from B2B deliveries.
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { AppState } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getRequiredApiBaseUrl } from "@/constants/oauth";
 
+export type LiveTrackingTarget = "order" | "b2b";
+
 export interface PilotPosition {
+  target?: LiveTrackingTarget;
   deliveryId: number;
   pilotId: number;
   lat: number;
@@ -36,10 +40,13 @@ export interface GeofenceAlert {
 
 interface UseLiveTrackingOptions {
   deliveryId: number;
+  target?: LiveTrackingTarget;
   enabled?: boolean;
 }
 
-export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingOptions) {
+const TOKEN_KEY = "@dropi_token";
+
+export function useLiveTracking({ deliveryId, target = "order", enabled = true }: UseLiveTrackingOptions) {
   const [position, setPosition] = useState<PilotPosition | null>(null);
   const [eta, setEta] = useState<ETAInfo | null>(null);
   const [geofenceAlert, setGeofenceAlert] = useState<GeofenceAlert | null>(null);
@@ -49,33 +56,50 @@ export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingO
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const attemptRef = useRef(0);
+  const authFailedRef = useRef(false);
+  const allowReconnectRef = useRef(true);
 
-  const connect = useCallback(() => {
-    if (!enabled || !deliveryId) return;
+  const connect = useCallback(async () => {
+    if (!enabled || !deliveryId || wsRef.current) return;
+
+    allowReconnectRef.current = true;
+    authFailedRef.current = false;
 
     try {
-      // Build WS URL from API base
+      const token = await AsyncStorage.getItem(TOKEN_KEY);
+      if (!token) {
+        authFailedRef.current = true;
+        setConnected(false);
+        setError("Authentication required for live tracking.");
+        return;
+      }
+
       const apiUrl = getRequiredApiBaseUrl("subscriber tracking websocket");
-      const wsUrl = apiUrl.replace(/^http/, "ws") + `/ws/tracking?role=subscriber&deliveryId=${deliveryId}`;
+      const params = new URLSearchParams({
+        target,
+        deliveryId: String(deliveryId),
+      });
+      const wsUrl = `${apiUrl.replace(/^http/, "ws")}/ws/tracking?${params.toString()}`;
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
+      let authenticated = false;
 
       ws.onopen = () => {
-        setConnected(true);
-        setError(null);
-        attemptRef.current = 0;
+        ws.send(JSON.stringify({ type: "authenticate", mode: "subscriber", token }));
       };
 
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data as string);
 
-          if (data.type === "position") {
+          if (data.type === "authenticated") {
+            authenticated = true;
+            setConnected(true);
+            setError(null);
+            attemptRef.current = 0;
+          } else if (data.type === "position") {
             setPosition(data.data || data);
-            // Update ETA if included
-            if (data.eta) {
-              setEta(data.eta);
-            }
+            if (data.eta) setEta(data.eta);
           } else if (data.type === "geofence_entered") {
             setGeofenceAlert({
               deliveryId: data.deliveryId,
@@ -89,24 +113,30 @@ export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingO
             setPosition(null);
             setEta(null);
           } else if (data.type === "delivery_completed" || data.type === "delivery_complete") {
+            allowReconnectRef.current = false;
             setPosition(null);
             setEta(null);
             setDeliveryCompleted(true);
             ws.close();
           } else if (data.type === "error") {
-            setError(data.message);
+            setError(data.message || "Live tracking error");
+            if (!authenticated || ["AUTH_REQUIRED", "AUTH_INVALID", "ACCOUNT_INACTIVE", "FORBIDDEN", "TARGET_NOT_FOUND"].includes(data.code)) {
+              authFailedRef.current = true;
+              allowReconnectRef.current = false;
+            }
           }
-        } catch { /* ignore parse errors */ }
+        } catch {
+          setError("Invalid live tracking response.");
+        }
       };
 
       ws.onclose = () => {
         setConnected(false);
         wsRef.current = null;
-        // Exponential backoff reconnect
-        if (enabled) {
+        if (enabled && allowReconnectRef.current && !authFailedRef.current) {
           const delay = Math.min(1000 * Math.pow(2, attemptRef.current), 30000);
           attemptRef.current++;
-          reconnectTimer.current = setTimeout(connect, delay);
+          reconnectTimer.current = setTimeout(() => void connect(), delay);
         }
       };
 
@@ -117,9 +147,10 @@ export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingO
     } catch (e: any) {
       setError(e.message || "Failed to connect");
     }
-  }, [deliveryId, enabled]);
+  }, [deliveryId, enabled, target]);
 
   const disconnect = useCallback(() => {
+    allowReconnectRef.current = false;
     if (reconnectTimer.current) {
       clearTimeout(reconnectTimer.current);
       reconnectTimer.current = null;
@@ -133,16 +164,15 @@ export function useLiveTracking({ deliveryId, enabled = true }: UseLiveTrackingO
 
   useEffect(() => {
     if (enabled && deliveryId) {
-      connect();
+      void connect();
     }
     return () => disconnect();
-  }, [deliveryId, enabled, connect, disconnect]);
+  }, [deliveryId, target, enabled, connect, disconnect]);
 
-  // Pause/resume on app state change
   useEffect(() => {
     const sub = AppState.addEventListener("change", (state) => {
       if (state === "active" && enabled && !wsRef.current) {
-        connect();
+        void connect();
       } else if (state === "background") {
         disconnect();
       }

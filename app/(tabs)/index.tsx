@@ -81,7 +81,7 @@ function CustomerDashboard() {
               <TouchableOpacity
                 className="mt-3 bg-primary/10 rounded-lg px-3 py-2"
                 activeOpacity={0.7}
-                onPress={() => router.push({ pathname: '/pilot/live-tracking', params: { deliveryId: String(item.id) } } as any)}
+                onPress={() => router.push({ pathname: '/pilot/live-tracking', params: { deliveryId: String(item.id), target: 'order' } } as any)}
               >
                 <Text className="text-primary text-sm font-medium">
                   {VEHICLE_ICONS[item.vehicleType || "drone"]} Live Tracking — ETA {item.estimatedTime} min →
@@ -177,18 +177,6 @@ function DeliveryPartnerDashboard() {
       <View className="flex-row justify-between items-center mb-1">
         <Text className="text-2xl font-bold text-foreground">Mission Radar</Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <TouchableOpacity
-            style={{ backgroundColor: '#EF444415', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 }}
-            onPress={() => router.push({ pathname: '/pilot/broadcast', params: { deliveryId: '1', pilotId: '1', vehicleType: 'drone' } } as any)}
-          >
-            <Text style={{ color: '#EF4444', fontSize: 12, fontWeight: '600' }}>📶 Broadcast</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{ backgroundColor: '#22C55E15', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 }}
-            onPress={() => router.push({ pathname: '/pilot/live-tracking', params: { deliveryId: '1' } } as any)}
-          >
-            <Text style={{ color: '#22C55E', fontSize: 12, fontWeight: '600' }}>📡 Live Track</Text>
-          </TouchableOpacity>
           <TouchableOpacity
             style={{ backgroundColor: '#0066FF15', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 }}
             onPress={() => router.push('/pilot/leaderboard')}

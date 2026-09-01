@@ -60,8 +60,8 @@ export default function OrderDetailScreen() {
   }
 
   const currentStep = getStepIndex(order.status);
-  const modeInfo = DELIVERY_MODE_INFO[order.deliveryMode];
-  const fallbackInfo = order.fallbackMode ? DELIVERY_MODE_INFO[order.fallbackMode] : null;
+  const modeInfo = DELIVERY_MODE_INFO[order.deliveryMode as keyof typeof DELIVERY_MODE_INFO];
+  const fallbackInfo = order.fallbackMode ? DELIVERY_MODE_INFO[order.fallbackMode as keyof typeof DELIVERY_MODE_INFO] : null;
 
   return (
     <ScreenContainer edges={["top", "bottom", "left", "right"]}>
