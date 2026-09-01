@@ -227,10 +227,16 @@ export const pilotSelectionRouter = router({
       const userId = (ctx.user as any)?.id;
       if (!userId) return { success: false };
 
-      // Sprint 6A Guard: Block unverified pilots
       const user = ctx.user as any;
+      if (user.dropiRole !== "delivery_partner") {
+        throw new Error("Only delivery partners can update pilot availability.");
+      }
+      // Sprint 6A Guard: Block unverified/inactive pilots before profile mutation.
       if (!user.isVerified) {
         throw new Error("Your account is not yet verified. Submit documents and wait for approval before going online.");
+      }
+      if (!user.isActive) {
+        throw new Error("Your account is inactive. Please contact support.");
       }
 
       // Ensure profile exists
@@ -258,10 +264,16 @@ export const pilotSelectionRouter = router({
       const userId = (ctx.user as any)?.id;
       if (!userId) return { success: false };
 
-      // Sprint 6A Guard: Block unverified pilots
       const user = ctx.user as any;
+      if (user.dropiRole !== "delivery_partner") {
+        throw new Error("Only delivery partners can update pilot position.");
+      }
+      // Sprint 6A Guard: Block unverified/inactive pilots before DB access.
       if (!user.isVerified) {
         throw new Error("Account not verified. Cannot update position.");
+      }
+      if (!user.isActive) {
+        throw new Error("Your account is inactive. Please contact support.");
       }
 
       const db = await getDb();
