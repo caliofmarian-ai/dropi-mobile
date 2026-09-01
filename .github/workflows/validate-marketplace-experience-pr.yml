@@ -1,0 +1,44 @@
+name: Validate Marketplace experience core
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - app/merchant/dashboard.tsx
+      - server/marketplace-review-policy.ts
+      - server/marketplace-router.ts
+      - server/merchant-portfolio-service.ts
+      - server/trust-engine.ts
+      - tests/marketplace-experience-contract.test.ts
+      - tests/marketplace-review-policy.test.ts
+      - tests/merchant-portfolio-summary.test.ts
+      - .github/workflows/validate-marketplace-experience-pr.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  certification:
+    name: M1 Marketplace experience certification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Marketplace experience tests
+        run: node --import tsx --test tests/marketplace-review-policy.test.ts tests/merchant-portfolio-summary.test.ts tests/marketplace-experience-contract.test.ts tests/marketplace-policy.test.ts tests/marketplace-controls-contract.test.ts
+      - name: M1 regressions
+        run: pnpm exec vitest run tests/order-state-machine.test.ts tests/order-transition-notifications.test.ts tests/order-management-integration-contract.test.ts tests/push-state-notifications.test.ts tests/push-state-integration-contract.test.ts tests/live-tracking-security.test.ts tests/live-tracking-client-contract.test.ts tests/operational-safety-certification.test.ts
+      - name: TypeScript check
+        run: pnpm check
+      - name: Whitespace check
+        run: git diff --check origin/main...HEAD
