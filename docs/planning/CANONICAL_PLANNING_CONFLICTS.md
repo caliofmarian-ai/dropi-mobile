@@ -1,211 +1,150 @@
 # DROPi — Canonical Planning Conflicts Register
 
-> **Status:** PLANNING CANONICAL — DO NOT DELETE  
-> **Generated:** 2026-08-02  
-> **Purpose:** Record of all detected conflicts between canonical sources that affect planning decisions  
-> **Rule:** Conflicted items must NOT be silently resolved. Each must have an owner-decision or canonical-resolution issue.
+> **Status:** PLANNING CANONICAL — RECONCILED 2026-09-01  
+> **Initial generation:** 2026-08-02  
+> **Purpose:** Preserve material source tensions and route them to explicit owner/canonical decisions  
+> **Rule:** No conflict is silently resolved in implementation planning.
 
 ---
 
-## Conflict Detection Methodology
+## Authority Order
 
-Conflicts are detected by comparing:
-1. Claims across different authority-class sources
-2. Implementation state vs. canonical requirements
-3. Operational rules vs. practical feasibility
+Planning comparisons use this precedence unless a newer explicit owner decision supersedes it:
 
-Priority: `04-ZIP` > `HIST-EXTRACT` > `ACTIVE-CANON` > `BLUEPRINT` > `IMPL`
+`04-ZIP > HIST-EXTRACT > ACTIVE-CANON > BLUEPRINT > IMPLEMENTATION OBSERVATION`
 
----
-
-## CONFLICT-001: Marketplace Separation vs. Integration
-
-| Field | Value |
-|-------|-------|
-| ID | CONFLICT-001 |
-| Severity | MEDIUM |
-| Status | Unresolved — Requires Owner Decision |
-| Blocking Issues | CANON-RES-001 |
-
-**Source A (Higher Authority — 04-ZIP):**
-- Cap. 06 (Product): Marketplace is a "separate controlled marketplace" with its own website
-- "Flow: Marketplace → App — separate systems"
-- Marketplace does NOT validate orders, does NOT select pilots, does NOT start delivery
-
-**Source B (BLUEPRINT — Lower Authority):**
-- `BLUEPRINT_MARKETPLACE_DROPI.md`: Marketplace implemented as part of the mobile app (C1 channel tab)
-- Current implementation: Marketplace UI lives in the mobile app under C1 channel
-
-**Conflict:**
-The 04.zip canonical states a separate website/marketplace distinct from the app. The current implementation has marketplace embedded in the app.
-
-**Impact:**
-- EPIC-004 (Marketplace C1) may need separate website scope
-- Could require separate web application project or clarification on "integrated app marketplace"
-
-**Resolution Required:** CANON-RES-001  
-**Blocking:** EPIC-004 final scope, EPIC-027 (Website) dependency
+Implementation observations can prove what currently exists, but they do not silently override higher canonical authority.
 
 ---
 
-## CONFLICT-002: EASA Compliance Timeline for Philippines Zone 0
+## CONFLICT-001 — Marketplace Separation vs Integrated Mobile Marketplace
 
-| Field | Value |
-|-------|-------|
-| ID | CONFLICT-002 |
-| Severity | HIGH |
-| Status | Unresolved — Requires Owner Decision |
-| Blocking Issues | OWNER-004, OWNER-005 |
+**Severity:** Medium  
+**Resolution issue:** **CANON-RES-001 — #283**  
+**Status:** unresolved / blocking final Marketplace scope
 
-**Source A (04-ZIP — Cap. 23):**
-- Detailed EASA multi-country compliance requirements
-- EU-standard compliance framework for drone operations
+### Tension
+Higher-authority product material describes Marketplace as a separate controlled marketplace/web surface whose outputs feed the operational app. Lower-authority blueprint/current implementation places Marketplace functionality inside the mobile application.
 
-**Source B (04-ZIP — Cap. 22):**
-- Philippines Zone 0 is the starting point
-- Philippines has its own drone regulations (CAAP — Civil Aviation Authority of Philippines)
+### Impact
+- EPIC-004 — Marketplace C1
+- Public web/marketplace boundaries
+- Operational-app responsibility boundaries
 
-**Conflict:**
-Cap. 23 specifies EASA compliance framework, but Zone 0 is Philippines, not EU. EASA rules do not directly apply in Philippines. Philippines uses CAAP regulations. The canon does not explicitly resolve whether EASA is aspirational (for future EU expansion) or a current requirement.
-
-**Impact:**
-- EPIC-011 (GDPR & Privacy Compliance) and any drone compliance epics
-- Blocking EPIC-023 (Delivery Execution) final compliance scope
-- affects OWNER-004 (DronePort physical timeline)
-
-**Resolution Required:** OWNER-004 (Philippines regulatory strategy)  
-**Blocking:** Any live drone delivery epic until resolved
+### Rule until resolved
+Do not expand the integrated mobile Marketplace in ways that make future separation harder. Existing implementation remains observable legacy/current state, not proof that the architectural conflict is resolved.
 
 ---
 
-## CONFLICT-003: Client-Presence Rules — Canonical vs. Operational Reality
+## CONFLICT-002 — Philippines Zone 0 Regulatory Scope vs EASA/FAA References
 
-| Field | Value |
-|-------|-------|
-| ID | CONFLICT-003 |
-| Severity | MEDIUM |
-| Status | Unresolved — Requires Owner Decision |
-| Blocking Issues | CANON-RES-002 |
+**Severity:** High  
+**Resolution issue:** **CANON-RES-003 — #285**  
+**Status:** unresolved / blocks final live-drone compliance scope
 
-**Source A (DELIVERY_MULTIMODAL.md — ACTIVE-CANON):**
-- "Drone does NOT wait for client"
-- "Drone does NOT negotiate reception"
-- "Drone does NOT repeat delivery"
-- "Failed reception triggers fallback"
-- Client must complete tutorial and accept conditions
+### Tension
+Canonical materials contain EASA/FAA-oriented regulatory references while the first operational geography is Philippines Zone 0, whose locally binding aviation authority is CAAP.
 
-**Source B (BLUEPRINT/DROPi_ROADMAP_BY_LAYERS.md):**
-- Mentions "client-presence rules" as feature to implement
-- Does not specify enforcement mechanism
+### Impact
+- M2 compliance/audit planning
+- M5 live supervised delivery
+- Geofencing and authority-reporting requirements
 
-**Source C (Implementation):**
-- No client-presence validation currently implemented
-- Tutorial completion flow not yet implemented
+### Rule until resolved
+Treat EASA/FAA material as reference/future-market input unless CANON-RES-003 establishes a binding requirement for Zone 0. Do not claim live regulatory readiness until the locally binding path is resolved.
 
-**Conflict:**
-The canonical rule (no-wait drone) is clear, but the enforcement mechanism (how the app verifies client presence at reception point, tutorial completion tracking, conditions acceptance) is underspecified in implementation sources.
-
-**Impact:**
-- EPIC-023 (Delivery Execution Engine) needs specific acceptance criteria
-- Tutorial completion tracking must be explicit in BATCH scope
-- Conditions acceptance must be logged (L6 audit requirement)
-
-**Resolution Required:** CANON-RES-002  
-**Note:** Canon authority is clear; implementation detail needs specification, not resolution of authority conflict.
+**Correction from the initial register:** this conflict is **not OWNER-004**. OWNER-004 (#281) governs DronePort physical-infrastructure timing. The regulatory interpretation is materialized as CANON-RES-003 (#285).
 
 ---
 
-## CONFLICT-004: Real-Time — WebSocket vs. Polling Strategy
+## CONFLICT-003 — Client-Presence Rules vs Enforcement Mechanism
 
-| Field | Value |
-|-------|-------|
-| ID | CONFLICT-004 |
-| Severity | LOW |
-| Status | Unresolved — Owner Decision Needed |
-| Blocking Issues | OWNER-002 |
+**Severity:** Medium  
+**Resolution issue:** **CANON-RES-002 — #284**  
+**Status:** unresolved implementation detail
 
-**Source A (AUDIT_TRACKING.md — Sprint 7):**
-- Real-time WebSocket for live data is "Low priority" (Sprint 7)
-- Score: 2.40 in prioritization matrix
+### Tension
+The canonical delivery rule is clear: the drone does not wait, negotiate reception, or repeat delivery; failed reception triggers fallback. The exact app-side mechanism for proving tutorial completion, acceptance of conditions and reception readiness is not fully specified.
 
-**Source B (BLUEPRINT_SPRINT_ROADMAP.md):**
-- Push notifications for order status (Sprint 6B) — MEDIUM priority
-- These are different from WebSocket (push vs. real-time)
+### Impact
+- Delivery Execution Engine
+- Client eligibility/readiness
+- Audit logging of accepted conditions
+- STOP/FALLBACK paths
 
-**Source C (Current Implementation):**
-- `server/live-tracking.ts` exists (WebSocket partially implemented)
-- `components/live-tracking-map` exists
-
-**Conflict:**
-Partial WebSocket implementation exists but not prioritized for completion. Canon doesn't specify whether to complete WebSocket or use polling for Zone 0 (low-connectivity environment).
-
-**Impact:**
-- BATCH for real-time features needs clear approach
-- Zone 0 (Philippines) connectivity constraints not specified
-
-**Resolution Required:** OWNER-002  
-**Blocking:** EPIC-009 (Real-Time & Notifications) final implementation approach
+### Rule until resolved
+Preserve the canonical no-wait/fallback behavior and do not invent an irreversible client-presence mechanism before #284 resolves the exact enforcement contract.
 
 ---
 
-## CONFLICT-005: AI Agent Activation Sequence
+## CONFLICT-004 — WebSocket vs Polling Strategy for Zone 0
 
-| Field | Value |
-|-------|-------|
-| ID | CONFLICT-005 |
-| Severity | MEDIUM |
-| Status | Unresolved — Owner Decision Needed |
-| Blocking Issues | OWNER-005 |
+**Severity:** Low as an architecture choice; **security impact is higher for the existing implementation**  
+**Owner decision:** **OWNER-002 — #279**  
+**Status:** unresolved operating-strategy decision
 
-**Source A (AI_AGENT_SYSTEM.md — ACTIVE-CANON):**
-- Every role has dual human+AI account
-- All 29 roles need AI agents
-- AI agents operate autonomously until human takes over
+### Current repository reality
+`server/live-tracking.ts` already implements a WebSocket transport and `server/_core/index.ts` mounts it at runtime. Therefore the work is not accurately described as “WebSocket missing”.
 
-**Source B (BLUEPRINT/DROPi_ROADMAP_BY_LAYERS.md):**
-- AI agents are Phase 4 (L4 Logic Core)
-- Dependency: L2 Application Core must be complete first
-- L4 includes: framework (4.1), then C1 agents (4.2), C2 agents (4.3), C3 agents (4.4), Admin (4.5), Simulation (4.6), Eligibility (4.7)
+The 2026-09-01 audit also found that the current tracking connection derives `role`, `pilotId` and `deliveryId` from query parameters without an evident session/JWT authorization gate inside the WebSocket connection path. This is an implementation security gap independent of whether the long-term Zone 0 transport is WebSocket or polling.
 
-**Source C (AUDIT_TRACKING.md):**
-- "AI Agents: ❌ Doar documentat — Canonical definit, neimplementat"
+### Impact
+- EPIC-009 — Real-Time & Notifications
+- live tracking privacy/authorization
+- low-connectivity behavior
 
-**Conflict:**
-Canon requires all 29 agents from the start (dual account at registration). But roadmap places agent implementation in Phase 4 (M3), after M1 completion. There's a gap: accounts exist in M1 but their AI agents don't exist until M3.
-
-**Impact:**
-- Dual account creation (human+AI) can be data-model-only in M1
-- Full agent behavior implemented in M3
-- This is a staging/phasing decision, not a technical conflict
-
-**Resolution Required:** OWNER-005  
-**Note:** Not a true conflict — a phasing decision. Owner must confirm whether M1 creates AI agent records (placeholder) or defers to M3.
+### Rule until resolved
+OWNER-002 decides the transport strategy. Security/authentication of any enabled transport is mandatory regardless of that decision.
 
 ---
 
-## Summary
+## CONFLICT-005 — AI Agent Activation Sequence
 
-| ID | Severity | Status | Resolution Issue |
-|----|----------|--------|-----------------|
-| CONFLICT-001 | MEDIUM | Unresolved | CANON-RES-001 |
-| CONFLICT-002 | HIGH | Unresolved | OWNER-004 |
-| CONFLICT-003 | MEDIUM | Unresolved (impl detail) | CANON-RES-002 |
-| CONFLICT-004 | LOW | Unresolved | OWNER-002 |
-| CONFLICT-005 | MEDIUM | Unresolved (phasing) | OWNER-005 |
+**Severity:** Medium  
+**Owner decision:** **OWNER-005 — #282**  
+**Status:** unresolved phasing decision
 
-**Total Conflicts:** 5  
-**Blocking High-Priority Epics:** CONFLICT-002 (drone compliance), CONFLICT-001 (marketplace scope)  
-**Non-Blocking (phasing decisions):** CONFLICT-004, CONFLICT-005
+### Tension
+Canonical role architecture expects human + AI identity concepts, while the layered roadmap schedules full AI-agent behavior for M3 after Application Core/Audit Core. Repository reality already contains an agent router/orchestration foundation, so “AI entirely unimplemented” is also too coarse.
 
----
+### Impact
+- account/data-model expectations in M1
+- full autonomous behavior in M3
+- simulation/readiness gates
 
-## Rule: Conflict Preservation
-
-These conflicts are preserved, not resolved by this document.  
-Each conflict has a corresponding GitHub issue that requires owner or canonical decision before implementation of dependent work proceeds.
-
-Dependent implementation issues MUST be labeled `status:blocked` and reference the blocking conflict issue.
+### Rule until resolved
+Do not equate the existence of AI-agent scaffolding with authorization for autonomous production operation. OWNER-005 determines when records/scaffolding become active behavior.
 
 ---
 
-*No canonical sources were modified to generate this document.*
+## Related Owner Decisions That Are Not Canonical Conflicts
+
+These decisions are material planning gates but should not be mislabeled as the resolution of one of the five conflicts above:
+
+| Issue | Topic |
+|---|---|
+| OWNER-001 — #278 | Biometric authentication timing and priority |
+| OWNER-003 — #280 | Offline-first synchronization strategy |
+| OWNER-004 — #281 | DronePort physical-infrastructure timing |
+
+---
+
+## Reconciled Summary
+
+| Conflict | Severity | Decision / Resolution Issue |
+|---|---|---|
+| Marketplace separation vs integrated mobile Marketplace | Medium | CANON-RES-001 #283 |
+| Philippines Zone 0 regulatory baseline vs EASA/FAA references | High | CANON-RES-003 #285 |
+| Client-presence canonical rule vs enforcement mechanism | Medium | CANON-RES-002 #284 |
+| WebSocket vs polling operating strategy | Low architecture / security hardening required | OWNER-002 #279 |
+| AI-agent activation sequence | Medium | OWNER-005 #282 |
+
+**Total tracked conflicts/tensions: 5.**
+
+---
+
+## Preservation Rule
+
+Dependent work may inspect or harden existing implementation, but it must not silently resolve a canonical/owner decision. When implementation evidence changes the understanding of an issue (for example, a supposedly missing capability already exists), planning status must be reconciled explicitly and verification evidence must be added.
+
+*Reconciled against the materialized GitHub graph and `main` repository state on 2026-09-01. No canonical source was modified.*
