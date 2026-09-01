@@ -11,6 +11,22 @@ def replace_once(path: str, old: str, new: str) -> None:
     p.write_text(text.replace(old, new, 1), encoding="utf-8")
 
 
+def replace_after(path: str, marker: str, old: str, new: str) -> None:
+    p = Path(path)
+    text = p.read_text(encoding="utf-8")
+    marker_index = text.find(marker)
+    if marker_index < 0:
+        raise SystemExit(f"{path}: marker not found: {marker!r}")
+    before = text[:marker_index]
+    tail = text[marker_index:]
+    count = tail.count(old)
+    if count < 1:
+        raise SystemExit(f"{path}: replacement not found after marker: {old[:120]!r}")
+    first = tail.find(old)
+    tail = tail[:first] + new + tail[first + len(old):]
+    p.write_text(before + tail, encoding="utf-8")
+
+
 # Centralized notifier imports.
 replace_once(
     "server/b2b-router.ts",
@@ -80,8 +96,9 @@ replace_once(
 )
 
 # Admin/system transition: notify both non-actor stakeholders according to preferences.
-replace_once(
+replace_after(
     "server/b2b-router.ts",
+    "  updateStatus: adminProcedure",
     '''    .mutation(async ({ input }) => {
       const db = await getDb();
 ''',
