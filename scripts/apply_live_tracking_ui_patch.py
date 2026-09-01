@@ -123,6 +123,11 @@ replace_once(
     "  const modeInfo = DELIVERY_MODE_INFO[order.deliveryMode as keyof typeof DELIVERY_MODE_INFO];",
 )
 replace_once(
+    "app/order/[id].tsx",
+    "  const fallbackInfo = order.fallbackMode ? DELIVERY_MODE_INFO[order.fallbackMode] : null;",
+    "  const fallbackInfo = order.fallbackMode ? DELIVERY_MODE_INFO[order.fallbackMode as keyof typeof DELIVERY_MODE_INFO] : null;",
+)
+replace_once(
     "server/operations-router.ts",
     '    .filter((item): item is { name: string; quantity: number; weight?: number } => Boolean(item));',
     '    .filter((item): item is NonNullable<typeof item> => item !== null);',
