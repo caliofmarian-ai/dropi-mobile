@@ -130,8 +130,20 @@ export const storeRouter = router({
       if (input.webhookUrl !== undefined) updateData.webhookUrl = input.webhookUrl;
 
       await db.update(stores).set(updateData).where(eq(stores.id, store.id));
-      if (updateData.zone) {
-        await db.update(products).set({ zone: updateData.zone }).where(eq(products.storeId, store.id));
+      if (updateData.zone && !sameMarketplaceZone(updateData.zone, store.zone)) {
+        // Moving a store changes the market in which its listings are visible.
+        // Approved listings must be revalidated before becoming public in the new zone.
+        await db.update(products)
+          .set({ zone: updateData.zone, status: "pending_review", isActive: false })
+          .where(and(eq(products.storeId, store.id), eq(products.status, "approved")));
+        await db.update(products)
+          .set({ zone: updateData.zone })
+          .where(and(eq(products.storeId, store.id), or(
+            eq(products.status, "draft"),
+            eq(products.status, "pending_review"),
+            eq(products.status, "rejected"),
+            eq(products.status, "suspended"),
+          )));
       }
       return { success: true };
     }),

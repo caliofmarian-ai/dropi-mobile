@@ -68,6 +68,13 @@ test("product zone derives from store and merchant form cannot override it", () 
   assert.match(productNew, /Product listings inherit the store zone and cannot override it/);
 });
 
+
+test("moving a store to another zone forces approved listings back through review", () => {
+  assert.match(marketplaceRouter, /updateData\.zone && !sameMarketplaceZone\(updateData\.zone, store\.zone\)/);
+  assert.match(marketplaceRouter, /status: "pending_review", isActive: false/);
+  assert.match(marketplaceRouter, /eq\(products\.status, "approved"\)/);
+});
+
 test("store setup uses governed categories and no fake default zone or category", () => {
   assert.match(storeSetup, /MARKETPLACE_CATEGORY_POLICIES/);
   assert.doesNotMatch(storeSetup, /zone: zone\.trim\(\) \|\| "default"/);
