@@ -1,3 +1,5 @@
+import { getMarketplaceCategoryPolicy } from "../shared/marketplace-policy";
+
 /**
  * DROPi Auto-Moderation Engine — Sprint B
  * 
@@ -36,24 +38,7 @@ const PROHIBITED_KEYWORDS = [
   "furat", "stolen",
 ];
 
-// ===== PRICE LIMITS PER CATEGORY =====
-// Minimum and maximum prices in RON (canonical: marketplace financial flow)
-const PRICE_LIMITS: Record<string, { min: number; max: number }> = {
-  "Food & Groceries": { min: 1, max: 5000 },
-  "Electronics": { min: 5, max: 50000 },
-  "Clothing & Fashion": { min: 5, max: 20000 },
-  "Health & Beauty": { min: 2, max: 10000 },
-  "Home & Garden": { min: 5, max: 100000 },
-  "Sports & Outdoors": { min: 5, max: 50000 },
-  "Books & Stationery": { min: 1, max: 5000 },
-  "Toys & Games": { min: 3, max: 10000 },
-  "Automotive": { min: 10, max: 200000 },
-  "Pet Supplies": { min: 2, max: 10000 },
-  "Other": { min: 1, max: 50000 },
-};
-
-// Default limits for unknown categories
-const DEFAULT_PRICE_LIMITS = { min: 1, max: 100000 };
+// Category eligibility and financial limits are governed by shared/marketplace-policy.ts.
 
 // ===== WEIGHT LIMITS =====
 const MAX_WEIGHT_GRAMS = 50000; // 50kg max for any delivery
@@ -121,23 +106,32 @@ export function moderateProduct(
     }
   }
 
-  // Rule 2: Price limits
-  const limits = PRICE_LIMITS[product.category] || DEFAULT_PRICE_LIMITS;
-  if (product.price < limits.min) {
+  // Rule 2: controlled category + price limits from the shared policy.
+  const categoryPolicy = getMarketplaceCategoryPolicy(product.category);
+  if (!categoryPolicy) {
     violations.push({
-      rule: "PRICE_TOO_LOW",
-      severity: "warning",
-      message: `Price ${product.price} ${product.currency} is below minimum (${limits.min} ${product.currency}) for category "${product.category}".`,
-      field: "price",
+      rule: "CATEGORY_NOT_ELIGIBLE",
+      severity: "critical",
+      message: `Category "${product.category}" is not eligible for the controlled DROPi Marketplace.`,
+      field: "category",
     });
-  }
-  if (product.price > limits.max) {
-    violations.push({
-      rule: "PRICE_TOO_HIGH",
-      severity: "warning",
-      message: `Price ${product.price} ${product.currency} exceeds maximum (${limits.max} ${product.currency}) for category "${product.category}". High-value items require manual review.`,
-      field: "price",
-    });
+  } else {
+    if (product.price < categoryPolicy.minPrice) {
+      violations.push({
+        rule: "PRICE_TOO_LOW",
+        severity: "warning",
+        message: `Price ${product.price} ${product.currency} is below minimum (${categoryPolicy.minPrice} ${product.currency}) for category "${categoryPolicy.label}".`,
+        field: "price",
+      });
+    }
+    if (product.price > categoryPolicy.maxPrice) {
+      violations.push({
+        rule: "PRICE_TOO_HIGH",
+        severity: "warning",
+        message: `Price ${product.price} ${product.currency} exceeds maximum (${categoryPolicy.maxPrice} ${product.currency}) for category "${categoryPolicy.label}". High-value items require manual review.`,
+        field: "price",
+      });
+    }
   }
 
   // Rule 3: Weight sanity

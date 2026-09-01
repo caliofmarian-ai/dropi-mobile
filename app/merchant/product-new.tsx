@@ -29,20 +29,7 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { trpc } from "@/lib/trpc";
 import { safeGoBack } from "@/lib/safe-back";
-
-const CATEGORIES = [
-  "Food & Groceries",
-  "Electronics",
-  "Clothing & Fashion",
-  "Health & Beauty",
-  "Home & Garden",
-  "Sports & Outdoors",
-  "Books & Stationery",
-  "Toys & Games",
-  "Automotive",
-  "Pet Supplies",
-  "Other",
-];
+import { MARKETPLACE_CATEGORY_POLICIES } from "@/shared/marketplace-policy";
 
 // Drone eligibility thresholds (from canonical docs)
 const DRONE_MAX_WEIGHT_G = 2000; // grams
@@ -52,6 +39,7 @@ export default function ProductNewScreen() {
   const router = useRouter();
   const createMutation = trpc.product.create.useMutation();
   const submitMutation = trpc.product.submitForReview.useMutation();
+  const storeQuery = trpc.store.getMyStore.useQuery();
 
   // Form state
   const [name, setName] = useState("");
@@ -64,7 +52,6 @@ export default function ProductNewScreen() {
   const [category, setCategory] = useState("");
   const [subcategory, setSubcategory] = useState("");
   const [showCategories, setShowCategories] = useState(false);
-  const [zone, setZone] = useState("");
   const [stock, setStock] = useState("");
   const [isFragile, setIsFragile] = useState(false);
   const [requiresSpecialPackaging, setRequiresSpecialPackaging] = useState(false);
@@ -85,7 +72,6 @@ export default function ProductNewScreen() {
     if (!price.trim() || isNaN(parseFloat(price)) || parseFloat(price) <= 0) { Alert.alert("Error", "Valid price is required"); return; }
     if (!category) { Alert.alert("Error", "Please select a category"); return; }
     if (!weight.trim() || isNaN(parseFloat(weight)) || parseFloat(weight) <= 0) { Alert.alert("Error", "Weight (grams) is required"); return; }
-    if (!zone.trim()) { Alert.alert("Error", "Zone is required for delivery calculation"); return; }
 
     setSaving(true);
     try {
@@ -98,7 +84,6 @@ export default function ProductNewScreen() {
         weight: parseFloat(weight),
         dimensions: hasDims ? { l: lNum, w: wNum, h: hNum } : undefined,
         stock: stock ? parseInt(stock) : undefined,
-        zone: zone.trim(),
         isFragile,
         requiresSpecialPackaging,
       });
@@ -193,13 +178,13 @@ export default function ProductNewScreen() {
         </TouchableOpacity>
         {showCategories && (
           <View className="bg-surface border border-border rounded-xl mb-4 overflow-hidden">
-            {CATEGORIES.map((cat) => (
+            {MARKETPLACE_CATEGORY_POLICIES.map((policy) => (
               <TouchableOpacity
-                key={cat}
-                className={`px-4 py-3 border-b border-border ${category === cat ? "bg-primary/10" : ""}`}
-                onPress={() => { setCategory(cat); setShowCategories(false); }}
+                key={policy.id}
+                className={`px-4 py-3 border-b border-border ${category === policy.label ? "bg-primary/10" : ""}`}
+                onPress={() => { setCategory(policy.label); setShowCategories(false); }}
               >
-                <Text className={`text-sm ${category === cat ? "text-primary font-semibold" : "text-foreground"}`}>{cat}</Text>
+                <Text className={`text-sm ${category === policy.label ? "text-primary font-semibold" : "text-foreground"}`}>{policy.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -242,14 +227,11 @@ export default function ProductNewScreen() {
           </View>
         </View>
 
-        <Text className="text-sm font-semibold text-foreground mb-2">Zone *</Text>
-        <TextInput
-          className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground mb-4"
-          value={zone}
-          onChangeText={setZone}
-          placeholder="e.g., Bucharest, Cluj-Napoca"
-          placeholderTextColor="#9BA1A6"
-        />
+        <Text className="text-sm font-semibold text-foreground mb-2">Listing Zone</Text>
+        <View className="bg-surface border border-border rounded-xl px-4 py-3 mb-4">
+          <Text className="text-foreground">{storeQuery.data?.zone || "Set the store operating zone first"}</Text>
+          <Text className="text-xs text-muted mt-1">Product listings inherit the store zone and cannot override it.</Text>
+        </View>
 
         {/* Weight & Dimensions */}
         <Text className="text-lg font-semibold text-foreground mb-3 mt-2">Physical Properties</Text>

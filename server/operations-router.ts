@@ -90,6 +90,7 @@ export const operationsRouter = router({
         storeId: z.number().int().positive(),
         items: z.array(z.object({ productId: z.number().int().positive(), quantity: z.number().int().positive() })).min(1),
         deliveryAddress: z.string().trim().min(3).max(1000),
+        zone: z.string().trim().min(1).max(100),
       }),
     )
     .mutation(async ({ ctx, input }) =>
@@ -98,6 +99,7 @@ export const operationsRouter = router({
         storeId: input.storeId,
         items: input.items,
         deliveryAddress: input.deliveryAddress,
+        zone: input.zone,
       }),
     ),
 

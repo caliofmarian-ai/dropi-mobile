@@ -17,6 +17,7 @@ import {
 } from "./order-state-machine";
 import { notifyOrderTransition } from "./order-transition-notifications";
 import { sendPreferenceAwarePush } from "./preference-aware-push";
+import { evaluateMarketplaceListingVisibility, normalizeMarketplaceZone, sameMarketplaceZone } from "../shared/marketplace-policy";
 
 export type MarketplaceOrderLineInput = {
   productId: number;
@@ -44,6 +45,7 @@ export async function createMarketplaceOrder(input: {
   storeId: number;
   items: MarketplaceOrderLineInput[];
   deliveryAddress: string;
+  zone: string;
 }): Promise<{ orderId: number; orderUid: string; status: "initiated" }> {
   if (input.actor.dropiRole !== "customer") {
     throw new Error("Only customer accounts can place Marketplace orders.");
@@ -62,6 +64,10 @@ export async function createMarketplaceOrder(input: {
     .limit(1);
   const store = storeRows[0];
   if (!store) throw new Error("Active Marketplace store not found.");
+  const requestedZone = normalizeMarketplaceZone(input.zone);
+  if (!sameMarketplaceZone(requestedZone, store.zone)) {
+    throw new Error("Selected Marketplace store is outside the requested zone.");
+  }
 
   const normalizedItems = input.items.filter(
     (line) => Number.isSafeInteger(line.productId) && line.productId > 0 && Number.isSafeInteger(line.quantity) && line.quantity > 0,
@@ -92,6 +98,18 @@ export async function createMarketplaceOrder(input: {
   let totalWeightGrams = 0;
   const snapshotItems = normalizedItems.map((line) => {
     const product = productsById.get(line.productId)!;
+    const visibility = evaluateMarketplaceListingVisibility({
+      status: product.status,
+      isActive: product.isActive,
+      stock: product.stock,
+      category: product.category,
+      productZone: product.zone,
+      storeZone: store.zone,
+      requestedZone,
+    });
+    if (!visibility.purchasable) {
+      throw new Error(`${product.name} is not purchasable in the requested Marketplace zone (${visibility.reasons.join(", ")}).`);
+    }
     if (product.stock != null && product.stock < line.quantity) {
       throw new Error(`${product.name} does not have enough stock.`);
     }
@@ -122,7 +140,7 @@ export async function createMarketplaceOrder(input: {
       totalAmount: totalAmount.toFixed(2),
       deliveryAddress: input.deliveryAddress.trim(),
       pickupAddress: store.physicalAddress || store.name,
-      zone: store.zone,
+      zone: requestedZone,
       packageWeight: (totalWeightGrams / 1000).toFixed(2),
     })
     .$returningId();
