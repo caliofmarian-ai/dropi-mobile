@@ -1,4 +1,4 @@
-name: Apply secure live-tracking client wiring
+name: Apply secure live tracking
 
 on:
   push:
@@ -11,23 +11,20 @@ permissions:
   contents: write
 
 jobs:
-  patch-and-certify:
+  certify:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout secure live-tracking branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: m1/secure-live-tracking
           fetch-depth: 0
 
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 9.12.0
           run_install: false
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
@@ -35,106 +32,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Patch live-tracking client surfaces
-        shell: python
-        run: |
-          from pathlib import Path
+      - name: Apply client wiring patch
+        run: python scripts/apply_live_tracking_ui_patch.py
 
-          def replace_once(path: str, old: str, new: str) -> None:
-              p = Path(path)
-              text = p.read_text(encoding="utf-8")
-              count = text.count(old)
-              if count != 1:
-                  raise SystemExit(f"{path}: expected exactly one match, found {count}: {old[:80]!r}")
-              p.write_text(text.replace(old, new, 1), encoding="utf-8")
-
-          # Subscriber hook: track authenticated state without a React-state dependency loop.
-          replace_once(
-              "hooks/use-live-tracking.ts",
-              "      const ws = new WebSocket(wsUrl);\n      wsRef.current = ws;\n",
-              "      const ws = new WebSocket(wsUrl);\n      wsRef.current = ws;\n      let authenticated = false;\n",
-          )
-          replace_once(
-              "hooks/use-live-tracking.ts",
-              "          if (data.type === \"authenticated\") {\n            setConnected(true);",
-              "          if (data.type === \"authenticated\") {\n            authenticated = true;\n            setConnected(true);",
-          )
-          replace_once(
-              "hooks/use-live-tracking.ts",
-              "            if (!connected || [\"AUTH_REQUIRED\", \"AUTH_INVALID\", \"ACCOUNT_INACTIVE\", \"FORBIDDEN\", \"TARGET_NOT_FOUND\"].includes(data.code)) {",
-              "            if (!authenticated || [\"AUTH_REQUIRED\", \"AUTH_INVALID\", \"ACCOUNT_INACTIVE\", \"FORBIDDEN\", \"TARGET_NOT_FOUND\"].includes(data.code)) {",
-          )
-          replace_once(
-              "hooks/use-live-tracking.ts",
-              "  }, [deliveryId, enabled, target, connected]);",
-              "  }, [deliveryId, enabled, target]);",
-          )
-
-          # Subscriber screen: make the tracking namespace explicit and reject missing IDs.
-          replace_once(
-              "app/pilot/live-tracking.tsx",
-              '  const params = useLocalSearchParams<{ deliveryId: string }>();\n  const deliveryId = parseInt(params.deliveryId || "0");',
-              '  const params = useLocalSearchParams<{ deliveryId: string; target?: string }>();\n  const deliveryId = parseInt(params.deliveryId || "0", 10);\n  const target = params.target === "b2b" ? "b2b" : "order";',
-          )
-          replace_once(
-              "app/pilot/live-tracking.tsx",
-              "  const { position, eta, geofenceAlert, connected, error } = useLiveTracking({\n    deliveryId,\n    enabled: deliveryId > 0,\n  });",
-              "  const { position, eta, geofenceAlert, connected, error } = useLiveTracking({\n    deliveryId,\n    target,\n    enabled: deliveryId > 0,\n  });",
-          )
-          replace_once(
-              "app/pilot/live-tracking.tsx",
-              "  // Update trail when position changes\n  useEffect(() => {",
-              "  if (!Number.isSafeInteger(deliveryId) || deliveryId <= 0) {\n    return (\n      <ScreenContainer edges={[\"top\", \"left\", \"right\", \"bottom\"]} className=\"items-center justify-center px-6\">\n        <Text className=\"text-base font-semibold text-foreground\">Tracking target not selected</Text>\n        <Text className=\"text-sm text-muted text-center mt-2\">Open live tracking from an order or an assigned mission.</Text>\n      </ScreenContainer>\n    );\n  }\n\n  // Update trail when position changes\n  useEffect(() => {",
-          )
-
-          # Pilot broadcast screen: no fallback IDs and no client-supplied pilot identity.
-          replace_once(
-              "app/pilot/broadcast.tsx",
-              '  const params = useLocalSearchParams<{ deliveryId: string; pilotId: string; vehicleType: string }>();\n  const deliveryId = parseInt(params.deliveryId || "1");\n  const pilotId = parseInt(params.pilotId || "1");\n  const vehicleType = params.vehicleType || "drone";',
-              '  const params = useLocalSearchParams<{ deliveryId: string; target?: string; vehicleType: string }>();\n  const deliveryId = parseInt(params.deliveryId || "0", 10);\n  const target = params.target === "order" ? "order" : "b2b";\n  const vehicleType = params.vehicleType || "drone";',
-          )
-          replace_once(
-              "app/pilot/broadcast.tsx",
-              "  } = usePilotBroadcasting({ deliveryId, pilotId, vehicleType });",
-              "  } = usePilotBroadcasting({ deliveryId, target, vehicleType });",
-          )
-          replace_once(
-              "app/pilot/broadcast.tsx",
-              "  const handleCompleteDelivery = () => {",
-              "  if (!Number.isSafeInteger(deliveryId) || deliveryId <= 0) {\n    return (\n      <ScreenContainer className=\"p-4\" edges={[\"top\", \"left\", \"right\", \"bottom\"]}>\n        <View style={{ flex: 1, justifyContent: \"center\", alignItems: \"center\", gap: 12 }}>\n          <Text style={{ fontSize: 48 }}>📡</Text>\n          <Text style={{ fontSize: 18, fontWeight: \"700\", color: colors.foreground }}>Assigned delivery required</Text>\n          <Text style={{ fontSize: 13, color: colors.muted, textAlign: \"center\" }}>Open broadcasting from an active mission. Pilot identity is taken from your authenticated DROPi session.</Text>\n        </View>\n      </ScreenContainer>\n    );\n  }\n\n  const handleCompleteDelivery = () => {",
-          )
-
-          # Customer order tracking declares the order namespace explicitly.
-          replace_once(
-              "app/(tabs)/index.tsx",
-              "params: { deliveryId: String(item.id) }",
-              "params: { deliveryId: String(item.id), target: 'order' }",
-          )
-
-          # Remove the two global debug buttons with hardcoded tracking IDs.
-          hardcoded = '''          <TouchableOpacity
-            style={{ backgroundColor: '#EF444415', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 }}
-            onPress={() => router.push({ pathname: '/pilot/broadcast', params: { deliveryId: '1', pilotId: '1', vehicleType: 'drone' } } as any)}
-          >
-            <Text style={{ color: '#EF4444', fontSize: 12, fontWeight: '600' }}>📶 Broadcast</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{ backgroundColor: '#22C55E15', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 }}
-            onPress={() => router.push({ pathname: '/pilot/live-tracking', params: { deliveryId: '1' } } as any)}
-          >
-            <Text style={{ color: '#22C55E', fontSize: 12, fontWeight: '600' }}>📡 Live Track</Text>
-          </TouchableOpacity>
-'''
-          replace_once("app/(tabs)/index.tsx", hardcoded, "")
-
-          # Put broadcast/live-track actions in the actual assigned mission context.
-          replace_once(
-              "app/mission/[id].tsx",
-              "          {/* Critical Controls */}\n          <View className=\"px-4 py-6 gap-3\">\n            {/* STOP Button - Large and prominent (56px height as per canonical) */}",
-              "          {/* Critical Controls */}\n          <View className=\"px-4 py-6 gap-3\">\n            <View className=\"flex-row gap-3\">\n              <TouchableOpacity\n                style={{ flex: 1, backgroundColor: colors.primary + '15', borderRadius: 12, paddingVertical: 12, alignItems: 'center' }}\n                activeOpacity={0.8}\n                onPress={() => router.push({ pathname: '/pilot/broadcast', params: { deliveryId: String(mission.orderId), target: 'b2b', vehicleType: mission.vehicleType || 'drone' } } as any)}\n              >\n                <Text style={{ color: colors.primary, fontWeight: '700' }}>📶 Broadcast Position</Text>\n              </TouchableOpacity>\n              <TouchableOpacity\n                style={{ flex: 1, backgroundColor: colors.success + '15', borderRadius: 12, paddingVertical: 12, alignItems: 'center' }}\n                activeOpacity={0.8}\n                onPress={() => router.push({ pathname: '/pilot/live-tracking', params: { deliveryId: String(mission.orderId), target: 'b2b' } } as any)}\n              >\n                <Text style={{ color: colors.success, fontWeight: '700' }}>📡 View Live Track</Text>\n              </TouchableOpacity>\n            </View>\n\n            {/* STOP Button - Large and prominent (56px height as per canonical) */}",
-          )
-
-      - name: Run live-tracking security tests
+      - name: Run security regression tests
         run: pnpm exec vitest run tests/live-tracking-security.test.ts tests/live-tracking-client-contract.test.ts tests/operational-safety-certification.test.ts
 
       - name: TypeScript check
@@ -143,11 +44,12 @@ jobs:
       - name: Reject whitespace errors
         run: git diff --check
 
-      - name: Commit verified wiring and remove one-time workflow
+      - name: Commit verified changes
         run: |
           rm .github/workflows/apply-secure-live-tracking.yml
+          rm scripts/apply_live_tracking_ui_patch.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add hooks/use-live-tracking.ts hooks/use-pilot-broadcasting.ts app/pilot/live-tracking.tsx app/pilot/broadcast.tsx 'app/(tabs)/index.tsx' 'app/mission/[id].tsx' .github/workflows/apply-secure-live-tracking.yml
+          git add -A
           git commit -m "fix: wire authenticated live tracking through real mission context"
           git push origin HEAD:m1/secure-live-tracking
