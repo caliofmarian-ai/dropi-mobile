@@ -53,7 +53,7 @@ function parseOrderItems(raw: unknown): Array<{ name: string; quantity: number; 
         weight: obj.weight != null ? toNumber(obj.weight, 0) : undefined,
       };
     })
-    .filter((item): item is { name: string; quantity: number; weight?: number } => Boolean(item));
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 }
 
 export const operationsRouter = router({

@@ -32,7 +32,7 @@ describe("SMTP Gmail Configuration — live credentials (skipped without env)", 
 // when mail.ts is first loaded.
 const sendMailMock = vi.hoisted(() => vi.fn());
 const createTransportMock = vi.hoisted(() =>
-  vi.fn(() => ({ sendMail: sendMailMock })),
+  vi.fn((_options: Record<string, unknown>) => ({ sendMail: sendMailMock })),
 );
 const dnsMock = vi.hoisted(() => ({ resolve4: vi.fn() }));
 

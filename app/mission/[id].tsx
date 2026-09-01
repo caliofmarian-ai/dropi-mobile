@@ -402,6 +402,23 @@ export default function MissionDetailScreen() {
 
           {/* Critical Controls */}
           <View className="px-4 py-6 gap-3">
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                style={{ flex: 1, backgroundColor: colors.primary + '15', borderRadius: 12, paddingVertical: 12, alignItems: 'center' }}
+                activeOpacity={0.8}
+                onPress={() => router.push({ pathname: '/pilot/broadcast', params: { deliveryId: String(mission.orderId), target: 'b2b', vehicleType: mission.vehicleType || 'drone' } } as any)}
+              >
+                <Text style={{ color: colors.primary, fontWeight: '700' }}>📶 Broadcast Position</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flex: 1, backgroundColor: colors.success + '15', borderRadius: 12, paddingVertical: 12, alignItems: 'center' }}
+                activeOpacity={0.8}
+                onPress={() => router.push({ pathname: '/pilot/live-tracking', params: { deliveryId: String(mission.orderId), target: 'b2b' } } as any)}
+              >
+                <Text style={{ color: colors.success, fontWeight: '700' }}>📡 View Live Track</Text>
+              </TouchableOpacity>
+            </View>
+
             {/* STOP Button - Large and prominent (56px height as per canonical) */}
             <TouchableOpacity
               style={{ backgroundColor: colors.error, borderRadius: 16, paddingVertical: 20, alignItems: "center" }}

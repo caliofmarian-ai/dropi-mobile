@@ -82,6 +82,7 @@ export function useLiveTracking({ deliveryId, target = "order", enabled = true }
       const wsUrl = `${apiUrl.replace(/^http/, "ws")}/ws/tracking?${params.toString()}`;
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
+      let authenticated = false;
 
       ws.onopen = () => {
         ws.send(JSON.stringify({ type: "authenticate", mode: "subscriber", token }));
@@ -92,6 +93,7 @@ export function useLiveTracking({ deliveryId, target = "order", enabled = true }
           const data = JSON.parse(event.data as string);
 
           if (data.type === "authenticated") {
+            authenticated = true;
             setConnected(true);
             setError(null);
             attemptRef.current = 0;
@@ -118,7 +120,7 @@ export function useLiveTracking({ deliveryId, target = "order", enabled = true }
             ws.close();
           } else if (data.type === "error") {
             setError(data.message || "Live tracking error");
-            if (!connected || ["AUTH_REQUIRED", "AUTH_INVALID", "ACCOUNT_INACTIVE", "FORBIDDEN", "TARGET_NOT_FOUND"].includes(data.code)) {
+            if (!authenticated || ["AUTH_REQUIRED", "AUTH_INVALID", "ACCOUNT_INACTIVE", "FORBIDDEN", "TARGET_NOT_FOUND"].includes(data.code)) {
               authFailedRef.current = true;
               allowReconnectRef.current = false;
             }
@@ -145,7 +147,7 @@ export function useLiveTracking({ deliveryId, target = "order", enabled = true }
     } catch (e: any) {
       setError(e.message || "Failed to connect");
     }
-  }, [deliveryId, enabled, target, connected]);
+  }, [deliveryId, enabled, target]);
 
   const disconnect = useCallback(() => {
     allowReconnectRef.current = false;
