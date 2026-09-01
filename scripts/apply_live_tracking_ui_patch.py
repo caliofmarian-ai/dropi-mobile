@@ -116,4 +116,31 @@ replace_once(
             {/* STOP Button - Large and prominent (56px height as per canonical) */}""",
 )
 
-print("Live-tracking client patch applied successfully.")
+# Strict TypeScript fixes exposed by the repository-wide gate.
+replace_once(
+    "app/order/[id].tsx",
+    "  const modeInfo = DELIVERY_MODE_INFO[order.deliveryMode];",
+    "  const modeInfo = DELIVERY_MODE_INFO[order.deliveryMode as keyof typeof DELIVERY_MODE_INFO];",
+)
+replace_once(
+    "server/operations-router.ts",
+    '    .filter((item): item is { name: string; quantity: number; weight?: number } => Boolean(item));',
+    '    .filter((item): item is NonNullable<typeof item> => item !== null);',
+)
+replace_once(
+    "tests/live-tracking-security.test.ts",
+    "    emailVerifyExpiry: null,",
+    "    emailVerifyExpires: null,",
+)
+replace_once(
+    "tests/live-tracking-security.test.ts",
+    "    lockedUntil: null,\n    lastIp: null,",
+    "    lockedUntil: null,\n    profilePhotoUrl: null,\n    lastIp: null,",
+)
+replace_once(
+    "tests/smtp.test.ts",
+    "const createTransportMock = vi.hoisted(() =>\n  vi.fn(() => ({ sendMail: sendMailMock })),\n);",
+    "const createTransportMock = vi.hoisted(() =>\n  vi.fn((_options: Record<string, unknown>) => ({ sendMail: sendMailMock })),\n);",
+)
+
+print("Live-tracking client patch and strict TypeScript fixes applied successfully.")
