@@ -519,13 +519,13 @@ export const b2bDeliveryRouter = router({
       failureReason: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
-
       const user = ctx.user as any;
       if (!user) throw new Error("Authentication required");
+      if (user.dropiRole !== "delivery_partner") {
+        throw new Error("Only delivery partners can update delivery mission status.");
+      }
 
-      // Sprint 6A Guard: Block unverified delivery partners from mission operations
+      // Sprint 6A Guard: Block unverified/inactive delivery partners before DB access.
       if (!user.isVerified) {
         throw new Error("Your account is not yet verified. Please submit your documents and wait for admin approval before accepting missions.");
       }
@@ -533,11 +533,19 @@ export const b2bDeliveryRouter = router({
         throw new Error("Your account is inactive. Please contact support.");
       }
 
+      const db = await getDb();
+      if (!db) throw new Error("Database unavailable");
+
       const delivery = await db.select().from(b2bDeliveries)
         .where(eq(b2bDeliveries.id, input.deliveryId))
         .limit(1);
 
       if (delivery.length === 0) throw new Error("Delivery not found");
+
+      // A delivery already assigned to a pilot can only be mutated by that pilot.
+      if (delivery[0].assignedPilotId && delivery[0].assignedPilotId !== user.id) {
+        throw new Error("This delivery is assigned to another pilot.");
+      }
 
       // Validate forward-only transitions
       const statusOrder = ["pending", "assigned", "pickup_enroute", "picked_up", "in_transit", "delivered"];

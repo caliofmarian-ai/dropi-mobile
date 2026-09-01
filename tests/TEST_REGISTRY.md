@@ -128,8 +128,8 @@ See `/docs/BLUEPRINT_TESTING_REQUIREMENTS.md` for the testing standard.
 - [ ] `pilotUpdateStatus` notifies store owner on completion/failure
 
 #### Authorization Tests
-- [ ] Only delivery_partner role can call pilotUpdateStatus
-- [ ] Pilot can only update deliveries assigned to them
+- [x] Only delivery_partner role can call pilotUpdateStatus — certified by `operational-safety-certification.test.ts`
+- [x] Pilot can only update deliveries assigned to them — certified by `operational-safety-certification.test.ts`
 
 #### Integration Tests
 - [ ] Full flow: assigned→pickup_enroute→picked_up→in_transit→delivered
@@ -235,4 +235,41 @@ See `/docs/BLUEPRINT_TESTING_REQUIREMENTS.md` for the testing standard.
 
 ---
 
-*Registry updated: 2026-06-28*
+## Sprint 6A — Operational Safety Certification (2026-09-01)
+
+### IMPL-001 — Delivery Partner unverified status (#158)
+- [x] Delivery Partner registration persists `isVerified=false`
+- [x] Delivery Partner remains active for onboarding while mission capability is gated
+- [x] Registration response exposes `verificationRequired=true`
+- [x] Delivery Partner dashboard exposes an explicit `Verification Required` state
+
+### IMPL-002 — Mission authorization gates (#159)
+- [x] Unverified Delivery Partner cannot set pilot availability
+- [x] Verified non-delivery roles cannot set pilot availability
+- [x] Verified non-delivery roles cannot write pilot GPS position
+- [x] Unverified Delivery Partner cannot call `pilotUpdateStatus`
+- [x] Verified non-delivery roles cannot call `pilotUpdateStatus`
+- [x] A Delivery Partner cannot mutate a delivery already assigned to another pilot
+- [x] Authorization/verification failures occur before mission DB mutation
+
+### IMPL-003 — Operational-role admin approval gate (#160)
+- [x] Operational-role registration persists `isActive=false`
+- [x] Registration creates a pending role application
+- [x] No session token is returned to an approval-pending operational account
+- [x] Role-application review remains admin-only
+- [x] Approval activates/verifies the account and applies requested role/channel
+
+### IMPL-004 — Admin Approvals UI (#161)
+- [x] Admin screen lists pending document verifications
+- [x] Admin screen lists pending role applications
+- [x] Admin screen calls governed review procedures for approve/reject actions
+- [x] Rejection reason is carried through the review UI contract
+
+### Certification automation
+- [x] `tests/operational-safety-certification.test.ts` added as the executable regression suite
+- [x] `.github/workflows/validate-operational-safety-pr.yml` added as the permanent pull-request gate
+- [x] One-time patch workflow removed after successful test-backed commit
+
+---
+
+*Registry updated: 2026-09-01*
