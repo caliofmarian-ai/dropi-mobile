@@ -32,7 +32,7 @@
  */
 
 import { getDb } from "./db";
-import { stores, products, productReviews, sellerBadges, storeAnalytics } from "../drizzle/schema";
+import { stores, products, productReviews, sellerBadges, storeAnalytics, orders } from "../drizzle/schema";
 import { eq, and, sql, gte, desc } from "drizzle-orm";
 
 // ===== TYPES =====
@@ -99,16 +99,14 @@ export async function calculateTrustScore(storeId: number): Promise<TrustScoreRe
   // Fetch reviews for this store
   const reviews = await db.select().from(productReviews).where(eq(productReviews.storeId, storeId));
 
-  // Fetch analytics (latest monthly period for order stats)
-  const analytics = await db.select().from(storeAnalytics)
-    .where(and(eq(storeAnalytics.storeId, storeId), eq(storeAnalytics.periodType, "monthly")))
-    .orderBy(desc(storeAnalytics.calculatedAt))
-    .limit(6); // Last 6 months
-
-  // Aggregate order stats from analytics
-  const totalOrders = analytics.reduce((sum, a) => sum + a.totalOrders, 0) || store.totalOrders;
-  const completedOrders = analytics.reduce((sum, a) => sum + a.completedOrders, 0) || store.totalOrders;
-  const cancelledOrders = analytics.reduce((sum, a) => sum + a.cancelledOrders, 0);
+  // Canonical Marketplace lifecycle rows are the authoritative order evidence.
+  // Pre-calculated analytics remain useful for reporting, but must not override live order truth.
+  const marketplaceOrders = await db.select({ status: orders.status })
+    .from(orders)
+    .where(eq(orders.merchantId, store.ownerId));
+  const totalOrders = marketplaceOrders.length;
+  const completedOrders = marketplaceOrders.filter((order) => order.status === "completed").length;
+  const cancelledOrders = marketplaceOrders.filter((order) => order.status === "cancelled").length;
 
   // Check minimum threshold
   if (completedOrders < 3) {

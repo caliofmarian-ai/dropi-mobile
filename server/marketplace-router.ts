@@ -12,13 +12,16 @@
 
 import { router, protectedProcedure, adminProcedure, publicProcedure } from "./_core/trpc";
 import { getDb } from "./db";
-import { stores, products, productReviews, sellerBadges, deliveryBadges, storeAnalytics } from "../drizzle/schema";
+import { stores, products, productReviews, sellerBadges, deliveryBadges, storeAnalytics, orders } from "../drizzle/schema";
 import { eq, and, desc, sql, like, or, gt, gte, lte, isNull, inArray } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "crypto";
 import { moderateProduct, formatViolationsForNote, type ProductForModeration, type StoreContext } from "./moderation-engine";
 import { notifyOwner } from "./_core/notification";
 import { MARKETPLACE_CATEGORY_POLICIES, normalizeMarketplaceCategory, normalizeMarketplaceZone, sameMarketplaceZone } from "../shared/marketplace-policy";
+import { assertVerifiedMarketplaceReview } from "./marketplace-review-policy";
+import { updateStoreTrustScore } from "./trust-engine";
+import { getMerchantPortfolioSummary } from "./merchant-portfolio-service";
 
 const MARKETPLACE_CATEGORY_LABELS = MARKETPLACE_CATEGORY_POLICIES.map((policy) => policy.label);
 
@@ -40,6 +43,15 @@ function calculateDeliveryModes(weightGrams: number, dimensions?: { l: number; w
 
 // ===== STORE ROUTER =====
 export const storeRouter = router({
+  // Real merchant portfolio summary across the complete catalog and order lifecycle.
+  portfolioSummary: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx.user as any;
+    if (user.dropiRole !== "merchant" || !user.isActive) {
+      throw new Error("Merchant account required");
+    }
+    return getMerchantPortfolioSummary(user.id);
+  }),
+
   // Create a new store (merchant only)
   create: protectedProcedure
     .input(z.object({
@@ -727,15 +739,33 @@ export const reviewRouter = router({
 
       const user = ctx.user as any;
 
-      // Check if review already exists for this order
+      // One verified review per order, enforced for the authenticated customer.
       const existing = await db.select().from(productReviews)
         .where(and(eq(productReviews.orderId, input.orderId), eq(productReviews.userId, user.id)))
         .limit(1);
       if (existing.length > 0) throw new Error("You already reviewed this order");
 
-      // Get product to find storeId
-      const [product] = await db.select().from(products).where(eq(products.id, input.productId)).limit(1);
+      const [[product], [order]] = await Promise.all([
+        db.select().from(products).where(eq(products.id, input.productId)).limit(1),
+        db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1),
+      ]);
       if (!product) throw new Error("Product not found");
+      if (!order) throw new Error("Order not found");
+
+      const [store] = await db.select().from(stores).where(eq(stores.id, product.storeId)).limit(1);
+      if (!store) throw new Error("Product store not found");
+
+      assertVerifiedMarketplaceReview({
+        actor: { id: user.id, dropiRole: user.dropiRole, isActive: user.isActive },
+        order: {
+          id: order.id,
+          customerId: order.customerId,
+          merchantId: order.merchantId,
+          status: order.status,
+          items: order.items,
+        },
+        product: { id: product.id, storeOwnerId: store.ownerId },
+      });
 
       await db.insert(productReviews).values({
         productId: input.productId,
@@ -748,21 +778,15 @@ export const reviewRouter = router({
         isVerifiedPurchase: true,
       });
 
-      // Update store trust score (simplified: average of all reviews)
-      const [avgResult] = await db.select({
-        avg: sql<number>`AVG(overallRating)`,
-        count: sql<number>`COUNT(*)`,
-      }).from(productReviews).where(eq(productReviews.storeId, product.storeId));
+      const [reviewCount] = await db.select({ count: sql<number>`COUNT(*)` })
+        .from(productReviews)
+        .where(eq(productReviews.storeId, product.storeId));
+      await db.update(stores).set({ totalReviews: reviewCount?.count || 0 }).where(eq(stores.id, product.storeId));
 
-      if (avgResult) {
-        const trustScore = Math.round((avgResult.avg || 0) * 20); // 1-5 → 20-100
-        await db.update(stores).set({
-          trustScore,
-          totalReviews: avgResult.count || 0,
-        }).where(eq(stores.id, product.storeId));
-      }
+      // Reuse the canonical weighted Trust Score engine; never replace it with a simple rating average.
+      const trust = await updateStoreTrustScore(product.storeId);
 
-      return { success: true };
+      return { success: true, trustScore: trust.score, badge: trust.badge };
     }),
 
   // Get reviews for a product
