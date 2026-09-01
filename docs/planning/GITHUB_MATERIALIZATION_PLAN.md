@@ -1,21 +1,30 @@
 # DROPi — GitHub Materialization Plan
 
-> **Status:** PLANNING CANONICAL — DO NOT DELETE  
-> **Generated:** 2026-08-02  
-> **Version:** 1.0.0  
-> **Repository:** caliofmarian-ai/dropi-mobile  
-> **Archive SHA-256:** `82a6015b8c968645307e36c8e4aa0351515f50333c08a6c5402a7819b7b747e5`
+> **Status:** PLANNING CANONICAL — RECONCILED 2026-09-01  
+> **Initial generation:** 2026-08-02  
+> **Repository:** `caliofmarian-ai/dropi-mobile`  
+> **Archive SHA-256:** `82a6015b8c968645307e36c8e4aa0351515f50333c08a6c5402a7819b7b747e5`  
+> **Machine-readable authority:** `docs/planning/github_materialization_plan.json`
 
 ---
 
-## Summary
+## Purpose
 
-| Item | Count |
-|------|-------|
-| Canonical sources inspected | 22 source groups (47 documents) |
-| Conflicts detected | 5 (3 requiring owner decision, 2 requiring canonical resolution) |
-| Labels planned | 147 |
-| Milestones planned | 7 |
+This document is the human-readable summary of the DROPi Mobile GitHub planning graph.
+Exact labels, milestone definitions, issue bodies, stable IDs and dependencies are governed by the machine-readable JSON plan. The YAML file is a compact mirror intended for human inspection.
+
+The planning graph preserves completed canonical recovery work and materializes the remaining roadmap without reopening CAN-001 through CAN-008.
+
+---
+
+## Reconciled Plan Shape
+
+| Object | Count |
+|---|---:|
+| Canonical source documents inspected | 47 |
+| Canonical/source conflicts or planning tensions tracked | 5 |
+| Labels planned | 212 |
+| Milestones | 7 |
 | Program issues | 1 |
 | Phase issues | 6 |
 | Epic issues | 30 |
@@ -23,247 +32,145 @@
 | Implementation issues | 120 |
 | Owner-decision issues | 5 |
 | Canonical-resolution issues | 3 |
-| Audit/Verify/Doc issues | 8 |
-| **Total issues planned** | **233** |
+| Audit issues | 1 |
+| Verification issues | 1 |
+| Documentation issues | 1 |
+| **Total materialized issues** | **228** |
 
----
+The 228 stable-ID planning issues are currently present in GitHub as issue numbers **#61 through #288**. A repository issue-search audit on 2026-09-01 returned `total_count=228` for bodies containing `dropi-planning-id`.
 
-## Planning Hierarchy
-
-```
-PROG-001: DROPi Mobile — Complete Canonical Roadmap Program
-├── M0: Canonical Recovery (CLOSED — issues #42–#50 done)
-├── M1: Application Core Foundation
-│   ├── PHASE-M1
-│   ├── EPIC-001: Auth & Accounts
-│   │   ├── BATCH-001: Auth Core — OAuth, JWT, RBAC
-│   │   │   ├── IMPL-001: Delivery Partner unverified status
-│   │   │   ├── IMPL-002: Guard on mission endpoints
-│   │   │   └── IMPL-003: Admin approval gate
-│   │   └── BATCH-002: Account Management — Roles, Test Accounts
-│   │       ├── IMPL-004: 29 test accounts seed
-│   │       └── IMPL-005: Phantom mode complete
-│   ├── EPIC-002: Data Persistence & Sync
-│   │   ├── BATCH-003: DB Schema & Migrations finalization
-│   │   └── BATCH-004: Replace mock data with real DB
-│   ├── EPIC-003: Order Management
-│   │   ├── BATCH-005: Order lifecycle C1
-│   │   └── BATCH-006: Order C2/C3/Admin flows
-│   ├── EPIC-004: Marketplace C1
-│   │   ├── BATCH-007: Product catalog real data
-│   │   ├── BATCH-008: Zonal search & P2P listings
-│   │   └── BATCH-009: Checkout & payment integration
-│   ├── EPIC-005: COS — C2 Channel
-│   │   ├── BATCH-010: C2 contracted operations backend
-│   │   └── BATCH-011: C2 SLA monitoring
-│   ├── EPIC-006: EOC — C3 Channel
-│   │   ├── BATCH-012: C3 emergency declaration & dispatch
-│   │   └── BATCH-013: C3 resource allocation & OVERRIDE
-│   ├── EPIC-007: Admin Operations
-│   │   ├── BATCH-014: Admin phantom mode completion
-│   │   └── BATCH-015: Admin approval panel
-│   ├── EPIC-008: Payments & Wallet
-│   │   ├── BATCH-016: Wallet real/promo balance
-│   │   └── BATCH-017: Payment providers & commissions
-│   ├── EPIC-009: Real-Time & Notifications
-│   │   ├── BATCH-018: Push notifications for order status
-│   │   └── BATCH-019: WebSocket live tracking
-│   ├── EPIC-028: Security Module (transversal)
-│   │   ├── BATCH-054: Security audit & pen testing
-│   │   └── BATCH-055: Biometric authentication
-│   ├── EPIC-029: Testing & QA (transversal)
-│   │   ├── BATCH-056: QA Sprint 1-2 validation
-│   │   └── BATCH-057: Test coverage expansion
-│   └── EPIC-030: Deployment & Release (transversal)
-│       ├── BATCH-058: Railway deployment optimization
-│       └── BATCH-059: Android distribution EAS
-├── M2: Audit Core Activation
-│   ├── PHASE-M2
-│   ├── EPIC-010: Audit Logging
-│   │   ├── BATCH-020: Complete event logging system
-│   │   └── BATCH-021: Audit log API & admin view
-│   ├── EPIC-011: GDPR & Privacy Compliance
-│   │   ├── BATCH-022: Consent management
-│   │   └── BATCH-023: Data retention & deletion
-│   └── EPIC-012: Operational Traceability
-│       ├── BATCH-024: Proof of delivery system
-│       └── BATCH-025: Incident audit trail
-├── M3: Logic Core — AI/DSS
-│   ├── PHASE-M3
-│   ├── EPIC-013: AI Agents Framework
-│   │   ├── BATCH-026: Base agent framework & dual accounts
-│   │   └── BATCH-027: Agent simulation harness
-│   ├── EPIC-014: AI Agents — C1 Marketplace (9)
-│   │   └── BATCH-028: C1 agent implementation (9 agents)
-│   ├── EPIC-015: AI Agents — C2 COS (8)
-│   │   └── BATCH-029: C2 agent implementation (8 agents)
-│   ├── EPIC-016: AI Agents — C3 EOC (6)
-│   │   └── BATCH-030: C3 agent implementation (6 agents)
-│   ├── EPIC-017: AI Agents — Admin & Support (11)
-│   │   └── BATCH-031: Admin/Support agent implementation
-│   └── EPIC-018: Eligibility Engine & Route Optimization
-│       ├── BATCH-032: Delivery eligibility engine
-│       └── BATCH-033: Route optimization service
-├── M4: Physical Core — DronePort
-│   ├── PHASE-M4
-│   ├── EPIC-019: DronePort Digital Management
-│   │   ├── BATCH-034: DronePort registry & status API
-│   │   └── BATCH-035: DronePort digital twin
-│   ├── EPIC-020: Multimodal Transfer
-│   │   └── BATCH-036: Transfer hub & staged delivery logic
-│   ├── EPIC-021: Battery & Charging Management
-│   │   └── BATCH-037: Battery lifecycle tracking
-│   └── EPIC-022: Safety Points & Emergency Landing
-│       └── BATCH-038: Safety zones registry
-├── M5: Operational Core — Supervised Delivery
-│   ├── PHASE-M5
-│   ├── EPIC-023: Delivery Execution Engine
-│   │   ├── BATCH-039: Live delivery orchestration
-│   │   └── BATCH-040: Pilot dispatch system
-│   ├── EPIC-024: STOP & FALLBACK Mechanisms
-│   │   ├── BATCH-041: STOP rules implementation
-│   │   └── BATCH-042: FALLBACK triggers & weather
-│   ├── EPIC-025: GPS, Geofencing & Weather
-│   │   ├── BATCH-043: GPS tracking & geofencing
-│   │   └── BATCH-044: Weather API & no-crowds rules
-│   └── EPIC-026: Fleet Management Real
-│       ├── BATCH-045: Drone fleet tracking
-│       └── BATCH-046: Ground fleet & maintenance
-└── M6: Public Front — Website
-    ├── PHASE-M6
-    └── EPIC-027: Website Marketing — Public Front
-        ├── BATCH-047: Marketing website build
-        └── BATCH-048: SEO & investor pages
-
-OWNER-DECISION Issues (cross-cutting):
-- OWNER-001: Biometric authentication timeline
-- OWNER-002: WebSocket vs polling for Zone 0
-- OWNER-003: Offline-first sync strategy
-- OWNER-004: DronePort physical infrastructure timeline
-- OWNER-005: AI agent activation sequence
-
-CANONICAL-RESOLUTION Issues:
-- CANON-RES-001: Marketplace separation vs integration
-- CANON-RES-002: Client-presence rules enforcement
-- CANON-RES-003: EASA compliance for Philippines Zone 0
-
-VERIFICATION Issues:
-- VERIFY-001: Sprint 1-2 spec compliance
-- VERIFY-002: Complete implementation coverage
-- AUDIT-001: API contract documentation
-- DOC-001: Canonical source documentation
-```
+The earlier values `147 labels` and `233 issues` were draft-summary values and are superseded by the machine-readable plan and the live materialized graph. The difference in label count was primarily caused by the domain taxonomy not being included in the old human total.
 
 ---
 
 ## Milestones
 
-| ID | Title | State | Entry Criteria | Exit Criteria |
-|----|-------|-------|----------------|---------------|
-| M0 | Canonical Recovery & Certification | CLOSED | — | CAN-001–CAN-008 completed (#42–#50) |
-| M1 | Application Core Foundation | OPEN | M0 complete | L2 layers (2.1–2.9) fully implemented and tested |
-| M2 | Audit Core Activation | OPEN | M1 core auth done | L6 (6.1–6.3) fully verified; GDPR compliant |
-| M3 | Logic Core — AI/DSS | OPEN | M1+M2 complete | 29 agents operational; 1-month simulation passed |
-| M4 | Physical Core — DronePort | OPEN | M3 complete | DronePort digital twin functional |
-| M5 | Operational Core | OPEN | M4 complete | Live Zone 0 pilot delivery operational |
-| M6 | Public Front | OPEN | M5 complete | Zone 0 launch ready; website live |
+| ID | GitHub milestone title | State | Purpose |
+|---|---|---|---|
+| M0 | Canonical Recovery & Certification | closed | CAN-001 through CAN-008 recovery/certification |
+| M1 | Application Core Foundation | open | Auth, persistence, order flows, operational roles, payments, real-time foundations |
+| M2 | Audit Core Activation | open | Audit, privacy, GDPR and operational traceability |
+| M3 | Logic Core — AI/DSS | open | AI-agent framework, simulations, eligibility and route optimization |
+| M4 | Physical Core — DronePort | open | DronePort digital operations and multimodal physical-core support |
+| M5 | Operational Core — Supervised Delivery | open | Live supervised delivery, STOP/FALLBACK, GPS/geofencing and fleet operations |
+| M6 | Public Front — Website & Launch | open | Public launch surfaces and complete-roadmap verification |
+
+M0 is historical/completed. M1 is the active implementation milestone.
 
 ---
 
-## Label Taxonomy
+## GitHub Hierarchy
 
-### Type Labels (18)
-`type:program`, `type:phase`, `type:milestone`, `type:epic`, `type:batch`, `type:implementation`, `type:design`, `type:audit`, `type:documentation`, `type:verification`, `type:testing`, `type:security`, `type:compliance`, `type:operations`, `type:owner-decision`, `type:canonical-resolution`, `type:migration`, `type:release`
+```text
+PROG-001  Program (#61)
+  ├─ PHASE-M1 .. PHASE-M6
+  ├─ EPIC-001 .. EPIC-030
+  ├─ BATCH-001 .. BATCH-060
+  ├─ IMPL-001 .. IMPL-120
+  ├─ OWNER-001 .. OWNER-005
+  ├─ CANON-RES-001 .. CANON-RES-003
+  ├─ AUDIT-001
+  ├─ VERIFY-001
+  └─ DOC-001
+```
 
-### Status Labels (10)
-`status:ready`, `status:in-progress`, `status:blocked`, `status:needs-design`, `status:needs-audit`, `status:needs-owner-decision`, `status:future`, `status:historical`, `status:superseded`, `status:done`
+Every managed issue contains a stable marker:
 
-### Priority Labels (4)
-`priority:p0`, `priority:p1`, `priority:p2`, `priority:p3`
+```html
+<!-- dropi-planning-id: EPIC-001 -->
+```
 
-### Risk Labels (4)
-`risk:critical`, `risk:high`, `risk:medium`, `risk:low`
+The materializer uses this stable ID rather than issue number for deduplication and reconciliation.
 
-### Authority Labels (6)
-`authority:04-zip`, `authority:active-canon`, `authority:blueprint`, `authority:implementation`, `authority:conflicted`, `authority:derived`
+---
 
-### Platform Labels (8)
-`platform:web`, `platform:android`, `platform:backend`, `platform:database`, `platform:infrastructure`, `platform:drone`, `platform:ground-logistics`, `platform:operations`
+## Current M1 Execution Context — 2026-09-01 Repository Audit
 
-### Domain Labels (60+)
-One per canonical domain. See `github_materialization_plan.json` for complete list.
+The materialization was produced from historical audits as well as implementation observations. Some child issues therefore describe work that has since been implemented on `main` but was never reconciled back into GitHub planning status.
 
-### Phase Labels (7)
-`phase:m0-canonical-recovery`, `phase:m1-application-core`, `phase:m2-audit-core`, `phase:m3-logic-core`, `phase:m4-physical-core`, `phase:m5-operational-core`, `phase:m6-public-front`
+The repository audit identified these examples:
 
-### Epic Labels (30)
-`epic:auth-accounts`, `epic:data-persistence`, `epic:order-management`, `epic:marketplace-c1`, `epic:cos-c2`, `epic:eoc-c3`, `epic:admin-operations`, `epic:payments-wallet`, `epic:realtime-notifications`, `epic:audit-logging`, `epic:gdpr-privacy`, `epic:operational-traceability`, `epic:ai-agents-framework`, `epic:ai-agents-c1`, `epic:ai-agents-c2`, `epic:ai-agents-c3`, `epic:ai-agents-admin`, `epic:eligibility-engine`, `epic:droneport-management`, `epic:multimodal-transfer`, `epic:battery-management`, `epic:safety-points`, `epic:delivery-execution`, `epic:stop-fallback`, `epic:gps-geofencing`, `epic:fleet-management`, `epic:website-marketing`, `epic:security-module`, `epic:testing-qa`, `epic:deployment-release`
+- **IMPL-001 / #158 — Delivery Partner unverified status:** implementation exists in registration/backend and the delivery-partner dashboard exposes the verification-required state. Requires regression verification and planning closure, not reimplementation.
+- **IMPL-002 / #159 — Mission guards for unverified delivery partners:** guards exist on the blueprint-specified mission-affecting procedures (`b2bDelivery.pilotUpdateStatus`, `pilotSelection.updateAvailability`, `pilotSelection.updatePosition`). Test-registry verification is still incomplete.
+- **IMPL-003 / #160 — Admin approval gate:** role-application approval/rejection backend exists and updates role/channel/account state with notifications. Requires regression verification and planning reconciliation.
+- **IMPL-004 / #161 — Admin approvals UI:** `app/admin/approvals.tsx` exists and consumes the role-application API. Requires verification and planning reconciliation.
+- **IMPL-010 / #167 — Replace mock/hardcoded dashboards:** partially complete. Customer/Merchant/Pilot core flows use tRPC-backed reads, but additional role dashboards still contain fixed/demo metrics and values.
+- **IMPL-033 / #190 — WebSocket server:** transport exists and is mounted in the server runtime. It is not simply “missing”; it requires security/authorization hardening and verification because live-tracking identity is currently derived from connection query parameters.
+- **IMPL-034 / #191 — Push notifications for order state changes:** still requires explicit wiring to order/mission state transitions; existing push infrastructure is already used for verification/role decisions.
 
-### Batch Labels (60)
-`batch:b001` through `batch:b060`
+Therefore `status:ready` in the materialized graph means **ready for repository-grounded reconciliation/execution**, not proof that the capability is absent from code.
 
-**Total Labels: 147**
+---
+
+## Immediate Execution Order
+
+1. **Finish PR #60 planning certification.**
+   - Run planning unit tests on the PR.
+   - Verify the complete live GitHub materialization read-only against the JSON plan.
+   - Prove stable-ID uniqueness and exact counts.
+   - Do not merge if remote verification fails.
+
+2. **Reconcile already-implemented M1 safety work before rewriting it.**
+   - Verify IMPL-001..IMPL-004 against current code and targeted tests.
+   - Close/update their GitHub planning status only after evidence exists.
+
+3. **Repair P0/P1 gaps discovered by current-code audit.**
+   - Authenticate/authorize WebSocket tracking identities and delivery access.
+   - Remove hardcoded debug tracking IDs from user-facing dashboard paths.
+   - Continue IMPL-010 until remaining role dashboards consume governed live contracts.
+   - Implement IMPL-034 order/mission state push delivery.
+
+4. **Then proceed through the M1 batch dependency graph** as represented in the JSON plan.
+
+---
+
+## Conflict / Owner-Decision Mapping
+
+The reconciled mapping is maintained in `CANONICAL_PLANNING_CONFLICTS.md`.
+
+| Topic | Planning issue |
+|---|---|
+| Marketplace separation vs integrated mobile marketplace | CANON-RES-001 — #283 |
+| Client-presence enforcement details | CANON-RES-002 — #284 |
+| Philippines Zone 0 regulatory scope / EASA references | CANON-RES-003 — #285 |
+| Biometric authentication timing | OWNER-001 — #278 |
+| WebSocket vs polling operating strategy | OWNER-002 — #279 |
+| Offline-first sync strategy | OWNER-003 — #280 |
+| DronePort physical infrastructure timing | OWNER-004 — #281 |
+| AI-agent activation sequence | OWNER-005 — #282 |
+
+No conflict is silently resolved by this planning document.
 
 ---
 
 ## Materialization Rules
 
-1. Labels are created before issues
-2. Milestones are created before issues
-3. Parent issues are created before children
-4. Closed completed work (#42–#50) is NOT reopened
-5. No product code is modified
-6. No canonical source is modified
-7. No archive is modified
-8. No audit input is modified
-9. Script is idempotent (safe to run multiple times)
-10. Duplicate detection uses stable IDs embedded in issue bodies
+1. The JSON plan is the exact source for managed GitHub objects.
+2. Labels and milestones are materialized before issues.
+3. Parent planning objects are materialized before children.
+4. Closed CAN-001 through CAN-008 recovery issues remain historical and are not recreated.
+5. Product code is outside the planning-materialization PR scope.
+6. Canonical source files and `04.zip` are protected from mutation by the materialization workflow.
+7. Stable IDs are the deduplication key.
+8. Apply must be idempotent: a second apply creates zero labels, milestones and issues.
+9. Pre-merge validation is read-only against GitHub state.
+10. Mutating materialization is manual (`workflow_dispatch`) only after the workflow exists on the repository default branch.
 
 ---
 
-## Stable ID Schema
+## Verification Gate
 
-| Type | Pattern | Example |
-|------|---------|---------|
-| Program | `PROG-NNN` | `PROG-001` |
-| Phase | `PHASE-MN` | `PHASE-M1` |
-| Epic | `EPIC-NNN` | `EPIC-001` |
-| Batch | `BATCH-NNN` | `BATCH-001` |
-| Implementation | `IMPL-NNN` | `IMPL-001` |
-| Owner Decision | `OWNER-NNN` | `OWNER-001` |
-| Canonical Resolution | `CANON-RES-NNN` | `CANON-RES-001` |
-| Audit | `AUDIT-NNN` | `AUDIT-001` |
-| Verify | `VERIFY-NNN` | `VERIFY-001` |
-| Documentation | `DOC-NNN` | `DOC-001` |
+PR #60 is ready to merge only when its PR validation proves:
 
-Stable IDs are embedded in issue bodies as: `<!-- dropi-planning-id: EPIC-001 -->`
+- `04.zip` SHA-256 is unchanged;
+- no protected canonical/product paths are modified;
+- planning tests pass;
+- JSON plan contains exactly 212 labels, 7 milestones and 228 unique stable-ID issues;
+- live GitHub verification matches the machine-readable plan;
+- no duplicate stable IDs exist.
+
+After merge, the manual materialization workflow may be invoked to execute apply → verify → second apply → second verify and record an idempotency result.
 
 ---
 
-## Dependencies
-
-### Hard Dependencies (blocking)
-
-| Dependent | Blocked By | Reason |
-|-----------|-----------|--------|
-| EPIC-003 | EPIC-001 | Orders require auth |
-| EPIC-004 | EPIC-002 | Marketplace requires real DB |
-| EPIC-008 | EPIC-004 | Payments require orders |
-| EPIC-009 | EPIC-001 | Notifications require auth |
-| EPIC-010 | M1 partial | Audit core needs core flows |
-| EPIC-013 | M1+M2 | AI agents require full core |
-| EPIC-019 | M3 | DronePort needs AI/DSS |
-| EPIC-023 | M4 | Delivery needs physical infrastructure |
-| EPIC-027 | M5 | Website is last |
-
-### Conflict Blocks
-
-| Dependent | Blocked By | Reason |
-|-----------|-----------|--------|
-| EPIC-004 final scope | CANON-RES-001 | Marketplace separation unclear |
-| EPIC-023 compliance | OWNER-004 | EASA/Philippines regs unclear |
-| EPIC-024 weather | OWNER-002 | Real-time strategy unclear |
-
----
-
-*This plan is derived from complete canonical corpus inspection. Deviations from this plan require canonical justification.*
+*Reconciled from repository state and live GitHub planning on 2026-09-01. No product code or canonical source was changed by this document.*
