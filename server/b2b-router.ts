@@ -25,6 +25,7 @@ import crypto from "crypto";
 import { notifyOwner } from "./_core/notification";
 import { triggerWebhooks, buildWebhookPayload, getWebhookEvents } from "./webhook-trigger";
 import { onB2bDeliveryCompleted, onB2bDeliveryFailed } from "./pilot-rating-hooks";
+import { notifyB2bDeliveryTransition } from "./b2b-transition-notifications";
 
 // ===== HELPERS =====
 
@@ -424,6 +425,16 @@ export const b2bDeliveryRouter = router({
         triggerWebhooks(storeResult[0].id, input.deliveryId, event, { ...payload, event });
       }
 
+      await notifyB2bDeliveryTransition({
+        deliveryId: delivery[0].id,
+        trackingCode: delivery[0].trackingCode,
+        previousStatus,
+        newStatus: "cancelled",
+        storeOwnerId: storeResult[0].ownerId,
+        assignedPilotId: delivery[0].assignedPilotId,
+        actorUserId: storeResult[0].ownerId,
+      });
+
       return { success: true, message: "Delivery cancelled successfully" };
     }),
 
@@ -631,6 +642,16 @@ export const b2bDeliveryRouter = router({
             metadata: { deliveryId: delivery[0].id, trackingCode: delivery[0].trackingCode, status: input.newStatus },
           });
         } catch (e) { /* silent */ }
+
+        await notifyB2bDeliveryTransition({
+          deliveryId: delivery[0].id,
+          trackingCode: delivery[0].trackingCode,
+          previousStatus,
+          newStatus: input.newStatus,
+          storeOwnerId: storeResult[0].ownerId,
+          assignedPilotId: (updateData.assignedPilotId as number | undefined) ?? delivery[0].assignedPilotId ?? user.id,
+          actorUserId: user.id,
+        });
       }
 
       return {
@@ -654,7 +675,7 @@ export const b2bDeliveryRouter = router({
       cancellationReason: z.string().optional(),
       cancelledBy: z.enum(["system", "pilot"]).optional(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error("Database unavailable");
 
@@ -717,6 +738,21 @@ export const b2bDeliveryRouter = router({
 
       for (const event of events) {
         triggerWebhooks(delivery[0].storeId, delivery[0].id, event, { ...webhookPayload, event });
+      }
+
+      const transitionStore = await db.select().from(stores)
+        .where(eq(stores.id, delivery[0].storeId))
+        .limit(1);
+      if (transitionStore.length > 0) {
+        await notifyB2bDeliveryTransition({
+          deliveryId: delivery[0].id,
+          trackingCode: delivery[0].trackingCode,
+          previousStatus,
+          newStatus: input.newStatus,
+          storeOwnerId: transitionStore[0].ownerId,
+          assignedPilotId: pilotId,
+          actorUserId: ctx.user?.id ?? null,
+        });
       }
 
       return {
