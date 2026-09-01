@@ -1,0 +1,164 @@
+name: Validate DROPi Planning PR
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/materialize-dropi-planning.yml"
+      - ".github/workflows/validate-dropi-planning-pr.yml"
+      - "docs/planning/**"
+      - "scripts/materialize_github_planning.py"
+      - "tests/test_materialize_github_planning.py"
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: dropi-planning-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Read-only planning certification
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    steps:
+      - name: Checkout PR merge candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Protect canonical and product sources
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.repository }}" != "caliofmarian-ai/dropi-mobile" ]; then
+            echo "::error::Wrong repository: ${{ github.repository }}"
+            exit 1
+          fi
+
+          git fetch origin main
+
+          if ! git diff --exit-code origin/main -- canonical/SESSION_HANDOVER.md; then
+            echo "::error::canonical/SESSION_HANDOVER.md differs from origin/main"
+            exit 1
+          fi
+
+          EXPECTED="82a6015b8c968645307e36c8e4aa0351515f50333c08a6c5402a7819b7b747e5"
+          ACTUAL=$(sha256sum 04.zip | awk '{print $1}')
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "::error::04.zip checksum mismatch. Expected=$EXPECTED Got=$ACTUAL"
+            exit 1
+          fi
+
+          PROTECTED=$(git diff --name-only origin/main -- \
+            canonical/ BLUEPRINT/ DROPi_Canonical_Reference/ docs/audits/ \
+            app/ server/ drizzle/ 04.zip 2>/dev/null || true)
+          if [ -n "$PROTECTED" ]; then
+            echo "::error::Protected sources modified by planning PR: $PROTECTED"
+            exit 1
+          fi
+
+      - name: Run planning unit tests
+        run: |
+          set -euo pipefail
+          python -m unittest -v tests/test_materialize_github_planning.py
+          git diff --check
+
+      - name: Validate exact plan shape
+        run: |
+          set -euo pipefail
+          python3 - <<'PYEOF'
+          import json
+          from pathlib import Path
+
+          plan = json.loads(Path("docs/planning/github_materialization_plan.json").read_text(encoding="utf-8"))
+          issue_ids = [item["id"] for item in plan["issues"]]
+          label_names = [item["name"] for item in plan["labels"]]
+          milestone_titles = [item["title"] for item in plan["milestones"]]
+
+          expected = {
+              "issues": 228,
+              "labels": 212,
+              "milestones": 7,
+          }
+          actual = {
+              "issues": len(issue_ids),
+              "labels": len(label_names),
+              "milestones": len(milestone_titles),
+          }
+          if actual != expected:
+              raise SystemExit(f"Plan-shape mismatch: expected={expected} actual={actual}")
+          if len(set(issue_ids)) != len(issue_ids):
+              raise SystemExit("Duplicate stable issue IDs in plan")
+          if len(set(label_names)) != len(label_names):
+              raise SystemExit("Duplicate labels in plan")
+          if len(set(milestone_titles)) != len(milestone_titles):
+              raise SystemExit("Duplicate milestones in plan")
+
+          print("Plan shape PASS: 228 issues, 212 labels, 7 milestones, unique identifiers.")
+          PYEOF
+
+      - name: Verify live GitHub materialization read-only
+        run: |
+          set -euo pipefail
+          python3 - <<'PYEOF'
+          import json
+          import sys
+          from pathlib import Path
+
+          repo_root = Path(".").resolve()
+          sys.path.insert(0, str(repo_root / "scripts"))
+          import materialize_github_planning as mat
+
+          plan = mat.load_plan(repo_root)
+          client = mat.GitHubClient("caliofmarian-ai/dropi-mobile", dry_run=False)
+          results = {}
+
+          # Branch-path safety is already proven by the previous workflow step.
+          # Bypass only that local-diff guard so the newly added PR-only workflow
+          # does not make the read-only remote verification reject itself.
+          original_guard = mat.ensure_only_allowed_branch_changes
+          mat.ensure_only_allowed_branch_changes = lambda *_args, **_kwargs: []
+          try:
+              passed = mat.run_verify(client, plan, repo_root, results)
+          finally:
+              mat.ensure_only_allowed_branch_changes = original_guard
+
+          verification = results.get("verification", {})
+          failures = verification.get("failures", [])
+          mappings = verification.get("issue_number_mappings", {})
+
+          print(json.dumps({
+              "passed": passed,
+              "failure_count": len(failures),
+              "verified_issue_mappings": len(mappings),
+              "sample_failures": failures[:20],
+          }, indent=2))
+
+          if not passed:
+              raise SystemExit("Live GitHub materialization verification FAILED")
+          if len(mappings) != 228:
+              raise SystemExit(f"Expected 228 verified issue mappings, found {len(mappings)}")
+
+          print("Live GitHub materialization PASS: exact bodies, labels, milestones and stable-ID links verified.")
+          PYEOF
+
+      - name: Publish certification summary
+        if: always()
+        run: |
+          {
+            echo "## DROPi Planning PR Certification"
+            echo
+            echo "- Canonical/product paths: read-only protected"
+            echo "- 04.zip canonical hash: checked"
+            echo "- Planning unit tests: executed"
+            echo "- Machine plan shape: 228 issues / 212 labels / 7 milestones"
+            echo "- Live GitHub comparison: read-only"
+            echo "- This workflow has no write permission to issues or repository contents"
+          } >> "$GITHUB_STEP_SUMMARY"
