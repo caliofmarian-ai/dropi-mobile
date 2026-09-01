@@ -37,13 +37,15 @@ export default function MerchantDashboardScreen() {
   // Fetch store data
   const storeQuery = trpc.store.getMyStore.useQuery();
   const productsQuery = trpc.product.myProducts.useQuery({ limit: 5 });
+  const portfolioQuery = trpc.store.portfolioSummary.useQuery();
 
   const store = storeQuery.data;
   const products = productsQuery.data;
+  const portfolio = portfolioQuery.data;
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    Promise.all([storeQuery.refetch(), productsQuery.refetch()]).finally(() => setRefreshing(false));
+    Promise.all([storeQuery.refetch(), productsQuery.refetch(), portfolioQuery.refetch()]).finally(() => setRefreshing(false));
   }, []);
 
   // No store yet — show setup prompt
@@ -81,9 +83,10 @@ export default function MerchantDashboardScreen() {
   const trustColor = (store?.trustScore || 0) >= 80 ? "#10B981" : (store?.trustScore || 0) >= 50 ? "#F59E0B" : "#EF4444";
   const statusColor = store?.status === "active" ? "#10B981" : store?.status === "pending" ? "#F59E0B" : "#EF4444";
 
-  const pendingCount = products?.products.filter((p: any) => p.status === "pending_review").length || 0;
-  const activeCount = products?.products.filter((p: any) => p.status === "approved").length || 0;
-  const draftCount = products?.products.filter((p: any) => p.status === "draft").length || 0;
+  const pendingCount = portfolio?.products.pendingReview || 0;
+  const activeCount = portfolio?.products.live || 0;
+  const draftCount = portfolio?.products.drafts || 0;
+  const needsAttention = portfolio?.listingQuality.needsAttention || 0;
 
   return (
     <ScreenContainer className="px-4 pt-4">
@@ -100,6 +103,7 @@ export default function MerchantDashboardScreen() {
               <BadgeChip label={store?.status === "active" ? "Active" : store?.status === "pending" ? "Pending Approval" : "Suspended"} color={statusColor} />
               <BadgeChip label={store?.type === "internal" ? "Internal Store" : "External Store"} color="#6366F1" />
             </View>
+            <Text className="text-xs text-muted mt-2">📍 {portfolio?.store.zone || store?.zone} • {portfolio?.store.category || store?.category}</Text>
           </View>
           <TouchableOpacity
             style={{ backgroundColor: "#F3F4F6", width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" }}
@@ -126,7 +130,7 @@ export default function MerchantDashboardScreen() {
               </View>
               <View className="items-end">
                 <Text className="text-sm text-muted">Total Orders</Text>
-                <Text className="text-lg font-bold text-foreground">{store?.totalOrders || 0}</Text>
+                <Text className="text-lg font-bold text-foreground">{portfolio?.orders.total || 0}</Text>
               </View>
             </View>
             <Text className="text-primary text-xs text-center mt-2">Tap to view details →</Text>
@@ -134,10 +138,20 @@ export default function MerchantDashboardScreen() {
         </Pressable>
 
         {/* Quick Stats */}
-        <View className="flex-row gap-3 mb-4">
+        <View className="flex-row gap-3 mb-3">
           <StatCard title="Active Products" value={String(activeCount)} color="#10B981" />
           <StatCard title="Pending Review" value={String(pendingCount)} color="#F59E0B" />
           <StatCard title="Drafts" value={String(draftCount)} color="#6B7280" />
+        </View>
+        <View className="flex-row gap-3 mb-4">
+          <StatCard title="New Orders" value={String(portfolio?.orders.new || 0)} color="#0066FF" />
+          <StatCard title="Ready" value={String(portfolio?.orders.ready || 0)} color="#10B981" />
+          <StatCard title="Needs Attention" value={String(needsAttention)} color="#EF4444" />
+        </View>
+        <View className="bg-surface border border-border rounded-xl p-4 mb-4">
+          <Text className="text-xs text-muted">Completed-order revenue</Text>
+          <Text className="text-xl font-bold text-foreground mt-1">RON {portfolio?.completedRevenue.toFixed(2) || "0.00"}</Text>
+          <Text className="text-xs text-muted mt-1">Listing approval: {portfolio?.listingQuality.approvalRate == null ? "Not enough reviewed listings" : `${portfolio.listingQuality.approvalRate}%`}</Text>
         </View>
 
         {/* Quick Actions */}
