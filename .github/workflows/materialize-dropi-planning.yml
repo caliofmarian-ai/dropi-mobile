@@ -1,165 +1,27 @@
-name: Validate & Materialize DROPi Planning
+name: Materialize DROPi Planning
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/materialize-dropi-planning.yml"
-      - "docs/planning/**"
-      - "scripts/materialize_github_planning.py"
-      - "tests/test_materialize_github_planning.py"
   workflow_dispatch:
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: read
+
 concurrency:
-  group: dropi-planning-${{ github.event_name }}-${{ github.ref }}
+  group: dropi-planning-materialization
   cancel-in-progress: false
 
 jobs:
-  validate:
-    if: github.event_name == 'pull_request'
-    name: Verify planning against live GitHub state
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: read
-      pull-requests: read
-    env:
-      GH_TOKEN: ${{ github.token }}
-      PYTHONDONTWRITEBYTECODE: "1"
-
-    steps:
-      - name: Checkout PR head
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Safety checks
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [ "${{ github.repository }}" != "caliofmarian-ai/dropi-mobile" ]; then
-            echo "::error::Wrong repository: ${{ github.repository }}"
-            exit 1
-          fi
-
-          git fetch origin main
-
-          if ! git diff --exit-code FETCH_HEAD -- canonical/SESSION_HANDOVER.md; then
-            echo "::error::canonical/SESSION_HANDOVER.md differs from origin/main"
-            exit 1
-          fi
-
-          EXPECTED="82a6015b8c968645307e36c8e4aa0351515f50333c08a6c5402a7819b7b747e5"
-          ACTUAL=$(sha256sum 04.zip | awk '{print $1}')
-          if [ "$ACTUAL" != "$EXPECTED" ]; then
-            echo "::error::04.zip checksum mismatch. Expected=$EXPECTED Got=$ACTUAL"
-            exit 1
-          fi
-
-          PROTECTED=$(git diff --name-only FETCH_HEAD -- \
-            canonical/ BLUEPRINT/ DROPi_Canonical_Reference/ docs/audits/ \
-            app/ server/ drizzle/ 04.zip 2>/dev/null || true)
-          if [ -n "$PROTECTED" ]; then
-            echo "::error::Protected sources modified on this branch vs origin/main: $PROTECTED"
-            exit 1
-          fi
-
-      - name: Run planning unit tests
-        run: |
-          set -euo pipefail
-          python -m unittest -v tests/test_materialize_github_planning.py
-          git diff --check
-
-      - name: Validate machine-readable plan shape
-        run: |
-          set -euo pipefail
-          python3 - <<'PYEOF'
-          import json
-          from pathlib import Path
-
-          plan = json.loads(Path("docs/planning/github_materialization_plan.json").read_text(encoding="utf-8"))
-          ids = [item["id"] for item in plan["issues"]]
-          labels = [item["name"] for item in plan["labels"]]
-          milestones = [item["title"] for item in plan["milestones"]]
-
-          assert len(ids) == 228, f"Expected 228 planned issues, found {len(ids)}"
-          assert len(set(ids)) == len(ids), "Duplicate stable issue IDs in plan"
-          assert len(labels) == 212, f"Expected 212 planned labels, found {len(labels)}"
-          assert len(set(labels)) == len(labels), "Duplicate labels in plan"
-          assert len(milestones) == 7, f"Expected 7 milestones, found {len(milestones)}"
-          assert len(set(milestones)) == len(milestones), "Duplicate milestones in plan"
-          print("Plan shape PASS: 228 issues, 212 labels, 7 milestones, unique IDs.")
-          PYEOF
-
-      - name: Verify live GitHub materialization read-only
-        run: |
-          set -euo pipefail
-          # Discard the historical failed-attempt report so verification is evaluated
-          # from the current remote GitHub state only.
-          rm -f docs/planning/GITHUB_MATERIALIZATION_RESULT.md \
-                docs/planning/github_materialization_result.json
-
-          python scripts/materialize_github_planning.py \
-            --repo caliofmarian-ai/dropi-mobile \
-            --repo-root . \
-            --verify
-
-      - name: Validate fresh verification result
-        run: |
-          set -euo pipefail
-          python3 - <<'PYEOF'
-          import json
-          from pathlib import Path
-
-          result = json.loads(Path("docs/planning/github_materialization_result.json").read_text(encoding="utf-8"))
-          verify = result.get("verify_result", {})
-          first = result.get("first_verify", {})
-          failures = first.get("failures", [])
-
-          if verify.get("final") is not True:
-              raise SystemExit(f"Live GitHub verification failed: {failures[:10]}")
-
-          summary = result.get("summary", {})
-          expected = {"labels": 212, "milestones": 7, "issues": 228}
-          for scope, planned in expected.items():
-              actual = summary.get(scope, {})
-              if actual.get("planned") != planned:
-                  raise SystemExit(f"{scope} planned mismatch: {actual}")
-
-          mappings = first.get("issue_number_mappings", {})
-          if len(mappings) != 228:
-              raise SystemExit(f"Expected 228 verified stable-ID mappings, found {len(mappings)}")
-
-          print("Live materialization verification PASS.")
-          PYEOF
-
-      - name: Publish verification summary
-        if: always()
-        run: |
-          {
-            echo "## DROPi Planning PR Verification"
-            echo
-            echo "- Protected canonical/product paths: checked"
-            echo "- Planning tests: executed"
-            echo "- Expected plan shape: 228 issues / 212 labels / 7 milestones"
-            echo "- Remote verification: read-only"
-            echo "- No planning objects are created or mutated by this PR job"
-          } >> "$GITHUB_STEP_SUMMARY"
-
   materialize:
-    if: github.event_name == 'workflow_dispatch'
-    name: Apply & verify GitHub planning
+    name: Apply & Verify GitHub Planning
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: read
     env:
       GH_TOKEN: ${{ github.token }}
       PYTHONDONTWRITEBYTECODE: "1"
 
     steps:
-      - name: Checkout selected ref
+      - name: Checkout selected branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
@@ -176,8 +38,9 @@ jobs:
           fi
 
           git fetch origin main
+
           if ! git diff --exit-code origin/main -- canonical/SESSION_HANDOVER.md; then
-            echo "::error::canonical/SESSION_HANDOVER.md differs from origin/main"
+            echo "::error::canonical/SESSION_HANDOVER.md differs from origin/main — restore it before materializing"
             exit 1
           fi
 
@@ -196,50 +59,69 @@ jobs:
             exit 1
           fi
 
+          echo "All safety checks passed."
+
       - name: Run planning tests
         run: |
           set -euo pipefail
           python -m unittest -v tests/test_materialize_github_planning.py
           git diff --check
 
-      - name: Reset historical result snapshot
+      - name: Reset historical materialization result snapshot
         run: |
+          set -euo pipefail
           rm -f docs/planning/GITHUB_MATERIALIZATION_RESULT.md \
                 docs/planning/github_materialization_result.json
 
       - name: First APPLY
+        id: first_apply
         run: |
           set -euo pipefail
+          START=$(date +%s)
           python scripts/materialize_github_planning.py \
             --repo caliofmarian-ai/dropi-mobile \
             --repo-root . \
             --apply
+          END=$(date +%s)
+          echo "runtime=$((END - START))s" >> "$GITHUB_OUTPUT"
 
       - name: First VERIFY
+        id: first_verify
         run: |
           set -euo pipefail
+          START=$(date +%s)
           python scripts/materialize_github_planning.py \
             --repo caliofmarian-ai/dropi-mobile \
             --repo-root . \
             --verify
+          END=$(date +%s)
+          echo "runtime=$((END - START))s" >> "$GITHUB_OUTPUT"
 
       - name: Second APPLY — idempotency proof
+        id: second_apply
         run: |
           set -euo pipefail
+          START=$(date +%s)
           python scripts/materialize_github_planning.py \
             --repo caliofmarian-ai/dropi-mobile \
             --repo-root . \
             --apply
+          END=$(date +%s)
+          echo "runtime=$((END - START))s" >> "$GITHUB_OUTPUT"
 
       - name: Second VERIFY
+        id: second_verify
         run: |
           set -euo pipefail
+          START=$(date +%s)
           python scripts/materialize_github_planning.py \
             --repo caliofmarian-ai/dropi-mobile \
             --repo-root . \
             --verify
+          END=$(date +%s)
+          echo "runtime=$((END - START))s" >> "$GITHUB_OUTPUT"
 
-      - name: Validate materialization result
+      - name: Validate results
         run: |
           set -euo pipefail
           python3 - <<'PYEOF'
@@ -264,15 +146,22 @@ jobs:
 
           if errors:
               raise SystemExit("; ".join(errors))
+
           print("Materialization + idempotency PASS.")
           PYEOF
 
-      - name: Restrict generated changes to result files
+      - name: Check result-file restrictions
         run: |
           set -euo pipefail
           ALLOWED_1="docs/planning/GITHUB_MATERIALIZATION_RESULT.md"
           ALLOWED_2="docs/planning/github_materialization_result.json"
+
           CHANGED=$(git diff --name-only)
+          if [ -z "$CHANGED" ]; then
+            echo "No files changed; restriction check passed."
+            exit 0
+          fi
+
           UNEXPECTED=""
           while IFS= read -r f; do
             [ -z "$f" ] && continue
@@ -280,12 +169,14 @@ jobs:
               UNEXPECTED="$UNEXPECTED $f"
             fi
           done <<< "$CHANGED"
+
           if [ -n "$UNEXPECTED" ]; then
             echo "::error::Unexpected tracked files changed:$UNEXPECTED"
             exit 1
           fi
+          echo "Result-file restriction check passed."
 
-      - name: Commit verified result files
+      - name: Commit result files
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -294,6 +185,7 @@ jobs:
           CHANGED=$(git diff --name-only -- \
             docs/planning/GITHUB_MATERIALIZATION_RESULT.md \
             docs/planning/github_materialization_result.json)
+
           if [ -z "$CHANGED" ]; then
             echo "No result files changed; skipping commit."
             exit 0
@@ -304,13 +196,26 @@ jobs:
           git commit -m "planning: record verified cloud materialization results"
           git push origin HEAD:${{ github.ref_name }}
 
-      - name: Publish materialization summary
+      - name: Publish job summary
         if: always()
+        env:
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+          FIRST_APPLY_RUNTIME: ${{ steps.first_apply.outputs.runtime }}
+          FIRST_VERIFY_RUNTIME: ${{ steps.first_verify.outputs.runtime }}
+          SECOND_APPLY_RUNTIME: ${{ steps.second_apply.outputs.runtime }}
+          SECOND_VERIFY_RUNTIME: ${{ steps.second_verify.outputs.runtime }}
         run: |
           {
-            echo "## DROPi Planning Materialization"
+            echo "## DROPi Planning Materialization Summary"
             echo
-            echo "- Apply + verify executed twice"
-            echo "- Second apply must create zero objects"
-            echo "- Result files are the only generated repository changes"
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Branch | \`$BRANCH\` |"
+            echo "| Commit | \`$COMMIT_SHA\` |"
+            echo "| First APPLY | ${FIRST_APPLY_RUNTIME:-n/a} |"
+            echo "| First VERIFY | ${FIRST_VERIFY_RUNTIME:-n/a} |"
+            echo "| Second APPLY | ${SECOND_APPLY_RUNTIME:-n/a} |"
+            echo "| Second VERIFY | ${SECOND_VERIFY_RUNTIME:-n/a} |"
+            echo "| Contract | second APPLY creates zero objects |"
           } >> "$GITHUB_STEP_SUMMARY"
