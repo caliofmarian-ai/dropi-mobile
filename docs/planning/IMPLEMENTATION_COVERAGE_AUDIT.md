@@ -1,260 +1,296 @@
 # DROPi — Implementation Coverage Audit
 
-> **Status:** PLANNING CANONICAL — DO NOT DELETE  
-> **Generated:** 2026-08-02  
-> **Purpose:** Classify every canonical capability against current implementation state  
-> **Sources:** See CANONICAL_PLANNING_SOURCE_REGISTER.md for authority details
+> **Status:** REPOSITORY-GROUNDED RECONCILIATION  
+> **Initial audit:** 2026-08-02  
+> **Reconciled against `main`:** 2026-09-01  
+> **Repository baseline:** `8fa0bfac20e689824e12850afbc274268d34594e`  
+> **Purpose:** distinguish what exists now, what still requires verification, and what is genuinely missing before implementation continues
 
 ---
 
-## Classification Schema
+## Scope and Interpretation
 
-| Status Code | Meaning |
-|-------------|---------|
-| `implemented_and_verified` | Code exists, tests pass, validated against canon |
-| `implemented_not_verified` | Code exists, no canonical test validation |
-| `partially_implemented` | Stub/UI exists, no real backend/data |
-| `specified_not_implemented` | Canon specifies clearly, not in codebase |
-| `planned_future` | Canon mentions but marks as future/phase X |
-| `blocked_by_owner_decision` | Cannot implement until owner decides |
-| `blocked_by_canonical_conflict` | Sources conflict — see CANONICAL_PLANNING_CONFLICTS.md |
-| `historical_only` | In canon for context, not a software deliverable |
-| `obsolete_or_superseded` | Superseded by later canonical version |
-| `unknown_requires_audit` | Cannot determine without deeper investigation |
+The initial coverage document compared the canonical corpus with repository state as understood on 2026-08-02. Several capabilities were subsequently found to exist already in `main`, while some older audit statements remained unchanged. This reconciliation corrects those statements.
 
----
+The machine-readable planning graph remains the authority for stable issue IDs, labels, milestones and dependencies. This document is an implementation-state audit, not a replacement for `github_materialization_plan.json`.
 
-## Layer 2: Application Core
+### Status vocabulary
 
-### 2.1 Authentication & Accounts
-
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| Email/password registration | `implemented_and_verified` | `server/auth-router.ts`, tests pass | EPIC-001 |
-| JWT access + refresh tokens | `implemented_and_verified` | `server/auth-router.ts`, jose v6 | EPIC-001 |
-| Email verification flow | `implemented_and_verified` | `app/verify-email.tsx`, server endpoint | EPIC-001 |
-| Password reset via email | `implemented_and_verified` | `app/forgot-password.tsx`, SMTP | EPIC-001 |
-| RBAC middleware | `implemented_not_verified` | `server/audit-middleware.ts` exists | EPIC-001 |
-| SecureStore token persistence | `partially_implemented` | Expo SecureStore used | EPIC-001 |
-| Account roles (dropiRole enum) | `implemented_not_verified` | DB schema has roles | EPIC-001 |
-| Phantom mode (admin → any account) | `partially_implemented` | UI exists, server route partial | EPIC-001 |
-| 29 test accounts (one per role) | `specified_not_implemented` | No seed for 29 roles | EPIC-001 |
-| AI agent account pairing | `specified_not_implemented` | AI agent accounts not created | EPIC-013 |
-| Apply for role flow | `partially_implemented` | `app/apply-role.tsx` exists | EPIC-001 |
-| Delivery partner unverified status | `partially_implemented` | `isVerified` field exists; guard missing | EPIC-001 |
-| Guard on mission endpoints | `specified_not_implemented` | Not implemented — sprint 6A | EPIC-001 |
-| Admin approval gate for ops roles | `partially_implemented` | `roleApplications` table exists; UI partial | EPIC-007 |
-| Company accounts | `specified_not_implemented` | No company account type | EPIC-001 |
-| Partner accounts | `specified_not_implemented` | No partner account type | EPIC-001 |
-
-### 2.2 Data Persistence & Sync
-
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| Database schema — 26 tables | `implemented_and_verified` | `drizzle/meta/0013_snapshot.json` | EPIC-002 |
-| Drizzle ORM migrations (0000-0013) | `implemented_and_verified` | All migrations verified | EPIC-002 |
-| Production migration runner | `implemented_and_verified` | `scripts/migrate.ts`, Railway startup | EPIC-002 |
-| tRPC routers for core entities | `partially_implemented` | Multiple routers exist | EPIC-002 |
-| Replace mock data with real DB | `specified_not_implemented` | All dashboards use mock data | EPIC-002 |
-| Offline-first with AsyncStorage | `specified_not_implemented` | Sprint 8+ | EPIC-002 |
-| TanStack Query integration | `partially_implemented` | Setup exists | EPIC-002 |
-| Seed data (products, merchants) | `specified_not_implemented` | No seed scripts | EPIC-002 |
-
-### 2.3 Order Management
-
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| Order creation flow | `partially_implemented` | UI exists, mock data | EPIC-003 |
-| Order status machine | `partially_implemented` | `b2b-router.ts` exists | EPIC-003 |
-| Order history | `partially_implemented` | UI exists, mock data | EPIC-003 |
-| C1 order flow (customer) | `partially_implemented` | UI only | EPIC-003 |
-| C2 contracted order flow | `specified_not_implemented` | No COS-specific flow | EPIC-003 |
-| C3 emergency order handling | `specified_not_implemented` | EOC flows not implemented | EPIC-003 |
-| Delivery selection in order | `specified_not_implemented` | Delivery mode selection not real | EPIC-003 |
-| Order audit trail | `specified_not_implemented` | L6 audit on orders incomplete | EPIC-010 |
-
-### 2.4 Marketplace C1
-
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| Product catalog UI | `partially_implemented` | UI functional, mock data | EPIC-004 |
-| Category system | `partially_implemented` | UI exists, mock data | EPIC-004 |
-| Merchant product listing | `partially_implemented` | UI exists, mock data | EPIC-004 |
-| Zonal product visibility | `specified_not_implemented` | No zone filtering | EPIC-004 |
-| P2P listings (1-3 max) | `specified_not_implemented` | No P2P listing type | EPIC-004 |
-| Checkout flow | `partially_implemented` | UI exists, no real payment | EPIC-004 |
-| Delivery eligibility badges | `partially_implemented` | Badge UI exists | EPIC-004 |
-| Separate marketplace website | `blocked_by_canonical_conflict` | See CONFLICT-001 | EPIC-027 |
-
-### 2.5 COS — C2 Channel
-
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| C2 channel UI (29 dashboards) | `partially_implemented` | UI exists | EPIC-005 |
-| Contracted operations management | `specified_not_implemented` | No real contract management | EPIC-005 |
-| SLA monitoring | `specified_not_implemented` | Not implemented | EPIC-005 |
-| Logistics optimization | `specified_not_implemented` | Not implemented | EPIC-005 |
-
-### 2.6 EOC — C3 Channel
-
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| C3 channel UI | `partially_implemented` | UI exists | EPIC-006 |
-| Emergency declaration | `specified_not_implemented` | Not implemented | EPIC-006 |
-| Rapid dispatch (<3 min) | `specified_not_implemented` | Not implemented | EPIC-006 |
-| Resource allocation | `specified_not_implemented` | Not implemented | EPIC-006 |
-| OVERRIDE capability | `specified_not_implemented` | Not implemented | EPIC-006 |
-
-### 2.7 Admin Operations
-
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| Admin channel UI | `partially_implemented` | UI exists | EPIC-007 |
-| Phantom mode login | `partially_implemented` | UI exists, partial server | EPIC-007 |
-| Verification panel | `partially_implemented` | `app/admin/` exists | EPIC-007 |
-| Role approval flow | `partially_implemented` | Partial; missing guard | EPIC-007 |
-| System configuration | `specified_not_implemented` | Not implemented | EPIC-007 |
-
-### 2.8 Payments & Wallet
-
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| Wallet real balance | `specified_not_implemented` | No wallet implementation | EPIC-008 |
-| Promotional balance | `specified_not_implemented` | Not implemented | EPIC-008 |
-| Payment provider integration | `specified_not_implemented` | Not implemented | EPIC-008 |
-| Refund flows | `specified_not_implemented` | Not implemented | EPIC-008 |
-| Commission calculation | `specified_not_implemented` | Not implemented | EPIC-008 |
-| Withdrawal | `specified_not_implemented` | Not implemented | EPIC-008 |
-
-### 2.9 Real-Time & Notifications
-
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| Push notifications | `partially_implemented` | `server/push-notifications.ts` exists; not wired | EPIC-009 |
-| WebSocket live tracking | `partially_implemented` | `server/live-tracking.ts`; Sprint 7 | EPIC-009 |
-| In-app notifications | `partially_implemented` | `notification-router.ts` exists | EPIC-009 |
-| Order status push | `specified_not_implemented` | Sprint 6B | EPIC-009 |
+| Status | Meaning |
+|---|---|
+| `implemented_verified` | Implementation exists and current evidence/tests are sufficient for the stated capability |
+| `implemented_needs_regression` | Implementation exists, but targeted regression/canonical verification is still missing |
+| `partial` | A meaningful portion exists but acceptance is not complete |
+| `missing` | Required behavior was not found in current `main` |
+| `security_gap` | Capability exists but exposes a material authorization/data-integrity problem |
+| `owner_or_canon_gate` | Scope/activation remains subject to an explicit owner/canonical decision |
+| `future` | Correctly scheduled for a later milestone and must not be pulled forward casually |
 
 ---
 
-## Layer 6: Audit Core
+# Executive Findings
 
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| Audit log table | `partially_implemented` | Table in schema | EPIC-010 |
-| Complete event logging | `specified_not_implemented` | Incomplete coverage | EPIC-010 |
-| GDPR consent management | `specified_not_implemented` | Not implemented | EPIC-011 |
-| Data retention policies | `specified_not_implemented` | Not implemented | EPIC-011 |
-| Data deletion (right to erasure) | `specified_not_implemented` | Not implemented | EPIC-011 |
-| Operational traceability | `specified_not_implemented` | Partial | EPIC-012 |
-| Proof of delivery logging | `specified_not_implemented` | Not implemented | EPIC-012 |
-| Incident audit trail | `specified_not_implemented` | Not implemented | EPIC-012 |
+1. **Sprint 6A security work is substantially implemented already.** Delivery-partner unverified state, mission-operation guards and admin role approval flows exist in code. The planning issues describing them as missing must be verified and reconciled rather than rewritten.
+2. **The core C1 dashboards are no longer all mock-backed.** Customer, Merchant and Delivery Partner dashboards consume tRPC-backed operational reads, but several additional role dashboards still contain fixed/demo metrics.
+3. **The WebSocket tracking server exists and is mounted.** The open planning task that describes it as absent is stale. However, its connection identity/authorization path requires hardening.
+4. **Order/mission push notification wiring remains incomplete.** Push infrastructure exists, but the required status-transition hooks still need implementation/verification.
+5. **AI framework scaffolding exists.** An agent router, orchestrator-facing task APIs and agent state/report persistence are present. This does not mean the complete 29-agent production system or activation criteria are complete.
+6. **Several high-risk product shortcuts remain in user-facing code**, including hardcoded tracking IDs in Delivery Partner dashboard actions.
+7. **Biometric authentication, localization EN/RO/TL and the governed offline-first sync strategy remain incomplete/not found.** Their timing is also connected to owner decisions.
 
 ---
 
-## Layer 4: Logic Core (AI/DSS)
+# M1 — Application Core Foundation
 
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| AI agent framework | `specified_not_implemented` | Canon defined, no code | EPIC-013 |
-| C1 agents (9 agents) | `specified_not_implemented` | Canon defined only | EPIC-014 |
-| C2 agents (8 agents) | `specified_not_implemented` | Canon defined only | EPIC-015 |
-| C3 agents (6 agents) | `specified_not_implemented` | Canon defined only | EPIC-016 |
-| Admin agents (6+5) | `specified_not_implemented` | Canon defined only | EPIC-017 |
-| 1-month simulation | `specified_not_implemented` | Not implemented | EPIC-013 |
-| Eligibility engine | `specified_not_implemented` | Badge UI exists, no real engine | EPIC-018 |
-| Route optimization | `specified_not_implemented` | Not implemented | EPIC-018 |
+## 2.1 Authentication & Accounts
 
----
+| Capability | Current status | Repository evidence / finding | Planning action |
+|---|---|---|---|
+| Email/password registration | `implemented_verified` | `server/auth-router.ts` registration path exists; password hashing/auth infrastructure is active | Preserve; regression only when auth changes |
+| Email verification | `implemented_verified` | canonical tRPC/auth-context path exists; prior raw-fetch/AsyncStorage split was remediated | Preserve |
+| Password reset | `implemented_needs_regression` | reset flow and email infrastructure exist | Keep targeted auth regression coverage |
+| Protected tRPC auth | `implemented_verified` | `server/_core/trpc.ts` requires `ctx.user` for `protectedProcedure` | Preserve |
+| Admin authorization | `implemented_needs_regression` | `adminProcedure` permits legacy admin or `system_administrator`; needs role-boundary regression | Add RBAC negative tests |
+| Audit middleware on protected/admin tRPC | `implemented_needs_regression` | protected/admin procedures attach async audit logging | M2 must verify complete event coverage |
+| Delivery Partner starts unverified | `implemented_needs_regression` | auth registration explicitly sets `isVerified=false` for delivery partners; UI banner exists | **IMPL-001 #158: verify then reconcile/close** |
+| Mission operation guard | `implemented_needs_regression` | guards found on `b2bDelivery.pilotUpdateStatus`, `pilotSelection.updateAvailability`, `pilotSelection.updatePosition`; mission UI also guards acceptance | **IMPL-002 #159: verify then reconcile/close** |
+| Operational-role approval gate | `implemented_needs_regression` | registration creates pending role application / inactive state for approval-required roles | **IMPL-003 #160: verify then reconcile/close** |
+| Admin approvals UI | `implemented_needs_regression` | `app/admin/approvals.tsx` consumes role-application review APIs | **IMPL-004 #161: verify then reconcile/close** |
+| Exact token/session refresh contract | `partial` | authenticated token path exists, but current implementation must be re-audited against the exact active session invalidation/refresh requirements; do not overclaim a canonical refresh-token model | Keep in auth certification scope |
+| 29 role test accounts | `partial` | role catalog exists; full deterministic seed/certification requires verification against planned issue | Execute governed seed issue rather than assuming absence/completion |
+| Phantom mode | `partial` | UI/backend pieces exist historically; complete takeover/restore/audit safety needs verification | Keep planned batch |
+| Company/partner account semantics | `partial_or_missing` | no basis to certify complete canonical company/partner lifecycle | Keep planned work |
 
-## Layer 3: Physical Core (DronePort)
+### Authentication invariant risk
 
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| DronePort registry (digital) | `partially_implemented` | DronePort UI module exists | EPIC-019 |
-| DronePort status monitoring | `partially_implemented` | UI only | EPIC-019 |
-| DronePort digital twin | `specified_not_implemented` | Not implemented | EPIC-019 |
-| Multimodal transfer logic | `specified_not_implemented` | Not implemented | EPIC-020 |
-| Staged delivery | `specified_not_implemented` | Not implemented | EPIC-020 |
-| Battery management | `specified_not_implemented` | Not implemented | EPIC-021 |
-| Safety points registry | `specified_not_implemented` | Not implemented | EPIC-022 |
-| Emergency landing zones | `specified_not_implemented` | Not implemented | EPIC-022 |
+The schema-level `isVerified` default is `true`, while delivery-partner registration correctly overrides it to `false`. That creates a latent bypass risk if any future user-creation path inserts a delivery partner without explicitly setting verification state. The invariant should be enforced centrally or covered by tests proving every creation path is safe.
 
 ---
 
-## Layer 5: Operational Core
+## 2.2 Data Persistence & Sync
 
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| Delivery execution engine | `specified_not_implemented` | Mission UI exists (mock) | EPIC-023 |
-| STOP mechanism | `specified_not_implemented` | STOP button UI exists | EPIC-024 |
-| FALLBACK triggers | `specified_not_implemented` | FALLBACK button UI exists | EPIC-024 |
-| Weather integration | `specified_not_implemented` | Not implemented | EPIC-025 |
-| GPS geofencing | `specified_not_implemented` | Map UI exists | EPIC-025 |
-| No-crowds operational rules | `specified_not_implemented` | Not implemented | EPIC-025 |
-| Drone fleet tracking | `specified_not_implemented` | Not implemented | EPIC-026 |
-| Ground fleet management | `specified_not_implemented` | Not implemented | EPIC-026 |
-| Maintenance scheduling | `specified_not_implemented` | Not implemented | EPIC-026 |
-| Telemetry data | `specified_not_implemented` | Not implemented | EPIC-026 |
+| Capability | Current status | Evidence / finding | Planning action |
+|---|---|---|---|
+| Drizzle schema/migrations | `implemented_verified` | schema and migrations exist; canonical recovery/audit work preserved them | Preserve migration discipline |
+| Production migration runner | `implemented_verified` | build/start toolchain includes migration/DB validation support | Preserve |
+| Core tRPC live reads | `partial` | Customer/Merchant/Pilot operational dashboards consume `operations` router | Continue domain-by-domain replacement |
+| Replace remaining fixed/demo dashboards | `partial` | Support/Analyst and other role surfaces still contain hardcoded metrics/tickets; C1 core is already live-backed | **IMPL-010 #167 remains active** |
+| TanStack Query/tRPC cache path | `implemented_needs_regression` | React Query/tRPC are integrated in live screens | Verify invalidation after mutations |
+| Offline-first transaction sync | `missing` / `owner_or_canon_gate` | AsyncStorage dependency is not proof of governed offline queue/conflict resolution | OWNER-003 #280 + planned implementation |
+| Seed/reference operational data | `partial` | repository contains real DB pathways but not all domains have governed production seeds | Continue per planned batch |
 
----
+### Hardcoded user-facing data defect
 
-## Layer 1: Public Front
-
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| Marketing website | `specified_not_implemented` | Not implemented | EPIC-027 |
-| Investor pitch assets | `historical_only` | In 04.zip (docs only) | EPIC-027 |
-| Public brand presence | `specified_not_implemented` | Not implemented | EPIC-027 |
+`app/(tabs)/index.tsx` currently exposes Delivery Partner quick actions with literal `deliveryId='1'` and `pilotId='1'`. These are not acceptable production identifiers. Tracking/broadcast actions must derive identity and delivery context from authenticated/current mission state or be removed until such context exists.
 
 ---
 
-## Transversal Modules
+## 2.3 Order & Delivery Operations
 
-| Capability | Status | Evidence | Epic |
-|------------|--------|----------|------|
-| Security module | `partially_implemented` | Auth security done; broader incomplete | EPIC-028 |
-| Biometric authentication | `specified_not_implemented` | Sprint 7 | EPIC-028 |
-| Testing infrastructure | `partially_implemented` | Tests exist for auth | EPIC-029 |
-| QA agent validation | `specified_not_implemented` | Not implemented | EPIC-029 |
-| Release discipline | `implemented_not_verified` | Process exists | EPIC-030 |
-| Rollback procedures | `implemented_not_verified` | Railway rollback possible | EPIC-030 |
-| Railway deployment | `implemented_and_verified` | Live and working | EPIC-030 |
-| Android distribution | `specified_not_implemented` | EAS configured, not published | EPIC-030 |
-| Localization (EN/RO/TL) | `specified_not_implemented` | Sprint 7 | Various |
+| Capability | Current status | Evidence / finding | Planning action |
+|---|---|---|---|
+| Customer order reads | `implemented_needs_regression` | `operations.myOrders` backs customer dashboard | Verify ownership isolation and status consistency |
+| Merchant order queue reads | `implemented_needs_regression` | merchant dashboard uses live tRPC order reads | Verify merchant ownership/isolation |
+| Pilot mission reads | `implemented_needs_regression` | pilot dashboard/mission detail use live tRPC/b2b paths | Verify verification + pilot identity boundaries |
+| Pilot forward-only status updates | `implemented_needs_regression` | `b2bDelivery.pilotUpdateStatus` exists with identity/transition guard and downstream hooks | Add explicit transition matrix tests in TEST_REGISTRY |
+| Complete C1 lifecycle | `partial` | major runtime pieces exist, but full acceptance, notification and audit coverage is not certified | Keep M1 integration tests |
+| C2 contracted operations | `partial` | substantial routers/UI exist, but no basis for complete canonical certification | Continue planned C2 batches |
+| C3 emergency operations | `partial` | role/UI foundations exist; full declaration/dispatch/override acceptance not certified | Continue planned C3 batches |
+| Order audit trail | `partial` | tRPC audit middleware exists but end-to-end order-event completeness is an M2 concern | M2 verification |
 
----
-
-## Summary Counts
-
-| Status | Count |
-|--------|-------|
-| implemented_and_verified | 9 |
-| implemented_not_verified | 5 |
-| partially_implemented | 33 |
-| specified_not_implemented | 64 |
-| planned_future | 4 |
-| blocked_by_owner_decision | 1 |
-| blocked_by_canonical_conflict | 1 |
-| historical_only | 4 |
-| obsolete_or_superseded | 0 |
-| unknown_requires_audit | 1 |
-| **TOTAL** | **122** |
+Some operational DTOs still carry placeholder values such as zero distance/estimated-time in paths where real calculations are not yet available. Those fields must not be presented as authoritative operational truth.
 
 ---
 
-## Immediate Action Required (Sprint 6A — Critical)
+## 2.4 Marketplace C1
 
-Based on AUDIT_TRACKING.md and BLUEPRINT_SPRINT_ROADMAP.md:
+**Canonical scope remains conflicted.** Repository metadata describes DROPi as the operational core and explicitly says it is not a marketplace, while historical implementation contains marketplace functionality inside the mobile app.
 
-| # | Capability | Status | Issue |
-|---|------------|--------|-------|
-| 1 | Delivery Partner unverified status display | `partially_implemented` | IMPL-001 |
-| 2 | Guard on mission endpoints | `specified_not_implemented` | IMPL-002 |
-| 3 | Admin approval gate for ops roles | `partially_implemented` | IMPL-003 |
-| 4 | Admin approval panel UI | `partially_implemented` | IMPL-004 |
-| 5 | QA-debugger validation Sprint 1-2 | `specified_not_implemented` | IMPL-005 |
+| Capability | Current status | Planning action |
+|---|---|---|
+| Existing mobile marketplace screens/backend | `partial` | Do not delete blindly; inventory current behavior |
+| Final marketplace ownership/location | `owner_or_canon_gate` | **CANON-RES-001 #283** must resolve separate web marketplace vs integrated app responsibility |
+| Product/catalog real-data completion | `partial` | Continue only within non-conflicted safe scope |
+| Checkout/payment boundary | `partial` | Coordinate with Payments epic and marketplace resolution |
 
 ---
 
-*This audit was generated by inspecting all canonical sources and comparing against the current codebase state.*
+## 2.5 C2 / 2.6 C3 / 2.7 Admin Operations
+
+The initial audit reduced many of these areas to “UI only.” Current `main` contains substantially more server-side infrastructure than that statement implies. They are still not certified complete.
+
+### C2
+- role-specific dashboards and backend modules exist;
+- pilot/delivery operational APIs exist;
+- contracted operations, SLA and complete canonical boundary testing remain incomplete.
+
+### C3
+- role/channel foundations exist;
+- emergency-domain completeness, override authority, incident command and rapid-dispatch acceptance require dedicated audit/tests.
+
+### Admin
+- admin router/procedures exist;
+- role application review/approval/rejection is implemented;
+- verification administration exists;
+- agent administration/orchestration APIs exist;
+- system-wide configuration/permission audit remains necessary.
+
+---
+
+## 2.8 Payments & Wallet
+
+No current evidence supports declaring the complete canonical wallet/payment system finished. Treat it as `partial/missing by capability`, not as a monolithic absence.
+
+Required certification areas include:
+- real vs promotional balance separation;
+- provider/payment intent contract;
+- commissions;
+- refunds;
+- withdrawals;
+- audit/reconciliation and failure semantics.
+
+Continue through EPIC-008 planned batches after upstream order/marketplace boundaries are stable.
+
+---
+
+## 2.9 Real-Time & Notifications
+
+| Capability | Current status | Evidence / finding | Planning action |
+|---|---|---|---|
+| Push notification infrastructure | `implemented_needs_regression` | `server/push-notifications.ts` and role/verification notification use exist | Preserve infrastructure |
+| In-app notifications | `implemented_needs_regression` | notification router and notification center/preferences exist | Verify preferences + auth isolation |
+| Order/mission status push | `missing_or_incomplete` | no complete evidence that every required `updateStatus`/`pilotUpdateStatus` transition notifies intended customer/merchant | **IMPL-034 #191 remains active** |
+| WebSocket server | `implemented_needs_regression` | `server/live-tracking.ts` exists; `_core/index.ts` mounts it | Reclassify **IMPL-033 #190** from “missing server” to hardening/verification |
+| WebSocket identity/authorization | `security_gap` | connection accepts role/pilotId/deliveryId from query parameters without an evident session/JWT ownership gate in the tracking connection path | **P0 hardening before production tracking** |
+| Zone 0 transport policy | `owner_or_canon_gate` | WebSocket exists, but long-term WebSocket vs polling policy is unresolved | OWNER-002 #279 |
+
+---
+
+# M2 — Audit Core
+
+Current audit infrastructure is better than the old “table only” description:
+
+- tRPC protected/admin procedures invoke audit middleware;
+- audit storage/router infrastructure exists;
+- role approval and other sensitive operations create operational evidence.
+
+However, **complete event coverage is not certified**. Non-tRPC paths, WebSocket events, high-risk state transitions, proof-of-delivery, incidents, privacy consent, retention and erasure remain M2 work.
+
+Status: **partial — M2 remains required**.
+
+---
+
+# M3 — Logic Core / AI-DSS
+
+The old statement “AI framework: no code” is incorrect.
+
+Current repository evidence includes:
+- `server/agent-router.ts`;
+- orchestrator dispatch APIs;
+- task queue operations;
+- agent-state reads;
+- agent-report persistence/read APIs;
+- schema support for agent tasks/state/reports;
+- role enumeration across 29 DROPi roles.
+
+This is **framework/scaffolding**, not proof that all 29 agents are implemented, validated, simulated for one month, or authorized for autonomous production decisions.
+
+| Capability | Status |
+|---|---|
+| Base orchestrator/API framework | `partial` |
+| Persistent task/state/report model | `partial` |
+| Complete C1/C2/C3/Admin agent behaviors | `future/partial by role` |
+| Full simulation harness and 1-month acceptance | `future` |
+| Autonomous activation sequence | `owner_or_canon_gate` — OWNER-005 #282 |
+| Eligibility engine / route optimizer | `partial_or_future` |
+
+Do not move M3 ahead of M1/M2 closure simply because scaffolding already exists.
+
+---
+
+# M4–M6
+
+These milestones remain predominantly future/planned and should be audited when their dependency gates are satisfied.
+
+Important exceptions:
+- some DronePort/fleet/tracking UI/server scaffolding exists early;
+- early scaffolding must not be interpreted as operational certification;
+- Zone 0 drone regulatory scope remains gated by **CANON-RES-003 #285**;
+- client-presence enforcement details remain gated by **CANON-RES-002 #284**;
+- public Marketplace responsibility remains gated by **CANON-RES-001 #283**.
+
+---
+
+# Transversal Security Audit — Current P0/P1 Findings
+
+## P0 — must be addressed before production trust
+
+1. **WebSocket authentication/authorization**
+   - Do not trust `role`, `pilotId` or `deliveryId` supplied by query string as identity.
+   - Authenticate the socket session/token server-side.
+   - Derive user/pilot identity from authenticated state.
+   - Authorize subscriber access to the specific delivery.
+   - Reject unauthenticated/unauthorized tracking connections.
+
+2. **Remove hardcoded tracking identities**
+   - Delete/replace `deliveryId='1'` and `pilotId='1'` user-facing navigation shortcuts.
+   - Use current mission context only.
+
+3. **Verification invariant enforcement**
+   - Current delivery-partner registration correctly sets unverified state, but schema default `isVerified=true` can become a bypass if another creation path omits explicit state.
+   - Enforce the role-dependent invariant centrally and add regression tests.
+
+## P1 — next implementation/certification wave
+
+4. Complete remaining live-data migration under **IMPL-010 #167**.
+5. Implement/certify order/mission status push under **IMPL-034 #191**.
+6. Add negative RBAC/ownership tests for order, mission, admin and tracking surfaces.
+7. Execute the Sprint 1–2 QA/canonical compliance verification rather than relying on historical todo checkmarks.
+8. Audit exact token refresh/session invalidation behavior against active canonical requirements.
+
+---
+
+# Still Missing / Not Found in Current Main
+
+| Capability | Status / gate |
+|---|---|
+| Biometric authentication | not found; OWNER-001 #278 governs timing |
+| Full offline-first transactional sync | not found; OWNER-003 #280 governs strategy |
+| EN/RO/TL localization selector/framework | not found in current code search |
+| Complete remaining hardcoded-dashboard replacement | partial; IMPL-010 #167 |
+| Complete order-status push wiring | incomplete; IMPL-034 #191 |
+| Certified WebSocket authorization | missing; existing transport must be hardened |
+| Complete M2 privacy/retention/erasure package | future/incomplete |
+| Complete 29-agent production behavior + simulation acceptance | future/incomplete |
+
+---
+
+# Planning Reconciliation Required
+
+Before starting a large new implementation batch, GitHub status should be reconciled with code evidence:
+
+| Planning item | Repository audit result | Next action |
+|---|---|---|
+| IMPL-001 #158 | implementation exists | targeted regression → mark done if PASS |
+| IMPL-002 #159 | implementation exists | endpoint/security regression → mark done if PASS |
+| IMPL-003 #160 | implementation exists | registration/approval tests → mark done if PASS |
+| IMPL-004 #161 | implementation exists | admin UI/API journey tests → mark done if PASS |
+| IMPL-010 #167 | partially implemented | continue remaining live-data migration |
+| IMPL-033 #190 | server exists but security gap remains | redefine execution as auth/authorization hardening + verification |
+| IMPL-034 #191 | infrastructure exists, transition wiring incomplete | implement required push hooks + tests |
+
+---
+
+# Current Continuation Pointer
+
+1. **Certify and merge planning PR #60 only after read-only live GitHub verification passes.**
+2. **Verify/reconcile IMPL-001..IMPL-004 instead of duplicating their code.**
+3. **Address the P0 tracking/verification security findings.**
+4. **Continue IMPL-010 (#167) and IMPL-034 (#191).**
+5. **Proceed through M1 dependency order, then M2.**
+
+This is the repository-grounded continuation point as of 2026-09-01.
+
+---
+
+*No product or canonical source was modified by this audit reconciliation. Findings describe `main` and map them back to the already-materialized GitHub planning graph.*
