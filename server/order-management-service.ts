@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import {
   auditLogs,
@@ -11,7 +12,6 @@ import { createInAppNotification } from "./create-notification";
 import { getDb } from "./db";
 import {
   assertOrderTransitionAuthorized,
-  resolveOrderActorKind,
   type OrderActor,
   type OrderStatus,
 } from "./order-state-machine";
@@ -110,7 +110,7 @@ export async function createMarketplaceOrder(input: {
     };
   });
 
-  const orderUid = crypto.randomUUID();
+  const orderUid = randomUUID();
   const inserted = await db
     .insert(orders)
     .values({
@@ -303,4 +303,23 @@ export async function listReadyMarketplaceOrders(actor: MarketplaceOrderActor) {
   if (actor.zone) filters.push(eq(orders.zone, actor.zone));
 
   return db.select().from(orders).where(and(...filters)).orderBy(desc(orders.createdAt)).limit(100);
+}
+
+export async function listAssignedMarketplaceOrders(actor: MarketplaceOrderActor) {
+  if (actor.dropiRole !== "delivery_partner" || !actor.isVerified || !actor.isActive) return [];
+
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(orders)
+    .where(
+      and(
+        eq(orders.pilotId, actor.id),
+        inArray(orders.status, ["accepted", "in_execution", "fallback"]),
+      ),
+    )
+    .orderBy(desc(orders.updatedAt))
+    .limit(100);
 }
