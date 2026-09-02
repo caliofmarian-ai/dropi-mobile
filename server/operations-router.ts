@@ -100,6 +100,7 @@ export const operationsRouter = router({
         items: input.items,
         deliveryAddress: input.deliveryAddress,
         zone: input.zone,
+        auditSession: ctx.session,
       }),
     ),
 
@@ -117,6 +118,7 @@ export const operationsRouter = router({
         orderId: input.orderId,
         newStatus: input.newStatus,
         reason: input.reason,
+        auditSession: ctx.session,
       }),
     ),
 

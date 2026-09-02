@@ -14,7 +14,7 @@ import { trpc } from "@/lib/trpc";
 import { safeGoBack } from "@/lib/safe-back";
 
 type SeverityFilter = "all" | "info" | "warning" | "critical";
-type ChannelFilter = "all" | "C1" | "C2" | "C3" | "ADMIN";
+type ChannelFilter = "C1" | "C2" | "C3" | "ADMIN";
 
 export default function AuditLogsScreen() {
   const router = useRouter();
@@ -22,27 +22,24 @@ export default function AuditLogsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [severity, setSeverity] = useState<SeverityFilter>("all");
-  const [channel, setChannel] = useState<ChannelFilter>("all");
+  const [channel, setChannel] = useState<ChannelFilter>("C1");
   const [searchAction, setSearchAction] = useState("");
   const [showPhantomOnly, setShowPhantomOnly] = useState(false);
 
   // Build query input
-  const queryInput: any = { page, limit: 30 };
+  const queryInput: any = { page, limit: 30, channel };
   if (severity !== "all") queryInput.severity = severity;
-  if (channel !== "all") queryInput.channel = channel;
   if (searchAction.trim()) queryInput.action = searchAction.trim();
+  if (showPhantomOnly) queryInput.phantomMode = true;
 
   const logsQuery = trpc.audit.list.useQuery(queryInput);
-  const statsQuery = trpc.audit.getStats.useQuery({});
+  const statsQuery = trpc.audit.getStats.useQuery({ channel });
 
   const logs = logsQuery.data?.logs || [];
   const totalCount = logsQuery.data?.total || 0;
   const stats = statsQuery.data;
 
-  // Filter phantom mode locally if toggled
-  const displayLogs = showPhantomOnly
-    ? logs.filter((l: any) => l.isPhantomMode)
-    : logs;
+  const displayLogs = logs;
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -131,7 +128,7 @@ export default function AuditLogsScreen() {
           {/* Channel Filter */}
           <Text className="text-xs text-muted mb-1">Channel</Text>
           <View className="flex-row gap-2 mb-3">
-            {(["all", "C1", "C2", "C3", "ADMIN"] as ChannelFilter[]).map((c) => (
+            {(["C1", "C2", "C3", "ADMIN"] as ChannelFilter[]).map((c) => (
               <Pressable
                 key={c}
                 onPress={() => { setChannel(c); setPage(1); }}

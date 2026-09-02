@@ -22,6 +22,7 @@ export type SessionPayload = {
   openId: string;
   appId: string;
   name: string;
+  phantomAdminId?: number;
 };
 
 const EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
@@ -150,13 +151,14 @@ class SDKServer {
    */
   async createSessionToken(
     openId: string,
-    options: { expiresInMs?: number; name?: string } = {},
+    options: { expiresInMs?: number; name?: string; phantomAdminId?: number } = {},
   ): Promise<string> {
     return this.signSession(
       {
         openId,
         appId: ENV.appId,
         name: options.name || "",
+        phantomAdminId: options.phantomAdminId,
       },
       options,
     );
@@ -171,11 +173,14 @@ class SDKServer {
     const expirationSeconds = Math.floor((issuedAt + expiresInMs) / 1000);
     const secretKey = this.getSessionSecret();
 
-    return new SignJWT({
+    const claims: Record<string, unknown> = {
       openId: payload.openId,
       appId: payload.appId,
       name: payload.name,
-    })
+    };
+    if (payload.phantomAdminId !== undefined) claims.phantomAdminId = payload.phantomAdminId;
+
+    return new SignJWT(claims)
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
       .setExpirationTime(expirationSeconds)
       .sign(secretKey);
@@ -183,7 +188,7 @@ class SDKServer {
 
   async verifySession(
     cookieValue: string | undefined | null,
-  ): Promise<{ openId: string; appId: string; name: string } | null> {
+  ): Promise<{ openId: string; appId: string; name: string; phantomAdminId?: number } | null> {
     if (!cookieValue) {
       console.warn("[Auth] Missing session cookie");
       return null;
@@ -194,7 +199,7 @@ class SDKServer {
       const { payload } = await jwtVerify(cookieValue, secretKey, {
         algorithms: ["HS256"],
       });
-      const { openId, appId, name } = payload as Record<string, unknown>;
+      const { openId, appId, name, phantomAdminId } = payload as Record<string, unknown>;
 
       if (!isNonEmptyString(openId)) {
         // appId and name are NOT checked for non-emptiness.
@@ -207,10 +212,16 @@ class SDKServer {
         return null;
       }
 
+      if (phantomAdminId !== undefined && (!Number.isSafeInteger(phantomAdminId) || Number(phantomAdminId) <= 0)) {
+        console.warn("[Auth] Session payload has invalid phantom administrator identity");
+        return null;
+      }
+
       return {
         openId,
         appId: typeof appId === "string" ? appId : "",
         name: typeof name === "string" ? name : "",
+        ...(phantomAdminId !== undefined ? { phantomAdminId: Number(phantomAdminId) } : {}),
       };
     } catch (error) {
       console.warn("[Auth] Session verification failed", String(error));
@@ -256,6 +267,18 @@ class SDKServer {
       throw ForbiddenError("Invalid session cookie");
     }
 
+    let persistedPhantomSession: Awaited<ReturnType<typeof db.getSessionByToken>> | undefined;
+    if (session.phantomAdminId !== undefined) {
+      persistedPhantomSession = await db.getSessionByToken(sessionCookie ?? "");
+      const validPersistedPhantom =
+        persistedPhantomSession?.isPhantom === true &&
+        persistedPhantomSession.phantomAdminId === session.phantomAdminId &&
+        new Date(persistedPhantomSession.expiresAt).getTime() > Date.now();
+      if (!validPersistedPhantom) {
+        throw ForbiddenError("Invalid or expired phantom session");
+      }
+    }
+
     if (session.openId.startsWith(CRON_OPEN_ID_PREFIX)) {
       const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
       const taskUid = userInfo.taskUid ?? null;
@@ -294,6 +317,9 @@ class SDKServer {
 
     if (!user) {
       throw ForbiddenError("User not found");
+    }
+    if (persistedPhantomSession && persistedPhantomSession.userId !== user.id) {
+      throw ForbiddenError("Phantom session target does not match authenticated user");
     }
 
     await db.upsertUser({
