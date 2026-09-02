@@ -34,27 +34,14 @@ jobs:
               raise SystemExit("expected drizzle import not found")
           text = text.replace(old_import, new_import, 1)
 
-          old = '''  const orderUid = randomUUID();
-          const inserted = await db
-            .insert(orders)
-            .values({
-              orderUid,
-              customerId: input.actor.id,
-              merchantId: store.ownerId,
-              status: "initiated",
-              items: snapshotItems,
-              totalAmount: totalAmount.toFixed(2),
-              deliveryAddress: input.deliveryAddress.trim(),
-              pickupAddress: store.physicalAddress || store.name,
-              zone: requestedZone,
-              packageWeight: (totalWeightGrams / 1000).toFixed(2),
-            })
-            .$returningId();
+          start_marker = "  const orderUid = randomUUID();\n"
+          end_marker = "\n  await db.insert(auditLogs).values({"
+          start = text.find(start_marker)
+          end = text.find(end_marker, start)
+          if start < 0 or end < 0:
+              raise SystemExit("canonical order insertion boundaries not found")
 
-          const orderId = inserted[0]?.id;
-          if (!orderId) throw new Error("Order could not be created.");'''
-
-          new = '''  const orderUid = randomUUID();
+          replacement = '''  const orderUid = randomUUID();
           const orderId = await db.transaction(async (tx) => {
             // Stock consumption and order creation are one atomic unit. The conditional
             // update prevents two concurrent checkouts from selling the same final stock.
@@ -99,9 +86,7 @@ jobs:
             if (!createdOrderId) throw new Error("Order could not be created.");
             return createdOrderId;
           });'''
-          if old not in text:
-              raise SystemExit("expected order insertion block not found")
-          path.write_text(text.replace(old, new, 1))
+          path.write_text(text[:start] + replacement + text[end:])
       - name: C1 policy tests
         run: node --import tsx --test tests/p2p-policy.test.ts tests/c1-checkout-p2p-contract.test.ts tests/marketplace-review-policy.test.ts tests/order-state-machine.test.ts
       - name: TypeScript
