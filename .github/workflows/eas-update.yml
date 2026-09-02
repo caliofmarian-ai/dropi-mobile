@@ -30,7 +30,7 @@ jobs:
         run: |
           if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
             echo "❌ EROARE: EXPO_TOKEN nu este setat în GitHub Secrets"
-            echo "   → Mergi la GitHub → Settings → Secrets → Actions → adaugă EXPO_TOKEN"
+            echo "   → Mergi la https://expo.dev, creează un access token și adaugă-l ca EXPO_TOKEN în GitHub Actions Secrets"
             exit 1
           fi
           echo "✅ EXPO_TOKEN este configurat"
@@ -38,7 +38,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.x
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -52,13 +52,10 @@ jobs:
         run: |
           if [ -z "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" ]; then
             echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu este setat în GitHub Variables"
-            echo "   → GitHub → Settings → Secrets and variables → Actions → Variables → adaugă EXPO_PUBLIC_API_BASE_URL"
-            echo "   → Valoarea: URL-ul public Railway al backend-ului (ex: https://dropi-xxx.up.railway.app)"
             exit 1
           fi
           if echo "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" | grep -qE "(localhost|127\.0\.0\.1)"; then
             echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu poate fi localhost sau 127.0.0.1 pe mobile"
-            echo "   → Folosește URL-ul public Railway al backend-ului."
             exit 1
           fi
           echo "✅ EXPO_PUBLIC_API_BASE_URL este configurat"
@@ -68,6 +65,9 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Verify EAS CLI
+        run: eas --version
 
       - name: Publish EAS Update
         run: eas update --branch development --message "$(git log -1 --pretty=format:'%s')" --non-interactive
