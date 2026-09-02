@@ -22,11 +22,48 @@ export const RECEPTION_METHODS = [
 ] as const;
 export const ATTESTATION_KINDS = ["recorded_by", "recipient_confirmed", "system_verified"] as const;
 
+export const B2B_DELIVERY_STATUSES = [
+  "pending",
+  "assigned",
+  "pickup_enroute",
+  "picked_up",
+  "in_transit",
+  "delivered",
+  "cancelled",
+  "failed",
+] as const;
+
 export type TraceChannel = (typeof TRACE_CHANNELS)[number];
 export type TraceTargetType = (typeof TRACE_TARGET_TYPES)[number];
 export type TraceEventType = (typeof TRACE_EVENT_TYPES)[number];
 export type ReceptionMethod = (typeof RECEPTION_METHODS)[number];
 export type AttestationKind = (typeof ATTESTATION_KINDS)[number];
+export type B2bDeliveryStatus = (typeof B2B_DELIVERY_STATUSES)[number];
+
+const B2B_NEXT_STATUS: Partial<Record<B2bDeliveryStatus, B2bDeliveryStatus>> = {
+  pending: "assigned",
+  assigned: "pickup_enroute",
+  pickup_enroute: "picked_up",
+  picked_up: "in_transit",
+  in_transit: "delivered",
+};
+
+export function assertB2bTransition(
+  current: string,
+  next: string,
+  options: { allowFailure?: boolean; allowCancellation?: boolean } = {},
+): void {
+  if (!B2B_DELIVERY_STATUSES.includes(current as B2bDeliveryStatus) || !B2B_DELIVERY_STATUSES.includes(next as B2bDeliveryStatus)) {
+    throw new Error(`Unsupported B2B delivery transition: ${current} → ${next}.`);
+  }
+  if (current === next) return;
+  if (options.allowFailure && next === "failed" && !["delivered", "cancelled", "failed"].includes(current)) return;
+  if (options.allowCancellation && next === "cancelled" && !["delivered", "cancelled", "failed"].includes(current)) return;
+  const expected = B2B_NEXT_STATUS[current as B2bDeliveryStatus];
+  if (next !== expected) {
+    throw new Error(`Invalid B2B transition: ${current} → ${next}. Expected ${expected ?? "no further transition"}.`);
+  }
+}
 
 export type CompletionProofInput = {
   receptionMethod: ReceptionMethod;
