@@ -21,7 +21,8 @@ test("audit middleware uses context session and admin procedures force ADMIN str
   assert.match(middleware, /buildAuditAttribution/);
   assert.match(middleware, /ctx\.session/);
   assert.doesNotMatch(middleware, /getSessionByToken/);
-  assert.match(trpc, /channelOverride:\s*"ADMIN"/);
+  assert.match(trpc, /auditMiddleware\("ADMIN"\)/);
+  assert.match(trpc, /\.use\(auditAdminLog\)/);
 });
 
 test("audit retrieval is always scoped to one explicit channel", () => {
