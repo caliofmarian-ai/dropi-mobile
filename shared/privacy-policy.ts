@@ -185,7 +185,9 @@ export function classifyAuditRetention(action: string): AuditRetentionClass {
   }
   if (
     normalized.startsWith("auth.") ||
+    normalized.startsWith("dropiauth.") ||
     normalized.startsWith("admin.") ||
+    normalized.startsWith("adminauth.") ||
     normalized.startsWith("security.") ||
     normalized.includes("phantom") ||
     normalized.includes("change_role") ||
