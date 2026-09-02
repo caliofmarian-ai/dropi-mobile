@@ -1,0 +1,65 @@
+name: Materialize C1 audit separation
+
+on:
+  push:
+    branches: [m2/c1-audit-separation]
+    paths:
+      - .github/workflows/materialize-c1-audit-separation.yml
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m2/c1-audit-separation
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Materialize strict audit separation
+        run: python scripts/materialize_c1_audit_separation.py
+
+      - name: Audit policy and source-contract tests
+        run: >-
+          node --import tsx --test
+          tests/audit-policy.test.ts
+          tests/request-session.test.ts
+          tests/c1-audit-separation-contract.test.ts
+          tests/marketplace-experience-contract.test.ts
+
+      - name: Authentication and M1 regression certification
+        run: >-
+          pnpm exec vitest run
+          tests/sdk.authenticate-request.test.ts
+          tests/order-state-machine.test.ts
+          tests/order-transition-notifications.test.ts
+          tests/order-management-integration-contract.test.ts
+          tests/marketplace-controls-policy.test.ts
+          tests/marketplace-controls-integration-contract.test.ts
+          tests/push-state-notifications.test.ts
+          tests/push-state-integration-contract.test.ts
+          tests/live-tracking-security.test.ts
+          tests/live-tracking-client-contract.test.ts
+          tests/operational-safety-certification.test.ts
+
+      - name: TypeScript
+        run: pnpm check
+
+      - name: Whitespace
+        run: git diff --check
+
+      - name: Commit verified audit separation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/materialize-c1-audit-separation.yml scripts/materialize_c1_audit_separation.py
+          git add server app tests
+          git commit -m "feat: enforce channel-separated phantom-aware audit"
+          git push origin HEAD:m2/c1-audit-separation
