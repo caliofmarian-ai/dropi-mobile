@@ -5,6 +5,13 @@ on:
     branches: [m2/audit-investigator-export]
     paths:
       - '.github/workflows/materialize-audit-investigator.yml'
+      - 'server/audit-router.ts'
+      - 'server/_core/trpc.ts'
+      - 'server/routers.ts'
+      - 'app/admin/audit-logs.tsx'
+      - 'tests/audit-investigator-export.test.ts'
+      - 'tests/c1-audit-separation-contract.test.ts'
+      - 'scripts/materialize_audit_investigator.py'
 
 permissions:
   contents: write
