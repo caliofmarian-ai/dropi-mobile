@@ -1,7 +1,7 @@
 import { COOKIE_NAME } from "../shared/const.js";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { dropiAuthRouter, adminAuthRouter, auditRouter } from "./auth-router";
 import { verificationRouter, roleApplicationRouter } from "./verification-router";
 import { storeRouter, productRouter, reviewRouter } from "./marketplace-router";
@@ -17,10 +17,11 @@ import { p2pRouter } from "./p2p-router";
 export const appRouter = router({
   system: systemRouter,
 
-  // Legacy Manus OAuth auth (kept for backward compatibility)
+  // Legacy Manus OAuth auth (kept for backward compatibility).
+  // Logout is authenticated so the central Audit Core captures the write action.
   auth: router({
     me: publicProcedure.query((opts) => opts.ctx.user),
-    logout: publicProcedure.mutation(({ ctx }) => {
+    logout: protectedProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
