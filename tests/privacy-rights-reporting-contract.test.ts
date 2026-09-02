@@ -27,12 +27,14 @@ test("subject export excludes third-party B2B contacts and authentication secret
   assert.match(exportSection, /detailsExcluded: true/);
 });
 
-test("authority reports remain investigator-only and channel-scoped", () => {
+test("authority reports remain investigator-only, channel-scoped, and explicitly non-official", () => {
   const router = source("server/authority-report-router.ts");
+  const policy = source("shared/authority-report-policy.ts");
   assert.match(router, /auditInvestigatorProcedure/);
   assert.match(router, /channel: auditChannelSchema/);
   assert.match(router, /eq\(auditLogs\.channel, input\.channel\)/);
-  assert.match(router, /not an official/i);
+  assert.match(router, /AUTHORITY_REPORT_DISCLAIMER/);
+  assert.match(policy, /not an official/i);
   assert.match(router, /Dedicated C3 operational storage is not yet materialized/);
 });
 
