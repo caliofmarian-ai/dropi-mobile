@@ -55,6 +55,7 @@ jobs:
           tests/p2p-policy.test.ts
           tests/c1-checkout-p2p-contract.test.ts
           tests/marketplace-review-policy.test.ts
+          tests/marketplace-experience-contract.test.ts
 
       - name: Run C1 and M1 regression certification
         run: >-
@@ -64,7 +65,6 @@ jobs:
           tests/order-management-integration-contract.test.ts
           tests/marketplace-controls-policy.test.ts
           tests/marketplace-controls-integration-contract.test.ts
-          tests/marketplace-experience-contract.test.ts
           tests/push-state-notifications.test.ts
           tests/push-state-integration-contract.test.ts
           tests/live-tracking-security.test.ts
