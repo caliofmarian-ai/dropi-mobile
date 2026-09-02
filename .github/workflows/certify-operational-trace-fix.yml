@@ -1,0 +1,58 @@
+name: Certify operational trace atomicity fix
+
+on:
+  push:
+    branches:
+      - m2/operational-evidence-chain
+    paths:
+      - .github/workflows/certify-operational-trace-fix.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m2/operational-evidence-chain
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply audited atomicity correction
+        run: python scripts/fix_operational_trace_atomicity.py
+      - name: Operational trace policy and contracts
+        run: node --import tsx --test tests/operational-trace-policy.test.ts tests/operational-trace-contract.test.ts
+      - name: Delivery, B2B, tracking, audit and safety regressions
+        run: >-
+          pnpm exec vitest run
+          tests/order-state-machine.test.ts
+          tests/order-transition-notifications.test.ts
+          tests/order-management-integration-contract.test.ts
+          tests/push-state-notifications.test.ts
+          tests/push-state-integration-contract.test.ts
+          tests/live-tracking-security.test.ts
+          tests/live-tracking-client-contract.test.ts
+          tests/operational-safety-certification.test.ts
+          tests/audit-capture-attribution.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check
+      - name: Commit verified correction and self-clean
+        run: |
+          rm -f scripts/fix_operational_trace_atomicity.py .github/workflows/certify-operational-trace-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: make operational evidence chain atomic and contiguous" || exit 0
+          git push origin HEAD:m2/operational-evidence-chain
