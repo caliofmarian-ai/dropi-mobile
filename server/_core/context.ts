@@ -8,8 +8,10 @@ export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
   res: CreateExpressContextOptions["res"];
   user: User | null;
-  session: Session | null;
-  sessionToken: string | null;
+  // Real request contexts populate both fields. They remain optional so legacy
+  // test fixtures and isolated procedure callers do not need synthetic sessions.
+  session?: Session | null;
+  sessionToken?: string | null;
 };
 
 export async function createContext(opts: CreateExpressContextOptions): Promise<TrpcContext> {
