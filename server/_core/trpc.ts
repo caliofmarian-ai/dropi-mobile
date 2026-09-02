@@ -74,12 +74,39 @@ const requireUser = t.middleware(async (opts) => {
   });
 });
 
+const requireAuditInvestigator = t.middleware(async (opts) => {
+  const { ctx, next } = opts;
+  const user = ctx.user;
+  if (!user) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
+  }
+  if ((user as any).isActive === false) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Inactive accounts cannot access Audit Core." });
+  }
+
+  const dropiRole = (user as any).dropiRole;
+  const channel = (user as any).channel;
+  const isOwner = user.role === "admin" || dropiRole === "system_administrator";
+  const isAuditor = dropiRole === "audit_manager" && channel === "ADMIN";
+  if (!isOwner && !isAuditor) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Audit Core requires Owner or Auditor authority." });
+  }
+
+  return next({
+    ctx: { ...ctx, user },
+  });
+});
+
 export const protectedProcedure = t.procedure.use(requireUser).use(auditLog);
 
 // Phantom-control operations run while the authenticated identity is the target
 // user, but they are administrative control actions and therefore belong to the
 // ADMIN audit stream. The procedure itself still validates phantom state.
 export const phantomProcedure = t.procedure.use(requireUser).use(auditAdminLog);
+
+// Canonical full-log investigators: Owner/System Administrator and Audit Manager.
+// Every investigator read/export is itself written to the ADMIN audit stream.
+export const auditInvestigatorProcedure = t.procedure.use(requireAuditInvestigator).use(auditAdminLog);
 
 export const adminProcedure = t.procedure.use(
   t.middleware(async (opts) => {
