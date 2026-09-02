@@ -21,11 +21,14 @@ test("C1 completion is proof-backed and pickup/fallback/completion enter operati
   assert.match(service, /eventType: "pickup"/);
   assert.match(service, /eventType: "fallback"/);
   assert.match(service, /eventType: "delivery_completed"/);
+  assert.match(service, /db\.transaction/);
+  assert.match(service, /appendOperationalEventWithDb\(tx/);
 });
 
-test("live tracking persists accepted telemetry and WebSocket completion is not authoritative", () => {
+test("live tracking persists accepted telemetry, fails closed on evidence failure, and WebSocket completion is not authoritative", () => {
   const tracking = source("server/live-tracking.ts");
   assert.match(tracking, /recordTelemetrySample/);
+  assert.match(tracking, /TRACE_PERSISTENCE_FAILED/);
   assert.match(tracking, /type: "proof_required"/);
   assert.doesNotMatch(tracking, /type: "completion_confirmed"/);
 });
@@ -41,13 +44,18 @@ test("pilot C1 UI routes completion through proof capture and no real order scre
   assert.match(detail, /confirmOrderReceipt/);
 });
 
-test("B2B lifecycle uses the same operational evidence and requires proof for delivered", () => {
+test("B2B lifecycle is contiguous, transaction-bound, actor-attributed, and proof-backed", () => {
   const b2b = source("server/b2b-router.ts");
-  assert.match(b2b, /completionProof/);
+  assert.match(b2b, /assertB2bTransition/);
   assert.match(b2b, /Proof of delivery is required before a B2B mission can be delivered/);
+  assert.match(b2b, /appendOperationalEventWithDb\(tx/);
+  assert.doesNotMatch(b2b, /appendOperationalEvent\(\{/);
+  assert.match(b2b, /eventType: "assignment"/);
+  assert.match(b2b, /eventType: "execution_started"/);
   assert.match(b2b, /eventType: "pickup"/);
   assert.match(b2b, /eventType: "transfer"/);
   assert.match(b2b, /eventType: "delivery_completed"/);
+  assert.match(b2b, /actorUserId: ctx\.user!\.id/);
 });
 
 test("artifact policy refuses inline bytes and signer records are attestations, not fake legal signatures", () => {
