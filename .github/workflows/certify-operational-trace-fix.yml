@@ -1,5 +1,6 @@
 name: Certify operational trace atomicity fix
 
+# Rerun after scoping the pilot pickup evidence anchor.
 on:
   push:
     branches:
