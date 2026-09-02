@@ -9,6 +9,13 @@ def replace_once(text: str, old: str, new: str, label: str) -> str:
     return text.replace(old, new, 1)
 
 
+def replace_first(text: str, old: str, new: str, label: str) -> str:
+    count = text.count(old)
+    if count < 1:
+        raise SystemExit(f"{label}: expected at least one match, found {count}")
+    return text.replace(old, new, 1)
+
+
 b2b_path = Path("server/b2b-router.ts")
 s = b2b_path.read_text()
 s = replace_once(
@@ -107,7 +114,7 @@ pilot_pickup_replace = '''        if (input.newStatus === "pickup_enroute") {
         }
         if (input.newStatus === "picked_up") {
           await appendOperationalEventWithDb(tx, {'''
-s = replace_once(s, pilot_pickup_anchor, pilot_pickup_replace, "pilot pickup_enroute evidence")
+s = replace_first(s, pilot_pickup_anchor, pilot_pickup_replace, "pilot pickup_enroute evidence")
 
 admin_pickup_anchor = '''        if (input.newStatus === "picked_up") {
           await appendOperationalEventWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "pickup", custodyToUserId: pilotId, details: { trackingCode: delivery[0].trackingCode, previousStatus } });
