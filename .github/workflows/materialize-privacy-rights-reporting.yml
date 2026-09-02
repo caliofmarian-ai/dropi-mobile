@@ -7,6 +7,15 @@ on:
     paths:
       - scripts/materialize_privacy_rights_reporting.py
       - .github/workflows/materialize-privacy-rights-reporting.yml
+      - shared/privacy-rights-policy.ts
+      - shared/authority-report-policy.ts
+      - server/privacy-rights-service.ts
+      - server/authority-report-router.ts
+      - app/admin/authority-reports.tsx
+      - tests/privacy-rights-policy.test.ts
+      - tests/authority-report-policy.test.ts
+      - tests/privacy-rights-reporting-contract.test.ts
+      - tests/audit-capture-attribution.test.ts
 
 permissions:
   contents: write
