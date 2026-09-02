@@ -12,6 +12,7 @@ import { pilotRatingAdminRouter } from "./pilot-rating-admin";
 import { notificationRouter } from "./notification-router";
 import { agentRouter } from "./agent-router";
 import { operationsRouter } from "./operations-router";
+import { p2pRouter } from "./p2p-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -41,10 +42,13 @@ export const appRouter = router({
   // Role applications (C2/C3/Admin operational roles)
   roleApplications: roleApplicationRouter,
 
-  // Marketplace — Stores, Products, Reviews
+  // Channel 1 controlled Marketplace
   store: storeRouter,
   product: productRouter,
   review: reviewRouter,
+
+  // Channel 1 non-commercial P2P capability (separate from merchant stores/orders)
+  p2p: p2pRouter,
 
   // Trust & Badge System
   trust: trustRouter,
