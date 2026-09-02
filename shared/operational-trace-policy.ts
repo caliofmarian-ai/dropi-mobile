@@ -1,8 +1,32 @@
-import { RECEPTION_METHODS, TRACE_CHANNELS, TRACE_TARGET_TYPES } from "../drizzle/operational-trace-schema";
+export const TRACE_CHANNELS = ["C1", "C2", "C3", "ADMIN"] as const;
+export const TRACE_TARGET_TYPES = ["order", "b2b"] as const;
+export const TRACE_EVENT_TYPES = [
+  "assignment",
+  "pickup",
+  "execution_started",
+  "transfer",
+  "geofence_entered",
+  "fallback",
+  "stop",
+  "delivery_completed",
+  "delivery_failed",
+] as const;
+export const RECEPTION_METHODS = [
+  "personal_handover",
+  "leave_at_door",
+  "leave_at_gate",
+  "leave_in_yard",
+  "drone_reception",
+  "droneport_pickup",
+  "fallback_handover",
+] as const;
+export const ATTESTATION_KINDS = ["recorded_by", "recipient_confirmed", "system_verified"] as const;
 
 export type TraceChannel = (typeof TRACE_CHANNELS)[number];
 export type TraceTargetType = (typeof TRACE_TARGET_TYPES)[number];
+export type TraceEventType = (typeof TRACE_EVENT_TYPES)[number];
 export type ReceptionMethod = (typeof RECEPTION_METHODS)[number];
+export type AttestationKind = (typeof ATTESTATION_KINDS)[number];
 
 export type CompletionProofInput = {
   receptionMethod: ReceptionMethod;
@@ -38,10 +62,10 @@ export function assertCompletionProof(input: CompletionProofInput): CompletionPr
   return input;
 }
 
-export function requiresRecipientAttestation(method: ReceptionMethod): boolean {
-  // Canon permits passive terrestrial reception and drone delivery without waiting
-  // for the recipient. Even personal handover is recorded first by the pilot;
-  // authenticated recipient confirmation is a separate optional attestation.
+export function requiresRecipientAttestation(_method: ReceptionMethod): boolean {
+  // Active canon permits passive terrestrial reception and drone delivery without
+  // waiting for the recipient. Authenticated recipient confirmation is therefore
+  // a separate optional attestation, not a universal completion gate.
   return false;
 }
 
