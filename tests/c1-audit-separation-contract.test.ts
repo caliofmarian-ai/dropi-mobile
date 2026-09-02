@@ -26,16 +26,14 @@ test("audit middleware uses context session and admin procedures force ADMIN str
   assert.match(trpc, /\.use\(auditAdminLog\)/);
 });
 
-test("audit retrieval is always scoped to one explicit channel", () => {
-  const db = source("server/db.ts");
-  const auth = source("server/auth-router.ts").split("// ===== AUDIT ROUTER =====")[1] || "";
-  assert.match(db, /listAuditLogs\(opts:\s*\{\s*channel:\s*AuditChannel/);
-  assert.match(db, /phantomMode\?:\s*boolean/);
-  assert.match(db, /eq\(auditLogs\.channel,\s*opts\.channel/);
-  assert.match(db, /eq\(auditLogs\.isPhantomMode,\s*opts\.phantomMode/);
-  assert.match(auth, /channel:\s*z\.enum\(\["C1",\s*"C2",\s*"C3",\s*"ADMIN"\]\),/);
-  assert.doesNotMatch(auth, /channel:\s*z\.enum\(\["C1",\s*"C2",\s*"C3",\s*"ADMIN"\]\)\.optional\(\)/);
-  assert.match(auth, /phantomMode:\s*z\.boolean\(\)\.optional\(\)/);
+test("audit retrieval is always scoped to one explicit governed channel", () => {
+  const audit = source("server/audit-router.ts");
+  assert.match(audit, /const auditChannelSchema = z\.enum\(\["C1", "C2", "C3", "ADMIN"\]\)/);
+  assert.match(audit, /channel:\s*auditChannelSchema/);
+  assert.doesNotMatch(audit, /channel:\s*auditChannelSchema\.optional\(\)/);
+  assert.match(audit, /const conditions: any\[\] = \[eq\(auditLogs\.channel, input\.channel as AuditChannel\)\]/);
+  assert.match(audit, /phantomMode:\s*z\.boolean\(\)\.optional\(\)/);
+  assert.match(audit, /eq\(auditLogs\.isPhantomMode, input\.phantomMode\)/);
 });
 
 test("phantom exit restores the persisted administrator rather than trusting target role", () => {
@@ -69,12 +67,14 @@ test("C1 domain audit events preserve phantom attribution", () => {
   assert.match(operations, /auditSession:\s*ctx\.session/);
 });
 
-test("admin audit viewer never defaults to a blended all-channel stream", () => {
+test("audit investigator viewer never defaults to a blended all-channel stream", () => {
   const file = source("app/admin/audit-logs.tsx");
   assert.match(file, /type ChannelFilter = "C1" \| "C2" \| "C3" \| "ADMIN"/);
   assert.match(file, /useState<ChannelFilter>\("C1"\)/);
-  assert.match(file, /const queryInput: any = \{ page, limit: 30, channel \}/);
-  assert.match(file, /phantomMode = true/);
-  assert.match(file, /trpc\.audit\.getStats\.useQuery\(\{ channel \}\)/);
+  assert.match(file, /const filterInput: any = \{ channel \}/);
+  assert.match(file, /\{ \.\.\.filterInput, page, limit: 30 \}/);
+  assert.match(file, /filterInput\.phantomMode = true/);
+  assert.match(file, /const statsInput: any = \{ channel \}/);
+  assert.match(file, /trpc\.audit\.getStats\.useQuery\(statsInput/);
   assert.doesNotMatch(file, /logs\.filter\(\(l: any\) => l\.isPhantomMode\)/);
 });
