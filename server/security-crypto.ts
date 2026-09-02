@@ -74,7 +74,7 @@ export function encryptSensitiveValue(value: string, purpose: string, keyring: D
 
 export function decryptSensitiveValue(value: string, purpose: string, keyring: DataEncryptionKeyring): string {
   const parts = value.split(":");
-  if (parts.length !== 8 || parts.slice(0, 3).join(":") !== SECURITY_ENCRYPTION_ENVELOPE_PREFIX) {
+  if (parts.length !== 7 || parts.slice(0, 3).join(":") !== SECURITY_ENCRYPTION_ENVELOPE_PREFIX) {
     throw new Error("Stored value is not a DROPi encrypted envelope.");
   }
   const keyId = parts[3];
@@ -82,7 +82,7 @@ export function decryptSensitiveValue(value: string, purpose: string, keyring: D
   if (!key) throw new Error(`Data-encryption key '${keyId}' is unavailable; keep old keys during rotation.`);
   const iv = Buffer.from(parts[4], "base64url");
   const tag = Buffer.from(parts[5], "base64url");
-  const ciphertext = Buffer.from(parts[6] + (parts[7] ? `:${parts[7]}` : ""), "base64url");
+  const ciphertext = Buffer.from(parts[6], "base64url");
   if (iv.length !== 12 || tag.length !== 16) throw new Error("Encrypted envelope metadata is invalid.");
   const decipher = createDecipheriv(SECURITY_ENCRYPTION_ALGORITHM, key, iv);
   decipher.setAAD(aad(purpose));
@@ -93,7 +93,7 @@ export function decryptSensitiveValue(value: string, purpose: string, keyring: D
 export function encryptedEnvelopeKeyId(value: string): string | null {
   if (!isEncryptedEnvelope(value)) return null;
   const parts = value.split(":");
-  return parts[3] || null;
+  return parts.length === 7 ? parts[3] || null : null;
 }
 
 export function needsEncryptionRewrap(value: string, keyring: DataEncryptionKeyring): boolean {
