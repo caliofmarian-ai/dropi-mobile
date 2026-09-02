@@ -9,15 +9,13 @@ export interface PrivacyErasureBlockers {
   activeDeliveries: number;
   activeB2bDeliveries: number;
   activeP2pParcels: number;
-  openStores: number;
 }
 
 export function totalPrivacyErasureBlockers(blockers: PrivacyErasureBlockers): number {
   return blockers.activeOrders +
     blockers.activeDeliveries +
     blockers.activeB2bDeliveries +
-    blockers.activeP2pParcels +
-    blockers.openStores;
+    blockers.activeP2pParcels;
 }
 
 export function privacyErasureIsAllowed(blockers: PrivacyErasureBlockers): boolean {
@@ -62,5 +60,6 @@ export function redactAuditDetailsForErasure(value: unknown, depth = 0): unknown
 export const PRIVACY_ERASURE_RETENTION_NOTICE = [
   "Account access and direct identifiers are removed when erasure is executed.",
   "Completed operational, audit and financial evidence may remain in pseudonymized form where retention is required or justified.",
+  "Owned stores and listings are closed or deactivated once active obligations are resolved.",
   "Active operations must be resolved before erasure can execute.",
 ] as const;
