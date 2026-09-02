@@ -67,6 +67,11 @@ const requireUser = t.middleware(async (opts) => {
 
 export const protectedProcedure = t.procedure.use(requireUser).use(auditLog);
 
+// Phantom-control operations run while the authenticated identity is the target
+// user, but they are administrative control actions and therefore belong to the
+// ADMIN audit stream. The procedure itself still validates phantom state.
+export const phantomProcedure = t.procedure.use(requireUser).use(auditAdminLog);
+
 export const adminProcedure = t.procedure.use(
   t.middleware(async (opts) => {
     const { ctx, next } = opts;
