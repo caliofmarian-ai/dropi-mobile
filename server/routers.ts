@@ -16,6 +16,7 @@ import { operationsRouter } from "./operations-router";
 import { p2pRouter } from "./p2p-router";
 import { privacyRouter } from "./privacy-router";
 import { authorityReportRouter } from "./authority-report-router";
+import { incidentRouter } from "./incident-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -39,6 +40,9 @@ export const appRouter = router({
 
   // Audit Core investigator access (Owner/Auditor; channel-scoped and self-auditing)
   audit: auditRouter,
+
+  // Factual incident reconstruction (Owner/Auditor; C1/C2 never blended)
+  incidents: incidentRouter,
 
   // Delivery Partner document verification
   verification: verificationRouter,
