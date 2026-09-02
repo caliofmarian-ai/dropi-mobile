@@ -1,6 +1,6 @@
 # DROPi — Canonical Planning Conflicts Register
 
-> **Status:** PLANNING CANONICAL — RECONCILED 2026-09-01  
+> **Status:** PLANNING CANONICAL — RECONCILED 2026-09-02  
 > **Initial generation:** 2026-08-02  
 > **Purpose:** Preserve material source tensions and route them to explicit owner/canonical decisions  
 > **Rule:** No conflict is silently resolved in implementation planning.
@@ -21,18 +21,17 @@ Implementation observations can prove what currently exists, but they do not sil
 
 **Severity:** Medium  
 **Resolution issue:** **CANON-RES-001 — #283**  
-**Status:** unresolved / blocking final Marketplace scope
+**Status:** resolved 2026-09-02
 
 ### Tension
-Higher-authority product material describes Marketplace as a separate controlled marketplace/web surface whose outputs feed the operational app. Lower-authority blueprint/current implementation places Marketplace functionality inside the mobile application.
+Higher-authority product material describes Marketplace as a separate controlled public surface whose outputs feed the operational app. Lower-authority blueprint/current implementation places Marketplace functionality inside the mobile application.
 
-### Impact
-- EPIC-004 — Marketplace C1
-- Public web/marketplace boundaries
-- Operational-app responsibility boundaries
+### Resolution
+The recovered 04-ZIP canonical/frozen Marketplace annex controls. Marketplace is the public C1 offer-and-delivery-initiation layer and is strictly separated in responsibility from the execution application, pilot selection, delivery infrastructure and COS channels.
 
-### Rule until resolved
-Do not expand the integrated mobile Marketplace in ways that make future separation harder. Existing implementation remains observable legacy/current state, not proof that the architectural conflict is resolved.
+Shared backend/auth/order/audit primitives are allowed, but public discovery and checkout must remain modular so they can be hosted independently without changing Operational Core execution contracts. Existing integrated mobile Marketplace screens are implementation-stage surfaces, not architectural proof of inseparability.
+
+**Resolution record:** `docs/planning/C1_MARKETPLACE_POSITIONING_RESOLUTION.md`
 
 ---
 
@@ -117,9 +116,30 @@ Do not equate the existence of AI-agent scaffolding with authorization for auton
 
 ---
 
+## CONFLICT-006 — P2P Public Listing vs Private Non-Commercial Parcel Model
+
+**Severity:** Medium  
+**Resolution issue:** **#294**  
+**Status:** resolved 2026-09-02
+
+### Tension
+Some lower-authority/derived material described P2P as outside Marketplace, while delivery references used language implying Marketplace participation.
+
+### Resolution
+The recovered 04-ZIP canonical/frozen Marketplace annex explicitly supports both:
+
+- private P2P delivery initiation for non-commercial users; and
+- limited occasional public community offers, including donations, free transfers and occasional fixed-price sales without repetitive commercial character.
+
+Public P2P/community offers are limited in active count, time-bounded, moderated, automatically audited, non-promoted and non-commercial. P2P is not equivalent to a recurring merchant storefront.
+
+**Resolution record:** `docs/planning/C1_MARKETPLACE_POSITIONING_RESOLUTION.md`
+
+---
+
 ## Related Owner Decisions That Are Not Canonical Conflicts
 
-These decisions are material planning gates but should not be mislabeled as the resolution of one of the five conflicts above:
+These decisions are material planning gates but should not be mislabeled as the resolution of one of the conflicts above:
 
 | Issue | Topic |
 |---|---|
@@ -131,20 +151,21 @@ These decisions are material planning gates but should not be mislabeled as the 
 
 ## Reconciled Summary
 
-| Conflict | Severity | Decision / Resolution Issue |
-|---|---|---|
-| Marketplace separation vs integrated mobile Marketplace | Medium | CANON-RES-001 #283 |
-| Philippines Zone 0 regulatory baseline vs EASA/FAA references | High | CANON-RES-003 #285 |
-| Client-presence canonical rule vs enforcement mechanism | Medium | CANON-RES-002 #284 |
-| WebSocket vs polling operating strategy | Low architecture / security hardening required | OWNER-002 #279 |
-| AI-agent activation sequence | Medium | OWNER-005 #282 |
+| Conflict | Severity | Decision / Resolution Issue | Status |
+|---|---|---|---|
+| Marketplace separation vs integrated mobile Marketplace | Medium | CANON-RES-001 #283 | Resolved 2026-09-02 |
+| Philippines Zone 0 regulatory baseline vs EASA/FAA references | High | CANON-RES-003 #285 | Unresolved |
+| Client-presence canonical rule vs enforcement mechanism | Medium | CANON-RES-002 #284 | Unresolved |
+| WebSocket vs polling operating strategy | Low architecture / security hardening required | OWNER-002 #279 | Unresolved |
+| AI-agent activation sequence | Medium | OWNER-005 #282 | Unresolved |
+| P2P public listing vs private non-commercial parcel model | Medium | #294 | Resolved 2026-09-02 |
 
-**Total tracked conflicts/tensions: 5.**
+**Total tracked conflicts/tensions: 6. Resolved: 2. Unresolved: 4.**
 
 ---
 
 ## Preservation Rule
 
-Dependent work may inspect or harden existing implementation, but it must not silently resolve a canonical/owner decision. When implementation evidence changes the understanding of an issue (for example, a supposedly missing capability already exists), planning status must be reconciled explicitly and verification evidence must be added.
+Dependent work may inspect or harden existing implementation, but it must not silently resolve a canonical/owner decision. When implementation evidence changes the understanding of an issue, planning status must be reconciled explicitly and verification evidence must be added.
 
-*Reconciled against the materialized GitHub graph and `main` repository state on 2026-09-01. No canonical source was modified.*
+*Reconciled against the materialized GitHub graph, the recovered 04-ZIP authority corpus, and repository state on 2026-09-02. No frozen canonical source was modified.*
