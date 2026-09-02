@@ -401,7 +401,12 @@ export function initLiveTracking(server: HttpServer): void {
         return;
       }
 
-      await handlePilotMessage(ws, msg, authorization);
+      try {
+        await handlePilotMessage(ws, msg, authorization);
+      } catch (error) {
+        console.error("[ws] Operational trace persistence failed", error);
+        closeWithPolicyError(ws, "TRACE_PERSISTENCE_FAILED", "Operational evidence could not be persisted.");
+      }
     });
 
     ws.on("close", () => {

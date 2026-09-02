@@ -26,8 +26,8 @@ import { notifyOwner } from "./_core/notification";
 import { triggerWebhooks, buildWebhookPayload, getWebhookEvents } from "./webhook-trigger";
 import { onB2bDeliveryCompleted, onB2bDeliveryFailed } from "./pilot-rating-hooks";
 import { notifyB2bDeliveryTransition } from "./b2b-transition-notifications";
-import { appendOperationalEvent, createDeliveryProofWithDb } from "./operational-trace-service";
-import { RECEPTION_METHODS } from "../shared/operational-trace-policy";
+import { appendOperationalEventWithDb, createDeliveryProofWithDb } from "./operational-trace-service";
+import { RECEPTION_METHODS, assertB2bTransition } from "../shared/operational-trace-policy";
 
 // ===== HELPERS =====
 
@@ -529,7 +529,8 @@ export const b2bDeliveryRouter = router({
       deliveryId: z.number(),
       newStatus: z.enum(["assigned", "pickup_enroute", "picked_up", "in_transit", "delivered", "failed"]),
       estimatedArrival: z.string().optional(),
-      failureReason: z.string().optional(),
+      failureReason: z.string().trim().max(1000).optional(),
+      incidentType: z.enum(["stop", "fallback", "failure"]).optional(),
       completionProof: z.object({
         receptionMethod: z.enum(RECEPTION_METHODS),
         artifactUrl: z.string().trim().max(1000).optional(),
@@ -568,19 +569,14 @@ export const b2bDeliveryRouter = router({
         throw new Error("This delivery is assigned to another pilot.");
       }
 
-      // Validate forward-only transitions
-      const statusOrder = ["pending", "assigned", "pickup_enroute", "picked_up", "in_transit", "delivered"];
-      const currentIndex = statusOrder.indexOf(delivery[0].status);
-      const newIndex = statusOrder.indexOf(input.newStatus);
-
-      // Allow "failed" from any active status
-      if (input.newStatus !== "failed") {
-        if (newIndex <= currentIndex) {
-          throw new Error(`Invalid transition: cannot go from "${delivery[0].status}" to "${input.newStatus}". Only forward transitions allowed.`);
-        }
-      }
+      // Custody evidence must be contiguous; pilots cannot skip operational stages.
+      assertB2bTransition(delivery[0].status, input.newStatus, { allowFailure: true });
 
       const previousStatus = delivery[0].status;
+      if (input.newStatus === "failed" && !input.failureReason?.trim()) {
+        throw new Error("A factual failure reason is required for STOP, fallback, or failed delivery evidence.");
+      }
+      const incidentType = input.incidentType ?? "failure";
       if (input.newStatus === "delivered" && !input.completionProof) {
         throw new Error("Proof of delivery is required before a B2B mission can be delivered.");
       }
@@ -603,35 +599,52 @@ export const b2bDeliveryRouter = router({
       await db.transaction(async (tx) => {
         await tx.update(b2bDeliveries).set(updateData).where(eq(b2bDeliveries.id, input.deliveryId));
         if (input.newStatus === "assigned") {
-          await appendOperationalEvent({
+          await appendOperationalEventWithDb(tx, {
             channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: user.id, actorRole: "delivery_partner", eventType: "assignment", custodyToUserId: user.id,
             details: { trackingCode: delivery[0].trackingCode, previousStatus },
           });
         }
+        if (input.newStatus === "pickup_enroute") {
+          await appendOperationalEventWithDb(tx, {
+            channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: user.id, actorRole: "delivery_partner", eventType: "execution_started", custodyToUserId: user.id,
+            details: { trackingCode: delivery[0].trackingCode, previousStatus },
+          });
+        }
         if (input.newStatus === "picked_up") {
-          await appendOperationalEvent({
+          await appendOperationalEventWithDb(tx, {
             channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: user.id, actorRole: "delivery_partner", eventType: "pickup", custodyToUserId: user.id,
             details: { trackingCode: delivery[0].trackingCode, previousStatus },
           });
         }
         if (input.newStatus === "in_transit") {
-          await appendOperationalEvent({
+          await appendOperationalEventWithDb(tx, {
             channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: user.id, actorRole: "delivery_partner", eventType: "transfer", custodyToUserId: user.id,
             details: { trackingCode: delivery[0].trackingCode, previousStatus },
           });
         }
         if (input.newStatus === "delivered" && input.completionProof) {
           const proof = await createDeliveryProofWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, recordedByUserId: user.id, recordedByRole: "delivery_partner", proof: input.completionProof });
-          await appendOperationalEvent({
+          await appendOperationalEventWithDb(tx, {
             channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: user.id, actorRole: "delivery_partner", eventType: "delivery_completed", custodyFromUserId: user.id,
             latitude: input.completionProof.latitude ?? null, longitude: input.completionProof.longitude ?? null,
             details: { trackingCode: delivery[0].trackingCode, proofId: proof.proofId, receptionMethod: input.completionProof.receptionMethod },
           });
         }
         if (input.newStatus === "failed") {
-          await appendOperationalEvent({
-            channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: user.id, actorRole: "delivery_partner", eventType: "delivery_failed",
-            details: { trackingCode: delivery[0].trackingCode, reason: input.failureReason || null },
+          await appendOperationalEventWithDb(tx, {
+            channel: "C2",
+            targetType: "b2b",
+            targetId: delivery[0].id,
+            actorUserId: user.id,
+            actorRole: "delivery_partner",
+            eventType: incidentType === "stop" ? "stop" : incidentType === "fallback" ? "fallback" : "delivery_failed",
+            custodyFromUserId: user.id,
+            details: {
+              trackingCode: delivery[0].trackingCode,
+              reason: input.failureReason!.trim(),
+              incidentType,
+              resultingStatus: "failed",
+            },
           });
         }
       });
@@ -719,6 +732,7 @@ export const b2bDeliveryRouter = router({
       finalPrice: z.string().optional(),
       cancellationReason: z.string().optional(),
       cancelledBy: z.enum(["system", "pilot"]).optional(),
+      incidentType: z.enum(["stop", "fallback", "failure"]).optional(),
       completionProof: z.object({
         receptionMethod: z.enum(RECEPTION_METHODS),
         artifactUrl: z.string().trim().max(1000).optional(),
@@ -742,6 +756,11 @@ export const b2bDeliveryRouter = router({
       if (previousStatus === input.newStatus) {
         return { success: true, message: "Status unchanged" };
       }
+      assertB2bTransition(previousStatus, input.newStatus, { allowFailure: true, allowCancellation: true });
+      if ((input.newStatus === "failed" || input.newStatus === "cancelled") && !input.cancellationReason?.trim()) {
+        throw new Error("A factual reason is required for failed or cancelled operational evidence.");
+      }
+      const incidentType = input.incidentType ?? "failure";
       if (input.newStatus === "delivered" && !input.completionProof) {
         throw new Error("Proof of delivery is required before a B2B mission can be delivered.");
       }
@@ -766,18 +785,39 @@ export const b2bDeliveryRouter = router({
         await tx.update(b2bDeliveries).set(updateData).where(eq(b2bDeliveries.id, input.deliveryId));
         const actorId = ctx.user!.id;
         const actorRole = ctx.user!.dropiRole || "system_administrator";
+        if (input.newStatus === "assigned") {
+          await appendOperationalEventWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "assignment", custodyToUserId: pilotId, details: { trackingCode: delivery[0].trackingCode, previousStatus } });
+        }
+        if (input.newStatus === "pickup_enroute") {
+          await appendOperationalEventWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "execution_started", custodyToUserId: pilotId, details: { trackingCode: delivery[0].trackingCode, previousStatus } });
+        }
         if (input.newStatus === "picked_up") {
-          await appendOperationalEvent({ channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "pickup", custodyToUserId: pilotId, details: { trackingCode: delivery[0].trackingCode, previousStatus } });
+          await appendOperationalEventWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "pickup", custodyToUserId: pilotId, details: { trackingCode: delivery[0].trackingCode, previousStatus } });
         }
         if (input.newStatus === "in_transit") {
-          await appendOperationalEvent({ channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "transfer", custodyToUserId: pilotId, details: { trackingCode: delivery[0].trackingCode, previousStatus } });
+          await appendOperationalEventWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "transfer", custodyToUserId: pilotId, details: { trackingCode: delivery[0].trackingCode, previousStatus } });
         }
         if (input.newStatus === "delivered" && input.completionProof) {
           const proof = await createDeliveryProofWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, recordedByUserId: actorId, recordedByRole: actorRole, proof: input.completionProof });
-          await appendOperationalEvent({ channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "delivery_completed", custodyFromUserId: pilotId, latitude: input.completionProof.latitude ?? null, longitude: input.completionProof.longitude ?? null, details: { trackingCode: delivery[0].trackingCode, proofId: proof.proofId, receptionMethod: input.completionProof.receptionMethod } });
+          await appendOperationalEventWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "delivery_completed", custodyFromUserId: pilotId, latitude: input.completionProof.latitude ?? null, longitude: input.completionProof.longitude ?? null, details: { trackingCode: delivery[0].trackingCode, proofId: proof.proofId, receptionMethod: input.completionProof.receptionMethod } });
         }
-        if (input.newStatus === "failed") {
-          await appendOperationalEvent({ channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "delivery_failed", details: { trackingCode: delivery[0].trackingCode, reason: input.cancellationReason || null } });
+        if (input.newStatus === "failed" || input.newStatus === "cancelled") {
+          await appendOperationalEventWithDb(tx, {
+            channel: "C2",
+            targetType: "b2b",
+            targetId: delivery[0].id,
+            actorUserId: actorId,
+            actorRole,
+            eventType: incidentType === "stop" ? "stop" : incidentType === "fallback" ? "fallback" : "delivery_failed",
+            custodyFromUserId: pilotId,
+            details: {
+              trackingCode: delivery[0].trackingCode,
+              terminalStatus: input.newStatus,
+              reason: input.cancellationReason!.trim(),
+              incidentType,
+              resultingStatus: input.newStatus,
+            },
+          });
         }
       });
 
@@ -889,7 +929,7 @@ export const b2bDeliveryRouter = router({
       deliveryId: z.number(),
       pilotId: z.number(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error("Database unavailable");
 
@@ -900,16 +940,24 @@ export const b2bDeliveryRouter = router({
       if (delivery.length === 0) throw new Error("Delivery not found");
       if (delivery[0].status !== "pending") throw new Error("Can only assign pilots to pending deliveries");
 
-      await db.update(b2bDeliveries)
-        .set({
-          status: "assigned",
-          assignedPilotId: input.pilotId,
-          updatedAt: new Date(),
-        })
-        .where(eq(b2bDeliveries.id, input.deliveryId));
-      await appendOperationalEvent({
-        channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: null, actorRole: "operations_manager", eventType: "assignment", custodyToUserId: input.pilotId,
-        details: { trackingCode: delivery[0].trackingCode, assignedPilotId: input.pilotId },
+      await db.transaction(async (tx) => {
+        await tx.update(b2bDeliveries)
+          .set({
+            status: "assigned",
+            assignedPilotId: input.pilotId,
+            updatedAt: new Date(),
+          })
+          .where(eq(b2bDeliveries.id, input.deliveryId));
+        await appendOperationalEventWithDb(tx, {
+          channel: "C2",
+          targetType: "b2b",
+          targetId: delivery[0].id,
+          actorUserId: ctx.user!.id,
+          actorRole: ctx.user!.dropiRole || "system_administrator",
+          eventType: "assignment",
+          custodyToUserId: input.pilotId,
+          details: { trackingCode: delivery[0].trackingCode, assignedPilotId: input.pilotId },
+        });
       });
 
       // Trigger webhooks
