@@ -1,0 +1,48 @@
+name: Validate Audit capture
+
+on:
+  pull_request:
+    paths:
+      - 'server/**'
+      - 'tests/audit-capture-attribution.test.ts'
+      - 'tests/audit-policy.test.ts'
+      - 'tests/request-session.test.ts'
+      - '.github/workflows/validate-audit-capture-pr.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Audit capture contracts
+        run: >-
+          node --import tsx --test
+          tests/audit-policy.test.ts
+          tests/request-session.test.ts
+          tests/audit-capture-attribution.test.ts
+          tests/c1-audit-separation-contract.test.ts
+      - name: Authentication and M1 regressions
+        run: >-
+          pnpm exec vitest run
+          tests/sdk.authenticate-request.test.ts
+          tests/auth.logout.test.ts
+          tests/order-state-machine.test.ts
+          tests/order-management-integration-contract.test.ts
+          tests/marketplace-controls-integration-contract.test.ts
+          tests/live-tracking-security.test.ts
+          tests/operational-safety-certification.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check HEAD^1 HEAD^2
