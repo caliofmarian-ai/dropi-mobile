@@ -82,7 +82,7 @@ export default function MissionDetailScreen() {
   });
 
   // Helper to sync status to server (non-blocking for UX)
-  const syncStatusToServer = async (newStatus: string, extras?: { failureReason?: string }) => {
+  const syncStatusToServer = async (newStatus: string, extras?: { failureReason?: string; incidentType?: "stop" | "fallback" | "failure" }) => {
     // Only sync if mission has a B2B delivery ID (orderId maps to delivery)
     if (!mission?.orderId) return;
     setStatusUpdating(true);
@@ -91,9 +91,8 @@ export default function MissionDetailScreen() {
         deliveryId: mission.orderId,
         newStatus: newStatus as any,
         ...(extras?.failureReason && { failureReason: extras.failureReason }),
+        ...(extras?.incidentType && { incidentType: extras.incidentType }),
       });
-    } catch (e) {
-      // Silent fail — local flow continues
     } finally {
       setStatusUpdating(false);
     }
@@ -140,26 +139,34 @@ export default function MissionDetailScreen() {
           return;
         }
       } catch (e) {
-        // If we can't check, allow in demo mode but warn
         console.warn("Could not verify status:", e);
+        Alert.alert("Verification unavailable", "Mission acceptance is blocked until verification can be confirmed by the server.");
+        setCheckingVerification(false);
+        return;
       }
       setCheckingVerification(false);
     }
-    // Sync to server: assigned
-    syncStatusToServer("assigned");
-    setPhase("preflight");
+    try {
+      await syncStatusToServer("assigned");
+      setPhase("preflight");
+    } catch (error: any) {
+      Alert.alert("Mission acceptance blocked", error?.message || "The assigned state could not be persisted.");
+    }
   };
 
-  const handleLaunch = () => {
+  const handleLaunch = async () => {
     if (!allChecked) {
       Alert.alert("Incomplete Check", "All items must be confirmed before launch.");
       return;
     }
-    // Sync to server: pickup_enroute → picked_up → in_transit (rapid progression)
-    syncStatusToServer("pickup_enroute");
-    setTimeout(() => syncStatusToServer("picked_up"), 500);
-    setTimeout(() => syncStatusToServer("in_transit"), 1000);
-    setPhase("inflight");
+    try {
+      await syncStatusToServer("pickup_enroute");
+      await syncStatusToServer("picked_up");
+      await syncStatusToServer("in_transit");
+      setPhase("inflight");
+    } catch (error: any) {
+      Alert.alert("Launch blocked", error?.message || "The operational state chain could not be persisted.");
+    }
   };
 
   const handleStop = () => {
@@ -173,10 +180,14 @@ export default function MissionDetailScreen() {
         {
           text: "STOP NOW",
           style: "destructive",
-              onPress: () => {
-            syncStatusToServer("failed", { failureReason: "Emergency stop executed by pilot" });
-            Alert.alert("Vehicle Stopped", "Emergency stop executed. Creating incident report.");
-            setPhase("complete");
+          onPress: async () => {
+            try {
+              await syncStatusToServer("failed", { failureReason: "Emergency stop executed by pilot", incidentType: "stop" });
+              Alert.alert("Vehicle Stopped", "Emergency stop was persisted in the operational incident chain.");
+              setPhase("complete");
+            } catch (error: any) {
+              Alert.alert("STOP evidence failed", error?.message || "The STOP event could not be persisted.");
+            }
           },
         },
       ]
@@ -194,10 +205,17 @@ export default function MissionDetailScreen() {
         { text: "Cancel", style: "cancel" },
         {
           text: "Confirm Fallback",
-            onPress: () => {
-            syncStatusToServer("failed", { failureReason: isDrone ? "Fallback: drone returning to DronePort" : "Fallback: vehicle returning to depot" });
-            Alert.alert("Fallback Active", isDrone ? "Drone returning to DronePort Alpha." : "Vehicle returning to depot.");
-            setPhase("complete");
+          onPress: async () => {
+            try {
+              await syncStatusToServer("failed", {
+                failureReason: isDrone ? "Fallback activated: drone return requested to DronePort" : "Fallback activated: vehicle return requested to origin",
+                incidentType: "fallback",
+              });
+              Alert.alert("Fallback recorded", "Fallback activation and resulting failed mission state were persisted.");
+              setPhase("complete");
+            } catch (error: any) {
+              Alert.alert("Fallback blocked", error?.message || "Fallback evidence could not be persisted.");
+            }
           },
         },
       ]
@@ -442,10 +460,7 @@ export default function MissionDetailScreen() {
             <TouchableOpacity
               style={{ backgroundColor: colors.success, borderRadius: 12, paddingVertical: 14, alignItems: "center", opacity: statusUpdating ? 0.6 : 1 }}
               activeOpacity={0.8}
-              onPress={() => {
-                syncStatusToServer("delivered");
-                setPhase("complete");
-              }}
+              onPress={() => router.push({ pathname: "/pilot/complete-mission", params: { deliveryId: String(mission.orderId) } } as any)}
             >
               <Text className="text-white font-semibold text-base">✓ Delivery Complete</Text>
             </TouchableOpacity>

@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray, not, or } from "drizzle-orm";
 import { z } from "zod";
 import { b2bDeliveries, deliveries, orders, stores, users } from "../drizzle/schema";
+import { deliveryProofAttestations, deliveryProofs } from "../drizzle/operational-trace-schema";
 import { getDb } from "./db";
 import { protectedProcedure, router } from "./_core/trpc";
 import {
@@ -10,6 +11,8 @@ import {
   listReadyMarketplaceOrders,
   transitionMarketplaceOrder,
 } from "./order-management-service";
+import { RECEPTION_METHODS } from "../shared/operational-trace-policy";
+import { attestDeliveryProof, getOperationalTrace } from "./operational-trace-service";
 
 const ORDER_STATUS_VALUES = [
   "initiated",
@@ -22,6 +25,15 @@ const ORDER_STATUS_VALUES = [
   "cancelled",
   "fallback",
 ] as const;
+
+const COMPLETION_PROOF_SCHEMA = z.object({
+  receptionMethod: z.enum(RECEPTION_METHODS),
+  artifactUrl: z.string().trim().max(1000).optional(),
+  artifactHash: z.string().trim().min(8).max(128).optional(),
+  notes: z.string().trim().max(1000).optional(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+});
 
 type MobileDeliveryMode = "drone" | "auto" | "van" | "ebike" | "multimodal";
 type MobileVehicleType = "drone" | "auto" | "van" | "ebike" | null;
@@ -110,6 +122,7 @@ export const operationsRouter = router({
         orderId: z.number().int().positive(),
         newStatus: z.enum(ORDER_STATUS_VALUES),
         reason: z.string().trim().min(1).max(500).optional(),
+        completionProof: COMPLETION_PROOF_SCHEMA.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) =>
@@ -118,6 +131,7 @@ export const operationsRouter = router({
         orderId: input.orderId,
         newStatus: input.newStatus,
         reason: input.reason,
+        completionProof: input.completionProof,
         auditSession: ctx.session,
       }),
     ),
@@ -184,6 +198,79 @@ export const operationsRouter = router({
           createdAt: event.createdAt.toISOString(),
         })),
       };
+    }),
+
+  myOrderTrace: protectedProcedure
+    .input(z.object({ orderId: z.number().int().positive() }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) return { events: [], telemetry: [], proofs: [] };
+      const rows = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
+      const order = rows[0];
+      if (!order) throw new Error("Order not found.");
+      const user = ctx.user as any;
+      const authorized = order.customerId === user.id || order.merchantId === user.id || order.pilotId === user.id || user.role === "admin" || user.dropiRole === "system_administrator" || user.dropiRole === "audit_manager";
+      if (!authorized) throw new Error("Operational trace not accessible for current user");
+      const trace = await getOperationalTrace("C1", "order", order.id);
+      return {
+        events: trace.events.map((event) => ({ ...event, occurredAt: event.occurredAt.toISOString(), createdAt: event.createdAt.toISOString() })),
+        telemetry: trace.telemetry.map((sample) => ({
+          id: sample.id,
+          pilotUserId: sample.pilotUserId,
+          latitude: Number(sample.latitude),
+          longitude: Number(sample.longitude),
+          speed: Number(sample.speed),
+          heading: Number(sample.heading),
+          altitude: sample.altitude == null ? null : Number(sample.altitude),
+          vehicleType: sample.vehicleType,
+          recordedAt: sample.recordedAt.toISOString(),
+          evidenceHash: sample.evidenceHash,
+        })),
+        proofs: trace.proofs.map((proof) => ({
+          ...proof,
+          completedAt: proof.completedAt.toISOString(),
+          createdAt: proof.createdAt.toISOString(),
+          latitude: proof.latitude == null ? null : Number(proof.latitude),
+          longitude: proof.longitude == null ? null : Number(proof.longitude),
+          attestations: proof.attestations.map((attestation) => ({
+            ...attestation,
+            attestedAt: attestation.attestedAt.toISOString(),
+            createdAt: attestation.createdAt.toISOString(),
+          })),
+        })),
+      };
+    }),
+
+  confirmOrderReceipt: protectedProcedure
+    .input(z.object({ orderId: z.number().int().positive(), proofId: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database unavailable");
+      const orderRows = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
+      const order = orderRows[0];
+      if (!order || order.customerId !== ctx.user!.id || order.status !== "completed") {
+        throw new Error("Only the completed order customer can confirm receipt.");
+      }
+      const proofRows = await db.select().from(deliveryProofs).where(and(
+        eq(deliveryProofs.id, input.proofId),
+        eq(deliveryProofs.channel, "C1"),
+        eq(deliveryProofs.targetType, "order"),
+        eq(deliveryProofs.targetId, order.id),
+      )).limit(1);
+      if (!proofRows[0]) throw new Error("Delivery proof not found for this order.");
+      const existing = await db.select().from(deliveryProofAttestations).where(and(
+        eq(deliveryProofAttestations.proofId, input.proofId),
+        eq(deliveryProofAttestations.signerUserId, ctx.user!.id),
+        eq(deliveryProofAttestations.attestationKind, "recipient_confirmed"),
+      )).limit(1);
+      if (existing[0]) return { confirmed: true, alreadyConfirmed: true };
+      await attestDeliveryProof({
+        proofId: input.proofId,
+        signerUserId: ctx.user!.id,
+        signerRole: ctx.user!.dropiRole || "customer",
+        kind: "recipient_confirmed",
+      });
+      return { confirmed: true, alreadyConfirmed: false };
     }),
 
   myOrders: protectedProcedure
@@ -270,7 +357,7 @@ export const operationsRouter = router({
             createdAt: row.createdAt.toISOString(),
             deliveryMode,
             fallbackMode: row.status === "fallback" ? "auto" : null,
-            receptionType: "personal" as const,
+            receptionType: null as string | null,
             vehicleId: deliveryRow?.droneId || null,
             vehicleType,
           };
@@ -329,7 +416,7 @@ export const operationsRouter = router({
         createdAt: orderRow.createdAt.toISOString(),
         deliveryMode,
         fallbackMode: orderRow.status === "fallback" ? "auto" : null,
-        receptionType: "personal" as const,
+        receptionType: null as string | null,
         vehicleId: delivery?.droneId || null,
         vehicleType,
       };

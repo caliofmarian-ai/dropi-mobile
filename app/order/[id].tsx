@@ -5,10 +5,9 @@ import { useColors } from "@/hooks/use-colors";
 import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/shared/types";
 import type { OrderStatus } from "@/shared/types";
-import { DeliveryMap, createDemoRoute } from "@/components/delivery-map";
-import type { VehicleType } from "@/components/delivery-map";
 import { safeGoBack } from "@/lib/safe-back";
 import { trpc } from "@/lib/trpc";
+import { useDropiAuth } from "@/lib/auth-context";
 
 const TIMELINE_STEPS: OrderStatus[] = ["initiated", "validated", "preparing", "ready", "accepted", "in_execution", "completed"];
 
@@ -36,6 +35,7 @@ export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const colors = useColors();
+  const { user } = useDropiAuth();
   const orderId = Number(id);
   const orderQuery = trpc.operations.myOrderById.useQuery(
     { id: orderId },
@@ -45,6 +45,13 @@ export default function OrderDetailScreen() {
     { orderId },
     { enabled: Number.isFinite(orderId) },
   );
+  const traceQuery = trpc.operations.myOrderTrace.useQuery(
+    { orderId },
+    { enabled: Number.isFinite(orderId) },
+  );
+  const confirmReceipt = trpc.operations.confirmOrderReceipt.useMutation({
+    onSuccess: async () => { await traceQuery.refetch(); },
+  });
   const transitionOrder = trpc.operations.transitionOrder.useMutation({
     onSuccess: async () => {
       await Promise.all([orderQuery.refetch(), timelineQuery.refetch()]);
@@ -73,6 +80,9 @@ export default function OrderDetailScreen() {
   const fallbackInfo = order.fallbackMode ? DELIVERY_MODE_INFO[order.fallbackMode as keyof typeof DELIVERY_MODE_INFO] : null;
   const canCancel = ["initiated", "validated", "preparing", "ready"].includes(order.status);
   const auditEvents = timelineQuery.data?.events ?? [];
+  const operationalTrace = traceQuery.data;
+  const latestProof = operationalTrace?.proofs?.[operationalTrace.proofs.length - 1] ?? null;
+  const recipientConfirmed = latestProof?.attestations?.some((attestation) => attestation.attestationKind === "recipient_confirmed") ?? false;
 
   const handleCancel = () => {
     Alert.alert(
@@ -193,13 +203,14 @@ export default function OrderDetailScreen() {
               </View>
             )}
 
-            {/* Reception type */}
-            <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: colors.border }}>
-              <Text style={{ fontSize: 11, color: colors.muted, fontWeight: "600" }}>RECEPTION POINT:</Text>
-              <Text style={{ fontSize: 13, color: colors.foreground, marginTop: 4 }}>
-                {RECEPTION_LABELS[order.receptionType] || order.receptionType}
-              </Text>
-            </View>
+            {latestProof && (
+              <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: colors.border }}>
+                <Text style={{ fontSize: 11, color: colors.muted, fontWeight: "600" }}>RECORDED RECEPTION:</Text>
+                <Text style={{ fontSize: 13, color: colors.foreground, marginTop: 4 }}>
+                  {latestProof.receptionMethod.replace(/_/g, " ")}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -280,22 +291,43 @@ export default function OrderDetailScreen() {
           </View>
         </View>
 
-        {/* Interactive Live Tracking Map */}
-        {(order.status === "in_execution" || order.status === "accepted") && (
-          <View className="mx-4 mb-4">
-            <Text className="text-base font-semibold text-foreground mb-2">📍 Live Tracking</Text>
-            <DeliveryMap
-              route={createDemoRoute(
-                (order.vehicleType || order.deliveryMode || "auto") as VehicleType,
-                order.status === "in_execution" ? "in_transit" : "picking_up",
-                order.status === "in_execution" ? 0.55 : 0.15
+        {/* Persisted operational trace — never a simulated route */}
+        <View className="mx-4 bg-surface border border-border rounded-xl p-4 mb-4">
+          <Text className="text-base font-semibold text-foreground mb-2">Operational Evidence</Text>
+          <Text className="text-xs text-muted">
+            {operationalTrace?.telemetry?.length ?? 0} persisted telemetry samples • {operationalTrace?.events?.length ?? 0} custody/lifecycle events
+          </Text>
+          {operationalTrace?.telemetry?.length ? (() => {
+            const latest = operationalTrace.telemetry[operationalTrace.telemetry.length - 1];
+            return (
+              <View className="mt-3">
+                <Text className="text-sm text-foreground">Latest verified position</Text>
+                <Text className="text-xs text-muted mt-1">{latest.latitude.toFixed(6)}, {latest.longitude.toFixed(6)}</Text>
+                <Text className="text-xs text-muted">Speed {latest.speed.toFixed(1)} m/s • Heading {latest.heading.toFixed(0)}°{latest.altitude == null ? "" : ` • Alt ${latest.altitude.toFixed(0)}m`}</Text>
+                <Text className="text-[10px] text-muted mt-1">Evidence {latest.evidenceHash.slice(0, 16)}…</Text>
+              </View>
+            );
+          })() : (
+            <Text className="text-xs text-muted mt-2">No persisted trajectory samples yet.</Text>
+          )}
+          {latestProof && (
+            <View className="mt-3 pt-3 border-t border-border">
+              <Text className="text-sm font-semibold text-foreground">Proof of delivery</Text>
+              <Text className="text-xs text-muted mt-1">{latestProof.receptionMethod.replace(/_/g, " ")} • {new Date(latestProof.completedAt).toLocaleString()}</Text>
+              <Text className="text-[10px] text-muted mt-1">Proof {latestProof.evidenceHash.slice(0, 16)}…</Text>
+              {user?.id === order.customerId && !recipientConfirmed && (
+                <TouchableOpacity
+                  className="bg-primary rounded-lg py-2 items-center mt-3"
+                  disabled={confirmReceipt.isPending}
+                  onPress={() => confirmReceipt.mutate({ orderId, proofId: latestProof.id })}
+                >
+                  <Text className="text-white text-sm font-semibold">Confirm receipt</Text>
+                </TouchableOpacity>
               )}
-              height={260}
-              showRoute={true}
-              showETA={true}
-            />
-          </View>
-        )}
+              {recipientConfirmed && <Text className="text-xs text-success mt-2">Recipient confirmation recorded.</Text>}
+            </View>
+          )}
+        </View>
 
         {canCancel && (
           <View className="mx-4 mb-4">
