@@ -1,0 +1,56 @@
+name: Materialize audit investigator surface
+
+on:
+  push:
+    branches: [m2/audit-investigator-export]
+    paths:
+      - '.github/workflows/materialize-audit-investigator.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m2/audit-investigator-export
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Remove legacy audit router
+        run: python scripts/materialize_audit_investigator.py
+      - name: Investigator export contracts
+        run: >-
+          node --import tsx --test
+          tests/audit-investigator-export.test.ts
+          tests/audit-policy.test.ts
+          tests/request-session.test.ts
+          tests/audit-capture-attribution.test.ts
+          tests/c1-audit-separation-contract.test.ts
+      - name: Authentication and operational regressions
+        run: >-
+          pnpm exec vitest run
+          tests/sdk.authenticate-request.test.ts
+          tests/auth.logout.test.ts
+          tests/order-state-machine.test.ts
+          tests/order-management-integration-contract.test.ts
+          tests/marketplace-controls-integration-contract.test.ts
+          tests/live-tracking-security.test.ts
+          tests/operational-safety-certification.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check
+      - name: Commit verified investigator surface
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/materialize-audit-investigator.yml scripts/materialize_audit_investigator.py
+          git add server app tests
+          git commit -m "feat: deliver canonical audit investigator export"
+          git push origin HEAD:m2/audit-investigator-export
