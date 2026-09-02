@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
-import { router, publicProcedure, protectedProcedure, adminProcedure } from "./_core/trpc";
+import { router, publicProcedure, protectedProcedure, adminProcedure, phantomProcedure } from "./_core/trpc";
 import { sdk } from "./_core/sdk";
 import { maskEmail, sendPlatformEmail } from "./_core/mail";
 import * as db from "./db";
@@ -676,7 +676,7 @@ export const adminAuthRouter = router({
     return { token, user: targetUser };
   }),
 
-  exitPhantom: protectedProcedure.mutation(async ({ ctx }) => {
+  exitPhantom: phantomProcedure.mutation(async ({ ctx }) => {
     let phantomAdminId: number;
     try {
       phantomAdminId = requirePhantomAdminId(ctx.session);
