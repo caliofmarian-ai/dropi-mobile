@@ -1,0 +1,78 @@
+name: Validate C1 checkout and P2P
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - app/(tabs)/marketplace.tsx
+      - app/cart.tsx
+      - app/p2p.tsx
+      - app/product/[id].tsx
+      - app/register.tsx
+      - drizzle.config.ts
+      - drizzle/0014_c1_p2p.sql
+      - drizzle/p2p-schema.ts
+      - drizzle/meta/_journal.json
+      - lib/marketplace-cart.ts
+      - server/order-management-service.ts
+      - server/p2p-policy.ts
+      - server/p2p-router.ts
+      - server/routers.ts
+      - tests/c1-checkout-p2p-contract.test.ts
+      - tests/p2p-policy.test.ts
+      - .github/workflows/validate-c1-checkout-p2p-pr.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  certification:
+    name: M1 C1 checkout and P2P certification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run C1 policy and source-contract tests
+        run: >-
+          node --import tsx --test
+          tests/p2p-policy.test.ts
+          tests/c1-checkout-p2p-contract.test.ts
+          tests/marketplace-review-policy.test.ts
+          tests/marketplace-experience-contract.test.ts
+
+      - name: Run C1 and M1 regression certification
+        run: >-
+          pnpm exec vitest run
+          tests/order-state-machine.test.ts
+          tests/order-transition-notifications.test.ts
+          tests/order-management-integration-contract.test.ts
+          tests/marketplace-controls-policy.test.ts
+          tests/marketplace-controls-integration-contract.test.ts
+          tests/push-state-notifications.test.ts
+          tests/push-state-integration-contract.test.ts
+          tests/live-tracking-security.test.ts
+          tests/live-tracking-client-contract.test.ts
+          tests/operational-safety-certification.test.ts
+
+      - name: TypeScript check
+        run: pnpm check
+
+      - name: Reject whitespace errors
+        run: git diff --check origin/main...HEAD

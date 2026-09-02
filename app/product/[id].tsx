@@ -1,35 +1,59 @@
-import { useState } from "react";
-import { ScrollView, Text, View, TouchableOpacity, Alert } from "react-native";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
-import {
-  MOCK_PRODUCTS,
-  MOCK_MERCHANTS,
-  DELIVERY_MODE_INFO,
-  PRODUCT_CATEGORIES,
-  type DeliveryMode,
-  type DeliveryBadge,
-} from "@/lib/marketplace-data";
+import { useDropiAuth } from "@/lib/auth-context";
+import { addMarketplaceCartItem } from "@/lib/marketplace-cart";
 import { safeGoBack } from "@/lib/safe-back";
+import { trpc } from "@/lib/trpc";
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useColors();
   const router = useRouter();
-  const [selectedMode, setSelectedMode] = useState<DeliveryMode | null>(null);
+  const { user } = useDropiAuth();
   const [quantity, setQuantity] = useState(1);
-  const [droneAccepted, setDroneAccepted] = useState(false);
-  const [showDroneConditions, setShowDroneConditions] = useState(false);
+  const zone = user?.zone?.trim() || "";
+  const productId = Number(id);
 
-  const product = MOCK_PRODUCTS.find((p) => p.id === Number(id));
-  const merchant = product ? MOCK_MERCHANTS.find((m) => m.id === product.merchantId) : null;
-  const category = product ? PRODUCT_CATEGORIES.find((c) => c.id === product.category) : null;
+  const productQuery = trpc.product.getById.useQuery(
+    { id: Number.isSafeInteger(productId) ? productId : 0, zone },
+    { enabled: Boolean(zone) && Number.isSafeInteger(productId) && productId > 0 },
+  );
+  const product = productQuery.data;
+  const storeQuery = trpc.store.getById.useQuery(
+    { id: product?.storeId || 0, zone },
+    { enabled: Boolean(product?.storeId) && Boolean(zone) },
+  );
+  const store = storeQuery.data;
 
-  if (!product || !merchant) {
+  const imageUrl = useMemo(() => {
+    const images = product?.images;
+    return Array.isArray(images) && typeof images[0] === "string" ? images[0] : null;
+  }, [product?.images]);
+  const eligibleModes = useMemo(
+    () => (product?.deliveryBadges || []).filter((badge) => badge.isEligible).map((badge) => badge.mode),
+    [product?.deliveryBadges],
+  );
+
+  if (!zone) {
     return (
       <ScreenContainer className="p-6">
-        <Text style={{ color: colors.foreground, fontSize: 16 }}>Product not found</Text>
+        <Text style={{ color: colors.foreground, fontSize: 16, fontWeight: "700" }}>Operating zone required</Text>
+        <Text style={{ color: colors.muted, marginTop: 8 }}>Set your C1 operating zone before opening a Marketplace product.</Text>
+      </ScreenContainer>
+    );
+  }
+
+  if (productQuery.isLoading) {
+    return <ScreenContainer className="items-center justify-center"><ActivityIndicator size="large" /></ScreenContainer>;
+  }
+
+  if (!product) {
+    return (
+      <ScreenContainer className="p-6">
+        <Text style={{ color: colors.foreground, fontSize: 16 }}>Product is not available in this zone.</Text>
         <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginTop: 16 }}>
           <Text style={{ color: colors.primary }}>← Back</Text>
         </TouchableOpacity>
@@ -37,323 +61,113 @@ export default function ProductDetailScreen() {
     );
   }
 
-  const availableBadges = product.deliveryBadges.filter((b) => b.available);
-  const selectedBadge = availableBadges.find((b) => b.mode === selectedMode);
-  const totalPrice = product.price * quantity + (selectedBadge?.estimatedCost || 0);
+  const unitPrice = Number(product.price);
+  const displaySubtotal = unitPrice * quantity;
+  const stock = product.stock == null ? null : Number(product.stock);
 
-  function handleSelectDrone() {
-    setShowDroneConditions(true);
-  }
-
-  function handleAcceptDroneConditions() {
-    setDroneAccepted(true);
-    setSelectedMode("drone");
-    setShowDroneConditions(false);
-  }
-
-  function handleAddToCart() {
-    if (!selectedMode) {
-      Alert.alert("Select delivery mode", "Please choose a delivery mode before continuing.");
-      return;
-    }
-    if (selectedMode === "drone" && !droneAccepted) {
-      handleSelectDrone();
-      return;
-    }
-    Alert.alert(
-      "Added to cart ✓",
-      `${product!.name} x${quantity}\nDelivery: ${DELIVERY_MODE_INFO[selectedMode].label}\nTotal: ₱${totalPrice}`,
-      [
+  async function handleAddToCart() {
+    try {
+      await addMarketplaceCartItem({
+        productId: product!.id,
+        storeId: product!.storeId,
+        zone: product!.zone,
+        name: product!.name,
+        unitPriceDisplay: Number(product!.price),
+        currency: product!.currency,
+        quantity,
+        stock,
+      });
+      Alert.alert("Added to cart", `${product!.name} × ${quantity}`, [
         { text: "Continue shopping", onPress: () => safeGoBack(router) },
         { text: "View cart", onPress: () => router.push("/cart" as any) },
-      ]
-    );
+      ]);
+    } catch (error) {
+      Alert.alert("Cannot add to cart", error instanceof Error ? error.message : "Cart update failed.");
+    }
   }
 
   return (
     <ScreenContainer edges={["top", "left", "right"]}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* Back Button */}
-        <TouchableOpacity
-          onPress={() => safeGoBack(router)}
-          style={{ paddingHorizontal: 20, paddingTop: 12 }}
-        >
+        <TouchableOpacity onPress={() => safeGoBack(router)} style={{ paddingHorizontal: 20, paddingTop: 12 }}>
           <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "600" }}>← Back</Text>
         </TouchableOpacity>
 
-        {/* Product Image */}
-        <View
-          style={{
-            alignItems: "center",
-            justifyContent: "center",
-            height: 150,
-            backgroundColor: colors.surface,
-            marginHorizontal: 20,
-            marginTop: 12,
-            borderRadius: 20,
-          }}
-        >
-          <Text style={{ fontSize: 64 }}>{product.image}</Text>
+        <View style={{ alignItems: "center", justifyContent: "center", height: 180, backgroundColor: colors.surface, marginHorizontal: 20, marginTop: 12, borderRadius: 20, overflow: "hidden" }}>
+          {imageUrl ? (
+            <Image source={{ uri: imageUrl }} resizeMode="cover" style={{ width: "100%", height: "100%" }} />
+          ) : (
+            <Text style={{ fontSize: 64 }}>📦</Text>
+          )}
         </View>
 
-        {/* Product Info */}
         <View style={{ paddingHorizontal: 20, marginTop: 16 }}>
-          <Text style={{ fontSize: 22, fontWeight: "800", color: colors.foreground }}>
-            {product.name}
-          </Text>
-          <Text style={{ fontSize: 14, color: colors.muted, marginTop: 6 }}>
-            {product.description}
-          </Text>
+          <Text style={{ fontSize: 22, fontWeight: "800", color: colors.foreground }}>{product.name}</Text>
+          {product.description ? <Text style={{ fontSize: 14, color: colors.muted, marginTop: 6 }}>{product.description}</Text> : null}
 
-          {/* Merchant Info */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 12,
-              backgroundColor: colors.surface,
-              borderRadius: 12,
-              padding: 12,
-            }}
-          >
-            <Text style={{ fontSize: 24 }}>{merchant.image}</Text>
-            <View style={{ marginLeft: 10, flex: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: "600", color: colors.foreground }}>
-                {merchant.name}
-              </Text>
-              <Text style={{ fontSize: 11, color: colors.muted }}>
-                {merchant.type === "authorized" ? "✓ Comerciant Autorizat" :
-                 merchant.type === "artisan" ? "🎨 Artizan" :
-                 merchant.type === "community_seller" ? "🤝 Community Seller" : "👤 P2P"}
-              </Text>
-            </View>
-            <View style={{ alignItems: "center" }}>
-              <Text style={{ fontSize: 13, fontWeight: "700", color: colors.foreground }}>
-                ⭐ {merchant.rating}
-              </Text>
-              <Text style={{ fontSize: 10, color: colors.muted }}>{merchant.totalOrders} comenzi</Text>
-            </View>
+          <View style={{ marginTop: 12, backgroundColor: colors.surface, borderRadius: 12, padding: 12 }}>
+            <Text style={{ fontSize: 14, fontWeight: "700", color: colors.foreground }}>{store?.name || "Marketplace merchant"}</Text>
+            <Text style={{ fontSize: 11, color: colors.muted, marginTop: 3 }}>
+              {store ? `Trust score ${store.trustScore} • ${store.totalOrders} orders` : "Verified store information loading…"}
+            </Text>
           </View>
 
-          {/* Product Specs */}
           <View style={{ flexDirection: "row", marginTop: 16, gap: 8 }}>
             <View style={{ flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 12, alignItems: "center" }}>
               <Text style={{ fontSize: 11, color: colors.muted }}>Weight</Text>
-              <Text style={{ fontSize: 15, fontWeight: "700", color: colors.foreground }}>{product.weight} kg</Text>
+              <Text style={{ fontSize: 14, fontWeight: "700", color: colors.foreground }}>{(Number(product.weight) / 1000).toFixed(2)} kg</Text>
             </View>
             <View style={{ flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 12, alignItems: "center" }}>
               <Text style={{ fontSize: 11, color: colors.muted }}>Category</Text>
-              <Text style={{ fontSize: 15, fontWeight: "700", color: colors.foreground }}>{category?.icon} {category?.name}</Text>
+              <Text style={{ fontSize: 12, fontWeight: "700", color: colors.foreground, textAlign: "center" }}>{product.category}</Text>
             </View>
             <View style={{ flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 12, alignItems: "center" }}>
               <Text style={{ fontSize: 11, color: colors.muted }}>Zone</Text>
-              <Text style={{ fontSize: 15, fontWeight: "700", color: colors.foreground }}>{product.zone}</Text>
+              <Text style={{ fontSize: 12, fontWeight: "700", color: colors.foreground, textAlign: "center" }}>{product.zone}</Text>
             </View>
           </View>
 
-          {/* Price */}
-          <View style={{ marginTop: 20 }}>
-            <Text style={{ fontSize: 28, fontWeight: "800", color: colors.primary }}>
-              {product.price > 0 ? `₱${product.price}` : "GRATUIT"}
-            </Text>
-          </View>
+          <Text style={{ fontSize: 28, fontWeight: "800", color: colors.primary, marginTop: 20 }}>
+            {product.currency} {unitPrice.toFixed(2)}
+          </Text>
+          <Text style={{ fontSize: 11, color: colors.muted, marginTop: 4 }}>Product subtotal only. Delivery price/time is not promised by Marketplace.</Text>
 
-          {/* Quantity Selector */}
-          <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
-            <Text style={{ fontSize: 14, fontWeight: "600", color: colors.foreground, marginRight: 12 }}>
-              Quantity:
-            </Text>
-            <TouchableOpacity
-              onPress={() => setQuantity(Math.max(1, quantity - 1))}
-              style={{
-                width: 36, height: 36, borderRadius: 18,
-                backgroundColor: colors.surface, alignItems: "center", justifyContent: "center",
-                borderWidth: 0.5, borderColor: colors.border,
-              }}
-            >
+          <View style={{ flexDirection: "row", alignItems: "center", marginTop: 18 }}>
+            <Text style={{ fontSize: 14, fontWeight: "600", color: colors.foreground, marginRight: 12 }}>Quantity</Text>
+            <TouchableOpacity onPress={() => setQuantity(Math.max(1, quantity - 1))} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surface, alignItems: "center", justifyContent: "center" }}>
               <Text style={{ fontSize: 18, color: colors.foreground }}>−</Text>
             </TouchableOpacity>
-            <Text style={{ fontSize: 18, fontWeight: "700", color: colors.foreground, marginHorizontal: 16 }}>
-              {quantity}
-            </Text>
+            <Text style={{ fontSize: 18, fontWeight: "700", color: colors.foreground, marginHorizontal: 16 }}>{quantity}</Text>
             <TouchableOpacity
-              onPress={() => setQuantity(quantity + 1)}
-              style={{
-                width: 36, height: 36, borderRadius: 18,
-                backgroundColor: colors.surface, alignItems: "center", justifyContent: "center",
-                borderWidth: 0.5, borderColor: colors.border,
-              }}
+              onPress={() => setQuantity((current) => stock == null ? current + 1 : Math.min(stock, current + 1))}
+              style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surface, alignItems: "center", justifyContent: "center" }}
             >
               <Text style={{ fontSize: 18, color: colors.foreground }}>+</Text>
             </TouchableOpacity>
+            {stock != null && <Text style={{ marginLeft: 12, color: colors.muted, fontSize: 11 }}>{stock} available</Text>}
           </View>
 
-          {/* Delivery Mode Selection */}
-          <View style={{ marginTop: 24 }}>
-            <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground, marginBottom: 12 }}>
-              Select delivery mode
-            </Text>
-            <Text style={{ fontSize: 11, color: colors.muted, marginBottom: 12 }}>
-              Badges indicate possible modes. Final method is decided by the platform.
-            </Text>
-
-            {product.deliveryBadges.map((badge) => {
-              const modeInfo = DELIVERY_MODE_INFO[badge.mode];
-              const isSelected = selectedMode === badge.mode;
-              const isAvailable = badge.available;
-
-              return (
-                <TouchableOpacity
-                  key={badge.mode}
-                  onPress={() => {
-                    if (!isAvailable) return;
-                    if (badge.mode === "drone" && !droneAccepted) {
-                      handleSelectDrone();
-                    } else {
-                      setSelectedMode(badge.mode);
-                    }
-                  }}
-                  disabled={!isAvailable}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    backgroundColor: isSelected ? modeInfo.color + "15" : colors.surface,
-                    borderRadius: 14,
-                    padding: 14,
-                    marginBottom: 8,
-                    borderWidth: isSelected ? 2 : 0.5,
-                    borderColor: isSelected ? modeInfo.color : colors.border,
-                    opacity: isAvailable ? 1 : 0.4,
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={{ fontSize: 24 }}>{modeInfo.icon}</Text>
-                  <View style={{ flex: 1, marginLeft: 12 }}>
-                    <Text style={{ fontSize: 14, fontWeight: "700", color: isAvailable ? colors.foreground : colors.muted }}>
-                      {modeInfo.label}
-                    </Text>
-                    <Text style={{ fontSize: 11, color: colors.muted }}>
-                      {isAvailable ? modeInfo.description : "Unavailable pentru acest produs"}
-                    </Text>
-                  </View>
-                  {isAvailable && (
-                    <View style={{ alignItems: "flex-end" }}>
-                      <Text style={{ fontSize: 12, fontWeight: "600", color: modeInfo.color }}>
-                        {badge.estimatedTime}
-                      </Text>
-                      <Text style={{ fontSize: 11, color: colors.muted }}>
-                        +₱{badge.estimatedCost}
-                      </Text>
-                    </View>
-                  )}
-                  {!isAvailable && (
-                    <Text style={{ fontSize: 11, color: colors.error, fontWeight: "600" }}>✗</Text>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          {/* Drone Conditions Modal */}
-          {showDroneConditions && (
-            <View
-              style={{
-                backgroundColor: colors.surface,
-                borderRadius: 16,
-                padding: 20,
-                marginTop: 16,
-                borderWidth: 2,
-                borderColor: "#0066FF",
-              }}
-            >
-              <Text style={{ fontSize: 16, fontWeight: "800", color: colors.foreground, marginBottom: 12 }}>
-                🚁 Drone Delivery Conditions
-              </Text>
-              <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 20, marginBottom: 8 }}>
-                By selecting drone delivery, I accept the following conditions:
-              </Text>
-              <View style={{ gap: 6 }}>
-                <Text style={{ fontSize: 12, color: colors.foreground }}>
-                  • The drone does NOT wait for the client at the reception point
-                </Text>
-                <Text style={{ fontSize: 12, color: colors.foreground }}>
-                  • The drone does NOT negotiate the delivery location
-                </Text>
-                <Text style={{ fontSize: 12, color: colors.foreground }}>
-                  • The drone does NOT repeat delivery if reception fails
-                </Text>
-                <Text style={{ fontSize: 12, color: colors.foreground }}>
-                  • Failed reception triggers fallback (ground delivery)
-                </Text>
-                <Text style={{ fontSize: 12, color: colors.foreground }}>
-                  • The reception point must be valid and accessible
-                </Text>
-                <Text style={{ fontSize: 12, color: colors.foreground }}>
-                  • Final method may be changed by platform (weather, capacity)
-                </Text>
-              </View>
-              <View style={{ flexDirection: "row", marginTop: 16, gap: 10 }}>
-                <TouchableOpacity
-                  onPress={() => setShowDroneConditions(false)}
-                  style={{
-                    flex: 1, paddingVertical: 12, borderRadius: 10,
-                    backgroundColor: colors.background, alignItems: "center",
-                    borderWidth: 0.5, borderColor: colors.border,
-                  }}
-                >
-                  <Text style={{ color: colors.muted, fontWeight: "600" }}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleAcceptDroneConditions}
-                  style={{
-                    flex: 1, paddingVertical: 12, borderRadius: 10,
-                    backgroundColor: "#0066FF", alignItems: "center",
-                  }}
-                >
-                  <Text style={{ color: "#FFFFFF", fontWeight: "700" }}>Accept Conditionsle</Text>
-                </TouchableOpacity>
-              </View>
+          <View style={{ marginTop: 22 }}>
+            <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground }}>Eligible delivery modes</Text>
+            <Text style={{ fontSize: 11, color: colors.muted, marginTop: 4, marginBottom: 8 }}>Informational eligibility only. DROPi decides the final execution method.</Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+              {eligibleModes.map((mode) => (
+                <View key={mode} style={{ backgroundColor: colors.surface, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, marginRight: 8, marginBottom: 8 }}>
+                  <Text style={{ color: colors.foreground, fontSize: 12, fontWeight: "600" }}>{mode}</Text>
+                </View>
+              ))}
             </View>
-          )}
+          </View>
         </View>
       </ScrollView>
 
-      {/* Bottom Action Bar */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: colors.background,
-          borderTopWidth: 0.5,
-          borderTopColor: colors.border,
-          paddingHorizontal: 20,
-          paddingVertical: 16,
-          paddingBottom: 34,
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
+      <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: colors.background, borderTopWidth: 0.5, borderTopColor: colors.border, paddingHorizontal: 20, paddingVertical: 16, paddingBottom: 34, flexDirection: "row", alignItems: "center" }}>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 12, color: colors.muted }}>Total estimat</Text>
-          <Text style={{ fontSize: 20, fontWeight: "800", color: colors.foreground }}>
-            ₱{totalPrice}
-          </Text>
+          <Text style={{ fontSize: 11, color: colors.muted }}>Displayed product subtotal</Text>
+          <Text style={{ fontSize: 20, fontWeight: "800", color: colors.foreground }}>{product.currency} {displaySubtotal.toFixed(2)}</Text>
         </View>
-        <TouchableOpacity
-          onPress={handleAddToCart}
-          style={{
-            backgroundColor: colors.primary,
-            borderRadius: 14,
-            paddingHorizontal: 24,
-            paddingVertical: 14,
-          }}
-          activeOpacity={0.8}
-        >
-          <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 15 }}>
-            Add to cart
-          </Text>
+        <TouchableOpacity onPress={() => void handleAddToCart()} style={{ backgroundColor: colors.primary, borderRadius: 14, paddingHorizontal: 24, paddingVertical: 14 }} activeOpacity={0.8}>
+          <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 15 }}>Add to cart</Text>
         </TouchableOpacity>
       </View>
     </ScreenContainer>

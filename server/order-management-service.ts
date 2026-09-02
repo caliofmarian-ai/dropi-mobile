@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import {
   auditLogs,
   orders,
@@ -129,7 +129,31 @@ export async function createMarketplaceOrder(input: {
   });
 
   const orderUid = randomUUID();
-  const inserted = await db
+const orderId = await db.transaction(async (tx) => {
+  // Stock consumption and order creation are one atomic unit. The conditional
+  // update prevents two concurrent checkouts from selling the same final stock.
+  for (const line of normalizedItems) {
+    const product = productsById.get(line.productId)!;
+    if (product.stock != null) {
+      const updateResult = await tx
+        .update(products)
+        .set({
+          stock: sql`${products.stock} - ${line.quantity}`,
+          orderCount: sql`${products.orderCount} + 1`,
+        })
+        .where(and(eq(products.id, product.id), gte(products.stock, line.quantity)));
+      const affectedRows = Number((updateResult as any)?.[0]?.affectedRows ?? (updateResult as any)?.affectedRows ?? 0);
+      if (affectedRows !== 1) {
+        throw new Error(`${product.name} no longer has enough stock.`);
+      }
+    } else {
+      await tx.update(products)
+        .set({ orderCount: sql`${products.orderCount} + 1` })
+        .where(eq(products.id, product.id));
+    }
+  }
+
+  const inserted = await tx
     .insert(orders)
     .values({
       orderUid,
@@ -145,9 +169,10 @@ export async function createMarketplaceOrder(input: {
     })
     .$returningId();
 
-  const orderId = inserted[0]?.id;
-  if (!orderId) throw new Error("Order could not be created.");
-
+  const createdOrderId = inserted[0]?.id;
+  if (!createdOrderId) throw new Error("Order could not be created.");
+  return createdOrderId;
+});
   await db.insert(auditLogs).values({
     userId: input.actor.id,
     userRole: input.actor.dropiRole || "customer",
