@@ -1,0 +1,87 @@
+name: Reference APK — one shot
+
+on:
+  push:
+    branches:
+      - build/reference-apk-2026-09-02
+    paths:
+      - .github/workflows/reference-apk-build-once.yml
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build DROPi reference APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout reference source
+        uses: actions/checkout@v4
+
+      - name: Validate Expo credentials and backend URL
+        run: |
+          test -n "${{ secrets.EXPO_TOKEN }}" || { echo "EXPO_TOKEN is missing"; exit 1; }
+          test -n "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" || { echo "EXPO_PUBLIC_API_BASE_URL is missing"; exit 1; }
+          if echo "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" | grep -qE '(localhost|127\.0\.0\.1)'; then
+            echo "Mobile backend URL cannot be local"
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Verify EAS CLI
+        run: eas --version
+
+      - name: Build development APK and wait
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
+          EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+        run: |
+          eas build --profile development --platform android --non-interactive --wait --json > eas-build-result.json
+          cat eas-build-result.json
+
+      - name: Download completed APK
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const raw = fs.readFileSync('eas-build-result.json', 'utf8');
+          const parsed = JSON.parse(raw);
+          const build = Array.isArray(parsed) ? parsed[0] : parsed;
+          const url = build?.artifacts?.buildUrl || build?.artifacts?.applicationArchiveUrl;
+          if (!url) {
+            console.error('No APK URL found in EAS result');
+            process.exit(1);
+          }
+          fs.writeFileSync('apk-url.txt', url + '\n');
+          NODE
+          curl --fail --location "$(cat apk-url.txt)" --output DROPi-reference-2026-09-02.apk
+          test -s DROPi-reference-2026-09-02.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DROPi-reference-APK-2026-09-02
+          path: |
+            DROPi-reference-2026-09-02.apk
+            eas-build-result.json
+            apk-url.txt
+          if-no-files-found: error
+          retention-days: 30
