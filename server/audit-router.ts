@@ -111,7 +111,7 @@ export function buildAuditExportPayload(input: {
 
 export const auditRouter = router({
   list: auditInvestigatorProcedure
-    .input(auditFiltersSchema.extend({
+    .input(auditFiltersSchema.safeExtend({
       page: z.number().int().min(1).default(1),
       limit: z.number().int().min(1).max(100).default(50),
     }))
@@ -184,7 +184,7 @@ export const auditRouter = router({
     }),
 
   export: auditInvestigatorProcedure
-    .input(auditFiltersSchema.extend({ format: z.enum(["json", "csv"]) }))
+    .input(auditFiltersSchema.safeExtend({ format: z.enum(["json", "csv"]) }))
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) throw new Error("Database unavailable");
