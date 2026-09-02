@@ -168,12 +168,49 @@ export const auditLogs = mysqlTable("auditLogs", {
   userAgent: varchar("userAgent", { length: 500 }),
   sessionId: varchar("sessionId", { length: 100 }),
   duration: int("duration"),
+  retentionClass: mysqlEnum("retentionClass", ["operational", "security", "financial"]).default("operational").notNull(),
   // Timestamp
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
+
+/**
+ * Privacy consent ledger — immutable grants/withdrawals for purposes whose
+ * lawful basis is actually consent. Required processing never writes here.
+ */
+export const privacyConsents = mysqlTable("privacyConsents", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  purposeKey: varchar("purposeKey", { length: 100 }).notNull(),
+  purposeVersion: int("purposeVersion").notNull(),
+  granted: boolean("granted").notNull(),
+  source: mysqlEnum("source", ["app", "web", "operator", "system"]).default("app").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PrivacyConsent = typeof privacyConsents.$inferSelect;
+export type InsertPrivacyConsent = typeof privacyConsents.$inferInsert;
+
+/**
+ * Privacy retention run evidence. Data-rights erasure is deliberately separate
+ * and belongs to BATCH-022; this table records only authorized retention runs.
+ */
+export const privacyRetentionRuns = mysqlTable("privacyRetentionRuns", {
+  id: int("id").autoincrement().primaryKey(),
+  startedBy: int("startedBy").notNull(),
+  runMode: mysqlEnum("runMode", ["dry_run", "execute"]).default("execute").notNull(),
+  status: mysqlEnum("status", ["completed", "failed"]).notNull(),
+  eligibleCount: int("eligibleCount").default(0).notNull(),
+  affectedCount: int("affectedCount").default(0).notNull(),
+  details: json("details"),
+  startedAt: timestamp("startedAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"),
+});
+
+export type PrivacyRetentionRun = typeof privacyRetentionRuns.$inferSelect;
+export type InsertPrivacyRetentionRun = typeof privacyRetentionRuns.$inferInsert;
 
 /**
  * Verifications table — Delivery Partners submit documents to prove authorization.

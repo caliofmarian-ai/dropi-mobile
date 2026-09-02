@@ -2,6 +2,7 @@ import { eq, and, desc, gte, lte, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, sessions, auditLogs, InsertAuditLog, InsertSession } from "../drizzle/schema";
 import { type AuditChannel } from "./audit-policy";
+import { classifyAuditRetention } from "../shared/privacy-policy";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -248,7 +249,10 @@ export async function createAuditLog(data: InsertAuditLog & { channel: AuditChan
     return;
   }
   try {
-    await db.insert(auditLogs).values(data);
+    await db.insert(auditLogs).values({
+      ...data,
+      retentionClass: data.retentionClass ?? classifyAuditRetention(data.action),
+    });
   } catch (error) {
     console.error("[Audit] Failed to create log:", error);
   }
