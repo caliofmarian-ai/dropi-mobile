@@ -1,0 +1,120 @@
+name: Materialize C1 atomic checkout
+
+on:
+  push:
+    branches: [m1/c1-checkout-p2p]
+    paths:
+      - .github/workflows/materialize-c1-atomic-checkout.yml
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m1/c1-checkout-p2p
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Patch canonical order service
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path("server/order-management-service.ts")
+          text = path.read_text()
+          old_import = 'import { and, desc, eq, inArray } from "drizzle-orm";'
+          new_import = 'import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";'
+          if old_import not in text:
+              raise SystemExit("expected drizzle import not found")
+          text = text.replace(old_import, new_import, 1)
+
+          old = '''  const orderUid = randomUUID();
+          const inserted = await db
+            .insert(orders)
+            .values({
+              orderUid,
+              customerId: input.actor.id,
+              merchantId: store.ownerId,
+              status: "initiated",
+              items: snapshotItems,
+              totalAmount: totalAmount.toFixed(2),
+              deliveryAddress: input.deliveryAddress.trim(),
+              pickupAddress: store.physicalAddress || store.name,
+              zone: requestedZone,
+              packageWeight: (totalWeightGrams / 1000).toFixed(2),
+            })
+            .$returningId();
+
+          const orderId = inserted[0]?.id;
+          if (!orderId) throw new Error("Order could not be created.");'''
+
+          new = '''  const orderUid = randomUUID();
+          const orderId = await db.transaction(async (tx) => {
+            // Stock consumption and order creation are one atomic unit. The conditional
+            // update prevents two concurrent checkouts from selling the same final stock.
+            for (const line of normalizedItems) {
+              const product = productsById.get(line.productId)!;
+              if (product.stock != null) {
+                const updateResult = await tx
+                  .update(products)
+                  .set({
+                    stock: sql`${products.stock} - ${line.quantity}`,
+                    orderCount: sql`${products.orderCount} + 1`,
+                  })
+                  .where(and(eq(products.id, product.id), gte(products.stock, line.quantity)));
+                const affectedRows = Number((updateResult as any)?.[0]?.affectedRows ?? (updateResult as any)?.affectedRows ?? 0);
+                if (affectedRows !== 1) {
+                  throw new Error(`${product.name} no longer has enough stock.`);
+                }
+              } else {
+                await tx.update(products)
+                  .set({ orderCount: sql`${products.orderCount} + 1` })
+                  .where(eq(products.id, product.id));
+              }
+            }
+
+            const inserted = await tx
+              .insert(orders)
+              .values({
+                orderUid,
+                customerId: input.actor.id,
+                merchantId: store.ownerId,
+                status: "initiated",
+                items: snapshotItems,
+                totalAmount: totalAmount.toFixed(2),
+                deliveryAddress: input.deliveryAddress.trim(),
+                pickupAddress: store.physicalAddress || store.name,
+                zone: requestedZone,
+                packageWeight: (totalWeightGrams / 1000).toFixed(2),
+              })
+              .$returningId();
+
+            const createdOrderId = inserted[0]?.id;
+            if (!createdOrderId) throw new Error("Order could not be created.");
+            return createdOrderId;
+          });'''
+          if old not in text:
+              raise SystemExit("expected order insertion block not found")
+          path.write_text(text.replace(old, new, 1))
+      - name: C1 policy tests
+        run: node --import tsx --test tests/p2p-policy.test.ts tests/c1-checkout-p2p-contract.test.ts tests/marketplace-review-policy.test.ts tests/order-state-machine.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check
+      - name: Commit verified atomic checkout
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/materialize-c1-atomic-checkout.yml
+          git add server/order-management-service.ts
+          git commit -m "feat: make C1 checkout stock reservation atomic"
+          git push origin HEAD:m1/c1-checkout-p2p
