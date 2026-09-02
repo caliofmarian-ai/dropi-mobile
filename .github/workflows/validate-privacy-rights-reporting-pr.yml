@@ -1,0 +1,47 @@
+name: Validate Privacy rights reporting
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Privacy rights and authority contracts
+        run: >-
+          node --import tsx --test
+          tests/privacy-rights-policy.test.ts
+          tests/authority-report-policy.test.ts
+          tests/privacy-rights-reporting-contract.test.ts
+          tests/privacy-policy.test.ts
+          tests/privacy-controls-contract.test.ts
+          tests/audit-policy.test.ts
+          tests/audit-capture-attribution.test.ts
+          tests/c1-audit-separation-contract.test.ts
+          tests/audit-investigator-export.test.ts
+      - name: Operational regressions
+        run: >-
+          pnpm exec vitest run
+          tests/sdk.authenticate-request.test.ts
+          tests/auth.logout.test.ts
+          tests/order-state-machine.test.ts
+          tests/order-management-integration-contract.test.ts
+          tests/marketplace-controls-integration-contract.test.ts
+          tests/live-tracking-security.test.ts
+          tests/operational-safety-certification.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
