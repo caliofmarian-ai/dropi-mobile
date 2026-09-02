@@ -1,28 +1,11 @@
 import { decimal, index, int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
-
-export const TRACE_CHANNELS = ["C1", "C2", "C3", "ADMIN"] as const;
-export const TRACE_TARGET_TYPES = ["order", "b2b"] as const;
-export const TRACE_EVENT_TYPES = [
-  "assignment",
-  "pickup",
-  "execution_started",
-  "transfer",
-  "geofence_entered",
-  "fallback",
-  "stop",
-  "delivery_completed",
-  "delivery_failed",
-] as const;
-export const RECEPTION_METHODS = [
-  "personal_handover",
-  "leave_at_door",
-  "leave_at_gate",
-  "leave_in_yard",
-  "drone_reception",
-  "droneport_pickup",
-  "fallback_handover",
-] as const;
-export const ATTESTATION_KINDS = ["recorded_by", "recipient_confirmed", "system_verified"] as const;
+import {
+  ATTESTATION_KINDS,
+  RECEPTION_METHODS,
+  TRACE_CHANNELS,
+  TRACE_EVENT_TYPES,
+  TRACE_TARGET_TYPES,
+} from "../shared/operational-trace-policy";
 
 /**
  * Immutable operational evidence distinct from Audit Core. Audit says who invoked
