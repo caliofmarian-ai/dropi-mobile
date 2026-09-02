@@ -48,4 +48,4 @@ jobs:
       - name: TypeScript
         run: pnpm check
       - name: Whitespace
-        run: git diff --check origin/${{ github.base_ref }}...HEAD
+        run: git diff --check HEAD^1 HEAD^2
