@@ -1,6 +1,7 @@
 import { eq, and, desc, gte, lte, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, sessions, auditLogs, InsertAuditLog, InsertSession } from "../drizzle/schema";
+import { type AuditChannel } from "./audit-policy";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -240,7 +241,7 @@ export async function deleteUserSessions(userId: number) {
 
 // ===== AUDIT LOG QUERIES =====
 
-export async function createAuditLog(data: InsertAuditLog) {
+export async function createAuditLog(data: InsertAuditLog & { channel: AuditChannel }) {
   const db = await getDb();
   if (!db) {
     console.warn("[Audit] Cannot log: database not available");
@@ -254,10 +255,11 @@ export async function createAuditLog(data: InsertAuditLog) {
 }
 
 export async function listAuditLogs(opts: {
-  channel?: string;
+  channel: AuditChannel;
   userId?: number;
   action?: string;
   severity?: string;
+  phantomMode?: boolean;
   from?: Date;
   to?: Date;
   page?: number;
@@ -269,11 +271,11 @@ export async function listAuditLogs(opts: {
   const limit = opts.limit || 50;
   const offset = (page - 1) * limit;
 
-  const conditions = [];
-  if (opts.channel) conditions.push(eq(auditLogs.channel, opts.channel as any));
+  const conditions = [eq(auditLogs.channel, opts.channel)];
   if (opts.userId) conditions.push(eq(auditLogs.userId, opts.userId));
   if (opts.action) conditions.push(like(auditLogs.action, `%${opts.action}%`));
   if (opts.severity) conditions.push(eq(auditLogs.severity, opts.severity as any));
+  if (opts.phantomMode !== undefined) conditions.push(eq(auditLogs.isPhantomMode, opts.phantomMode));
   if (opts.from) conditions.push(gte(auditLogs.createdAt, opts.from));
   if (opts.to) conditions.push(lte(auditLogs.createdAt, opts.to));
 
@@ -284,26 +286,30 @@ export async function listAuditLogs(opts: {
   return { logs: result, total };
 }
 
-export async function getAuditLogsByUser(userId: number, page = 1, limit = 50) {
+export async function getAuditLogsByUser(channel: AuditChannel, userId: number, page = 1, limit = 50) {
   const db = await getDb();
   if (!db) return { logs: [], total: 0 };
   const offset = (page - 1) * limit;
-  const result = await db.select().from(auditLogs).where(eq(auditLogs.userId, userId)).limit(limit).offset(offset).orderBy(desc(auditLogs.createdAt));
-  const countResult = await db.select({ count: sql<number>`count(*)` }).from(auditLogs).where(eq(auditLogs.userId, userId));
+  const where = and(eq(auditLogs.channel, channel), eq(auditLogs.userId, userId));
+  const result = await db.select().from(auditLogs).where(where).limit(limit).offset(offset).orderBy(desc(auditLogs.createdAt));
+  const countResult = await db.select({ count: sql<number>`count(*)` }).from(auditLogs).where(where);
   return { logs: result, total: countResult[0]?.count || 0 };
 }
 
-export async function getAuditLogsByResource(resourceType: string, resourceId: string) {
+export async function getAuditLogsByResource(channel: AuditChannel, resourceType: string, resourceId: string) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(auditLogs).where(and(eq(auditLogs.resourceType, resourceType), eq(auditLogs.resourceId, resourceId))).orderBy(desc(auditLogs.createdAt));
+  return db.select().from(auditLogs).where(and(
+    eq(auditLogs.channel, channel),
+    eq(auditLogs.resourceType, resourceType),
+    eq(auditLogs.resourceId, resourceId),
+  )).orderBy(desc(auditLogs.createdAt));
 }
 
-export async function getAuditStats(opts: { channel?: string; from?: Date; to?: Date }) {
+export async function getAuditStats(opts: { channel: AuditChannel; from?: Date; to?: Date }) {
   const db = await getDb();
   if (!db) return { total: 0, byAction: [], bySeverity: [] };
-  const conditions = [];
-  if (opts.channel) conditions.push(eq(auditLogs.channel, opts.channel as any));
+  const conditions = [eq(auditLogs.channel, opts.channel)];
   if (opts.from) conditions.push(gte(auditLogs.createdAt, opts.from));
   if (opts.to) conditions.push(lte(auditLogs.createdAt, opts.to));
   const where = conditions.length > 0 ? and(...conditions) : undefined;

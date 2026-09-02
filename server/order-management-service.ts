@@ -9,7 +9,8 @@ import {
   users,
 } from "../drizzle/schema";
 import { createInAppNotification } from "./create-notification";
-import { getDb } from "./db";
+import { buildAuditAttribution, type AuditSessionLike } from "./audit-policy";
+import { createAuditLog, getDb } from "./db";
 import {
   assertOrderTransitionAuthorized,
   type OrderActor,
@@ -46,6 +47,7 @@ export async function createMarketplaceOrder(input: {
   items: MarketplaceOrderLineInput[];
   deliveryAddress: string;
   zone: string;
+  auditSession?: AuditSessionLike;
 }): Promise<{ orderId: number; orderUid: string; status: "initiated" }> {
   if (input.actor.dropiRole !== "customer") {
     throw new Error("Only customer accounts can place Marketplace orders.");
@@ -173,7 +175,8 @@ const orderId = await db.transaction(async (tx) => {
   if (!createdOrderId) throw new Error("Order could not be created.");
   return createdOrderId;
 });
-  await db.insert(auditLogs).values({
+  const attribution = buildAuditAttribution("C1", input.auditSession);
+  await createAuditLog({
     userId: input.actor.id,
     userRole: input.actor.dropiRole || "customer",
     action: "order.created",
@@ -181,7 +184,10 @@ const orderId = await db.transaction(async (tx) => {
     resourceId: String(orderId),
     details: { orderUid, storeId: store.id, status: "initiated", itemCount: snapshotItems.length },
     severity: "info",
-    channel: input.actor.channel || "C1",
+    channel: attribution.channel,
+    isPhantomMode: attribution.isPhantomMode,
+    phantomAdminId: attribution.phantomAdminId,
+    isAIAction: false,
   });
 
   await sendPreferenceAwarePush({
@@ -261,6 +267,7 @@ export async function transitionMarketplaceOrder(input: {
   orderId: number;
   newStatus: OrderStatus;
   reason?: string;
+  auditSession?: AuditSessionLike;
 }): Promise<{ previousStatus: OrderStatus; status: OrderStatus; pilotId: number | null; readyPilotNotifications: number }> {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
@@ -290,7 +297,8 @@ export async function transitionMarketplaceOrder(input: {
 
   await db.update(orders).set(update).where(eq(orders.id, order.id));
 
-  await db.insert(auditLogs).values({
+  const attribution = buildAuditAttribution("C1", input.auditSession);
+  await createAuditLog({
     userId: input.actor.id,
     userRole: authorization.actorKind,
     action: "order.status_transition",
@@ -304,7 +312,10 @@ export async function transitionMarketplaceOrder(input: {
       pilotId,
     },
     severity: transitionSeverity(input.newStatus),
-    channel: input.actor.channel || "C1",
+    channel: attribution.channel,
+    isPhantomMode: attribution.isPhantomMode,
+    phantomAdminId: attribution.phantomAdminId,
+    isAIAction: false,
   });
 
   await notifyOrderTransition({
@@ -341,7 +352,7 @@ export async function getMarketplaceOrderTimeline(orderId: number) {
   return db
     .select()
     .from(auditLogs)
-    .where(and(eq(auditLogs.resourceType, "order"), eq(auditLogs.resourceId, String(orderId))))
+    .where(and(eq(auditLogs.channel, "C1"), eq(auditLogs.resourceType, "order"), eq(auditLogs.resourceId, String(orderId))))
     .orderBy(desc(auditLogs.createdAt));
 }
 

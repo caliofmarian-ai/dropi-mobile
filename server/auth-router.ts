@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
-import { router, publicProcedure, protectedProcedure, adminProcedure } from "./_core/trpc";
+import { router, publicProcedure, protectedProcedure, adminProcedure, phantomProcedure } from "./_core/trpc";
 import { sdk } from "./_core/sdk";
 import { maskEmail, sendPlatformEmail } from "./_core/mail";
 import * as db from "./db";
 import { createAuditLog } from "./db";
+import { requirePhantomAdminId } from "./audit-policy";
 
 async function sendVerificationEmail(toEmail: string, code: string): Promise<boolean> {
   return sendPlatformEmail({
@@ -638,7 +639,11 @@ export const adminAuthRouter = router({
     }
 
     // Create phantom session token
-    const token = await sdk.createSessionToken(targetUser.openId, { name: `[PHANTOM] ${targetUser.name}` });
+    const token = await sdk.createSessionToken(targetUser.openId, {
+      name: `[PHANTOM] ${targetUser.name}`,
+      expiresInMs: 2 * 60 * 60 * 1000,
+      phantomAdminId: user.id,
+    });
 
     // Store phantom session
     await db.createSession({
@@ -671,27 +676,60 @@ export const adminAuthRouter = router({
     return { token, user: targetUser };
   }),
 
-  exitPhantom: adminProcedure.mutation(async ({ ctx }) => {
-    const user = ctx.user!;
-    // Audit
-    await createAuditLog({
-      userId: user.id,
-      userRole: user.dropiRole,
-      action: "admin.phantom_exit",
-      resourceType: "user",
-      resourceId: String(user.id),
-      severity: "critical",
-      channel: "ADMIN",
-      isAIAction: user.isAIAgent,
-      isPhantomMode: true,
-      phantomAdminId: user.id,
+  exitPhantom: phantomProcedure.mutation(async ({ ctx }) => {
+    let phantomAdminId: number;
+    try {
+      phantomAdminId = requirePhantomAdminId(ctx.session);
+    } catch {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Current session is not a valid phantom session" });
+    }
+    if (!ctx.sessionToken) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Phantom session token is unavailable" });
+    }
+
+    const targetUser = ctx.user!;
+    const adminUser = await db.getUserById(phantomAdminId);
+    const isAdmin = adminUser?.role === "admin" || adminUser?.dropiRole === "system_administrator";
+    if (!adminUser || !adminUser.isActive || !isAdmin) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Phantom administrator is no longer authorized" });
+    }
+
+    await db.deleteSessionByToken(ctx.sessionToken);
+    const token = await sdk.createSessionToken(adminUser.openId, {
+      name: adminUser.name || "",
+      expiresInMs: 7 * 24 * 60 * 60 * 1000,
+    });
+    await db.createSession({
+      userId: adminUser.id,
+      token,
+      deviceInfo: getDeviceInfo(ctx.req),
       ipAddress: getClientIp(ctx.req),
-      userAgent: getDeviceInfo(ctx.req),
+      isPhantom: false,
+      phantomAdminId: null,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
-    // Return admin's own token
-    const token = await sdk.createSessionToken(user.openId, { name: user.name || "" });
-    return { token, user };
+    await createAuditLog({
+      userId: adminUser.id,
+      userRole: adminUser.dropiRole,
+      action: "admin.phantom_exit",
+      resourceType: "user",
+      resourceId: String(targetUser.id),
+      severity: "critical",
+      channel: "ADMIN",
+      isAIAction: adminUser.isAIAgent,
+      isPhantomMode: true,
+      phantomAdminId,
+      ipAddress: getClientIp(ctx.req),
+      userAgent: getDeviceInfo(ctx.req),
+      details: {
+        targetUserId: targetUser.id,
+        targetRole: targetUser.dropiRole,
+        targetChannel: targetUser.channel,
+      },
+    });
+
+    return { token, user: adminUser };
   }),
 
   toggleUserActive: adminProcedure.input(z.object({
@@ -753,38 +791,41 @@ export const adminAuthRouter = router({
 // ===== AUDIT ROUTER =====
 export const auditRouter = router({
   list: adminProcedure.input(z.object({
-    channel: z.enum(["C1", "C2", "C3", "ADMIN"]).optional(),
+    channel: z.enum(["C1", "C2", "C3", "ADMIN"]),
     userId: z.number().optional(),
     action: z.string().optional(),
     severity: z.enum(["info", "warning", "critical"]).optional(),
+    phantomMode: z.boolean().optional(),
     from: z.date().optional(),
     to: z.date().optional(),
     page: z.number().min(1).default(1),
     limit: z.number().min(1).max(100).default(50),
-  }).default({ page: 1, limit: 50 })).query(async ({ input }) => {
+  })).query(async ({ input }) => {
     return db.listAuditLogs(input);
   }),
 
   getByUser: adminProcedure.input(z.object({
+    channel: z.enum(["C1", "C2", "C3", "ADMIN"]),
     userId: z.number(),
     page: z.number().min(1).default(1),
     limit: z.number().min(1).max(100).default(50),
   })).query(async ({ input }) => {
-    return db.getAuditLogsByUser(input.userId, input.page, input.limit);
+    return db.getAuditLogsByUser(input.channel, input.userId, input.page, input.limit);
   }),
 
   getByResource: adminProcedure.input(z.object({
+    channel: z.enum(["C1", "C2", "C3", "ADMIN"]),
     resourceType: z.string(),
     resourceId: z.string(),
   })).query(async ({ input }) => {
-    return db.getAuditLogsByResource(input.resourceType, input.resourceId);
+    return db.getAuditLogsByResource(input.channel, input.resourceType, input.resourceId);
   }),
 
   getStats: adminProcedure.input(z.object({
-    channel: z.enum(["C1", "C2", "C3", "ADMIN"]).optional(),
+    channel: z.enum(["C1", "C2", "C3", "ADMIN"]),
     from: z.date().optional(),
     to: z.date().optional(),
-  }).default({})).query(async ({ input }) => {
+  })).query(async ({ input }) => {
     return db.getAuditStats(input);
   }),
 });

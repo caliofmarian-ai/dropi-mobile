@@ -1,8 +1,9 @@
 import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG } from "../../shared/const.js";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
-import type { TrpcContext } from "./context";
+import type { AuditChannel } from "../audit-policy";
 import { logProcedureCall } from "../audit-middleware";
+import type { TrpcContext } from "./context";
 
 const t = initTRPC.context<TrpcContext>().create({
   transformer: superjson,
@@ -11,43 +12,48 @@ const t = initTRPC.context<TrpcContext>().create({
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
-// Audit middleware — logs all procedure calls for authenticated users
-const auditLog = t.middleware(async (opts) => {
-  const startTime = Date.now();
-  let success = true;
-  let errorMsg: string | undefined;
+function auditMiddleware(channelOverride?: AuditChannel) {
+  return t.middleware(async (opts) => {
+    const startTime = Date.now();
+    let success = true;
+    let errorMsg: string | undefined;
 
-  try {
-    const rawInput = await opts.getRawInput();
-    const result = await opts.next(opts);
-    if (!result.ok) {
+    try {
+      const rawInput = await opts.getRawInput();
+      const result = await opts.next(opts);
+      if (!result.ok) {
+        success = false;
+        errorMsg = "procedure_error";
+      }
+      logProcedureCall({
+        ctx: opts.ctx,
+        path: opts.path,
+        input: rawInput,
+        startTime,
+        success,
+        error: errorMsg,
+        channelOverride,
+      }).catch((e) => console.error("[Audit] Logging failed:", e));
+      return result;
+    } catch (error: any) {
       success = false;
-      errorMsg = "procedure_error";
+      errorMsg = error?.message || "unknown_error";
+      logProcedureCall({
+        ctx: opts.ctx,
+        path: opts.path,
+        input: undefined,
+        startTime,
+        success: false,
+        error: errorMsg,
+        channelOverride,
+      }).catch((e) => console.error("[Audit] Logging failed:", e));
+      throw error;
     }
-    // Log asynchronously (don't block response)
-    logProcedureCall({
-      ctx: opts.ctx,
-      path: opts.path,
-      input: rawInput,
-      startTime,
-      success,
-      error: errorMsg,
-    }).catch((e) => console.error("[Audit] Logging failed:", e));
-    return result;
-  } catch (error: any) {
-    success = false;
-    errorMsg = error?.message || "unknown_error";
-    logProcedureCall({
-      ctx: opts.ctx,
-      path: opts.path,
-      input: undefined,
-      startTime,
-      success: false,
-      error: errorMsg,
-    }).catch((e) => console.error("[Audit] Logging failed:", e));
-    throw error;
-  }
-});
+  });
+}
+
+const auditLog = auditMiddleware();
+const auditAdminLog = auditMiddleware("ADMIN");
 
 const requireUser = t.middleware(async (opts) => {
   const { ctx, next } = opts;
@@ -59,10 +65,13 @@ const requireUser = t.middleware(async (opts) => {
   });
 });
 
-// Protected procedure: requires authenticated user + audit logging
 export const protectedProcedure = t.procedure.use(requireUser).use(auditLog);
 
-// Admin procedure: requires system_administrator dropiRole OR legacy admin role + audit logging
+// Phantom-control operations run while the authenticated identity is the target
+// user, but they are administrative control actions and therefore belong to the
+// ADMIN audit stream. The procedure itself still validates phantom state.
+export const phantomProcedure = t.procedure.use(requireUser).use(auditAdminLog);
+
 export const adminProcedure = t.procedure.use(
   t.middleware(async (opts) => {
     const { ctx, next } = opts;
@@ -70,7 +79,6 @@ export const adminProcedure = t.procedure.use(
     if (!user) {
       throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
     }
-    // Accept both legacy "admin" role and DROPi system_administrator
     const isAdmin = user.role === "admin" || (user as any).dropiRole === "system_administrator";
     if (!isAdmin) {
       throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
@@ -79,4 +87,4 @@ export const adminProcedure = t.procedure.use(
       ctx: { ...ctx, user },
     });
   }),
-).use(auditLog);
+).use(auditAdminLog);

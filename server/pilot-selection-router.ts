@@ -16,8 +16,9 @@
  */
 
 import { router, publicProcedure, protectedProcedure, adminProcedure } from "./_core/trpc";
-import { getDb } from "./db";
-import { pilotProfiles, pilotRatingHistory, users, b2bDeliveries, auditLogs } from "../drizzle/schema";
+import { buildAuditAttribution } from "./audit-policy";
+import { createAuditLog, getDb } from "./db";
+import { pilotProfiles, pilotRatingHistory, users, b2bDeliveries } from "../drizzle/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
@@ -176,22 +177,25 @@ export const pilotSelectionRouter = router({
       await recordAssignment(input.pilotUserId);
 
       // 7. Audit log
-      await db.insert(auditLogs).values({
+      const attribution = buildAuditAttribution(userChannel, ctx.session);
+      await createAuditLog({
         userId: operatorId,
-        userRole: userRole,
+        userRole,
         action: "pilot_assigned_manual",
-        channel: userChannel,
+        channel: attribution.channel,
         resourceType: "b2bDelivery",
         resourceId: String(input.deliveryId),
         severity: "info",
-        details: JSON.stringify({
+        isPhantomMode: attribution.isPhantomMode,
+        phantomAdminId: attribution.phantomAdminId,
+        details: {
           deliveryId: input.deliveryId,
           pilotUserId: input.pilotUserId,
           assignmentType: "manual",
           operatorRole: userRole,
           operatorChannel: userChannel,
           trackingCode: delivery.trackingCode,
-        }),
+        },
         ipAddress: null,
         userAgent: null,
       });

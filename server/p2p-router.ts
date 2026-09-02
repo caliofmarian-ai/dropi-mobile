@@ -2,11 +2,11 @@ import { randomUUID } from "node:crypto";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, gt, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
-import { auditLogs } from "../drizzle/schema";
 import { p2pCommunityListings, p2pParcelRequests } from "../drizzle/p2p-schema";
 import { normalizeMarketplaceZone } from "../shared/marketplace-policy";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { getDb } from "./db";
+import { buildAuditAttribution, type AuditSessionLike } from "./audit-policy";
+import { createAuditLog, getDb } from "./db";
 import {
   assertP2pActiveListingLimit,
   assertP2pActor,
@@ -26,15 +26,15 @@ function actorFromContext(user: any) {
 
 async function audit(input: {
   user: any;
+  session?: AuditSessionLike;
   action: string;
   resourceType: string;
   resourceId: string;
   details?: Record<string, unknown>;
   severity?: "info" | "warning" | "critical";
 }) {
-  const db = await getDb();
-  if (!db) return;
-  await db.insert(auditLogs).values({
+  const attribution = buildAuditAttribution("C1", input.session);
+  await createAuditLog({
     userId: Number(input.user.id),
     userRole: String(input.user.dropiRole || "customer"),
     action: input.action,
@@ -42,7 +42,10 @@ async function audit(input: {
     resourceId: input.resourceId,
     details: input.details || null,
     severity: input.severity || "info",
-    channel: "C1",
+    channel: attribution.channel,
+    isPhantomMode: attribution.isPhantomMode,
+    phantomAdminId: attribution.phantomAdminId,
+    isAIAction: Boolean(input.user.isAIAgent),
   });
 }
 
@@ -98,6 +101,7 @@ export const p2pRouter = router({
 
       await audit({
         user: ctx.user,
+        session: ctx.session,
         action: "p2p.community_offer.created",
         resourceType: "p2p_community_offer",
         resourceId: String(listingId),
@@ -128,7 +132,7 @@ export const p2pRouter = router({
         .limit(1);
       if (!listing) throw new TRPCError({ code: "NOT_FOUND", message: "Community offer not found" });
       await db.update(p2pCommunityListings).set({ status: "closed" }).where(eq(p2pCommunityListings.id, listing.id));
-      await audit({ user: ctx.user, action: "p2p.community_offer.closed", resourceType: "p2p_community_offer", resourceId: String(listing.id) });
+      await audit({ user: ctx.user, session: ctx.session, action: "p2p.community_offer.closed", resourceType: "p2p_community_offer", resourceId: String(listing.id) });
       return { success: true };
     }),
 
@@ -195,6 +199,7 @@ export const p2pRouter = router({
       if (!requestId) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Private parcel request could not be created" });
       await audit({
         user: ctx.user,
+        session: ctx.session,
         action: "p2p.private_parcel.created",
         resourceType: "p2p_private_parcel",
         resourceId: String(requestId),
@@ -226,7 +231,7 @@ export const p2pRouter = router({
       if (!request) throw new TRPCError({ code: "NOT_FOUND", message: "Private parcel request not found" });
       if (request.status !== "initiated") throw new TRPCError({ code: "BAD_REQUEST", message: "Only initiated private parcels can be cancelled" });
       await db.update(p2pParcelRequests).set({ status: "cancelled" }).where(eq(p2pParcelRequests.id, request.id));
-      await audit({ user: ctx.user, action: "p2p.private_parcel.cancelled", resourceType: "p2p_private_parcel", resourceId: String(request.id), severity: "warning" });
+      await audit({ user: ctx.user, session: ctx.session, action: "p2p.private_parcel.cancelled", resourceType: "p2p_private_parcel", resourceId: String(request.id), severity: "warning" });
       return { success: true };
     }),
 
@@ -258,6 +263,7 @@ export const p2pRouter = router({
       }).where(eq(p2pCommunityListings.id, listing.id));
       await audit({
         user: ctx.user,
+        session: ctx.session,
         action: `p2p.community_offer.${status}`,
         resourceType: "p2p_community_offer",
         resourceId: String(listing.id),
