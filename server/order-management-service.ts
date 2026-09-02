@@ -19,6 +19,8 @@ import {
 import { notifyOrderTransition } from "./order-transition-notifications";
 import { sendPreferenceAwarePush } from "./preference-aware-push";
 import { evaluateMarketplaceListingVisibility, normalizeMarketplaceZone, sameMarketplaceZone } from "../shared/marketplace-policy";
+import type { CompletionProofInput } from "../shared/operational-trace-policy";
+import { appendOperationalEventWithDb, createDeliveryProofWithDb } from "./operational-trace-service";
 
 export type MarketplaceOrderLineInput = {
   productId: number;
@@ -267,8 +269,9 @@ export async function transitionMarketplaceOrder(input: {
   orderId: number;
   newStatus: OrderStatus;
   reason?: string;
+  completionProof?: CompletionProofInput;
   auditSession?: AuditSessionLike;
-}): Promise<{ previousStatus: OrderStatus; status: OrderStatus; pilotId: number | null; readyPilotNotifications: number }> {
+}): Promise<{ previousStatus: OrderStatus; status: OrderStatus; pilotId: number | null; readyPilotNotifications: number; proofId: number | null }> {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
 
@@ -288,6 +291,10 @@ export async function transitionMarketplaceOrder(input: {
     input.newStatus,
   );
 
+  if (input.newStatus === "completed" && !input.completionProof) {
+    throw new Error("Proof of delivery is required before an order can be completed.");
+  }
+
   const pilotId = authorization.assignPilotId ?? order.pilotId ?? null;
   const update: Partial<typeof orders.$inferInsert> = { status: input.newStatus };
   if (authorization.assignPilotId) update.pilotId = authorization.assignPilotId;
@@ -295,7 +302,77 @@ export async function transitionMarketplaceOrder(input: {
     update.cancellationReason = input.reason?.trim() || null;
   }
 
-  await db.update(orders).set(update).where(eq(orders.id, order.id));
+  let completionProofId: number | null = null;
+  await db.transaction(async (tx) => {
+    await tx.update(orders).set(update).where(eq(orders.id, order.id));
+
+    if (input.newStatus === "accepted") {
+      await appendOperationalEventWithDb(tx, {
+        channel: "C1",
+        targetType: "order",
+        targetId: order.id,
+        actorUserId: input.actor.id,
+        actorRole: authorization.actorKind,
+        eventType: "assignment",
+        custodyToUserId: pilotId,
+        details: { orderUid: order.orderUid, previousStatus, newStatus: input.newStatus },
+      });
+    }
+    if (input.newStatus === "in_execution") {
+      await appendOperationalEventWithDb(tx, {
+        channel: "C1",
+        targetType: "order",
+        targetId: order.id,
+        actorUserId: input.actor.id,
+        actorRole: authorization.actorKind,
+        eventType: "pickup",
+        custodyFromUserId: order.merchantId,
+        custodyToUserId: pilotId,
+        details: { orderUid: order.orderUid, previousStatus, newStatus: input.newStatus },
+      });
+    }
+    if (input.newStatus === "fallback") {
+      await appendOperationalEventWithDb(tx, {
+        channel: "C1",
+        targetType: "order",
+        targetId: order.id,
+        actorUserId: input.actor.id,
+        actorRole: authorization.actorKind,
+        eventType: "fallback",
+        details: { orderUid: order.orderUid, previousStatus, reason: input.reason || null },
+      });
+    }
+    if (input.newStatus === "completed" && input.completionProof) {
+      const proofResult = await createDeliveryProofWithDb(tx, {
+        channel: "C1",
+        targetType: "order",
+        targetId: order.id,
+        recordedByUserId: input.actor.id,
+        recordedByRole: authorization.actorKind,
+        recipientUserId: order.customerId,
+        proof: input.completionProof,
+      });
+      completionProofId = proofResult.proofId;
+      await appendOperationalEventWithDb(tx, {
+        channel: "C1",
+        targetType: "order",
+        targetId: order.id,
+        actorUserId: input.actor.id,
+        actorRole: authorization.actorKind,
+        eventType: "delivery_completed",
+        custodyFromUserId: pilotId,
+        custodyToUserId: order.customerId,
+        latitude: input.completionProof.latitude ?? null,
+        longitude: input.completionProof.longitude ?? null,
+        details: {
+          orderUid: order.orderUid,
+          proofId: proofResult.proofId,
+          receptionMethod: input.completionProof.receptionMethod,
+          previousStatus,
+        },
+      });
+    }
+  });
 
   const attribution = buildAuditAttribution("C1", input.auditSession);
   await createAuditLog({
@@ -310,6 +387,7 @@ export async function transitionMarketplaceOrder(input: {
       newStatus: input.newStatus,
       reason: input.reason || null,
       pilotId,
+      completionProofId,
     },
     severity: transitionSeverity(input.newStatus),
     channel: attribution.channel,
@@ -342,7 +420,7 @@ export async function transitionMarketplaceOrder(input: {
 
   const readyPilotNotifications = input.newStatus === "ready" ? await notifyReadyPilots({ ...order, status: "ready" }) : 0;
 
-  return { previousStatus, status: input.newStatus, pilotId, readyPilotNotifications };
+  return { previousStatus, status: input.newStatus, pilotId, readyPilotNotifications, proofId: completionProofId };
 }
 
 export async function getMarketplaceOrderTimeline(orderId: number) {

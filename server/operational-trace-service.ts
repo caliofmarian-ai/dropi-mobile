@@ -1,17 +1,20 @@
 import { createHash, randomUUID } from "node:crypto";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import {
-  ATTESTATION_KINDS,
-  RECEPTION_METHODS,
-  TRACE_CHANNELS,
-  TRACE_EVENT_TYPES,
-  TRACE_TARGET_TYPES,
   deliveryProofAttestations,
   deliveryProofs,
   flightTelemetrySamples,
   operationalEvidenceEvents,
 } from "../drizzle/operational-trace-schema";
-import { assertCompletionProof, type CompletionProofInput } from "../shared/operational-trace-policy";
+import {
+  ATTESTATION_KINDS,
+  RECEPTION_METHODS,
+  TRACE_CHANNELS,
+  TRACE_EVENT_TYPES,
+  TRACE_TARGET_TYPES,
+  assertCompletionProof,
+  type CompletionProofInput,
+} from "../shared/operational-trace-policy";
 import { getDb } from "./db";
 
 type TraceChannel = (typeof TRACE_CHANNELS)[number];

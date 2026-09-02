@@ -249,16 +249,15 @@ function DeliveryPartnerDashboard() {
                   disabled={transitionMarketplaceOrder.isPending}
                   onPress={() => transitionMarketplaceOrder.mutate({ orderId: item.id, newStatus: "in_execution" })}
                 >
-                  <Text className="text-white text-sm font-bold">Start Delivery</Text>
+                  <Text className="text-white text-sm font-bold">Confirm pickup & start delivery</Text>
                 </TouchableOpacity>
               )}
               {(item.status === "in_execution" || item.status === "fallback") && (
                 <TouchableOpacity
                   className="bg-success rounded-lg py-2 items-center mt-3"
-                  disabled={transitionMarketplaceOrder.isPending}
-                  onPress={() => transitionMarketplaceOrder.mutate({ orderId: item.id, newStatus: "completed" })}
+                  onPress={() => router.push({ pathname: "/pilot/complete-order", params: { orderId: String(item.id) } } as any)}
                 >
-                  <Text className="text-white text-sm font-bold">Complete Delivery</Text>
+                  <Text className="text-white text-sm font-bold">Record proof & complete</Text>
                 </TouchableOpacity>
               )}
             </View>

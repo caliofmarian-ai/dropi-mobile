@@ -26,6 +26,8 @@ import { notifyOwner } from "./_core/notification";
 import { triggerWebhooks, buildWebhookPayload, getWebhookEvents } from "./webhook-trigger";
 import { onB2bDeliveryCompleted, onB2bDeliveryFailed } from "./pilot-rating-hooks";
 import { notifyB2bDeliveryTransition } from "./b2b-transition-notifications";
+import { appendOperationalEvent, createDeliveryProofWithDb } from "./operational-trace-service";
+import { RECEPTION_METHODS } from "../shared/operational-trace-policy";
 
 // ===== HELPERS =====
 
@@ -528,6 +530,14 @@ export const b2bDeliveryRouter = router({
       newStatus: z.enum(["assigned", "pickup_enroute", "picked_up", "in_transit", "delivered", "failed"]),
       estimatedArrival: z.string().optional(),
       failureReason: z.string().optional(),
+      completionProof: z.object({
+        receptionMethod: z.enum(RECEPTION_METHODS),
+        artifactUrl: z.string().trim().max(1000).optional(),
+        artifactHash: z.string().trim().min(8).max(128).optional(),
+        notes: z.string().trim().max(1000).optional(),
+        latitude: z.number().min(-90).max(90).optional(),
+        longitude: z.number().min(-180).max(180).optional(),
+      }).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const user = ctx.user as any;
@@ -571,6 +581,9 @@ export const b2bDeliveryRouter = router({
       }
 
       const previousStatus = delivery[0].status;
+      if (input.newStatus === "delivered" && !input.completionProof) {
+        throw new Error("Proof of delivery is required before a B2B mission can be delivered.");
+      }
       const updateData: Record<string, any> = { status: input.newStatus };
 
       // Assign pilot on first acceptance
@@ -587,9 +600,41 @@ export const b2bDeliveryRouter = router({
         updateData.cancelledBy = "pilot";
       }
 
-      await db.update(b2bDeliveries)
-        .set(updateData)
-        .where(eq(b2bDeliveries.id, input.deliveryId));
+      await db.transaction(async (tx) => {
+        await tx.update(b2bDeliveries).set(updateData).where(eq(b2bDeliveries.id, input.deliveryId));
+        if (input.newStatus === "assigned") {
+          await appendOperationalEvent({
+            channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: user.id, actorRole: "delivery_partner", eventType: "assignment", custodyToUserId: user.id,
+            details: { trackingCode: delivery[0].trackingCode, previousStatus },
+          });
+        }
+        if (input.newStatus === "picked_up") {
+          await appendOperationalEvent({
+            channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: user.id, actorRole: "delivery_partner", eventType: "pickup", custodyToUserId: user.id,
+            details: { trackingCode: delivery[0].trackingCode, previousStatus },
+          });
+        }
+        if (input.newStatus === "in_transit") {
+          await appendOperationalEvent({
+            channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: user.id, actorRole: "delivery_partner", eventType: "transfer", custodyToUserId: user.id,
+            details: { trackingCode: delivery[0].trackingCode, previousStatus },
+          });
+        }
+        if (input.newStatus === "delivered" && input.completionProof) {
+          const proof = await createDeliveryProofWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, recordedByUserId: user.id, recordedByRole: "delivery_partner", proof: input.completionProof });
+          await appendOperationalEvent({
+            channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: user.id, actorRole: "delivery_partner", eventType: "delivery_completed", custodyFromUserId: user.id,
+            latitude: input.completionProof.latitude ?? null, longitude: input.completionProof.longitude ?? null,
+            details: { trackingCode: delivery[0].trackingCode, proofId: proof.proofId, receptionMethod: input.completionProof.receptionMethod },
+          });
+        }
+        if (input.newStatus === "failed") {
+          await appendOperationalEvent({
+            channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: user.id, actorRole: "delivery_partner", eventType: "delivery_failed",
+            details: { trackingCode: delivery[0].trackingCode, reason: input.failureReason || null },
+          });
+        }
+      });
 
       // Trigger rating hooks based on status
       if (input.newStatus === "delivered" && delivery[0].assignedPilotId) {
@@ -674,6 +719,14 @@ export const b2bDeliveryRouter = router({
       finalPrice: z.string().optional(),
       cancellationReason: z.string().optional(),
       cancelledBy: z.enum(["system", "pilot"]).optional(),
+      completionProof: z.object({
+        receptionMethod: z.enum(RECEPTION_METHODS),
+        artifactUrl: z.string().trim().max(1000).optional(),
+        artifactHash: z.string().trim().min(8).max(128).optional(),
+        notes: z.string().trim().max(1000).optional(),
+        latitude: z.number().min(-90).max(90).optional(),
+        longitude: z.number().min(-180).max(180).optional(),
+      }).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -688,6 +741,9 @@ export const b2bDeliveryRouter = router({
       const previousStatus = delivery[0].status;
       if (previousStatus === input.newStatus) {
         return { success: true, message: "Status unchanged" };
+      }
+      if (input.newStatus === "delivered" && !input.completionProof) {
+        throw new Error("Proof of delivery is required before a B2B mission can be delivered.");
       }
 
       // Build update payload
@@ -706,9 +762,24 @@ export const b2bDeliveryRouter = router({
         updateData.deliveryMode = delivery[0].preferredMode === "drone" ? "drone" : "terrestrial";
       }
 
-      await db.update(b2bDeliveries)
-        .set(updateData)
-        .where(eq(b2bDeliveries.id, input.deliveryId));
+      await db.transaction(async (tx) => {
+        await tx.update(b2bDeliveries).set(updateData).where(eq(b2bDeliveries.id, input.deliveryId));
+        const actorId = ctx.user!.id;
+        const actorRole = ctx.user!.dropiRole || "system_administrator";
+        if (input.newStatus === "picked_up") {
+          await appendOperationalEvent({ channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "pickup", custodyToUserId: pilotId, details: { trackingCode: delivery[0].trackingCode, previousStatus } });
+        }
+        if (input.newStatus === "in_transit") {
+          await appendOperationalEvent({ channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "transfer", custodyToUserId: pilotId, details: { trackingCode: delivery[0].trackingCode, previousStatus } });
+        }
+        if (input.newStatus === "delivered" && input.completionProof) {
+          const proof = await createDeliveryProofWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, recordedByUserId: actorId, recordedByRole: actorRole, proof: input.completionProof });
+          await appendOperationalEvent({ channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "delivery_completed", custodyFromUserId: pilotId, latitude: input.completionProof.latitude ?? null, longitude: input.completionProof.longitude ?? null, details: { trackingCode: delivery[0].trackingCode, proofId: proof.proofId, receptionMethod: input.completionProof.receptionMethod } });
+        }
+        if (input.newStatus === "failed") {
+          await appendOperationalEvent({ channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "delivery_failed", details: { trackingCode: delivery[0].trackingCode, reason: input.cancellationReason || null } });
+        }
+      });
 
       // Trigger rating hooks based on status
       const pilotId = input.pilotId || delivery[0].assignedPilotId;
@@ -836,6 +907,10 @@ export const b2bDeliveryRouter = router({
           updatedAt: new Date(),
         })
         .where(eq(b2bDeliveries.id, input.deliveryId));
+      await appendOperationalEvent({
+        channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: null, actorRole: "operations_manager", eventType: "assignment", custodyToUserId: input.pilotId,
+        details: { trackingCode: delivery[0].trackingCode, assignedPilotId: input.pilotId },
+      });
 
       // Trigger webhooks
       triggerWebhooks(delivery[0].storeId, delivery[0].id, "delivery.status_changed", {

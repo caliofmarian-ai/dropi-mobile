@@ -19,6 +19,8 @@ import {
   type TrackingMode,
   type TrackingTarget,
 } from "./live-tracking-access";
+import { appendOperationalEvent, recordTelemetrySample } from "./operational-trace-service";
+import { traceChannelForTarget } from "../shared/operational-trace-policy";
 
 interface PositionUpdate {
   target: TrackingTarget;
@@ -231,36 +233,14 @@ async function handlePilotMessage(
   }
 
   if (msg.type === "delivery_complete") {
-    const completedAt = new Date().toISOString();
-    const payload = {
-      type: "delivery_completed",
+    // WebSocket telemetry is not authoritative completion. A proof-backed tRPC
+    // transition must record the actual reception method before state completion.
+    sendJson(ws, {
+      type: "proof_required",
       target: authorization.target,
       deliveryId: authorization.resourceId,
-      pilotId: authorization.pilotId,
-      completedAt,
-      message: "Delivery has been completed successfully.",
-    };
-    broadcastToSubscribers(delivery, payload);
-    activeDeliveries.delete(key);
-
-    if (authorization.notificationRecipientId) {
-      createInAppNotification({
-        userId: authorization.notificationRecipientId,
-        title: "Delivery Completed! 🎉",
-        body: `Delivery #${authorization.resourceId} has been completed successfully.`,
-        category: "orders",
-        metadata: {
-          target: authorization.target,
-          deliveryId: authorization.resourceId,
-          pilotId: authorization.pilotId,
-          completedAt,
-        },
-      }).catch(() => {});
-    }
-
-    sendJson(ws, { type: "completion_confirmed", deliveryId: authorization.resourceId });
-    pilotConnections.delete(ws);
-    ws.close(1000, "Delivery completed");
+      message: "Record proof of delivery before completing this mission.",
+    });
     return;
   }
 
@@ -276,6 +256,19 @@ async function handlePilotMessage(
   }
 
   delivery.lastPosition = position;
+  await recordTelemetrySample({
+    channel: traceChannelForTarget(authorization.target),
+    targetType: authorization.target,
+    targetId: authorization.resourceId,
+    pilotUserId: authorization.pilotId!,
+    latitude: position.lat,
+    longitude: position.lng,
+    speed: position.speed,
+    heading: position.heading,
+    altitude: position.altitude ?? null,
+    vehicleType: position.vehicleType,
+    recordedAt: new Date(position.timestamp),
+  });
 
   let etaSeconds: number | null = null;
   let distanceM: number | null = null;
@@ -286,6 +279,18 @@ async function handlePilotMessage(
 
     if (!delivery.geofenceTriggered && distanceM <= GEOFENCE_RADIUS_M) {
       delivery.geofenceTriggered = true;
+      await appendOperationalEvent({
+        channel: traceChannelForTarget(authorization.target),
+        targetType: authorization.target,
+        targetId: authorization.resourceId,
+        actorUserId: authorization.pilotId,
+        actorRole: "delivery_partner",
+        eventType: "geofence_entered",
+        latitude: position.lat,
+        longitude: position.lng,
+        vehicleType: position.vehicleType,
+        details: { distanceM: Math.round(distanceM), etaSeconds },
+      });
       broadcastToSubscribers(delivery, {
         type: "geofence_entered",
         target: authorization.target,
