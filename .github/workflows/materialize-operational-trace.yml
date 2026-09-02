@@ -1,0 +1,58 @@
+name: Materialize operational trace
+
+on:
+  push:
+    branches:
+      - m2/operational-evidence-chain
+    paths:
+      - scripts/patch_operational_trace.py
+      - .github/workflows/materialize-operational-trace.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m2/operational-evidence-chain
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply controlled integration patch
+        run: python scripts/patch_operational_trace.py
+      - name: Operational trace policy and source contracts
+        run: node --import tsx --test tests/operational-trace-policy.test.ts tests/operational-trace-contract.test.ts
+      - name: Order, tracking and safety regressions
+        run: >-
+          pnpm exec vitest run
+          tests/order-state-machine.test.ts
+          tests/order-transition-notifications.test.ts
+          tests/order-management-integration-contract.test.ts
+          tests/push-state-notifications.test.ts
+          tests/push-state-integration-contract.test.ts
+          tests/live-tracking-security.test.ts
+          tests/live-tracking-client-contract.test.ts
+          tests/operational-safety-certification.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check
+      - name: Commit verified implementation and remove temporary materializer
+        run: |
+          rm -f scripts/patch_operational_trace.py .github/workflows/materialize-operational-trace.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: deliver operational evidence chain" || exit 0
+          git push origin HEAD:m2/operational-evidence-chain
