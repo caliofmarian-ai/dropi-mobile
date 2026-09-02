@@ -17,8 +17,6 @@ jobs:
         with:
           ref: m1/c1-checkout-p2p
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 22
