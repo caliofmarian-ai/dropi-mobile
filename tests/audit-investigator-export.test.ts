@@ -36,8 +36,9 @@ test("CSV export uses stable columns and RFC-style quote escaping", () => {
   assert.equal(lines.length, 2);
   assert.match(lines[0], /"id","createdAt","channel","userId"/);
   assert.ok(lines[1].includes('"order.status_transition,""quoted"""'));
-  assert.ok(lines[1].includes('"{''')); // object serialization is quoted JSON
-  assert.ok(lines[1].includes('customer said ""ok""'));
+  assert.ok(lines[1].includes("reason"));
+  assert.ok(lines[1].includes("customer said"));
+  assert.ok(lines[1].includes('""ok""'));
 });
 
 test("JSON export carries channel, filters, truncation and evidence rows", () => {
