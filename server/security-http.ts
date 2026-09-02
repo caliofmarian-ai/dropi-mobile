@@ -14,6 +14,10 @@ function clientIp(req: Request): string {
   return req.ip || req.socket.remoteAddress || "unknown";
 }
 
+function isHealthPath(req: Request): boolean {
+  return req.path === "/api/health" || req.path === "/health";
+}
+
 function rateClass(req: Request): { name: string; max: number } {
   const path = req.path || req.originalUrl || "";
   if (/auth|login|register|password|verify/i.test(path)) return { name: "auth", max: SECURITY_AUTH_RATE_MAX };
@@ -54,7 +58,7 @@ export function securityHeadersMiddleware(isProduction: boolean) {
 
 export function httpsOnlyMiddleware(isProduction: boolean) {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!isProduction) return next();
+    if (!isProduction || isHealthPath(req)) return next();
     const forwardedProto = String(req.headers["x-forwarded-proto"] ?? "").split(",")[0].trim().toLowerCase();
     const secure = req.secure || forwardedProto === "https";
     if (secure) return next();
@@ -86,7 +90,7 @@ export function strictCorsMiddleware(input: { isProduction: boolean; allowedOrig
 }
 
 export function apiRateLimitMiddleware(req: Request, res: Response, next: NextFunction) {
-  if (req.path === "/api/health" || req.path === "/health") return next();
+  if (isHealthPath(req)) return next();
   const category = rateClass(req);
   const key = `${category.name}:${clientIp(req)}`;
   const result = consumeRateBucket(key, category.max);
