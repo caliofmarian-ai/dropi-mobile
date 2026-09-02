@@ -31,6 +31,19 @@ s = replace_once(
     "B2B trace policy import",
 )
 
+s = replace_once(
+    s,
+    '      failureReason: z.string().optional(),\n      completionProof: z.object({',
+    '      failureReason: z.string().trim().max(1000).optional(),\n      incidentType: z.enum(["stop", "fallback", "failure"]).optional(),\n      completionProof: z.object({',
+    "pilot incident schema",
+)
+s = replace_once(
+    s,
+    '      cancelledBy: z.enum(["system", "pilot"]).optional(),\n      completionProof: z.object({',
+    '      cancelledBy: z.enum(["system", "pilot"]).optional(),\n      incidentType: z.enum(["stop", "fallback", "failure"]).optional(),\n      completionProof: z.object({',
+    "admin incident schema",
+)
+
 pattern = re.compile(
     r'      // Validate forward-only transitions\n'
     r'      const statusOrder = \["pending", "assigned", "pickup_enroute", "picked_up", "in_transit", "delivered"\];\n'
@@ -52,6 +65,16 @@ s, count = pattern.subn(
 if count != 1:
     raise SystemExit(f"pilot transition guard: expected 1 replacement, found {count}")
 
+pilot_incident_anchor = '''      const previousStatus = delivery[0].status;
+      if (input.newStatus === "delivered" && !input.completionProof) {'''
+pilot_incident_replace = '''      const previousStatus = delivery[0].status;
+      if (input.newStatus === "failed" && !input.failureReason?.trim()) {
+        throw new Error("A factual failure reason is required for STOP, fallback, or failed delivery evidence.");
+      }
+      const incidentType = input.incidentType ?? "failure";
+      if (input.newStatus === "delivered" && !input.completionProof) {'''
+s = replace_first(s, pilot_incident_anchor, pilot_incident_replace, "pilot incident requirement")
+
 admin_anchor = '''      if (previousStatus === input.newStatus) {
         return { success: true, message: "Status unchanged" };
       }
@@ -60,11 +83,14 @@ admin_replace = '''      if (previousStatus === input.newStatus) {
         return { success: true, message: "Status unchanged" };
       }
       assertB2bTransition(previousStatus, input.newStatus, { allowFailure: true, allowCancellation: true });
+      if ((input.newStatus === "failed" || input.newStatus === "cancelled") && !input.cancellationReason?.trim()) {
+        throw new Error("A factual reason is required for failed or cancelled operational evidence.");
+      }
+      const incidentType = input.incidentType ?? "failure";
       if (input.newStatus === "delivered" && !input.completionProof) {'''
-s = replace_once(s, admin_anchor, admin_replace, "admin transition guard")
+s = replace_once(s, admin_anchor, admin_replace, "admin transition and incident guard")
 
-# Every existing B2B domain-evidence write is expected to live inside one of the
-# state transactions after the assignment block below is made transactional.
+# Every B2B domain-evidence write must use the same transaction as its state change.
 s = s.replace("await appendOperationalEvent({", "await appendOperationalEventWithDb(tx, {")
 
 assign_sig = re.compile(r'(  assignPilot: adminProcedure.*?\.mutation\(async \(\{) input (\}\) => \{)', re.S)
@@ -116,6 +142,31 @@ pilot_pickup_replace = '''        if (input.newStatus === "pickup_enroute") {
           await appendOperationalEventWithDb(tx, {'''
 s = replace_first(s, pilot_pickup_anchor, pilot_pickup_replace, "pilot pickup_enroute evidence")
 
+pilot_failure_anchor = '''        if (input.newStatus === "failed") {
+          await appendOperationalEventWithDb(tx, {
+            channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: user.id, actorRole: "delivery_partner", eventType: "delivery_failed",
+            details: { trackingCode: delivery[0].trackingCode, reason: input.failureReason || null },
+          });
+        }'''
+pilot_failure_replace = '''        if (input.newStatus === "failed") {
+          await appendOperationalEventWithDb(tx, {
+            channel: "C2",
+            targetType: "b2b",
+            targetId: delivery[0].id,
+            actorUserId: user.id,
+            actorRole: "delivery_partner",
+            eventType: incidentType === "stop" ? "stop" : incidentType === "fallback" ? "fallback" : "delivery_failed",
+            custodyFromUserId: user.id,
+            details: {
+              trackingCode: delivery[0].trackingCode,
+              reason: input.failureReason!.trim(),
+              incidentType,
+              resultingStatus: "failed",
+            },
+          });
+        }'''
+s = replace_once(s, pilot_failure_anchor, pilot_failure_replace, "pilot STOP/fallback evidence")
+
 admin_pickup_anchor = '''        if (input.newStatus === "picked_up") {
           await appendOperationalEventWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "pickup", custodyToUserId: pilotId, details: { trackingCode: delivery[0].trackingCode, previousStatus } });
         }'''
@@ -134,9 +185,24 @@ admin_failure_anchor = '''        if (input.newStatus === "failed") {
           await appendOperationalEventWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "delivery_failed", details: { trackingCode: delivery[0].trackingCode, reason: input.cancellationReason || null } });
         }'''
 admin_failure_replace = '''        if (input.newStatus === "failed" || input.newStatus === "cancelled") {
-          await appendOperationalEventWithDb(tx, { channel: "C2", targetType: "b2b", targetId: delivery[0].id, actorUserId: actorId, actorRole, eventType: "delivery_failed", details: { trackingCode: delivery[0].trackingCode, terminalStatus: input.newStatus, reason: input.cancellationReason || null } });
+          await appendOperationalEventWithDb(tx, {
+            channel: "C2",
+            targetType: "b2b",
+            targetId: delivery[0].id,
+            actorUserId: actorId,
+            actorRole,
+            eventType: incidentType === "stop" ? "stop" : incidentType === "fallback" ? "fallback" : "delivery_failed",
+            custodyFromUserId: pilotId,
+            details: {
+              trackingCode: delivery[0].trackingCode,
+              terminalStatus: input.newStatus,
+              reason: input.cancellationReason!.trim(),
+              incidentType,
+              resultingStatus: input.newStatus,
+            },
+          });
         }'''
-s = replace_once(s, admin_failure_anchor, admin_failure_replace, "admin failure/cancellation evidence")
+s = replace_once(s, admin_failure_anchor, admin_failure_replace, "admin STOP/fallback/failure evidence")
 
 if "appendOperationalEvent({" in s:
     raise SystemExit("non-transactional B2B operational event writer remains")
@@ -157,3 +223,144 @@ tracking_new = '''      try {
     });'''
 t = replace_once(t, tracking_old, tracking_new, "tracking persistence failure guard")
 tracking_path.write_text(t)
+
+mission_path = Path("app/mission/[id].tsx")
+m = mission_path.read_text()
+m = replace_once(
+    m,
+    '  const syncStatusToServer = async (newStatus: string, extras?: { failureReason?: string }) => {',
+    '  const syncStatusToServer = async (newStatus: string, extras?: { failureReason?: string; incidentType?: "stop" | "fallback" | "failure" }) => {',
+    "mission sync signature",
+)
+m = replace_once(
+    m,
+    '''    try {
+      await pilotUpdateStatus.mutateAsync({
+        deliveryId: mission.orderId,
+        newStatus: newStatus as any,
+        ...(extras?.failureReason && { failureReason: extras.failureReason }),
+      });
+    } catch (e) {
+      // Silent fail — local flow continues
+    } finally {
+      setStatusUpdating(false);
+    }''',
+    '''    try {
+      await pilotUpdateStatus.mutateAsync({
+        deliveryId: mission.orderId,
+        newStatus: newStatus as any,
+        ...(extras?.failureReason && { failureReason: extras.failureReason }),
+        ...(extras?.incidentType && { incidentType: extras.incidentType }),
+      });
+    } finally {
+      setStatusUpdating(false);
+    }''',
+    "mission fail-closed sync",
+)
+m = replace_once(
+    m,
+    '''      } catch (e) {
+        // If we can't check, allow in demo mode but warn
+        console.warn("Could not verify status:", e);
+      }
+      setCheckingVerification(false);''',
+    '''      } catch (e) {
+        console.warn("Could not verify status:", e);
+        Alert.alert("Verification unavailable", "Mission acceptance is blocked until verification can be confirmed by the server.");
+        setCheckingVerification(false);
+        return;
+      }
+      setCheckingVerification(false);''',
+    "verification fail closed",
+)
+m = replace_once(
+    m,
+    '''    // Sync to server: assigned
+    syncStatusToServer("assigned");
+    setPhase("preflight");''',
+    '''    try {
+      await syncStatusToServer("assigned");
+      setPhase("preflight");
+    } catch (error: any) {
+      Alert.alert("Mission acceptance blocked", error?.message || "The assigned state could not be persisted.");
+    }''',
+    "assigned persistence gate",
+)
+m = replace_once(
+    m,
+    '''  const handleLaunch = () => {
+    if (!allChecked) {
+      Alert.alert("Incomplete Check", "All items must be confirmed before launch.");
+      return;
+    }
+    // Sync to server: pickup_enroute → picked_up → in_transit (rapid progression)
+    syncStatusToServer("pickup_enroute");
+    setTimeout(() => syncStatusToServer("picked_up"), 500);
+    setTimeout(() => syncStatusToServer("in_transit"), 1000);
+    setPhase("inflight");
+  };''',
+    '''  const handleLaunch = async () => {
+    if (!allChecked) {
+      Alert.alert("Incomplete Check", "All items must be confirmed before launch.");
+      return;
+    }
+    try {
+      await syncStatusToServer("pickup_enroute");
+      await syncStatusToServer("picked_up");
+      await syncStatusToServer("in_transit");
+      setPhase("inflight");
+    } catch (error: any) {
+      Alert.alert("Launch blocked", error?.message || "The operational state chain could not be persisted.");
+    }
+  };''',
+    "sequential launch state chain",
+)
+m = replace_once(
+    m,
+    '''              onPress: () => {
+            syncStatusToServer("failed", { failureReason: "Emergency stop executed by pilot" });
+            Alert.alert("Vehicle Stopped", "Emergency stop executed. Creating incident report.");
+            setPhase("complete");
+          },''',
+    '''          onPress: async () => {
+            try {
+              await syncStatusToServer("failed", { failureReason: "Emergency stop executed by pilot", incidentType: "stop" });
+              Alert.alert("Vehicle Stopped", "Emergency stop was persisted in the operational incident chain.");
+              setPhase("complete");
+            } catch (error: any) {
+              Alert.alert("STOP evidence failed", error?.message || "The STOP event could not be persisted.");
+            }
+          },''',
+    "STOP evidence UI",
+)
+m = replace_once(
+    m,
+    '''            onPress: () => {
+            syncStatusToServer("failed", { failureReason: isDrone ? "Fallback: drone returning to DronePort" : "Fallback: vehicle returning to depot" });
+            Alert.alert("Fallback Active", isDrone ? "Drone returning to DronePort Alpha." : "Vehicle returning to depot.");
+            setPhase("complete");
+          },''',
+    '''          onPress: async () => {
+            try {
+              await syncStatusToServer("failed", {
+                failureReason: isDrone ? "Fallback activated: drone return requested to DronePort" : "Fallback activated: vehicle return requested to origin",
+                incidentType: "fallback",
+              });
+              Alert.alert("Fallback recorded", "Fallback activation and resulting failed mission state were persisted.");
+              setPhase("complete");
+            } catch (error: any) {
+              Alert.alert("Fallback blocked", error?.message || "Fallback evidence could not be persisted.");
+            }
+          },''',
+    "fallback evidence UI",
+)
+m = replace_once(
+    m,
+    '''              onPress={() => {
+                syncStatusToServer("delivered");
+                setPhase("complete");
+              }}''',
+    '''              onPress={() => router.push({ pathname: "/pilot/complete-mission", params: { deliveryId: String(mission.orderId) } } as any)}''',
+    "B2B proof completion route",
+)
+mission_path.write_text(m)
