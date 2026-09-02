@@ -2,7 +2,7 @@ import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG } from "../../shared/const.js";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { AuditChannel } from "../audit-policy";
-import { logProcedureCall } from "../audit-middleware";
+import { logProcedureCall, type AuditProcedureType } from "../audit-middleware";
 import type { TrpcContext } from "./context";
 
 const t = initTRPC.context<TrpcContext>().create({
@@ -17,6 +17,7 @@ function auditMiddleware(channelOverride?: AuditChannel) {
     const startTime = Date.now();
     let success = true;
     let errorMsg: string | undefined;
+    const procedureType = ((opts as any).type || "unknown") as AuditProcedureType;
 
     try {
       const rawInput = await opts.getRawInput();
@@ -33,19 +34,27 @@ function auditMiddleware(channelOverride?: AuditChannel) {
         success,
         error: errorMsg,
         channelOverride,
+        procedureType,
       }).catch((e) => console.error("[Audit] Logging failed:", e));
       return result;
     } catch (error: any) {
       success = false;
       errorMsg = error?.message || "unknown_error";
+      let rawInput: unknown;
+      try {
+        rawInput = await opts.getRawInput();
+      } catch {
+        rawInput = undefined;
+      }
       logProcedureCall({
         ctx: opts.ctx,
         path: opts.path,
-        input: undefined,
+        input: rawInput,
         startTime,
         success: false,
         error: errorMsg,
         channelOverride,
+        procedureType,
       }).catch((e) => console.error("[Audit] Logging failed:", e));
       throw error;
     }
