@@ -30,6 +30,15 @@ test("cart reuses canonical operations.placeOrder and has no simulated checkout"
   assert.doesNotMatch(file, /DEMO_CART|Simulated cart|deliveryCost|estimatedTime/);
 });
 
+test("canonical checkout atomically consumes finite stock before order creation", () => {
+  const file = source("server/order-management-service.ts");
+  assert.match(file, /db\.transaction\(async \(tx\)/);
+  assert.match(file, /stock: sql`\$\{products\.stock\} - \$\{line\.quantity\}`/);
+  assert.match(file, /gte\(products\.stock, line\.quantity\)/);
+  assert.match(file, /no longer has enough stock/);
+  assert.match(file, /await tx[\s\S]*?\.insert\(orders\)/);
+});
+
 test("P2P is a separate router and private parcel discovery is not public", () => {
   const router = source("server/p2p-router.ts");
   const appRouter = source("server/routers.ts");
