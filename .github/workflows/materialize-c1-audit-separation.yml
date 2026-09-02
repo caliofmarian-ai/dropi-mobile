@@ -1,5 +1,6 @@
 name: Materialize C1 audit separation
 
+# materialization revision: 2
 on:
   push:
     branches: [m2/c1-audit-separation]
