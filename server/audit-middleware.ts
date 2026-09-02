@@ -88,7 +88,9 @@ export async function logProcedureCall(opts: {
   const attribution = buildAuditAttribution(channelOverride ?? (ctx.user as any).channel, ctx.session);
   const sanitizedInput = sanitizeAuditInput(input);
   const isAIAction = Boolean((ctx.user as any).isAIAgent);
-  const deviceInfo = ctx.session?.deviceInfo || getUserAgent(ctx.req);
+  const privacySafeErasureLog = path === "privacy.eraseAccount" && success;
+  const deviceInfo = privacySafeErasureLog ? null : (ctx.session?.deviceInfo || getUserAgent(ctx.req));
+  const persistedInput = privacySafeErasureLog ? null : sanitizedInput;
 
   await createAuditLog({
     userId: ctx.user.id,
@@ -101,17 +103,18 @@ export async function logProcedureCall(opts: {
     isAIAction,
     isPhantomMode: attribution.isPhantomMode,
     phantomAdminId: attribution.phantomAdminId,
-    ipAddress: getClientIp(ctx.req),
-    userAgent: getUserAgent(ctx.req),
-    sessionId: ctx.session?.id != null ? String(ctx.session.id) : null,
+    ipAddress: privacySafeErasureLog ? null : getClientIp(ctx.req),
+    userAgent: privacySafeErasureLog ? null : getUserAgent(ctx.req),
+    sessionId: privacySafeErasureLog ? null : (ctx.session?.id != null ? String(ctx.session.id) : null),
     duration,
     details: {
       procedureType,
       accessKind: auditAccessKind(procedureType),
       actorKind: isAIAction ? "AI_PERSONAL" : "HUMAN",
       deviceInfo,
-      input: sanitizedInput,
-      decision: extractDecisionMetadata(procedureType, sanitizedInput),
+      input: persistedInput,
+      decision: privacySafeErasureLog ? null : extractDecisionMetadata(procedureType, sanitizedInput),
+      privacySafeErasureLog,
       success,
       ...(error ? { error } : {}),
     },
