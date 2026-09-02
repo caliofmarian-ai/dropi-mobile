@@ -11,9 +11,15 @@ import {
 import { PRIVACY_RETENTION_POLICIES } from "../shared/privacy-policy";
 import { auditInvestigatorProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
+import {
+  INCIDENT_CHANNELS,
+  buildIncidentReconstruction,
+  type IncidentChannel,
+} from "./incident-reconstruction-service";
 
 const authorityTargetSchema = z.enum(AUTHORITY_REPORT_TARGETS);
 const auditChannelSchema = z.enum(["C1", "C2", "C3", "ADMIN"]);
+const incidentChannelSchema = z.enum(INCIDENT_CHANNELS);
 const rangeSchema = z.object({
   target: authorityTargetSchema,
   channel: auditChannelSchema,
@@ -23,8 +29,14 @@ const rangeSchema = z.object({
   message: "Report start date must not be after end date.",
   path: ["from"],
 });
+const incidentSchema = z.object({
+  target: authorityTargetSchema,
+  channel: incidentChannelSchema,
+  eventUid: z.string().uuid(),
+});
 
 type AuthorityPack = Awaited<ReturnType<typeof buildAuthorityEvidencePack>>;
+type IncidentAuthorityPack = Awaited<ReturnType<typeof buildIncidentAuthorityEvidencePack>>;
 
 function number(value: unknown) {
   return Number(value || 0);
@@ -165,6 +177,37 @@ export async function buildAuthorityEvidencePack(input: {
   };
 }
 
+export async function buildIncidentAuthorityEvidencePack(input: {
+  target: AuthorityReportTarget;
+  channel: IncidentChannel;
+  eventUid: string;
+}) {
+  const template = authorityTemplate(input.target);
+  const reconstruction = await buildIncidentReconstruction({ channel: input.channel, eventUid: input.eventUid });
+  return {
+    schema: "DROPi_INCIDENT_AUTHORITY_EVIDENCE_PACK",
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
+    target: input.target,
+    adaptationContext: template.adaptationContext,
+    purpose: `Provide a factual per-incident DROPi evidence package. ${template.canonicalPurpose}`,
+    disclaimer: AUTHORITY_REPORT_DISCLAIMER,
+    scope: {
+      channel: input.channel,
+      eventUid: input.eventUid,
+      timezone: "UTC",
+    },
+    incident: reconstruction.incident,
+    operationalTarget: reconstruction.target,
+    counts: reconstruction.counts,
+    truncation: reconstruction.truncation,
+    timeline: reconstruction.timeline,
+    privacyAndRetention: {
+      policies: PRIVACY_RETENTION_POLICIES,
+    },
+  };
+}
+
 export function serializeAuthorityPackCsv(pack: AuthorityPack): string {
   const rows: Array<[string, string, unknown]> = [
     ["meta", "target", pack.target],
@@ -188,6 +231,29 @@ export function serializeAuthorityPackCsv(pack: AuthorityPack): string {
     ["section", "metric", "value"].map(csvCell).join(","),
     ...rows.map((row) => row.map(csvCell).join(",")),
   ].join("\n");
+}
+
+export function serializeIncidentAuthorityPackCsv(pack: IncidentAuthorityPack): string {
+  const header = ["recordType", "sequence", "occurredAt", "source", "kind", "actorUserId", "actorRole", "evidenceHash", "details"];
+  const meta: Array<unknown[]> = [
+    ["meta", "", pack.generatedAt, "pack", "authority_target", "", "", "", pack.target],
+    ["meta", "", pack.incident.occurredAt, "incident", pack.incident.eventType, pack.incident.actorUserId, pack.incident.actorRole, pack.incident.evidenceHash, pack.incident],
+    ["meta", "", "", "target", "snapshot", "", "", "", pack.operationalTarget],
+    ["meta", "", "", "pack", "truncation", "", "", "", pack.truncation],
+    ["meta", "", "", "pack", "disclaimer", "", "", "", pack.disclaimer],
+  ];
+  const timeline = pack.timeline.map((entry: any, index: number) => [
+    "timeline",
+    index + 1,
+    entry.occurredAt,
+    entry.source,
+    entry.kind,
+    entry.actorUserId ?? "",
+    entry.actorRole ?? "",
+    entry.evidenceHash ?? "",
+    entry,
+  ]);
+  return [header.map(csvCell).join(","), ...meta.map((row) => row.map(csvCell).join(",")), ...timeline.map((row) => row.map(csvCell).join(","))].join("\n");
 }
 
 export const authorityReportRouter = router({
@@ -215,6 +281,32 @@ export const authorityReportRouter = router({
       }
       return {
         filename: `dropi-${pack.target}-${pack.scope.channel}-${stamp}.json`,
+        contentType: "application/json;charset=utf-8",
+        content: JSON.stringify(pack, null, 2),
+        disclaimer: pack.disclaimer,
+      };
+    }),
+
+  incidentPreview: auditInvestigatorProcedure
+    .input(incidentSchema)
+    .query(({ input }) => buildIncidentAuthorityEvidencePack(input)),
+
+  incidentExport: auditInvestigatorProcedure
+    .input(incidentSchema.extend({ format: z.enum(["json", "csv"]) }))
+    .query(async ({ input }) => {
+      const { format, ...scope } = input;
+      const pack = await buildIncidentAuthorityEvidencePack(scope);
+      const stamp = pack.generatedAt.replace(/[:.]/g, "-");
+      if (format === "csv") {
+        return {
+          filename: `dropi-incident-${pack.target}-${pack.scope.channel}-${pack.incident.eventUid}-${stamp}.csv`,
+          contentType: "text/csv;charset=utf-8",
+          content: serializeIncidentAuthorityPackCsv(pack),
+          disclaimer: pack.disclaimer,
+        };
+      }
+      return {
+        filename: `dropi-incident-${pack.target}-${pack.scope.channel}-${pack.incident.eventUid}-${stamp}.json`,
         contentType: "application/json;charset=utf-8",
         content: JSON.stringify(pack, null, 2),
         disclaimer: pack.disclaimer,
