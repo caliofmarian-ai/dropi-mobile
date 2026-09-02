@@ -1,16 +1,14 @@
 /**
  * DROPi Audit Middleware — L6 Audit Core
- * 
- * Automatically logs ALL tRPC procedure calls (protected and admin).
- * Conforms to Blueprint requirement: "Every state change, decision, 
- * and intervention is logged."
- * 
- * AI actions are marked with isAIAction = true.
- * Phantom mode actions are marked with isPhantomMode = true.
+ *
+ * Automatically logs authenticated tRPC procedure calls.
+ * Each persisted entry belongs to exactly one governed channel.
+ * Phantom actions retain the target channel while carrying the real admin ID.
  */
 
-import { createAuditLog, getSessionByToken } from "./db";
 import type { TrpcContext } from "./_core/context";
+import { buildAuditAttribution, type AuditChannel } from "./audit-policy";
+import { createAuditLog } from "./db";
 
 function getClientIp(req: any): string {
   return req?.headers?.["x-forwarded-for"]?.split(",")[0]?.trim() || req?.ip || "unknown";
@@ -36,7 +34,6 @@ function extractResourceId(input: any): string | null {
 function sanitizeInput(input: any): Record<string, unknown> | null {
   if (!input) return null;
   const sanitized = { ...input };
-  // Remove sensitive fields
   delete sanitized.password;
   delete sanitized.currentPassword;
   delete sanitized.newPassword;
@@ -45,10 +42,6 @@ function sanitizeInput(input: any): Record<string, unknown> | null {
   return sanitized;
 }
 
-/**
- * Log an audit entry for a tRPC procedure call.
- * Called after procedure execution.
- */
 export async function logProcedureCall(opts: {
   ctx: TrpcContext;
   path: string;
@@ -56,39 +49,17 @@ export async function logProcedureCall(opts: {
   startTime: number;
   success: boolean;
   error?: string;
+  channelOverride?: AuditChannel;
 }) {
-  const { ctx, path, input, startTime, success, error } = opts;
+  const { ctx, path, input, startTime, success, error, channelOverride } = opts;
   const duration = Date.now() - startTime;
-
-  // Skip if no user (public procedures without auth)
   if (!ctx.user) return;
 
-  // Determine severity
   let severity: "info" | "warning" | "critical" = "info";
   if (!success) severity = "warning";
   if (path.includes("phantom") || path.includes("changeRole") || path.includes("toggle")) severity = "critical";
 
-  // Check if this is a phantom session
-  let isPhantomMode = false;
-  let phantomAdminId: number | null = null;
-
-  // Detect phantom from session token
-  const authHeader = ctx.req.headers.authorization || ctx.req.headers.Authorization;
-  let token: string | undefined;
-  if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
-    token = authHeader.slice("Bearer ".length).trim();
-  }
-  if (token) {
-    try {
-      const session = await getSessionByToken(token);
-      if (session?.isPhantom) {
-        isPhantomMode = true;
-        phantomAdminId = session.phantomAdminId;
-      }
-    } catch {
-      // Ignore session lookup errors
-    }
-  }
+  const attribution = buildAuditAttribution(channelOverride ?? (ctx.user as any).channel, ctx.session);
 
   await createAuditLog({
     userId: ctx.user.id,
@@ -97,10 +68,10 @@ export async function logProcedureCall(opts: {
     resourceType: extractResourceType(path),
     resourceId: extractResourceId(input),
     severity,
-    channel: (ctx.user as any).channel || null,
+    channel: attribution.channel,
     isAIAction: (ctx.user as any).isAIAgent || false,
-    isPhantomMode,
-    phantomAdminId,
+    isPhantomMode: attribution.isPhantomMode,
+    phantomAdminId: attribution.phantomAdminId,
     ipAddress: getClientIp(ctx.req),
     userAgent: getUserAgent(ctx.req),
     duration,
