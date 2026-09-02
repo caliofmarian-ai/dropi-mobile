@@ -1,0 +1,51 @@
+name: Validate Audit separation
+
+on:
+  pull_request:
+    paths:
+      - 'server/**'
+      - 'app/admin/audit-logs.tsx'
+      - 'tests/audit-policy.test.ts'
+      - 'tests/request-session.test.ts'
+      - 'tests/c1-audit-separation-contract.test.ts'
+      - '.github/workflows/validate-audit-separation-pr.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Audit separation contracts
+        run: >-
+          node --import tsx --test
+          tests/audit-policy.test.ts
+          tests/request-session.test.ts
+          tests/c1-audit-separation-contract.test.ts
+          tests/marketplace-experience-contract.test.ts
+      - name: Authentication and operational regressions
+        run: >-
+          pnpm exec vitest run
+          tests/sdk.authenticate-request.test.ts
+          tests/order-state-machine.test.ts
+          tests/order-transition-notifications.test.ts
+          tests/order-management-integration-contract.test.ts
+          tests/marketplace-controls-policy.test.ts
+          tests/marketplace-controls-integration-contract.test.ts
+          tests/push-state-notifications.test.ts
+          tests/push-state-integration-contract.test.ts
+          tests/live-tracking-security.test.ts
+          tests/live-tracking-client-contract.test.ts
+          tests/operational-safety-certification.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check origin/${{ github.base_ref }}...HEAD
