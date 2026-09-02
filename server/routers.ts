@@ -15,6 +15,7 @@ import { agentRouter } from "./agent-router";
 import { operationsRouter } from "./operations-router";
 import { p2pRouter } from "./p2p-router";
 import { privacyRouter } from "./privacy-router";
+import { authorityReportRouter } from "./authority-report-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -55,6 +56,9 @@ export const appRouter = router({
 
   // Privacy purpose, consent and bounded retention controls
   privacy: privacyRouter,
+
+  // Audit-backed, channel-scoped evidence packs for authority adaptation
+  authorityReports: authorityReportRouter,
 
   // Trust & Badge System
   trust: trustRouter,

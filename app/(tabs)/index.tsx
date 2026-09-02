@@ -1039,6 +1039,14 @@ function AuditManagerDashboard() {
           </View>
           <Text className="text-muted">→</Text>
         </TouchableOpacity>
+        <TouchableOpacity className="bg-surface border border-border rounded-xl p-3 mb-2 flex-row items-center" activeOpacity={0.7} onPress={() => router.push("/admin/authority-reports" as any)}>
+          <Text style={{ fontSize: 16, marginRight: 8 }}>📑</Text>
+          <View style={{ flex: 1 }}>
+            <Text className="text-sm font-medium text-foreground">Authority Evidence Packs</Text>
+            <Text className="text-xs text-muted">CAAP, EASA, FAA adaptation — internal templates</Text>
+          </View>
+          <Text className="text-muted">→</Text>
+        </TouchableOpacity>
         <TouchableOpacity className="bg-surface border border-border rounded-xl p-3 mb-2 flex-row items-center" activeOpacity={0.7} onPress={() => router.push("/admin/marketplace-overview" as any)}>
           <Text style={{ fontSize: 16, marginRight: 8 }}>🏪</Text>
           <View style={{ flex: 1 }}>

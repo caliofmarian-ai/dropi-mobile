@@ -213,6 +213,25 @@ export type PrivacyRetentionRun = typeof privacyRetentionRuns.$inferSelect;
 export type InsertPrivacyRetentionRun = typeof privacyRetentionRuns.$inferInsert;
 
 /**
+ * Privacy rights requests — immutable evidence for access/portability/erasure.
+ * Historical references continue to use the stable numeric user ID after the
+ * user row has been pseudonymized.
+ */
+export const privacyRightsRequests = mysqlTable("privacyRightsRequests", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  requestType: mysqlEnum("requestType", ["access", "portability", "erasure"]).notNull(),
+  status: mysqlEnum("status", ["requested", "blocked", "completed", "failed"]).default("requested").notNull(),
+  blockerSummary: json("blockerSummary"),
+  resultSummary: json("resultSummary"),
+  requestedAt: timestamp("requestedAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"),
+});
+
+export type PrivacyRightsRequest = typeof privacyRightsRequests.$inferSelect;
+export type InsertPrivacyRightsRequest = typeof privacyRightsRequests.$inferInsert;
+
+/**
  * Verifications table — Delivery Partners submit documents to prove authorization.
  * Admin reviews and approves/rejects. Until approved, pilot cannot receive missions.
  */

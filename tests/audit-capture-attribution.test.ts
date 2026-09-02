@@ -63,11 +63,12 @@ test("central tRPC middleware passes procedure type and captures failures with i
 
 test("central audit persists actor, device, session, access, AI/human and decision metadata", () => {
   const middleware = source("server/audit-middleware.ts");
-  assert.match(middleware, /sessionId: ctx\.session\?\.id != null \? String\(ctx\.session\.id\) : null/);
+  assert.match(middleware, /privacySafeErasureLog = path === "privacy\.eraseAccount" && success/);
+  assert.match(middleware, /sessionId: privacySafeErasureLog \? null : \(ctx\.session\?\.id != null \? String\(ctx\.session\.id\) : null\)/);
   assert.match(middleware, /deviceInfo/);
   assert.match(middleware, /accessKind: auditAccessKind\(procedureType\)/);
   assert.match(middleware, /actorKind: isAIAction \? "AI_PERSONAL" : "HUMAN"/);
-  assert.match(middleware, /decision: extractDecisionMetadata\(procedureType, sanitizedInput\)/);
+  assert.match(middleware, /decision: privacySafeErasureLog \? null : extractDecisionMetadata\(procedureType, sanitizedInput\)/);
   assert.match(middleware, /isAIAction,/);
   assert.match(middleware, /phantomAdminId: attribution\.phantomAdminId/);
 });

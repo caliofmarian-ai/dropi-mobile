@@ -9,6 +9,7 @@ import {
 import { adminProcedure, protectedProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
 import { executeAuthorizedPrivacyRetention, previewPrivacyRetention } from "./privacy-retention-service";
+import { buildPrivacySubjectExport, executePrivacyErasure, getPrivacyErasurePreview } from "./privacy-rights-service";
 
 function latestConsentByPurpose(rows: Array<typeof privacyConsents.$inferSelect>) {
   const latest = new Map<string, typeof privacyConsents.$inferSelect>();
@@ -71,6 +72,22 @@ export const privacyRouter = router({
       });
       return { success: true, purposeKey: purpose.key, granted: input.granted };
     }),
+
+  subjectExport: protectedProcedure.query(async ({ ctx }) =>
+    buildPrivacySubjectExport(ctx.user!.id)),
+
+  erasurePreview: protectedProcedure.query(async ({ ctx }) =>
+    getPrivacyErasurePreview(ctx.user!.id)),
+
+  eraseAccount: protectedProcedure
+    .input(z.object({
+      confirm: z.literal("ERASE_MY_DROPI_ACCOUNT"),
+      currentPassword: z.string().min(8).max(128).optional(),
+    }))
+    .mutation(async ({ input, ctx }) => executePrivacyErasure({
+      userId: ctx.user!.id,
+      currentPassword: input.currentPassword,
+    })),
 
   retentionPolicies: adminProcedure.query(() => ({
     policies: PRIVACY_RETENTION_POLICIES,
