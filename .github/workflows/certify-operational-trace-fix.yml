@@ -1,6 +1,6 @@
 name: Certify operational trace atomicity fix
 
-# Rerun after scoping the pilot pickup evidence anchor.
+# Final rerun includes persisted STOP/fallback semantics and correct test runners.
 on:
   push:
     branches:
@@ -29,11 +29,16 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Apply audited atomicity correction
+      - name: Apply audited atomicity and incident correction
         run: python scripts/fix_operational_trace_atomicity.py
-      - name: Operational trace policy and contracts
-        run: node --import tsx --test tests/operational-trace-policy.test.ts tests/operational-trace-contract.test.ts
-      - name: Delivery, B2B, tracking, audit and safety regressions
+      - name: Node contract tests
+        run: >-
+          node --import tsx --test
+          tests/operational-trace-policy.test.ts
+          tests/operational-trace-contract.test.ts
+          tests/operational-mission-safety-contract.test.ts
+          tests/audit-capture-attribution.test.ts
+      - name: Delivery, B2B, tracking and safety Vitest regressions
         run: >-
           pnpm exec vitest run
           tests/order-state-machine.test.ts
@@ -44,7 +49,6 @@ jobs:
           tests/live-tracking-security.test.ts
           tests/live-tracking-client-contract.test.ts
           tests/operational-safety-certification.test.ts
-          tests/audit-capture-attribution.test.ts
       - name: TypeScript
         run: pnpm check
       - name: Whitespace
