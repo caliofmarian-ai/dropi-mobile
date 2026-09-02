@@ -87,8 +87,10 @@ jobs:
             return createdOrderId;
           });'''
           path.write_text(text[:start] + replacement + text[end:])
-      - name: C1 policy tests
-        run: node --import tsx --test tests/p2p-policy.test.ts tests/c1-checkout-p2p-contract.test.ts tests/marketplace-review-policy.test.ts tests/order-state-machine.test.ts
+      - name: C1 node tests
+        run: node --import tsx --test tests/p2p-policy.test.ts tests/c1-checkout-p2p-contract.test.ts tests/marketplace-review-policy.test.ts
+      - name: Order-management regression
+        run: pnpm exec vitest run tests/order-state-machine.test.ts tests/order-transition-notifications.test.ts tests/order-management-integration-contract.test.ts
       - name: TypeScript
         run: pnpm check
       - name: Whitespace
