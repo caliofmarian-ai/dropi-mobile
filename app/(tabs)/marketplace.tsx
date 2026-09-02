@@ -1,131 +1,53 @@
 import { useState } from "react";
-import { ScrollView, Text, View, TouchableOpacity, FlatList } from "react-native";
+import { ActivityIndicator, FlatList, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
-import {
-  PRODUCT_CATEGORIES,
-  MOCK_PRODUCTS,
-  MOCK_MERCHANTS,
-  DELIVERY_MODE_INFO,
-  type Product,
-  type DeliveryBadge,
-} from "@/lib/marketplace-data";
+import { useDropiAuth } from "@/lib/auth-context";
+import { trpc } from "@/lib/trpc";
+import { MARKETPLACE_CATEGORY_POLICIES } from "@/shared/marketplace-policy";
 
-function DeliveryBadgeChip({ badge }: { badge: DeliveryBadge }) {
+type MarketplaceProduct = {
+  id: number;
+  storeId: number;
+  name: string;
+  price: string | number;
+  currency: string;
+  category: string;
+  weight: string | number;
+  zone: string;
+  deliveryModes: unknown;
+};
+
+function ProductCard({ product, onPress }: { product: MarketplaceProduct; onPress: () => void }) {
   const colors = useColors();
-  const modeInfo = DELIVERY_MODE_INFO[badge.mode];
-  if (!badge.available) return null;
-
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: modeInfo.color + "15",
-        borderRadius: 12,
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        marginRight: 4,
-        marginBottom: 4,
-      }}
-    >
-      <Text style={{ fontSize: 10 }}>{modeInfo.icon}</Text>
-      <Text style={{ fontSize: 10, color: modeInfo.color, marginLeft: 3, fontWeight: "600" }}>
-        {modeInfo.label}
-      </Text>
-    </View>
-  );
-}
-
-function ProductCard({ product, onPress }: { product: Product; onPress: () => void }) {
-  const colors = useColors();
-  const availableBadges = product.deliveryBadges.filter((b) => b.available);
-
+  const modes = Array.isArray(product.deliveryModes) ? product.deliveryModes.filter((mode): mode is string => typeof mode === "string") : [];
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={{
-        backgroundColor: colors.surface,
-        borderRadius: 16,
-        padding: 14,
-        marginBottom: 12,
-        borderWidth: 0.5,
-        borderColor: colors.border,
-      }}
+      style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 14, marginBottom: 12, borderWidth: 0.5, borderColor: colors.border }}
       activeOpacity={0.7}
     >
-      <View style={{ flexDirection: "row" }}>
-        <View
-          style={{
-            width: 60,
-            height: 60,
-            borderRadius: 12,
-            backgroundColor: colors.background,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ fontSize: 28 }}>{product.image}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View style={{ width: 52, height: 52, borderRadius: 12, backgroundColor: colors.background, alignItems: "center", justifyContent: "center" }}>
+          <Text style={{ fontSize: 24 }}>📦</Text>
         </View>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={{ fontSize: 15, fontWeight: "700", color: colors.foreground }} numberOfLines={1}>
-            {product.name}
+          <Text style={{ fontSize: 15, fontWeight: "700", color: colors.foreground }} numberOfLines={1}>{product.name}</Text>
+          <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>{product.category}</Text>
+          <Text style={{ fontSize: 16, fontWeight: "700", color: colors.primary, marginTop: 4 }}>
+            {product.currency} {Number(product.price).toFixed(2)}
           </Text>
-          <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }} numberOfLines={1}>
-            {product.merchantName}
-          </Text>
-          <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
-            <Text style={{ fontSize: 16, fontWeight: "700", color: colors.primary }}>
-              {product.price > 0 ? `₱${product.price}` : "FREE"}
-            </Text>
-            <Text style={{ fontSize: 11, color: colors.muted, marginLeft: 8 }}>
-              {product.weight}kg
-            </Text>
-          </View>
         </View>
       </View>
-      {/* Delivery Badges */}
-      <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8 }}>
-        {availableBadges.map((badge) => (
-          <DeliveryBadgeChip key={badge.mode} badge={badge} />
-        ))}
-      </View>
-    </TouchableOpacity>
-  );
-}
-
-function CategoryChip({ category, selected, onPress }: { category: typeof PRODUCT_CATEGORIES[0]; selected: boolean; onPress: () => void }) {
-  const colors = useColors();
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: selected ? colors.primary : colors.surface,
-        borderRadius: 20,
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-        marginRight: 8,
-        borderWidth: 0.5,
-        borderColor: selected ? colors.primary : colors.border,
-      }}
-      activeOpacity={0.7}
-    >
-      <Text style={{ fontSize: 14 }}>{category.icon}</Text>
-      <Text
-        style={{
-          fontSize: 12,
-          fontWeight: "600",
-          color: selected ? "#FFFFFF" : colors.foreground,
-          marginLeft: 6,
-        }}
-      >
-        {category.name}
-      </Text>
-      {category.droneEligible && (
-        <Text style={{ fontSize: 10, marginLeft: 4 }}>🚁</Text>
+      {modes.length > 0 && (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8 }}>
+          {modes.map((mode) => (
+            <View key={mode} style={{ backgroundColor: colors.background, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4, marginRight: 6, marginTop: 4 }}>
+              <Text style={{ fontSize: 10, color: colors.muted }}>{mode}</Text>
+            </View>
+          ))}
+        </View>
       )}
     </TouchableOpacity>
   );
@@ -134,113 +56,111 @@ function CategoryChip({ category, selected, onPress }: { category: typeof PRODUC
 export default function MarketplaceScreen() {
   const colors = useColors();
   const router = useRouter();
+  const { user } = useDropiAuth();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const zone = user?.zone?.trim() || "";
 
-  const filteredProducts = MOCK_PRODUCTS.filter((p) => {
-    if (selectedCategory && p.category !== selectedCategory) return false;
-    if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return p.inStock;
-  });
+  const productsQuery = trpc.product.listActive.useQuery(
+    { zone, category: selectedCategory || undefined, limit: 50, offset: 0 },
+    { enabled: Boolean(zone) },
+  );
+  const communityQuery = trpc.p2p.publicCommunityOffers.useQuery(
+    { zone, limit: 10, offset: 0 },
+    { enabled: Boolean(zone) },
+  );
+
+  const products = (productsQuery.data?.products || []) as MarketplaceProduct[];
+  const communityOffers = communityQuery.data?.offers || [];
 
   return (
     <ScreenContainer>
       <View style={{ flex: 1 }}>
-        {/* Header */}
         <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 }}>
-          <Text style={{ fontSize: 28, fontWeight: "800", color: colors.foreground }}>
-            Marketplace
-          </Text>
-          <Text style={{ fontSize: 13, color: colors.muted, marginTop: 4 }}>
-            DROPi controlled Marketplace — Multimodal Delivery
-          </Text>
+          <Text style={{ fontSize: 28, fontWeight: "800", color: colors.foreground }}>Marketplace</Text>
+          <Text style={{ fontSize: 13, color: colors.muted, marginTop: 4 }}>Controlled C1 public offer layer</Text>
         </View>
 
-        {/* Zone Indicator */}
-        <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: colors.primary + "10",
-              borderRadius: 10,
-              padding: 10,
-            }}
-          >
-            <Text style={{ fontSize: 14 }}>📍</Text>
-            <Text style={{ fontSize: 12, color: colors.primary, fontWeight: "600", marginLeft: 6 }}>
-              Manila-Central Zone
-            </Text>
-            <Text style={{ fontSize: 11, color: colors.muted, marginLeft: 8 }}>
-              • {MOCK_MERCHANTS.filter((m) => m.isOpen).length} merchants activi
-            </Text>
+        {!zone ? (
+          <View style={{ marginHorizontal: 20, backgroundColor: colors.surface, borderRadius: 12, padding: 16, borderWidth: 0.5, borderColor: colors.border }}>
+            <Text style={{ color: colors.foreground, fontWeight: "700" }}>Operating zone required</Text>
+            <Text style={{ color: colors.muted, marginTop: 6 }}>Set a C1 operating zone on your account before browsing Marketplace availability.</Text>
           </View>
-        </View>
-
-        {/* Categories */}
-        <View style={{ marginBottom: 12 }}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 }}>
-            <CategoryChip
-              category={{ id: "all", name: "All", icon: "🏪", droneEligible: false, maxWeightDrone: 0, description: "" }}
-              selected={selectedCategory === null}
-              onPress={() => setSelectedCategory(null)}
-            />
-            {PRODUCT_CATEGORIES.map((cat) => (
-              <CategoryChip
-                key={cat.id}
-                category={cat}
-                selected={selectedCategory === cat.id}
-                onPress={() => setSelectedCategory(cat.id === selectedCategory ? null : cat.id)}
-              />
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Delivery Mode Legend */}
-        <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              backgroundColor: colors.surface,
-              borderRadius: 10,
-              padding: 10,
-              borderWidth: 0.5,
-              borderColor: colors.border,
-            }}
-          >
-            <Text style={{ fontSize: 10, color: colors.muted, fontWeight: "600", width: "100%", marginBottom: 4 }}>
-              MODURI DE LIVRARE DISPONIBILE:
-            </Text>
-            {Object.entries(DELIVERY_MODE_INFO).map(([key, info]) => (
-              <View key={key} style={{ flexDirection: "row", alignItems: "center", marginRight: 12, marginBottom: 2 }}>
-                <Text style={{ fontSize: 11 }}>{info.icon}</Text>
-                <Text style={{ fontSize: 10, color: colors.muted, marginLeft: 3 }}>{info.label}</Text>
+        ) : (
+          <>
+            <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.primary + "10", borderRadius: 10, padding: 10 }}>
+                <Text style={{ fontSize: 14 }}>📍</Text>
+                <Text style={{ fontSize: 12, color: colors.primary, fontWeight: "600", marginLeft: 6 }}>{zone}</Text>
+                <Text style={{ fontSize: 11, color: colors.muted, marginLeft: 8 }}>• {productsQuery.data?.total || 0} available products</Text>
               </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Products List */}
-        <FlatList
-          data={filteredProducts}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
-          renderItem={({ item }) => (
-            <ProductCard
-              product={item}
-              onPress={() => router.push(`/product/${item.id}` as any)}
-            />
-          )}
-          ListEmptyComponent={
-            <View style={{ alignItems: "center", paddingTop: 40 }}>
-              <Text style={{ fontSize: 40 }}>🔍</Text>
-              <Text style={{ fontSize: 14, color: colors.muted, marginTop: 8 }}>
-                No products found in this category
-              </Text>
             </View>
-          }
-        />
+
+            <View style={{ marginBottom: 12 }}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 }}>
+                <TouchableOpacity
+                  onPress={() => setSelectedCategory(null)}
+                  style={{ backgroundColor: selectedCategory === null ? colors.primary : colors.surface, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 8, marginRight: 8 }}
+                >
+                  <Text style={{ color: selectedCategory === null ? "#fff" : colors.foreground, fontSize: 12, fontWeight: "600" }}>All</Text>
+                </TouchableOpacity>
+                {MARKETPLACE_CATEGORY_POLICIES.map((category) => (
+                  <TouchableOpacity
+                    key={category.id}
+                    onPress={() => setSelectedCategory(selectedCategory === category.label ? null : category.label)}
+                    style={{ backgroundColor: selectedCategory === category.label ? colors.primary : colors.surface, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 8, marginRight: 8 }}
+                  >
+                    <Text style={{ color: selectedCategory === category.label ? "#fff" : colors.foreground, fontSize: 12, fontWeight: "600" }}>{category.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            <View style={{ paddingHorizontal: 20, marginBottom: 12, flexDirection: "row", gap: 8 }}>
+              <TouchableOpacity onPress={() => router.push("/cart" as any)} style={{ flex: 1, backgroundColor: colors.surface, borderRadius: 12, paddingVertical: 11, alignItems: "center", borderWidth: 0.5, borderColor: colors.border }}>
+                <Text style={{ color: colors.foreground, fontWeight: "700" }}>🛒 Cart</Text>
+              </TouchableOpacity>
+              {user?.dropiRole === "customer" && (
+                <TouchableOpacity onPress={() => router.push("/p2p" as any)} style={{ flex: 1, backgroundColor: colors.surface, borderRadius: 12, paddingVertical: 11, alignItems: "center", borderWidth: 0.5, borderColor: colors.border }}>
+                  <Text style={{ color: colors.foreground, fontWeight: "700" }}>🤝 P2P</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {communityOffers.length > 0 && (
+              <View style={{ paddingHorizontal: 20, marginBottom: 14 }}>
+                <Text style={{ fontSize: 15, fontWeight: "700", color: colors.foreground, marginBottom: 8 }}>Community offers</Text>
+                {communityOffers.map((offer) => (
+                  <View key={offer.id} style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 12, marginBottom: 8, borderWidth: 0.5, borderColor: colors.border }}>
+                    <Text style={{ color: colors.foreground, fontWeight: "700" }}>{offer.title}</Text>
+                    <Text style={{ color: colors.muted, fontSize: 11, marginTop: 3 }}>{offer.offerType.replace("_", " ")} • expires {new Date(offer.expiresAt).toLocaleDateString()}</Text>
+                    {offer.offerType === "fixed_price" && offer.fixedPrice != null && (
+                      <Text style={{ color: colors.primary, fontWeight: "700", marginTop: 4 }}>{offer.currency} {Number(offer.fixedPrice).toFixed(2)}</Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {productsQuery.isLoading ? (
+              <ActivityIndicator style={{ marginTop: 30 }} />
+            ) : (
+              <FlatList
+                data={products}
+                keyExtractor={(item) => String(item.id)}
+                contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}
+                renderItem={({ item }) => <ProductCard product={item} onPress={() => router.push(`/product/${item.id}` as any)} />}
+                refreshing={productsQuery.isFetching}
+                onRefresh={() => { void productsQuery.refetch(); void communityQuery.refetch(); }}
+                ListEmptyComponent={
+                  <View style={{ alignItems: "center", paddingTop: 40 }}>
+                    <Text style={{ fontSize: 36 }}>🔍</Text>
+                    <Text style={{ fontSize: 14, color: colors.muted, marginTop: 8 }}>No eligible products are currently available in this zone.</Text>
+                  </View>
+                }
+              />
+            )}
+          </>
+        )}
       </View>
     </ScreenContainer>
   );
