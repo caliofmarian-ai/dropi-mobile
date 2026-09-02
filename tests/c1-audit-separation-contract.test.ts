@@ -9,10 +9,11 @@ function source(path: string) {
 
 test("request context carries persisted session attribution", () => {
   const file = source("server/_core/context.ts");
-  assert.match(file, /session:\s*Session\s*\|\s*null/);
-  assert.match(file, /sessionToken:\s*string\s*\|\s*null/);
+  assert.match(file, /session\?:\s*Session\s*\|\s*null/);
+  assert.match(file, /sessionToken\?:\s*string\s*\|\s*null/);
   assert.match(file, /getRequestSessionToken/);
   assert.match(file, /getSessionByToken/);
+  assert.match(file, /session,\s*\n\s*sessionToken,/);
 });
 
 test("audit middleware uses context session and admin procedures force ADMIN stream", () => {
