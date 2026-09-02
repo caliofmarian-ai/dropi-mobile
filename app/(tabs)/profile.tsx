@@ -169,6 +169,13 @@ export default function ProfileScreen() {
 
         {/* Settings */}
         <View className="bg-surface border border-border rounded-xl overflow-hidden mb-4">
+          <TouchableOpacity
+            className="px-4 py-3.5 border-b border-border flex-row justify-between items-center"
+            onPress={() => router.push("/privacy" as any)}
+          >
+            <Text className="text-sm text-foreground">Privacy & Data Use</Text>
+            <Text className="text-primary text-xs font-medium">→</Text>
+          </TouchableOpacity>
           <TouchableOpacity className="px-4 py-3.5 border-b border-border flex-row justify-between items-center">
             <Text className="text-sm text-foreground">Notifications</Text>
             <Text className="text-muted text-xs">Enabled</Text>

@@ -14,6 +14,7 @@ import { notificationRouter } from "./notification-router";
 import { agentRouter } from "./agent-router";
 import { operationsRouter } from "./operations-router";
 import { p2pRouter } from "./p2p-router";
+import { privacyRouter } from "./privacy-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -51,6 +52,9 @@ export const appRouter = router({
 
   // Channel 1 non-commercial P2P capability (separate from merchant stores/orders)
   p2p: p2pRouter,
+
+  // Privacy purpose, consent and bounded retention controls
+  privacy: privacyRouter,
 
   // Trust & Badge System
   trust: trustRouter,
