@@ -69,15 +69,19 @@ describe("canonical Marketplace order integration", () => {
     expect(text).toContain("Verified History");
   });
 
-  it("keeps pilot acceptance voluntary and execution on the same canonical mutation", () => {
-    const text = source("app/(tabs)/index.tsx");
-    expect(text).toContain("trpc.operations.availableMarketplaceOrders.useQuery");
-    expect(text).toContain("trpc.operations.myMarketplacePilotOrders.useQuery");
-    expect(text).toContain("trpc.operations.transitionOrder.useMutation");
-    expect(text).toContain('newStatus: "accepted"');
-    expect(text).toContain('newStatus: "in_execution"');
-    expect(text).toContain('newStatus: "completed"');
-    expect(text).toContain("Accept Voluntarily");
+  it("keeps pilot acceptance voluntary and routes completion through proof-backed canonical transition", () => {
+    const dashboard = source("app/(tabs)/index.tsx");
+    const proofScreen = source("app/pilot/complete-order.tsx");
+    expect(dashboard).toContain("trpc.operations.availableMarketplaceOrders.useQuery");
+    expect(dashboard).toContain("trpc.operations.myMarketplacePilotOrders.useQuery");
+    expect(dashboard).toContain("trpc.operations.transitionOrder.useMutation");
+    expect(dashboard).toContain('newStatus: "accepted"');
+    expect(dashboard).toContain('newStatus: "in_execution"');
+    expect(dashboard).toContain("Accept Voluntarily");
+    expect(dashboard).toContain("/pilot/complete-order");
+    expect(proofScreen).toContain("trpc.operations.transitionOrder.useMutation");
+    expect(proofScreen).toContain('newStatus: "completed"');
+    expect(proofScreen).toContain("completionProof");
   });
 
   it("shows initiated orders to merchants instead of hiding them before validation", () => {
