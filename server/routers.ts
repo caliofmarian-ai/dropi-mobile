@@ -16,6 +16,7 @@ import { operationsRouter } from "./operations-router";
 import { p2pRouter } from "./p2p-router";
 import { privacyRouter } from "./privacy-router";
 import { authorityReportRouter } from "./authority-report-router";
+import { incidentReconstructionRouter } from "./incident-reconstruction-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -59,6 +60,9 @@ export const appRouter = router({
 
   // Audit-backed, channel-scoped evidence packs for authority adaptation
   authorityReports: authorityReportRouter,
+
+  // Per-incident factual reconstruction and authority exports from persisted evidence
+  incidentReconstruction: incidentReconstructionRouter,
 
   // Trust & Badge System
   trust: trustRouter,

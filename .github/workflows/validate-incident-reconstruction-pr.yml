@@ -1,0 +1,43 @@
+name: Validate Incident Reconstruction
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - app/admin/authority-reports.tsx
+      - app/admin/incident-reconstruction.tsx
+      - server/incident-reconstruction-router.ts
+      - server/incident-reconstruction-service.ts
+      - server/routers.ts
+      - shared/incident-reconstruction-policy.ts
+      - tests/incident-reconstruction-contract.test.ts
+      - tests/incident-reconstruction-policy.test.ts
+      - server/operational-trace-service.ts
+      - drizzle/operational-trace-schema.ts
+      - shared/authority-report-policy.ts
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Incident reconstruction contracts
+        run: node --import tsx --test tests/incident-reconstruction-policy.test.ts tests/incident-reconstruction-contract.test.ts tests/operational-trace-policy.test.ts tests/operational-trace-contract.test.ts tests/authority-report-policy.test.ts tests/privacy-rights-reporting-contract.test.ts
+      - name: Operational safety regressions
+        run: pnpm exec vitest run tests/operational-safety-certification.test.ts tests/live-tracking-security.test.ts tests/order-management-integration-contract.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
