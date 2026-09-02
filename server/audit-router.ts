@@ -185,7 +185,7 @@ export const auditRouter = router({
 
   export: auditInvestigatorProcedure
     .input(auditFiltersSchema.extend({ format: z.enum(["json", "csv"]) }))
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       const db = await getDb();
       if (!db) throw new Error("Database unavailable");
       const where = buildAuditWhere(input);
