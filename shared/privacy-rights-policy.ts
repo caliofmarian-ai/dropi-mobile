@@ -43,6 +43,13 @@ export function omitSecretsForSubjectExport<T extends Record<string, unknown>>(r
 
 const ERASURE_PII_KEY_PATTERN = /(^|_)(name|email|phone|address|token|secret|password|device|ip|latitude|longitude|lat|lng)($|_)/i;
 
+function normalizePrivacyKey(key: string): string {
+  return key
+    .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+    .replace(/[-.\s]+/g, "_")
+    .toLowerCase();
+}
+
 export function redactAuditDetailsForErasure(value: unknown, depth = 0): unknown {
   if (depth > 8) return "[REDACTED]";
   if (Array.isArray(value)) return value.map((item) => redactAuditDetailsForErasure(item, depth + 1));
@@ -50,7 +57,7 @@ export function redactAuditDetailsForErasure(value: unknown, depth = 0): unknown
 
   const output: Record<string, unknown> = {};
   for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
-    output[key] = ERASURE_PII_KEY_PATTERN.test(key)
+    output[key] = ERASURE_PII_KEY_PATTERN.test(normalizePrivacyKey(key))
       ? "[ERASED]"
       : redactAuditDetailsForErasure(nested, depth + 1);
   }
