@@ -45,6 +45,14 @@ export function loadDataEncryptionKeyring(env: NodeJS.ProcessEnv = process.env):
   return createDataEncryptionKeyring({ activeKeyId, keys: parsed as Record<string, string> });
 }
 
+export function requireDataEncryptionKeyring(env: NodeJS.ProcessEnv = process.env): DataEncryptionKeyring {
+  const keyring = loadDataEncryptionKeyring(env);
+  if (!keyring) {
+    throw new Error("DROPi data encryption is not configured. Set DROPI_DATA_ENCRYPTION_ACTIVE_KEY_ID and DROPI_DATA_ENCRYPTION_KEYS in the deployment secret store.");
+  }
+  return keyring;
+}
+
 function aad(purpose: string): Buffer {
   const normalized = purpose.trim();
   if (!/^[A-Za-z0-9._:-]{1,128}$/.test(normalized)) throw new Error("Encryption purpose is invalid.");
