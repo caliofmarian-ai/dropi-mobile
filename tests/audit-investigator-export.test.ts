@@ -36,9 +36,9 @@ test("CSV export uses stable columns and RFC-style quote escaping", () => {
   assert.equal(lines.length, 2);
   assert.match(lines[0], /"id","createdAt","channel","userId"/);
   assert.ok(lines[1].includes('"order.status_transition,""quoted"""'));
-  assert.ok(lines[1].includes("reason"));
+  assert.ok(lines[1].includes('""reason""'));
   assert.ok(lines[1].includes("customer said"));
-  assert.ok(lines[1].includes('""ok""'));
+  assert.ok(lines[1].includes("\\"), "embedded JSON quotes remain JSON-escaped inside the CSV cell");
 });
 
 test("JSON export carries channel, filters, truncation and evidence rows", () => {
