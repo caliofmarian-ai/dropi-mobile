@@ -7,7 +7,7 @@ function source(relativePath: string) {
 }
 
 describe("IMPL-010 C2/C3 dashboard channel boundaries", () => {
-  it("intercepts every C3 role before the legacy B2B-backed dashboard implementation", () => {
+  it("routes every C3 role to the governed EOC-unavailable surface", () => {
     const entry = source("app/(tabs)/index.tsx");
 
     for (const role of [
@@ -33,12 +33,12 @@ describe("IMPL-010 C2/C3 dashboard channel boundaries", () => {
     expect(governed).not.toContain("DECLARE ALL-CLEAR");
   });
 
-  it("fails closed for C2 domains whose governed persistence models are not active", () => {
+  it("fails closed for every C2 role until COS tenancy and authorization are materialized", () => {
     const entry = source("app/(tabs)/index.tsx");
     const governed = source("components/c2-c3-governed-dashboards.tsx");
-    const legacy = source("components/legacy-home-screen.tsx");
 
     for (const role of [
+      "operations_manager",
       "logistics_coordinator",
       "fleet_manager",
       "c2_compliance_officer",
@@ -51,8 +51,16 @@ describe("IMPL-010 C2/C3 dashboard channel boundaries", () => {
     }
 
     expect(governed).toContain("not fabricated");
-    expect(entry).not.toContain('"operations_manager",');
-    expect(legacy).toContain("function OperationsManagerDashboard()");
-    expect(legacy).toContain("trpc.b2bDelivery.adminList.useQuery");
+    expect(governed).toContain("B2B admin listing endpoint is restricted to system-administrator authority");
+    expect(governed).toContain("BATCH-009");
+    expect(governed).not.toContain("trpc.b2bDelivery");
+  });
+
+  it("keeps C1 delivery-partner UI isolated from B2B/C2 missions", () => {
+    const c1 = source("components/c1-transactional-dashboards.tsx");
+    expect(c1).toContain("Marketplace missions available");
+    expect(c1).not.toContain("myPilotMissions");
+    expect(c1).not.toContain("B2B Missions");
+    expect(c1).not.toContain("target: \"b2b\"");
   });
 });
