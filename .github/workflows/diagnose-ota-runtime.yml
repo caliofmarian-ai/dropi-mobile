@@ -28,13 +28,9 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Generate clean Android native project
         run: pnpm exec expo prebuild --platform android --clean --no-install
-      - name: Inspect generated SDK properties and permissions
-        run: |
-          echo '=== root build.gradle ==='
-          grep -nE 'compileSdk|targetSdk|buildTools' android/build.gradle android/gradle.properties || true
-          echo '=== app build.gradle ==='
-          grep -nE 'compileSdk|targetSdk|minSdk|buildTools' android/app/build.gradle || true
-          echo '=== AndroidManifest permissions ==='
-          grep -n 'uses-permission' android/app/src/main/AndroidManifest.xml || true
       - name: Generate local fingerprint
         run: eas fingerprint:generate --platform android --json --non-interactive
+      - name: Publish isolated diagnostic Android update
+        run: eas update --branch ota-runtime-diagnostic --platform android --message "OTA runtime diagnostic after clean prebuild" --non-interactive
+      - name: Inspect diagnostic update
+        run: eas update:list --branch ota-runtime-diagnostic --limit 1 --json
