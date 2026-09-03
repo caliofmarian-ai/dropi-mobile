@@ -10,6 +10,7 @@ on:
       - shared/types.ts
       - tests/rbac.policy.test.ts
       - tests/trpc.rbac-middleware.test.ts
+      - tests/rbac.protected-routes-contract.test.ts
       - .github/workflows/validate-rbac-pr.yml
 
 permissions:
@@ -32,7 +33,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Canonical RBAC policy and middleware
-        run: pnpm exec vitest run tests/rbac.policy.test.ts tests/trpc.rbac-middleware.test.ts
+        run: pnpm exec vitest run tests/rbac.policy.test.ts tests/trpc.rbac-middleware.test.ts tests/rbac.protected-routes-contract.test.ts
       - name: Auth regression
         run: pnpm exec vitest run tests/auth.refresh-rotation.test.ts tests/auth.login-session.test.ts tests/sdk.authenticate-request.test.ts
       - name: TypeScript
