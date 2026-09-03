@@ -5,6 +5,7 @@ import { InsertUser, users, sessions, auditLogs, InsertAuditLog, InsertSession }
 import { type AuditChannel } from "./audit-policy";
 import { classifyAuditRetention } from "../shared/privacy-policy";
 import { ENV } from "./_core/env";
+import { hashOneTimeCode } from "./account-lifecycle";
 import { resolveUserVerificationForCreate, verificationPatchForRoleChange } from "./user-verification-policy";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -135,20 +136,45 @@ export async function createUser(data: {
 export async function updateUserPassword(userId: number, passwordHash: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(users).set({ passwordHash, failedLoginAttempts: 0, lockedUntil: null }).where(eq(users.id, userId));
+
+  // Password replacement is a credential-boundary event. Revoke all existing
+  // sessions atomically so a stolen or previously issued session cannot survive
+  // a recovery or explicit password change.
+  await db.transaction(async (tx) => {
+    await tx
+      .update(users)
+      .set({ passwordHash, failedLoginAttempts: 0, lockedUntil: null })
+      .where(eq(users.id, userId));
+    await tx.delete(sessions).where(eq(sessions.userId, userId));
+  });
 }
 
 export async function setResetToken(userId: number, token: string, expiry: Date) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(users).set({ resetToken: token, resetTokenExpiry: expiry }).where(eq(users.id, userId));
+  const protectedToken = hashOneTimeCode("password-reset", token);
+  await db
+    .update(users)
+    .set({ resetToken: protectedToken, resetTokenExpiry: expiry })
+    .where(eq(users.id, userId));
 }
 
 export async function getUserByResetToken(token: string) {
   const db = await getDb();
   if (!db) return undefined;
-  const result = await db.select().from(users).where(eq(users.resetToken, token)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
+
+  const protectedToken = hashOneTimeCode("password-reset", token);
+  const protectedResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.resetToken, protectedToken))
+    .limit(1);
+  if (protectedResult.length > 0) return protectedResult[0];
+
+  // Transitional compatibility for codes issued immediately before IMPL-007.
+  // Their expiry remains authoritative; all new codes are protected at rest.
+  const legacyResult = await db.select().from(users).where(eq(users.resetToken, token)).limit(1);
+  return legacyResult.length > 0 ? legacyResult[0] : undefined;
 }
 
 export async function clearResetToken(userId: number) {
@@ -205,7 +231,13 @@ export async function listUsers(opts: { channel?: string; role?: string; search?
 export async function toggleUserActive(userId: number, isActive: boolean) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(users).set({ isActive }).where(eq(users.id, userId));
+
+  await db.transaction(async (tx) => {
+    await tx.update(users).set({ isActive }).where(eq(users.id, userId));
+    if (!isActive) {
+      await tx.delete(sessions).where(eq(sessions.userId, userId));
+    }
+  });
 }
 
 export async function changeUserRole(userId: number, dropiRole: string, channel: string) {
@@ -334,6 +366,15 @@ export async function setEmailVerifyToken(userId: number, token: string, expiry:
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.update(users).set({ emailVerifyToken: token, emailVerifyExpires: expiry }).where(eq(users.id, userId));
+}
+
+export async function clearEmailVerifyToken(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db
+    .update(users)
+    .set({ emailVerifyToken: null, emailVerifyExpires: null })
+    .where(eq(users.id, userId));
 }
 
 export async function getUserByEmailVerifyToken(token: string) {
