@@ -43,9 +43,10 @@ jobs:
         run: pnpm check
       - name: Whitespace
         run: git diff --check origin/main...HEAD
-      - name: Commit verified implementation and self-clean
+      - name: Commit verified implementation
         run: |
-          rm -f scripts/finalize_security_baseline.py scripts/finalize_security_baseline_v2.py scripts/finalize_security_baseline_v3.py scripts/finalize_security_baseline_v4.py scripts/finalize_security_baseline_v5.py scripts/finalize_security_baseline_v6.py .github/workflows/finalize-security-baseline.yml
+          rm -f scripts/finalize_security_baseline.py scripts/finalize_security_baseline_v2.py scripts/finalize_security_baseline_v3.py scripts/finalize_security_baseline_v4.py scripts/finalize_security_baseline_v5.py scripts/finalize_security_baseline_v6.py
+          rm -f .github/workflows/validate-security-baseline-pr.yml
           git config user.name "DROPi Security Automation"
           git config user.email "dropi.deliveries@gmail.com"
           git add -A
