@@ -1,6 +1,5 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import type { Session, User } from "../../drizzle/schema";
-import { getSessionByToken } from "../db";
 import { getRequestSessionToken } from "../request-session";
 import { sdk } from "./sdk";
 
@@ -28,7 +27,7 @@ export async function createContext(opts: CreateExpressContextOptions): Promise<
 
   if (user && sessionToken) {
     try {
-      const persisted = await getSessionByToken(sessionToken);
+      const persisted = await sdk.getPersistedSessionForToken(sessionToken);
       if (persisted && new Date(persisted.expiresAt).getTime() > Date.now()) {
         session = persisted;
       }

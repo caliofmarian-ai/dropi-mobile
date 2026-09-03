@@ -12,7 +12,7 @@ test("request context carries persisted session attribution", () => {
   assert.match(file, /session\?:\s*Session\s*\|\s*null/);
   assert.match(file, /sessionToken\?:\s*string\s*\|\s*null/);
   assert.match(file, /getRequestSessionToken/);
-  assert.match(file, /getSessionByToken/);
+  assert.match(file, /sdk\.getPersistedSessionForToken\(sessionToken\)/);
   assert.match(file, /session,\s*\n\s*sessionToken,/);
 });
 
@@ -50,8 +50,10 @@ test("phantom JWTs are session-bound and use the two-hour phantom lifetime", () 
   const sdk = source("server/_core/sdk.ts");
   const auth = source("server/auth-router.ts");
   assert.match(sdk, /phantomAdminId\?:\s*number/);
-  assert.match(sdk, /getSessionByToken\(sessionCookie/);
-  assert.match(sdk, /persistedPhantomSession/);
+  assert.match(sdk, /getPersistedSessionForToken\(sessionCookie\)/);
+  assert.match(sdk, /persistedSession\?\.isPhantom === true/);
+  assert.match(sdk, /persistedSession\.phantomAdminId === session\.phantomAdminId/);
+  assert.match(sdk, /new Date\(persistedSession\.expiresAt\)\.getTime\(\) > Date\.now\(\)/);
   assert.match(auth, /expiresInMs:\s*2\s*\*\s*60\s*\*\s*60\s*\*\s*1000/);
   assert.match(auth, /phantomAdminId:\s*user\.id/);
 });
