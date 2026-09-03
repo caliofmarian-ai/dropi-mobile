@@ -1,1 +1,0 @@
-IMPL-006 centralizes authenticated tRPC authorization in `server/_core/trpc.ts`. Router files that already use `protectedProcedure`, `adminProcedure`, `auditInvestigatorProcedure`, or `phantomProcedure` inherit the canonical RBAC gate automatically; route-specific permission narrowing can use `rbacProcedure(...)` without creating a second role graph.
