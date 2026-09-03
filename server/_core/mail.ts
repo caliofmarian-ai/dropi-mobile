@@ -104,6 +104,84 @@ export async function resolveIPv4Host(hostname: string): Promise<string> {
   return hostname;
 }
 
+function decoratePasswordRecoveryEmail(innerHtml: string): string {
+  return `
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>DROPi Password Recovery</title>
+      </head>
+      <body style="margin:0; padding:0; background:#F1F5F9; font-family:Arial,Helvetica,sans-serif; color:#0F172A;">
+        <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
+          Your secure DROPi password reset code is ready. It expires in 15 minutes.
+        </div>
+
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; background:#F1F5F9;">
+          <tr>
+            <td align="center" style="padding:32px 16px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; max-width:600px; background:#FFFFFF; border-radius:20px; overflow:hidden; box-shadow:0 10px 30px rgba(15,23,42,0.08);">
+                <tr>
+                  <td style="background:#0F172A; padding:30px 32px 26px; text-align:center;">
+                    <div style="display:inline-block; padding:8px 14px; border:1px solid rgba(255,255,255,0.22); border-radius:999px; color:#7DD3FC; font-size:11px; font-weight:700; letter-spacing:1.8px; text-transform:uppercase;">
+                      Account Security
+                    </div>
+                    <div style="margin-top:18px; color:#FFFFFF; font-size:38px; line-height:42px; font-weight:800; letter-spacing:-1px;">
+                      DROP<span style="color:#38BDF8;">i</span>
+                    </div>
+                    <p style="margin:8px 0 0; color:#CBD5E1; font-size:15px; line-height:22px;">
+                      Secure access to a smarter delivery experience.
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:8px 26px 0;">
+                    ${innerHtml}
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:0 32px 30px;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; background:#EFF6FF; border:1px solid #DBEAFE; border-radius:14px;">
+                      <tr>
+                        <td style="padding:18px 20px;">
+                          <div style="color:#1D4ED8; font-size:13px; font-weight:700; letter-spacing:0.2px; margin-bottom:6px;">
+                            More than a password reset
+                          </div>
+                          <div style="color:#334155; font-size:13px; line-height:20px;">
+                            DROPi brings marketplace access, delivery workflows and role-based operations into one connected platform — designed to make every delivery clearer, faster and easier to coordinate.
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <p style="margin:18px 4px 0; color:#64748B; font-size:12px; line-height:18px; text-align:center;">
+                      Security matters at every step. DROPi will never ask you to send your password or recovery code by reply email.
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="background:#F8FAFC; border-top:1px solid #E2E8F0; padding:18px 28px; text-align:center;">
+                    <div style="color:#475569; font-size:12px; line-height:18px;">
+                      DROPi Deliveries &middot; Connected logistics, built around people and operations.
+                    </div>
+                    <div style="margin-top:4px; color:#94A3B8; font-size:11px; line-height:16px;">
+                      This is an automated security message. Please do not reply with credentials or recovery codes.
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+  `;
+}
+
 export async function sendPlatformEmail(input: {
   to: string;
   subject: string;
@@ -156,12 +234,16 @@ export async function sendPlatformEmail(input: {
         ...timeoutOpts,
       });
 
+  const html = input.logLabel === "password reset email"
+    ? decoratePasswordRecoveryEmail(input.html)
+    : input.html;
+
   try {
     await transporter.sendMail({
       from: config.from,
       to: input.to,
       subject: input.subject,
-      html: input.html,
+      html,
     });
     console.log(`[SMTP] ${input.logLabel} sent to ${maskEmail(input.to)} via ${config.mode}`);
     return true;
