@@ -1,7 +1,7 @@
 name: EAS Update (OTA)
 
-# Rulează automat la fiecare push pe main
-# Trimite codul nou direct pe telefon fără reconstruire APK
+# Publishes JavaScript updates from main to the single development EAS branch.
+# Native-runtime changes require an app version bump and a new APK before OTA.
 on:
   push:
     branches:
@@ -20,20 +20,18 @@ jobs:
       - name: Validate EAS project ID
         run: |
           if grep -q "YOUR_EAS_PROJECT_ID" app.config.ts; then
-            echo "❌ EROARE: app.config.ts conține YOUR_EAS_PROJECT_ID (placeholder neînlocuit)"
-            echo "   → Mergi la https://expo.dev, creează proiectul și înlocuiește placeholder-ul."
+            echo "ERROR: app.config.ts contains an unresolved EAS project placeholder"
             exit 1
           fi
-          echo "✅ EAS Project ID este configurat corect"
+          echo "EAS Project ID is configured"
 
       - name: Validate EXPO_TOKEN secret
         run: |
           if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
-            echo "❌ EROARE: EXPO_TOKEN nu este setat în GitHub Secrets"
-            echo "   → Mergi la https://expo.dev, creează un access token și adaugă-l ca EXPO_TOKEN în GitHub Actions Secrets"
+            echo "ERROR: EXPO_TOKEN is not configured"
             exit 1
           fi
-          echo "✅ EXPO_TOKEN este configurat"
+          echo "EXPO_TOKEN is configured"
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -48,17 +46,43 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate EXPO_PUBLIC_API_BASE_URL
+      - name: Validate public mobile API configuration
+        env:
+          EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
         run: |
-          if [ -z "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" ]; then
-            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu este setat în GitHub Variables"
+          if [ -z "$EXPO_PUBLIC_API_BASE_URL" ]; then
+            echo "ERROR: EXPO_PUBLIC_API_BASE_URL is not configured in GitHub Variables"
             exit 1
           fi
-          if echo "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" | grep -qE "(localhost|127\.0\.0\.1)"; then
-            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu poate fi localhost sau 127.0.0.1 pe mobile"
+          if echo "$EXPO_PUBLIC_API_BASE_URL" | grep -qE "(localhost|127\.0\.0\.1)"; then
+            echo "ERROR: EXPO_PUBLIC_API_BASE_URL cannot target localhost on mobile"
             exit 1
           fi
-          echo "✅ EXPO_PUBLIC_API_BASE_URL este configurat"
+          if ! echo "$EXPO_PUBLIC_API_BASE_URL" | grep -qE '^https://'; then
+            echo "ERROR: EXPO_PUBLIC_API_BASE_URL must use HTTPS"
+            exit 1
+          fi
+          echo "Public mobile API configuration is valid"
+
+      - name: Validate generated Expo public config
+        env:
+          EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
+          EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+        run: |
+          node <<'NODE'
+          const { execFileSync } = require("node:child_process");
+          const raw = execFileSync(
+            "pnpm",
+            ["exec", "expo", "config", "--type", "public", "--json"],
+            { encoding: "utf8", env: process.env },
+          );
+          const config = JSON.parse(raw);
+          const value = config.extra?.apiBaseUrl;
+          if (typeof value !== "string" || !value.startsWith("https://")) {
+            throw new Error("Expo public config is missing a valid embedded API base URL");
+          }
+          console.log("Expo public config contains the embedded API base URL");
+          NODE
 
       - name: Setup EAS
         uses: expo/expo-github-action@v9
@@ -69,11 +93,9 @@ jobs:
       - name: Verify EAS CLI
         run: eas --version
 
-      - name: Generate native projects for runtime fingerprint parity
-        run: pnpm exec expo prebuild --clean --no-install
-
-      - name: Publish EAS Update
+      - name: Publish EAS Update to development
         run: eas update --branch development --message "$(git log -1 --pretty=format:'%s')" --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
           EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
