@@ -1,9 +1,8 @@
 name: EAS Build — Android APK (development)
 
-# Construiește APK-ul de development Android cu Expo EAS
-# Se rulează EXCLUSIV manual (workflow_dispatch) pentru a conserva cota EAS Free plan.
-# NU se declanșează automat la push pe main.
-# APK-ul rezultat este disponibil în dashboard-ul EAS (expo.dev).
+# Builds the Android development APK only when explicitly requested.
+# The public API URL is injected into the EAS build profile inside the runner so
+# the remote build receives the same value used by development OTA publishing.
 on:
   workflow_dispatch:
 
@@ -19,18 +18,18 @@ jobs:
       - name: Validate EAS_PROJECT_ID
         run: |
           if [ -z "${{ vars.EAS_PROJECT_ID }}" ] && grep -q "YOUR_EAS_PROJECT_ID" app.config.ts; then
-            echo "❌ EROARE: EAS_PROJECT_ID nu este configurat"
+            echo "ERROR: EAS_PROJECT_ID is not configured"
             exit 1
           fi
-          echo "✅ EAS_PROJECT_ID este configurat"
+          echo "EAS_PROJECT_ID is configured"
 
       - name: Validate EXPO_TOKEN
         run: |
           if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
-            echo "❌ EROARE: EXPO_TOKEN nu este setat în GitHub Secrets"
+            echo "ERROR: EXPO_TOKEN is not configured"
             exit 1
           fi
-          echo "✅ EXPO_TOKEN este configurat"
+          echo "EXPO_TOKEN is configured"
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -45,17 +44,78 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate EXPO_PUBLIC_API_BASE_URL
+      - name: Validate public mobile API configuration
+        env:
+          EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
         run: |
-          if [ -z "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" ]; then
-            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu este setat în GitHub Variables"
+          if [ -z "$EXPO_PUBLIC_API_BASE_URL" ]; then
+            echo "ERROR: EXPO_PUBLIC_API_BASE_URL is not configured in GitHub Variables"
             exit 1
           fi
-          if echo "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" | grep -qE "(localhost|127\.0\.0\.1)"; then
-            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu poate fi localhost sau 127.0.0.1 pe mobile"
+          if echo "$EXPO_PUBLIC_API_BASE_URL" | grep -qE "(localhost|127\.0\.0\.1)"; then
+            echo "ERROR: EXPO_PUBLIC_API_BASE_URL cannot target localhost on mobile"
             exit 1
           fi
-          echo "✅ EXPO_PUBLIC_API_BASE_URL este configurat"
+          if ! echo "$EXPO_PUBLIC_API_BASE_URL" | grep -qE '^https://'; then
+            echo "ERROR: EXPO_PUBLIC_API_BASE_URL must use HTTPS"
+            exit 1
+          fi
+          echo "Public mobile API configuration is valid"
+
+      - name: Materialize runtime configuration into EAS development profile
+        env:
+          EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const path = "eas.json";
+          const config = JSON.parse(fs.readFileSync(path, "utf8"));
+          const profile = config.build?.development;
+          if (!profile) throw new Error("Missing EAS development build profile");
+          profile.env = {
+            ...(profile.env || {}),
+            EXPO_PUBLIC_API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL,
+          };
+          fs.writeFileSync(path, `${JSON.stringify(config, null, 2)}\n`);
+          NODE
+
+          node <<'NODE'
+          const fs = require("node:fs");
+          const config = JSON.parse(fs.readFileSync("eas.json", "utf8"));
+          const value = config.build?.development?.env?.EXPO_PUBLIC_API_BASE_URL;
+          if (!value || value.startsWith("$") || !value.startsWith("https://")) {
+            throw new Error("EAS development profile did not receive a valid API base URL");
+          }
+          console.log("EAS development profile contains a resolved API base URL");
+          NODE
+
+      - name: Validate generated Expo public config
+        env:
+          EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
+          EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+        run: |
+          node <<'NODE'
+          const { execFileSync } = require("node:child_process");
+          const raw = execFileSync(
+            "pnpm",
+            ["exec", "expo", "config", "--type", "public", "--json"],
+            { encoding: "utf8", env: process.env },
+          );
+          const config = JSON.parse(raw);
+          const value = config.extra?.apiBaseUrl;
+          const version = config.version;
+          const runtimePolicy = config.runtimeVersion?.policy;
+          if (typeof value !== "string" || !value.startsWith("https://")) {
+            throw new Error("Expo public config is missing a valid embedded API base URL");
+          }
+          if (typeof version !== "string" || !/^\d+\.\d+\.\d+$/.test(version) || version === "1.0.0") {
+            throw new Error("Development build must use a bumped semantic app version; legacy 1.0.0 is forbidden");
+          }
+          if (runtimePolicy !== "appVersion") {
+            throw new Error("Development build must use the appVersion runtime policy");
+          }
+          console.log(`Certified development runtime version ${version}`);
+          NODE
 
       - name: Setup EAS
         uses: expo/expo-github-action@v9
@@ -75,7 +135,7 @@ jobs:
           if [ $EXIT_CODE -ne 0 ]; then
             if echo "$OUTPUT" | grep -qi "used its.*builds from the Free plan\|build quota\|reached your.*build limit"; then
               echo ""
-              echo "❌ EAS Free plan build quota exhausted for this month."
+              echo "ERROR: EAS Free plan build quota exhausted for this month."
             fi
           fi
           exit $EXIT_CODE
