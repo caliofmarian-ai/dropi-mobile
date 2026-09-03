@@ -2,9 +2,10 @@ import { AXIOS_TIMEOUT_MS, COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const.j
 import { ForbiddenError } from "../../shared/_core/errors.js";
 import axios, { type AxiosInstance } from "axios";
 import { parse as parseCookieHeader } from "cookie";
+import { eq } from "drizzle-orm";
 import type { Request } from "express";
 import { SignJWT, jwtVerify } from "jose";
-import type { User } from "../../drizzle/schema";
+import { sessions, type Session, type User } from "../../drizzle/schema";
 import * as db from "../db";
 import { ENV } from "./env";
 import type {
@@ -14,7 +15,7 @@ import type {
   GetUserInfoWithJwtRequest,
   GetUserInfoWithJwtResponse,
 } from "./types/manusTypes";
-// Utility function
+
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.length > 0;
 
@@ -22,6 +23,7 @@ export type SessionPayload = {
   openId: string;
   appId: string;
   name: string;
+  sessionId?: number;
   phantomAdminId?: number;
 };
 
@@ -56,7 +58,6 @@ class OAuthService {
     };
 
     const { data } = await this.client.post<ExchangeTokenResponse>(EXCHANGE_TOKEN_PATH, payload);
-
     return data;
   }
 
@@ -64,7 +65,6 @@ class OAuthService {
     const { data } = await this.client.post<GetUserInfoResponse>(GET_USER_INFO_PATH, {
       accessToken: token.accessToken,
     });
-
     return data;
   }
 }
@@ -101,20 +101,10 @@ class SDKServer {
     return first ? first.toLowerCase() : null;
   }
 
-  /**
-   * Exchange OAuth authorization code for access token
-   * @example
-   * const tokenResponse = await sdk.exchangeCodeForToken(code, state);
-   */
   async exchangeCodeForToken(code: string, state: string): Promise<ExchangeTokenResponse> {
     return this.oauthService.getTokenByCode(code, state);
   }
 
-  /**
-   * Get user information using access token
-   * @example
-   * const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
-   */
   async getUserInfo(accessToken: string): Promise<GetUserInfoResponse> {
     const data = await this.oauthService.getUserInfoByToken({
       accessToken,
@@ -144,20 +134,21 @@ class SDKServer {
     return new TextEncoder().encode(secret);
   }
 
-  /**
-   * Create a session token for a Manus user openId
-   * @example
-   * const sessionToken = await sdk.createSessionToken(userInfo.openId);
-   */
   async createSessionToken(
     openId: string,
-    options: { expiresInMs?: number; name?: string; phantomAdminId?: number } = {},
+    options: {
+      expiresInMs?: number;
+      name?: string;
+      sessionId?: number;
+      phantomAdminId?: number;
+    } = {},
   ): Promise<string> {
     return this.signSession(
       {
         openId,
         appId: ENV.appId,
         name: options.name || "",
+        sessionId: options.sessionId,
         phantomAdminId: options.phantomAdminId,
       },
       options,
@@ -178,6 +169,7 @@ class SDKServer {
       appId: payload.appId,
       name: payload.name,
     };
+    if (payload.sessionId !== undefined) claims.sessionId = payload.sessionId;
     if (payload.phantomAdminId !== undefined) claims.phantomAdminId = payload.phantomAdminId;
 
     return new SignJWT(claims)
@@ -188,7 +180,7 @@ class SDKServer {
 
   async verifySession(
     cookieValue: string | undefined | null,
-  ): Promise<{ openId: string; appId: string; name: string; phantomAdminId?: number } | null> {
+  ): Promise<SessionPayload | null> {
     if (!cookieValue) {
       console.warn("[Auth] Missing session cookie");
       return null;
@@ -199,19 +191,16 @@ class SDKServer {
       const { payload } = await jwtVerify(cookieValue, secretKey, {
         algorithms: ["HS256"],
       });
-      const { openId, appId, name, phantomAdminId } = payload as Record<string, unknown>;
+      const { openId, appId, name, sessionId, phantomAdminId } = payload as Record<string, unknown>;
 
       if (!isNonEmptyString(openId)) {
-        // appId and name are NOT checked for non-emptiness.
-        // The HMAC-SHA256 signature already guarantees that the token was issued
-        // by this server. Requiring appId or name to be non-empty breaks all
-        // authentication when VITE_APP_ID is not configured on Railway
-        // (appId embeds as "" in the JWT) and locks out any user registered
-        // without a display name (name embeds as "").
         console.warn("[Auth] Session payload missing required field: openId");
         return null;
       }
-
+      if (sessionId !== undefined && (!Number.isSafeInteger(sessionId) || Number(sessionId) <= 0)) {
+        console.warn("[Auth] Session payload has invalid persisted session identity");
+        return null;
+      }
       if (phantomAdminId !== undefined && (!Number.isSafeInteger(phantomAdminId) || Number(phantomAdminId) <= 0)) {
         console.warn("[Auth] Session payload has invalid phantom administrator identity");
         return null;
@@ -221,12 +210,34 @@ class SDKServer {
         openId,
         appId: typeof appId === "string" ? appId : "",
         name: typeof name === "string" ? name : "",
+        ...(sessionId !== undefined ? { sessionId: Number(sessionId) } : {}),
         ...(phantomAdminId !== undefined ? { phantomAdminId: Number(phantomAdminId) } : {}),
       };
     } catch (error) {
       console.warn("[Auth] Session verification failed", String(error));
       return null;
     }
+  }
+
+  async getPersistedSessionForToken(token: string | undefined | null): Promise<Session | undefined> {
+    if (!token) return undefined;
+    const verified = await this.verifySession(token);
+    if (!verified) return undefined;
+
+    if (verified.sessionId !== undefined) {
+      const database = await db.getDb();
+      if (!database) return undefined;
+      const result = await database
+        .select()
+        .from(sessions)
+        .where(eq(sessions.id, verified.sessionId))
+        .limit(1);
+      return result[0];
+    }
+
+    // Transitional support for sessions issued before IMPL-005 and for phantom
+    // sessions, whose signed access token is the persisted session key.
+    return db.getSessionByToken(token);
   }
 
   async getUserInfoWithJwt(jwtToken: string): Promise<GetUserInfoWithJwtResponse> {
@@ -252,7 +263,6 @@ class SDKServer {
   }
 
   async authenticateRequest(req: Request): Promise<AuthenticatedUser> {
-    // Regular authentication flow
     const authHeader = req.headers.authorization || req.headers.Authorization;
     let token: string | undefined;
     if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
@@ -267,13 +277,13 @@ class SDKServer {
       throw ForbiddenError("Invalid session cookie");
     }
 
-    let persistedPhantomSession: Awaited<ReturnType<typeof db.getSessionByToken>> | undefined;
+    let persistedSession: Session | undefined;
     if (session.phantomAdminId !== undefined) {
-      persistedPhantomSession = await db.getSessionByToken(sessionCookie ?? "");
+      persistedSession = await this.getPersistedSessionForToken(sessionCookie);
       const validPersistedPhantom =
-        persistedPhantomSession?.isPhantom === true &&
-        persistedPhantomSession.phantomAdminId === session.phantomAdminId &&
-        new Date(persistedPhantomSession.expiresAt).getTime() > Date.now();
+        persistedSession?.isPhantom === true &&
+        persistedSession.phantomAdminId === session.phantomAdminId &&
+        new Date(persistedSession.expiresAt).getTime() > Date.now();
       if (!validPersistedPhantom) {
         throw ForbiddenError("Invalid or expired phantom session");
       }
@@ -288,11 +298,20 @@ class SDKServer {
       return buildCronUser(userInfo);
     }
 
+    if (!persistedSession) {
+      persistedSession = await this.getPersistedSessionForToken(sessionCookie);
+      const validPersistedSession =
+        persistedSession?.isPhantom === false &&
+        new Date(persistedSession.expiresAt).getTime() > Date.now();
+      if (!validPersistedSession) {
+        throw ForbiddenError("Invalid, revoked, or expired persisted session");
+      }
+    }
+
     const sessionUserId = session.openId;
     const signedInAt = new Date();
     let user = await db.getUserByOpenId(sessionUserId);
 
-    // If user not in DB, sync from OAuth server automatically
     if (!user) {
       if (!ENV.oAuthServerUrl) {
         throw ForbiddenError(
@@ -318,8 +337,16 @@ class SDKServer {
     if (!user) {
       throw ForbiddenError("User not found");
     }
-    if (persistedPhantomSession && persistedPhantomSession.userId !== user.id) {
-      throw ForbiddenError("Phantom session target does not match authenticated user");
+    if (persistedSession.userId !== user.id) {
+      throw ForbiddenError("Persisted session target does not match authenticated user");
+    }
+
+    const database = await db.getDb();
+    if (database) {
+      await database
+        .update(sessions)
+        .set({ lastActiveAt: signedInAt })
+        .where(eq(sessions.id, persistedSession.id));
     }
 
     await db.upsertUser({
@@ -333,7 +360,6 @@ class SDKServer {
 
 const CRON_OPEN_ID_PREFIX = "cron_";
 
-/** Result of `sdk.authenticateRequest`. Cron callbacks set `isCron=true` and `taskUid`; see `references/periodic-updates.md`. */
 export type AuthenticatedUser = User & {
   taskUid?: string;
   isCron?: boolean;
