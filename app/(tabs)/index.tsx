@@ -68,6 +68,11 @@ function isGovernedAdminRole(role: string | null | undefined): role is GovernedA
   return Boolean(role && GOVERNED_ADMIN_ROLES.has(role as GovernedAdminRole));
 }
 
+function getDeliveryPartnerVerificationState(user: unknown) {
+  const isUnverified = user && !(user as any).isVerified;
+  return isUnverified ? "Verification Required" : "Verified";
+}
+
 export default function HomeScreen() {
   const { user, loading } = useDropiAuth();
 
@@ -84,6 +89,9 @@ export default function HomeScreen() {
   }
 
   if (isTransactionalC1Role(user.dropiRole)) {
+    if (user.dropiRole === "delivery_partner") {
+      getDeliveryPartnerVerificationState(user);
+    }
     return <C1TransactionalDashboard role={user.dropiRole} />;
   }
 
