@@ -9,6 +9,7 @@ on:
       - .github/workflows/eas-build-android.yml
       - .github/workflows/validate-eas-ota-runtime-pr.yml
       - app.config.ts
+      - constants/oauth.ts
       - eas.json
       - package.json
       - pnpm-lock.yaml
