@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 function read(path: string): string {
-  return readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+  return readFileSync(fileURLToPath(new URL(`../${path}`, import.meta.url)), "utf8");
 }
 
 const db = read("server/db.ts");

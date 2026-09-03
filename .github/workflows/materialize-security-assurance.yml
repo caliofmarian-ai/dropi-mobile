@@ -1,4 +1,4 @@
-# Controlled one-shot materializer for BATCH-056.
+# Controlled one-shot materializer for BATCH-056 (type-safe contract retry).
 name: Materialize Security Assurance
 
 on:
