@@ -9,9 +9,6 @@
       "distribution": "internal",
       "autoIncrement": true,
       "channel": "development",
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "$EXPO_PUBLIC_API_BASE_URL"
-      },
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleDebug"
@@ -24,9 +21,6 @@
       "distribution": "internal",
       "autoIncrement": true,
       "channel": "preview",
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "$EXPO_PUBLIC_API_BASE_URL"
-      },
       "android": {
         "buildType": "apk"
       }
@@ -34,9 +28,6 @@
     "production": {
       "autoIncrement": true,
       "channel": "production",
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "$EXPO_PUBLIC_API_BASE_URL"
-      },
       "android": {
         "buildType": "app-bundle"
       }
