@@ -1,0 +1,27 @@
+name: Audit Expo dependency compatibility
+
+on:
+  push:
+    branches:
+      - hotfix/dependabot-expo-compatibility
+    paths:
+      - .github/workflows/audit-expo-dependency-compatibility.yml
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22.x
+      - run: pnpm install --frozen-lockfile
+      - name: Expo SDK compatibility check
+        run: pnpm exec expo install --check
+      - name: TypeScript
+        run: pnpm check
+      - name: Android bundle smoke test
+        run: pnpm exec expo export --platform android --output-dir dist-audit
