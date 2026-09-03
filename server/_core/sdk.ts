@@ -308,6 +308,10 @@ class SDKServer {
       }
     }
 
+    if (!persistedSession) {
+      throw ForbiddenError("Persisted session unavailable after validation");
+    }
+
     const sessionUserId = session.openId;
     const signedInAt = new Date();
     let user = await db.getUserByOpenId(sessionUserId);
