@@ -21,7 +21,7 @@ describe("account lifecycle persistence contract", () => {
     const block = db.split("export async function updateUserPassword")[1]?.split("export async function setResetToken")[0] ?? "";
 
     expect(block).toContain("db.transaction");
-    expect(block).toMatch(/tx\.update\(users\)/);
+    expect(block).toMatch(/tx\s*\.update\(users\)/);
     expect(block).toMatch(/tx\.delete\(sessions\)\.where\(eq\(sessions\.userId, userId\)\)/);
   });
 
