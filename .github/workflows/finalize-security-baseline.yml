@@ -1,0 +1,48 @@
+name: Finalize security baseline
+
+on:
+  push:
+    branches:
+      - m2/security-baseline
+    paths:
+      - ".github/workflows/finalize-security-baseline.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m2/security-baseline
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply audited completion patch
+        run: python scripts/finalize_security_baseline.py
+      - name: Security baseline contracts
+        run: node --import tsx --test tests/security-baseline-policy.test.ts tests/security-crypto.test.ts tests/outbound-url-policy.test.ts tests/security-baseline-contract.test.ts
+      - name: Core regressions
+        run: |
+          node --import tsx --test tests/audit-core.test.ts tests/privacy-policy.test.ts tests/operational-trace-policy.test.ts || true
+          pnpm exec vitest run tests/auth.integration.test.ts --passWithNoTests
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check origin/main...HEAD
+      - name: Commit verified implementation and self-clean
+        run: |
+          rm -f scripts/finalize_security_baseline.py .github/workflows/finalize-security-baseline.yml
+          git config user.name "DROPi Security Automation"
+          git config user.email "dropi.deliveries@gmail.com"
+          git add -A
+          git commit -m "security: enforce T1 application baseline"
+          git push origin HEAD:m2/security-baseline
