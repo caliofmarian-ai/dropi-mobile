@@ -35,7 +35,7 @@ export type RbacDecision =
     };
 
 const ROLE_BY_NAME = new Map<DropiRole, RoleConfig>(
-  ROLE_CONFIGS.map((config) => [config.role, config]),
+  ROLE_CONFIGS.map((config): [DropiRole, RoleConfig] => [config.role, config]),
 );
 
 function asDropiRole(value: string | null | undefined): DropiRole | null {
