@@ -1,9 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "../server/_core/context";
+import { hashOneTimeCode } from "../server/account-lifecycle";
+
+process.env.JWT_SECRET = "test-jwt-secret";
 
 const dbMock = vi.hoisted(() => ({
   getUserById: vi.fn(),
   setEmailVerifyToken: vi.fn(),
+  clearEmailVerifyToken: vi.fn(),
   markEmailVerified: vi.fn(),
   createAuditLog: vi.fn(),
 }));
@@ -82,11 +86,12 @@ describe("dropiAuth verify-email protected flows", () => {
     vi.clearAllMocks();
     dbMock.createAuditLog.mockResolvedValue(undefined);
     dbMock.setEmailVerifyToken.mockResolvedValue(undefined);
+    dbMock.clearEmailVerifyToken.mockResolvedValue(undefined);
     dbMock.markEmailVerified.mockResolvedValue(undefined);
     mailMock.sendPlatformEmail.mockResolvedValue(true);
   });
 
-  it("lets a logged-in user verify their email with the active code", async () => {
+  it("lets a logged-in user verify a transitional plaintext code", async () => {
     dbMock.getUserById.mockResolvedValue(createUser());
     const caller = dropiAuthRouter.createCaller(createAuthContext());
 
@@ -99,8 +104,34 @@ describe("dropiAuth verify-email protected flows", () => {
     expect(dbMock.markEmailVerified).toHaveBeenCalledWith(7);
   });
 
-  it("lets a logged-in user resend the verification email when provider delivers successfully", async () => {
-    dbMock.getUserById.mockResolvedValue(createUser());
+  it("verifies a new protected-at-rest code", async () => {
+    dbMock.getUserById.mockResolvedValue(
+      createUser({
+        emailVerifyToken: hashOneTimeCode("email-verification", "123456", "test-jwt-secret"),
+      }),
+    );
+    const caller = dropiAuthRouter.createCaller(createAuthContext());
+
+    await expect(caller.verifyEmail({ code: "123456" })).resolves.toMatchObject({ success: true });
+    expect(dbMock.markEmailVerified).toHaveBeenCalledWith(7);
+  });
+
+  it("fails closed and clears a verification credential with missing expiry", async () => {
+    dbMock.getUserById.mockResolvedValue(createUser({ emailVerifyExpires: null as any }));
+    const caller = dropiAuthRouter.createCaller(createAuthContext());
+
+    await expect(caller.verifyEmail({ code: "123456" })).rejects.toMatchObject({
+      code: "BAD_REQUEST",
+      message: expect.stringContaining("expired"),
+    });
+    expect(dbMock.clearEmailVerifyToken).toHaveBeenCalledWith(7);
+    expect(dbMock.markEmailVerified).not.toHaveBeenCalled();
+  });
+
+  it("lets a logged-in user resend after the one-minute cooldown and stores only a digest", async () => {
+    dbMock.getUserById.mockResolvedValue(
+      createUser({ emailVerifyToken: null as any, emailVerifyExpires: null as any }),
+    );
     mailMock.sendPlatformEmail.mockResolvedValue(true);
     const caller = dropiAuthRouter.createCaller(createAuthContext());
 
@@ -111,14 +142,27 @@ describe("dropiAuth verify-email protected flows", () => {
       message: "Verification code sent",
     });
     expect(dbMock.setEmailVerifyToken).toHaveBeenCalledTimes(1);
-    const [, issuedCode, issuedExpiry] = dbMock.setEmailVerifyToken.mock.calls[0];
-    expect(issuedCode).toMatch(/^\d{6}$/);
+    const [, storedCode, issuedExpiry] = dbMock.setEmailVerifyToken.mock.calls[0];
+    expect(storedCode).toMatch(/^otc1:[0-9a-f]{64}$/);
     expect(issuedExpiry).toBeInstanceOf(Date);
     expect(mailMock.sendPlatformEmail).toHaveBeenCalledTimes(1);
   });
 
-  it("throws INTERNAL_SERVER_ERROR when provider delivery fails", async () => {
+  it("throttles immediate verification resend without issuing a new credential", async () => {
     dbMock.getUserById.mockResolvedValue(createUser());
+    const caller = dropiAuthRouter.createCaller(createAuthContext());
+
+    await expect(caller.resendVerificationCode()).rejects.toMatchObject({
+      code: "TOO_MANY_REQUESTS",
+    });
+    expect(dbMock.setEmailVerifyToken).not.toHaveBeenCalled();
+    expect(mailMock.sendPlatformEmail).not.toHaveBeenCalled();
+  });
+
+  it("clears the newly issued credential when provider delivery fails", async () => {
+    dbMock.getUserById.mockResolvedValue(
+      createUser({ emailVerifyToken: null as any, emailVerifyExpires: null as any }),
+    );
     mailMock.sendPlatformEmail.mockResolvedValue(false);
     const caller = dropiAuthRouter.createCaller(createAuthContext());
 
@@ -126,29 +170,32 @@ describe("dropiAuth verify-email protected flows", () => {
       code: "INTERNAL_SERVER_ERROR",
       message: expect.stringContaining("Unable to send verification code"),
     });
-    // Code was persisted before the failure
     expect(dbMock.setEmailVerifyToken).toHaveBeenCalledTimes(1);
-    // Mail service was invoked
+    expect(dbMock.clearEmailVerifyToken).toHaveBeenCalledWith(7);
     expect(mailMock.sendPlatformEmail).toHaveBeenCalledTimes(1);
-    // The procedure's own audit log (action: auth.resend_verification) is NOT written on delivery failure
-    const auditCalls = dbMock.createAuditLog.mock.calls;
-    const procedureAudit = auditCalls.find((c: any[]) => c[0]?.action === "auth.resend_verification");
+    const procedureAudit = dbMock.createAuditLog.mock.calls.find(
+      (c: any[]) => c[0]?.action === "auth.resend_verification",
+    );
     expect(procedureAudit).toBeUndefined();
   });
 
-  it("throws INTERNAL_SERVER_ERROR when mail service is not configured (sendPlatformEmail not called / returns false)", async () => {
-    dbMock.getUserById.mockResolvedValue(createUser());
-    // Simulate no transport configured: sendPlatformEmail returns false
+  it("throws INTERNAL_SERVER_ERROR when mail service is not configured", async () => {
+    dbMock.getUserById.mockResolvedValue(
+      createUser({ emailVerifyToken: null as any, emailVerifyExpires: null as any }),
+    );
     mailMock.sendPlatformEmail.mockResolvedValue(false);
     const caller = dropiAuthRouter.createCaller(createAuthContext());
 
     await expect(caller.resendVerificationCode()).rejects.toMatchObject({
       code: "INTERNAL_SERVER_ERROR",
     });
+    expect(dbMock.clearEmailVerifyToken).toHaveBeenCalledWith(7);
   });
 
   it("throws INTERNAL_SERVER_ERROR when user has no email address", async () => {
-    dbMock.getUserById.mockResolvedValue(createUser({ email: null as any }));
+    dbMock.getUserById.mockResolvedValue(
+      createUser({ email: null as any, emailVerifyToken: null as any, emailVerifyExpires: null as any }),
+    );
     const caller = dropiAuthRouter.createCaller(createAuthContext());
 
     await expect(caller.resendVerificationCode()).rejects.toMatchObject({
@@ -159,7 +206,9 @@ describe("dropiAuth verify-email protected flows", () => {
   });
 
   it("does not log the verification code in any log output", async () => {
-    dbMock.getUserById.mockResolvedValue(createUser());
+    dbMock.getUserById.mockResolvedValue(
+      createUser({ emailVerifyToken: null as any, emailVerifyExpires: null as any }),
+    );
     mailMock.sendPlatformEmail.mockResolvedValue(true);
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -168,6 +217,9 @@ describe("dropiAuth verify-email protected flows", () => {
     const caller = dropiAuthRouter.createCaller(createAuthContext());
     await caller.resendVerificationCode();
 
+    const storedDigest = String(dbMock.setEmailVerifyToken.mock.calls[0]?.[1] ?? "");
+    expect(storedDigest).toMatch(/^otc1:/);
+
     const allLogs = [
       ...logSpy.mock.calls.map((c) => c.join(" ")),
       ...errorSpy.mock.calls.map((c) => c.join(" ")),
@@ -175,18 +227,17 @@ describe("dropiAuth verify-email protected flows", () => {
     ];
 
     for (const line of allLogs) {
-      // No 6-digit numeric code should appear in any log line
       expect(line).not.toMatch(/\b\d{6}\b/);
     }
   });
 
-  it("loading state terminates: mutation throws on delivery failure (does not hang)", async () => {
-    dbMock.getUserById.mockResolvedValue(createUser());
+  it("loading state terminates: mutation throws on delivery failure", async () => {
+    dbMock.getUserById.mockResolvedValue(
+      createUser({ emailVerifyToken: null as any, emailVerifyExpires: null as any }),
+    );
     mailMock.sendPlatformEmail.mockResolvedValue(false);
     const caller = dropiAuthRouter.createCaller(createAuthContext());
 
-    // mutateAsync will reject, meaning isPending terminates — verified by the
-    // promise settling (either resolve or reject) rather than hanging.
     const promise = caller.resendVerificationCode();
     await expect(promise).rejects.toBeDefined();
   });
@@ -197,4 +248,3 @@ describe("dropiAuth verify-email protected flows", () => {
     await expect(caller.resendVerificationCode()).rejects.toThrow("Please login (10001)");
   });
 });
-
