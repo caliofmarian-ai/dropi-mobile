@@ -131,8 +131,7 @@ export async function getSessionToken(): Promise<string | null> {
     if (!token) return null;
 
     if (shouldRefreshToken(token) && (await getRefreshToken())) {
-      const refreshed = await refreshSessionToken();
-      return refreshed ?? token;
+      return await refreshSessionToken();
     }
     return token;
   } catch (error) {
