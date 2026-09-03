@@ -67,6 +67,7 @@ export function getRequiredApiBaseUrl(context: string = "native runtime"): strin
 }
 
 export const SESSION_TOKEN_KEY = "app_session_token";
+export const REFRESH_TOKEN_KEY = "app_refresh_token";
 export const USER_INFO_KEY = "manus-runtime-user-info";
 
 const encodeState = (value: string) => {
