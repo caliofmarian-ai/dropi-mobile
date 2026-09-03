@@ -45,8 +45,9 @@ jobs:
           EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
           BUILD_ID: 7c98a438-9f8e-4b75-a202-e08079ef6206
         run: |
+          eas build:view "$BUILD_ID" --json > /tmp/build.json
           echo "=== EXISTING APK BUILD ==="
-          eas build:view "$BUILD_ID" --json
+          jq -r '{id,status,platform,buildProfile,gitCommitHash,runtimeVersion,appVersion,buildNumber} | to_entries[] | "\(.key)=\(.value)"' /tmp/build.json
 
       - name: Compare build with same-commit OTA
         env:
@@ -56,8 +57,9 @@ jobs:
           BUILD_ID: 7c98a438-9f8e-4b75-a202-e08079ef6206
           UPDATE_ID: 01a063b7-6afb-7fb0-a56d-aa0028af34ff
         run: |
+          eas fingerprint:compare --build-id "$BUILD_ID" --update-id "$UPDATE_ID" --json --non-interactive > /tmp/same.json
           echo "=== BUILD vs SAME-COMMIT OTA ==="
-          eas fingerprint:compare --build-id "$BUILD_ID" --update-id "$UPDATE_ID" --json --non-interactive
+          jq -r 'paths(scalars) as $p | ($p|map(tostring)|join(".")) as $k | select($k|test("fingerprint|runtime|hash|compatible|diff|source|platform|id|reason";"i")) | "\($k)=\(getpath($p))"' /tmp/same.json | head -n 120
 
       - name: Generate current development-profile fingerprint
         env:
@@ -65,8 +67,9 @@ jobs:
           EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
           EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
         run: |
+          eas fingerprint:generate --build-profile development --platform android --json --non-interactive > /tmp/current.json
           echo "=== CURRENT DEVELOPMENT-PROFILE FINGERPRINT ==="
-          eas fingerprint:generate --build-profile development --platform android --json --non-interactive
+          jq -r 'paths(scalars) as $p | ($p|map(tostring)|join(".")) as $k | select($k|test("fingerprint|runtime|hash|source|platform|id";"i")) | "\($k)=\(getpath($p))"' /tmp/current.json | head -n 120
 
       - name: Compare existing build with current checkout
         env:
@@ -75,5 +78,6 @@ jobs:
           EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
           BUILD_ID: 7c98a438-9f8e-4b75-a202-e08079ef6206
         run: |
+          eas fingerprint:compare --build-id "$BUILD_ID" --json --non-interactive > /tmp/current-compare.json
           echo "=== EXISTING BUILD vs CURRENT CHECKOUT ==="
-          eas fingerprint:compare --build-id "$BUILD_ID" --json --non-interactive
+          jq -r 'paths(scalars) as $p | ($p|map(tostring)|join(".")) as $k | select($k|test("fingerprint|runtime|hash|compatible|diff|source|platform|id|reason";"i")) | "\($k)=\(getpath($p))"' /tmp/current-compare.json | head -n 160
