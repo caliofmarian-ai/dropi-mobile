@@ -46,6 +46,8 @@ describe("IMPL-005 OAuth JWT refresh rotation contract", () => {
     expect(auth).toContain("refreshPromise");
     expect(auth).toContain("/api/auth/refresh");
     expect(auth).toContain("shouldRefreshToken(token)");
+    expect(auth).toContain("return await refreshSessionToken()");
+    expect(auth).not.toContain("refreshed ?? token");
     expect(api).toContain("Auth.setSessionCredentials(sessionToken, refreshToken)");
     expect(api).toContain("Auth.getRefreshToken()");
   });
