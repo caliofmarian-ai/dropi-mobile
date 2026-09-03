@@ -8,6 +8,11 @@ import {
   isEncryptedEnvelope,
   needsEncryptionRewrap,
 } from "../server/security-crypto";
+import {
+  protectWebhookSigningSecret,
+  revealWebhookSigningSecret,
+  webhookSecretNeedsRewrap,
+} from "../server/webhook-secret-policy";
 
 const keyA = Buffer.alloc(32, 7).toString("base64url");
 const keyB = Buffer.alloc(32, 9).toString("base64url");
@@ -36,4 +41,18 @@ test("rotation keeps old key decrypt-only while new writes use active key", () =
 test("keyring rejects non-256-bit material and missing active key", () => {
   assert.throws(() => createDataEncryptionKeyring({ activeKeyId: "a", keys: { a: Buffer.alloc(16).toString("base64url") } }), /32 bytes/);
   assert.throws(() => createDataEncryptionKeyring({ activeKeyId: "missing", keys: { a: keyA } }), /not present/);
+});
+
+test("legacy webhook secrets remain readable before keyring rollout but cannot be newly protected without a keyring", () => {
+  assert.equal(revealWebhookSigningSecret("whsec_legacy", null), "whsec_legacy");
+  assert.equal(webhookSecretNeedsRewrap("whsec_legacy", null), false);
+  assert.throws(() => protectWebhookSigningSecret("whsec_new", undefined), /data encryption is not configured/);
+});
+
+test("encrypted webhook secrets never downgrade to plaintext reads", () => {
+  const ring = createDataEncryptionKeyring({ activeKeyId: "key-a", keys: { "key-a": keyA } });
+  const encrypted = protectWebhookSigningSecret("whsec_encrypted", ring);
+  assert.equal(revealWebhookSigningSecret(encrypted, ring), "whsec_encrypted");
+  assert.throws(() => revealWebhookSigningSecret(encrypted, null), /data encryption is required/);
+  assert.equal(webhookSecretNeedsRewrap(encrypted, ring), false);
 });
