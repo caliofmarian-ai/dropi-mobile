@@ -76,7 +76,7 @@ jobs:
           echo "apk_path=$APK_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dropi-debug-apk
           path: ${{ steps.locate_apk.outputs.apk_path }}
