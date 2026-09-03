@@ -27,20 +27,25 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Apply audited completion patch
-        run: python scripts/finalize_security_baseline.py
+        run: python scripts/finalize_security_baseline_v2.py
       - name: Security baseline contracts
         run: node --import tsx --test tests/security-baseline-policy.test.ts tests/security-crypto.test.ts tests/outbound-url-policy.test.ts tests/security-baseline-contract.test.ts
-      - name: Core regressions
+      - name: Audit, privacy, trace and auth regressions
         run: |
-          node --import tsx --test tests/audit-core.test.ts tests/privacy-policy.test.ts tests/operational-trace-policy.test.ts || true
-          pnpm exec vitest run tests/auth.integration.test.ts --passWithNoTests
+          node --import tsx --test \
+            tests/audit-capture-attribution.test.ts \
+            tests/audit-policy.test.ts \
+            tests/privacy-policy.test.ts \
+            tests/operational-trace-policy.test.ts \
+            tests/auth.login-normalize.test.ts \
+            tests/auth.login-session.test.ts
       - name: TypeScript
         run: pnpm check
       - name: Whitespace
         run: git diff --check origin/main...HEAD
       - name: Commit verified implementation and self-clean
         run: |
-          rm -f scripts/finalize_security_baseline.py .github/workflows/finalize-security-baseline.yml
+          rm -f scripts/finalize_security_baseline.py scripts/finalize_security_baseline_v2.py .github/workflows/finalize-security-baseline.yml
           git config user.name "DROPi Security Automation"
           git config user.email "dropi.deliveries@gmail.com"
           git add -A
