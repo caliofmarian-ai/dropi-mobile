@@ -1,0 +1,63 @@
+name: Validate Security Assurance
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/dependabot.yml
+      - .github/workflows/validate-security-assurance-pr.yml
+      - docs/security/SECURITY_ASSURANCE.md
+      - docs/security/VULNERABILITY_MANAGEMENT.md
+      - server/auth-router.ts
+      - server/db.ts
+      - server/user-verification-policy.ts
+      - server/live-tracking.ts
+      - server/live-tracking-access.ts
+      - server/operations-router.ts
+      - server/order-management-service.ts
+      - server/security-crypto.ts
+      - server/security-http.ts
+      - shared/security-baseline-policy.ts
+      - tests/security-assurance-policy.test.ts
+      - tests/security-assurance-contract.test.ts
+      - tests/security-baseline-policy.test.ts
+      - tests/security-crypto.test.ts
+      - tests/outbound-url-policy.test.ts
+      - tests/security-baseline-contract.test.ts
+      - tests/auth.login-normalize.test.ts
+      - tests/auth.login-session.test.ts
+      - tests/live-tracking-security.test.ts
+      - tests/live-tracking-client-contract.test.ts
+      - tests/operational-safety-certification.test.ts
+      - tests/order-management-integration-contract.test.ts
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Security assurance contracts
+        run: node --import tsx --test tests/security-assurance-policy.test.ts tests/security-assurance-contract.test.ts
+      - name: Security baseline regressions
+        run: node --import tsx --test tests/security-baseline-policy.test.ts tests/security-crypto.test.ts tests/outbound-url-policy.test.ts tests/security-baseline-contract.test.ts
+      - name: Auth and operational security regressions
+        run: pnpm exec vitest run tests/auth.login-normalize.test.ts tests/auth.login-session.test.ts tests/live-tracking-security.test.ts tests/live-tracking-client-contract.test.ts tests/operational-safety-certification.test.ts tests/order-management-integration-contract.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"

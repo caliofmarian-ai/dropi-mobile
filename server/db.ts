@@ -1,9 +1,11 @@
+import { randomUUID } from "node:crypto";
 import { eq, and, desc, gte, lte, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, sessions, auditLogs, InsertAuditLog, InsertSession } from "../drizzle/schema";
 import { type AuditChannel } from "./audit-policy";
 import { classifyAuditRetention } from "../shared/privacy-policy";
 import { ENV } from "./_core/env";
+import { resolveUserVerificationForCreate, verificationPatchForRoleChange } from "./user-verification-policy";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -109,7 +111,7 @@ export async function createUser(data: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const openId = `dropi_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  const openId = `dropi_${randomUUID()}`;
   const result = await db.insert(users).values({
     openId,
     email: data.email,
@@ -119,7 +121,7 @@ export async function createUser(data: {
     channel: data.channel as any,
     zone: data.zone || null,
     isActive: data.isActive ?? true,
-    isVerified: data.isVerified ?? true,
+    isVerified: resolveUserVerificationForCreate(data.dropiRole, data.isVerified),
     isAIAgent: data.isAIAgent || false,
     agentMode: data.agentMode || null,
     humanPairId: data.humanPairId || null,
@@ -209,7 +211,11 @@ export async function toggleUserActive(userId: number, isActive: boolean) {
 export async function changeUserRole(userId: number, dropiRole: string, channel: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(users).set({ dropiRole: dropiRole as any, channel: channel as any }).where(eq(users.id, userId));
+  await db.update(users).set({
+    dropiRole: dropiRole as any,
+    channel: channel as any,
+    ...verificationPatchForRoleChange(dropiRole),
+  }).where(eq(users.id, userId));
 }
 
 // ===== SESSION QUERIES =====

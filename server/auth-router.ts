@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
+import { randomInt } from "node:crypto";
 import { router, publicProcedure, protectedProcedure, adminProcedure, phantomProcedure } from "./_core/trpc";
 import { sdk } from "./_core/sdk";
 import { maskEmail, sendPlatformEmail } from "./_core/mail";
@@ -160,7 +161,7 @@ export const dropiAuthRouter = router({
     });
 
     // Generate email verification code
-    const verifyCode = String(Math.floor(100000 + Math.random() * 900000));
+    const verifyCode = String(randomInt(100000, 1_000_000));
     const verifyExpiry = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
     await db.setEmailVerifyToken(id, verifyCode, verifyExpiry);
 
@@ -364,7 +365,7 @@ export const dropiAuthRouter = router({
     }
 
     // Generate 6-digit verification code
-    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const code = String(randomInt(100000, 1_000_000));
     const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
     await db.setResetToken(user.id, code, expiry);
 
@@ -524,7 +525,7 @@ export const dropiAuthRouter = router({
     }
 
     // Generate new code
-    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const code = String(randomInt(100000, 1_000_000));
     const expiry = new Date(Date.now() + 30 * 60 * 1000);
     await db.setEmailVerifyToken(userId, code, expiry);
     console.log(`[EMAIL VERIFY] code_persisted=yes userId=${userId}`);
