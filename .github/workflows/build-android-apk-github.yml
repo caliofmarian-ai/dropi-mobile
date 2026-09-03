@@ -31,7 +31,7 @@ jobs:
           echo "✅ EXPO_PUBLIC_API_BASE_URL este configurat: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 20.x
 
