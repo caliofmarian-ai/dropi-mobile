@@ -15,6 +15,7 @@ import { webhookEndpoints, webhookLogs } from "../drizzle/schema";
 import { eq, and, sql } from "drizzle-orm";
 import crypto from "crypto";
 import { protectWebhookSigningSecret, revealWebhookSigningSecret, webhookSecretNeedsRewrap } from "./webhook-secret-policy";
+import { validatePublicWebhookUrl } from "./outbound-url-policy";
 
 const RETRY_DELAYS = [60_000, 300_000, 1_800_000];
 const MAX_RETRIES = 3;
@@ -101,7 +102,8 @@ async function deliverWebhook(
   let responseBody: string | null = null;
 
   try {
-    const response = await fetch(endpoint.url, {
+    const validatedUrl = await validatePublicWebhookUrl(endpoint.url);
+    const response = await fetch(validatedUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -113,6 +115,7 @@ async function deliverWebhook(
       },
       body: payloadStr,
       signal: AbortSignal.timeout(WEBHOOK_TIMEOUT_MS),
+      redirect: "error",
     });
 
     responseStatus = response.status;

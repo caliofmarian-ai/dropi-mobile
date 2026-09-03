@@ -471,7 +471,7 @@ export const webhookEndpoints = mysqlTable("webhookEndpoints", {
   storeId: int("storeId").notNull(),
   url: varchar("url", { length: 500 }).notNull(),
   events: text("events").notNull(), // JSON array: ["delivery.status_changed", "delivery.completed", "delivery.cancelled"]
-  secret: varchar("secret", { length: 128 }).notNull(), // HMAC secret for signature verification
+  secret: varchar("secret", { length: 512 }).notNull(), // AES-256-GCM envelope containing HMAC secret
   isActive: boolean("isActive").default(true).notNull(),
   failureCount: int("failureCount").default(0).notNull(),
   lastTriggeredAt: timestamp("lastTriggeredAt"),

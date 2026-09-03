@@ -48,6 +48,27 @@ export function sanitizeHttpUrl(value: string): string {
   return parsed.toString();
 }
 
+export function assertSafeJsonShape(value: unknown, depth = 0): void {
+  if (depth > 16) throw new Error("Request nesting exceeds the security limit.");
+  if (Array.isArray(value)) {
+    if (value.length > 5000) throw new Error("Request array exceeds the security limit.");
+    for (const item of value) assertSafeJsonShape(item, depth + 1);
+    return;
+  }
+  if (!value || typeof value !== "object") return;
+  const entries = Object.entries(value as Record<string, unknown>);
+  if (entries.length > 2000) throw new Error("Request object exceeds the security limit.");
+  for (const [key, item] of entries) {
+    if (/^(?:__proto__|prototype|constructor)$/i.test(key)) {
+      throw new Error("Unsafe object key is not allowed.");
+    }
+    if (/[\u0000-\u001F\u007F]/.test(key)) {
+      throw new Error("Control characters are not allowed in request keys.");
+    }
+    assertSafeJsonShape(item, depth + 1);
+  }
+}
+
 export function redactSensitive(value: unknown, depth = 0): unknown {
   if (depth > 8) return "[REDACTED_DEPTH]";
   if (Array.isArray(value)) return value.map((item) => redactSensitive(item, depth + 1));

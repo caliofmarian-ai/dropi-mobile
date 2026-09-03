@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   SECURITY_BODY_LIMIT,
+  assertSafeJsonShape,
   isAllowedBrowserOrigin,
   parseAllowedOrigins,
   redactSensitive,
@@ -36,4 +37,13 @@ test("recursive redaction removes secret-bearing values without discarding ordin
     token: "[REDACTED]",
     nested: { apiKey: "[REDACTED]", orderId: 7 },
   });
+});
+
+
+test("request-shape guard rejects prototype-pollution keys and excessive nesting", () => {
+  assert.throws(() => assertSafeJsonShape({ constructor: { prototype: { polluted: true } } }), /Unsafe object key/);
+  let value: any = {};
+  for (let i = 0; i < 20; i++) value = { nested: value };
+  assert.throws(() => assertSafeJsonShape(value), /nesting exceeds/);
+  assert.doesNotThrow(() => assertSafeJsonShape({ orderId: 7, nested: ["safe", { status: "READY" }] }));
 });

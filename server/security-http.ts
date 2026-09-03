@@ -3,6 +3,7 @@ import {
   SECURITY_AUTH_RATE_MAX,
   SECURITY_GLOBAL_RATE_MAX,
   SECURITY_GLOBAL_RATE_WINDOW_MS,
+  assertSafeJsonShape,
   isAllowedBrowserOrigin,
   parseAllowedOrigins,
 } from "../shared/security-baseline-policy";
@@ -97,6 +98,18 @@ export function apiRateLimitMiddleware(req: Request, res: Response, next: NextFu
   if (result.allowed) return next();
   res.setHeader("Retry-After", String(result.retryAfterSeconds));
   res.status(429).json({ error: "RATE_LIMIT_EXCEEDED", message: "Too many requests. Retry later.", retryAfter: result.retryAfterSeconds });
+}
+
+export function safeRequestShapeMiddleware(req: Request, res: Response, next: NextFunction) {
+  try {
+    if (req.body != null) assertSafeJsonShape(req.body);
+    next();
+  } catch (error: any) {
+    res.status(400).json({
+      error: "UNSAFE_REQUEST_SHAPE",
+      message: error?.message || "Request shape is not allowed.",
+    });
+  }
 }
 
 export function resetSecurityRateLimitStateForTests(): void {

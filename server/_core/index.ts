@@ -17,6 +17,7 @@ import { SECURITY_BODY_LIMIT } from "../../shared/security-baseline-policy";
 import {
   apiRateLimitMiddleware,
   httpsOnlyMiddleware,
+  safeRequestShapeMiddleware,
   securityHeadersMiddleware,
   strictCorsMiddleware,
 } from "../security-http";
@@ -71,6 +72,7 @@ async function startServer() {
   // 16 MB keeps that supported while removing the previous 50 MB global attack surface.
   app.use(express.json({ limit: SECURITY_BODY_LIMIT }));
   app.use(express.urlencoded({ limit: SECURITY_BODY_LIMIT, extended: true }));
+  app.use(safeRequestShapeMiddleware);
 
   registerStorageProxy(app);
   registerOAuthRoutes(app);

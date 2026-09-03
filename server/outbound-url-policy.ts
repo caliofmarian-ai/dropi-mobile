@@ -13,7 +13,7 @@ function ipv4Octets(address: string): number[] | null {
 export function isPrivateOrSpecialIp(address: string): boolean {
   const v4 = ipv4Octets(address);
   if (v4) {
-    const [a, b] = v4;
+    const [a, b, c] = v4;
     return (
       a === 0 ||
       a === 10 ||
@@ -23,7 +23,10 @@ export function isPrivateOrSpecialIp(address: string): boolean {
       (a === 172 && b >= 16 && b <= 31) ||
       (a === 192 && b === 0) ||
       (a === 192 && b === 168) ||
+      (a === 192 && b === 0 && c === 2) ||
       (a === 198 && (b === 18 || b === 19)) ||
+      (a === 198 && b === 51 && c === 100) ||
+      (a === 203 && b === 0 && c === 113) ||
       a >= 224
     );
   }
@@ -32,7 +35,8 @@ export function isPrivateOrSpecialIp(address: string): boolean {
     const lower = address.toLowerCase();
     if (lower === "::" || lower === "::1") return true;
     if (lower.startsWith("fe8") || lower.startsWith("fe9") || lower.startsWith("fea") || lower.startsWith("feb")) return true;
-    if (lower.startsWith("fc") || lower.startsWith("fd")) return true;
+    if (lower.startsWith("fc") || lower.startsWith("fd") || lower.startsWith("ff")) return true;
+    if (lower.startsWith("2001:db8:")) return true;
     if (lower.startsWith("::ffff:")) {
       const mapped = lower.slice("::ffff:".length);
       return isPrivateOrSpecialIp(mapped);
@@ -48,6 +52,9 @@ async function defaultResolver(hostname: string): Promise<ResolvedAddress[]> {
 export async function validatePublicWebhookUrl(value: string, resolver: AddressResolver = defaultResolver): Promise<string> {
   const normalized = sanitizeHttpUrl(value);
   const parsed = new URL(normalized);
+  if (parsed.protocol !== "https:") {
+    throw new Error("Webhook endpoints must use HTTPS.");
+  }
   const hostname = parsed.hostname.replace(/^\[|\]$/g, "").toLowerCase();
   if (hostname === "localhost" || hostname.endsWith(".localhost") || hostname.endsWith(".local")) {
     throw new Error("Webhook URL cannot target localhost or local network names.");
@@ -57,7 +64,7 @@ export async function validatePublicWebhookUrl(value: string, resolver: AddressR
   const addresses = literalFamily ? [{ address: hostname, family: literalFamily }] : await resolver(hostname);
   if (addresses.length === 0) throw new Error("Webhook hostname did not resolve to a public address.");
   if (addresses.some(({ address }) => isPrivateOrSpecialIp(address))) {
-    throw new Error("Webhook URL resolves to a private, loopback, link-local, or reserved address.");
+    throw new Error("Webhook URL resolves to a private, loopback, link-local, documentation, multicast, or reserved address.");
   }
   return parsed.toString();
 }

@@ -19,7 +19,7 @@
 import { router, protectedProcedure, adminProcedure } from "./_core/trpc";
 import { getDb } from "./db";
 import { stores, apiKeys, webhookEndpoints, b2bDeliveries, webhookLogs, apiRequestLogs } from "../drizzle/schema";
-import { eq, and, desc, sql, like } from "drizzle-orm";
+import { eq, and, desc, sql, like, inArray } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "crypto";
 import { notifyOwner } from "./_core/notification";
@@ -28,6 +28,8 @@ import { onB2bDeliveryCompleted, onB2bDeliveryFailed } from "./pilot-rating-hook
 import { notifyB2bDeliveryTransition } from "./b2b-transition-notifications";
 import { appendOperationalEventWithDb, createDeliveryProofWithDb } from "./operational-trace-service";
 import { RECEPTION_METHODS, assertB2bTransition } from "../shared/operational-trace-policy";
+import { validatePublicWebhookUrl } from "./outbound-url-policy";
+import { protectWebhookSigningSecret, revealWebhookSigningSecret } from "./webhook-secret-policy";
 
 // ===== HELPERS =====
 
@@ -1040,19 +1042,21 @@ export const webhookRouter = router({
       }
 
       const secret = generateWebhookSecret();
+      const validatedUrl = await validatePublicWebhookUrl(input.url);
+      const protectedSecret = protectWebhookSigningSecret(secret);
 
       const result = await db.insert(webhookEndpoints).values({
         storeId: storeResult[0].id,
-        url: input.url,
+        url: validatedUrl,
         events: JSON.stringify(input.events),
-        secret,
+        secret: protectedSecret,
       });
 
       return {
         id: result[0].insertId,
-        url: input.url,
+        url: validatedUrl,
         events: input.events,
-        secret, // Only returned once at creation
+        secret, // Only returned once at creation; persisted value is encrypted
         warning: "Save this webhook secret securely. It is used to verify webhook signatures (HMAC-SHA256).",
       };
     }),
@@ -1091,8 +1095,10 @@ export const webhookRouter = router({
       };
 
       const payloadStr = JSON.stringify(testPayload);
+      const signingSecret = revealWebhookSigningSecret(endpoint[0].secret);
+      const validatedUrl = await validatePublicWebhookUrl(endpoint[0].url);
       const signature = crypto
-        .createHmac("sha256", endpoint[0].secret)
+        .createHmac("sha256", signingSecret)
         .update(payloadStr)
         .digest("hex");
 
@@ -1102,7 +1108,7 @@ export const webhookRouter = router({
       let responseBody: string | null = null;
 
       try {
-        const response = await fetch(endpoint[0].url, {
+        const response = await fetch(validatedUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -1111,6 +1117,7 @@ export const webhookRouter = router({
           },
           body: payloadStr,
           signal: AbortSignal.timeout(10000), // 10s timeout
+          redirect: "error",
         });
 
         responseStatus = response.status;
@@ -1246,10 +1253,12 @@ export const webhookRouter = router({
       if (endpoint.length === 0) throw new Error("Webhook endpoint not found");
       if (!endpoint[0].isActive) throw new Error("Webhook endpoint is inactive. Reactivate it first.");
 
-      // Re-send the webhook
+      // Re-send the webhook using the decrypted secret only in memory.
       const payloadStr = logEntry[0].payload;
+      const signingSecret = revealWebhookSigningSecret(endpoint[0].secret);
+      const validatedRetryUrl = await validatePublicWebhookUrl(endpoint[0].url);
       const signature = crypto
-        .createHmac("sha256", endpoint[0].secret)
+        .createHmac("sha256", signingSecret)
         .update(payloadStr)
         .digest("hex");
 
@@ -1258,7 +1267,7 @@ export const webhookRouter = router({
       let responseBody: string | null = null;
 
       try {
-        const response = await fetch(endpoint[0].url, {
+        const response = await fetch(validatedRetryUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -1269,6 +1278,7 @@ export const webhookRouter = router({
           },
           body: payloadStr,
           signal: AbortSignal.timeout(10000),
+          redirect: "error",
         });
 
         responseStatus = response.status;
@@ -1339,7 +1349,7 @@ export const webhookRouter = router({
       // Filter by specific webhook if provided
       const conditions = input?.webhookId
         ? [eq(webhookLogs.webhookEndpointId, input.webhookId)]
-        : [sql`${webhookLogs.webhookEndpointId} IN (${sql.raw(endpointIds.join(","))})`];
+        : [inArray(webhookLogs.webhookEndpointId, endpointIds)];
 
       const where = and(...conditions);
       const logs = await db.select().from(webhookLogs)
