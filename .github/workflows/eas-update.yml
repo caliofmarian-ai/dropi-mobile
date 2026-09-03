@@ -83,10 +83,13 @@ jobs:
           if (typeof value !== "string" || !value.startsWith("https://")) {
             throw new Error("Expo public config is missing a valid embedded API base URL");
           }
-          if (version !== "1.0.1" || runtimePolicy !== "appVersion") {
-            throw new Error("Development OTA must use app version 1.0.1 with appVersion runtime policy");
+          if (typeof version !== "string" || !/^\d+\.\d+\.\d+$/.test(version) || version === "1.0.0") {
+            throw new Error("Development OTA must use a bumped semantic app version; legacy 1.0.0 is forbidden");
           }
-          console.log("Expo public config contains the certified development runtime configuration");
+          if (runtimePolicy !== "appVersion") {
+            throw new Error("Development OTA must use the appVersion runtime policy");
+          }
+          console.log(`Certified development runtime version ${version}`);
           NODE
 
       - name: Setup EAS
