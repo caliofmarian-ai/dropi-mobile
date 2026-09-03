@@ -26,7 +26,15 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
-      - name: EAS account
-        run: eas whoami
-      - name: Compare finished APK with current Android OTA
-        run: eas fingerprint:compare --build-id 7c98a438-9f8e-4b75-a202-e08079ef6206 --update-id 01a066b7-5e28-7199-9ce5-80eae0b62fa3 --json --non-interactive
+      - name: Generate clean Android native project
+        run: pnpm exec expo prebuild --platform android --clean --no-install
+      - name: Inspect generated SDK properties and permissions
+        run: |
+          echo '=== root build.gradle ==='
+          grep -nE 'compileSdk|targetSdk|buildTools' android/build.gradle android/gradle.properties || true
+          echo '=== app build.gradle ==='
+          grep -nE 'compileSdk|targetSdk|minSdk|buildTools' android/app/build.gradle || true
+          echo '=== AndroidManifest permissions ==='
+          grep -n 'uses-permission' android/app/src/main/AndroidManifest.xml || true
+      - name: Generate local fingerprint
+        run: eas fingerprint:generate --platform android --json --non-interactive
