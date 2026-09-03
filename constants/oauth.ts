@@ -1,3 +1,4 @@
+import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import * as ReactNative from "react-native";
 
@@ -17,28 +18,36 @@ export const OWNER_OPEN_ID = env.ownerId;
 export const OWNER_NAME = env.ownerName;
 export const API_BASE_URL = env.apiBaseUrl;
 
+function normalizeBaseUrl(value: unknown): string {
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === "$EXPO_PUBLIC_API_BASE_URL") return "";
+  return trimmed.replace(/\/+$/, "");
+}
+
+function getEmbeddedApiBaseUrl(): string {
+  return normalizeBaseUrl(Constants.expoConfig?.extra?.apiBaseUrl);
+}
+
 /**
- * Get the API base URL, deriving from current hostname if not set.
- * Metro runs on 8081, API server runs on 3000.
- * URL pattern: https://PORT-sandboxid.region.domain
+ * Resolve the API base URL from the JavaScript environment first and from the
+ * Expo config embedded in the native binary second. Web development retains
+ * the existing Metro 8081 -> API 3000 hostname derivation fallback.
  */
 export function getApiBaseUrl(): string {
-  // If API_BASE_URL is set, use it
-  if (API_BASE_URL) {
-    return API_BASE_URL.replace(/\/$/, "");
+  const configuredBaseUrl = normalizeBaseUrl(API_BASE_URL) || getEmbeddedApiBaseUrl();
+  if (configuredBaseUrl) {
+    return configuredBaseUrl;
   }
 
-  // On web, derive from current hostname by replacing port 8081 with 3000
   if (ReactNative.Platform.OS === "web" && typeof window !== "undefined" && window.location) {
     const { protocol, hostname } = window.location;
-    // Pattern: 8081-sandboxid.region.domain -> 3000-sandboxid.region.domain
     const apiHostname = hostname.replace(/^8081-/, "3000-");
     if (apiHostname !== hostname) {
       return `${protocol}//${apiHostname}`;
     }
   }
 
-  // Fallback to empty (will use relative URL)
   return "";
 }
 
@@ -50,7 +59,7 @@ export function getRequiredApiBaseUrl(context: string = "native runtime"): strin
 
   if (ReactNative.Platform.OS !== "web") {
     throw new Error(
-      `[Config] EXPO_PUBLIC_API_BASE_URL is required on native (${context}).`,
+      `[Config] API base URL is unavailable on native (${context}); neither EXPO_PUBLIC_API_BASE_URL nor embedded Expo config supplied a valid value.`,
     );
   }
 
@@ -111,7 +120,6 @@ export async function startOAuthLogin(): Promise<string | null> {
   const loginUrl = getLoginUrl();
 
   if (ReactNative.Platform.OS === "web") {
-    // On web, just redirect
     if (typeof window !== "undefined") {
       window.location.href = loginUrl;
     }
@@ -121,7 +129,6 @@ export async function startOAuthLogin(): Promise<string | null> {
   const supported = await Linking.canOpenURL(loginUrl);
   if (!supported) {
     console.warn("[OAuth] Cannot open login URL: URL scheme not supported");
-    // 可考虑抛出错误或返回错误状态，让调用方处理
     return null;
   }
 
@@ -129,9 +136,7 @@ export async function startOAuthLogin(): Promise<string | null> {
     await Linking.openURL(loginUrl);
   } catch (error) {
     console.error("[OAuth] Failed to open login URL:", error);
-    // 可考虑抛出错误让调用方处理
   }
 
-  // The OAuth callback will reopen the app via deep link.
   return null;
 }
