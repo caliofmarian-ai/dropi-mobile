@@ -16,11 +16,20 @@ function isLiveC1Role(role: string | null | undefined): role is C1LiveDashboardR
   return Boolean(role && LIVE_C1_ROLES.has(role as C1LiveDashboardRole));
 }
 
+function getDeliveryPartnerVerificationState(user: unknown) {
+  const isUnverified = user && !(user as any).isVerified;
+  return isUnverified ? "Verification Required" : "Verified";
+}
+
 export default function HomeScreen() {
   const { user } = useDropiAuth();
 
   if (user?.isAuthenticated && isLiveC1Role(user.dropiRole)) {
     return <C1LiveRoleDashboard role={user.dropiRole} />;
+  }
+
+  if (user?.dropiRole === "delivery_partner") {
+    getDeliveryPartnerVerificationState(user);
   }
 
   return <LegacyHomeScreen />;
