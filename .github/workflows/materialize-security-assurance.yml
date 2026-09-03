@@ -1,3 +1,4 @@
+# Controlled one-shot materializer for BATCH-056.
 name: Materialize Security Assurance
 
 on:

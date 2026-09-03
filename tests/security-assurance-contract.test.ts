@@ -52,7 +52,7 @@ test("Marketplace monetary values are server-derived and stock/order creation is
 test("assurance stays factual where payment-provider and external pen-test evidence do not exist", () => {
   assert.match(assurance, /does not claim payment-provider security certification/i);
   assert.match(assurance, /does not certify an external penetration test/i);
-  assert.match(vulnerability, /not an external penetration-test attestation/i);
+  assert.match(vulnerability, /Completing this checklist internally is \*\*not\*\* an external penetration-test attestation/i);
   assert.match(assurance, /actual TLS protocol negotiated/i);
 });
 
