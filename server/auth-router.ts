@@ -8,6 +8,12 @@ import { maskEmail, sendPlatformEmail } from "./_core/mail";
 import * as db from "./db";
 import { createAuditLog } from "./db";
 import { requirePhantomAdminId } from "./audit-policy";
+import {
+  hashOneTimeCode,
+  isOneTimeCodeExpired,
+  shouldThrottleVerificationResend,
+  verifyOneTimeCode,
+} from "./account-lifecycle";
 
 async function sendVerificationEmail(toEmail: string, code: string): Promise<boolean> {
   return sendPlatformEmail({
@@ -99,30 +105,45 @@ function getDeviceInfo(req: any): string {
   return req.headers["user-agent"]?.slice(0, 255) || "unknown";
 }
 
-// Rate limiting in-memory store (per email, not per IP — mobile users share IPs via NAT/4G)
-const loginAttempts = new Map<string, { count: number; firstAttempt: number }>();
-const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
-const RATE_LIMIT_MAX = 10; // 10 attempts per email per window
+type AttemptRecord = { count: number; firstAttempt: number };
 
-function checkRateLimit(key: string): boolean {
+const loginAttempts = new Map<string, AttemptRecord>();
+const recoveryRequests = new Map<string, AttemptRecord>();
+const resetAttempts = new Map<string, AttemptRecord>();
+const RATE_LIMIT_WINDOW = 15 * 60 * 1000;
+const LOGIN_RATE_LIMIT_MAX = 10;
+const RECOVERY_RATE_LIMIT_MAX = 5;
+const RESET_RATE_LIMIT_MAX = 10;
+
+function checkWindowLimit(
+  store: Map<string, AttemptRecord>,
+  key: string,
+  maxAttempts: number,
+  windowMs = RATE_LIMIT_WINDOW,
+): boolean {
   const now = Date.now();
-  const record = loginAttempts.get(key);
-  if (!record || now - record.firstAttempt > RATE_LIMIT_WINDOW) {
-    loginAttempts.set(key, { count: 1, firstAttempt: now });
+  const record = store.get(key);
+  if (!record || now - record.firstAttempt > windowMs) {
+    store.set(key, { count: 1, firstAttempt: now });
     return true;
   }
-  if (record.count >= RATE_LIMIT_MAX) {
-    return false;
-  }
+  if (record.count >= maxAttempts) return false;
   record.count++;
   return true;
+}
+
+function checkRateLimit(key: string): boolean {
+  return checkWindowLimit(loginAttempts, key, LOGIN_RATE_LIMIT_MAX);
 }
 
 // ===== DROPI AUTH ROUTER =====
 export const dropiAuthRouter = router({
   register: publicProcedure.input(registerSchema).mutation(async ({ input, ctx }) => {
-    // Check if email already exists
-    const existing = await db.getUserByEmail(input.email);
+    const normalizedEmail = input.email.toLowerCase().trim();
+
+    // Check if email already exists using the same normalized representation
+    // used by login and recovery.
+    const existing = await db.getUserByEmail(normalizedEmail);
     if (existing) {
       throw new TRPCError({ code: "CONFLICT", message: "An account with this email already exists" });
     }
@@ -150,7 +171,7 @@ export const dropiAuthRouter = router({
 
     // Create user
     const { id, openId } = await db.createUser({
-      email: input.email,
+      email: normalizedEmail,
       name: input.name,
       passwordHash,
       dropiRole: input.dropiRole,
@@ -160,29 +181,37 @@ export const dropiAuthRouter = router({
       isVerified,
     });
 
-    // Generate email verification code
+    // Generate email verification code. Only the keyed digest is persisted.
     const verifyCode = String(randomInt(100000, 1_000_000));
     const verifyExpiry = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
-    await db.setEmailVerifyToken(id, verifyCode, verifyExpiry);
+    await db.setEmailVerifyToken(
+      id,
+      hashOneTimeCode("email-verification", verifyCode),
+      verifyExpiry,
+    );
 
-    // Send verification email
-    const emailSent = await sendVerificationEmail(input.email, verifyCode);
+    // Send verification email. An undelivered code is cleared so the account
+    // never has an invisible verification credential active on the server.
+    const emailSent = await sendVerificationEmail(normalizedEmail, verifyCode);
     if (!emailSent) {
-      console.warn(`[EMAIL VERIFY] Verification delivery failed for userId=${id} email=${maskEmail(input.email)}`);
+      await db.clearEmailVerifyToken(id);
+      console.warn(`[EMAIL VERIFY] Verification delivery failed for userId=${id} email=${maskEmail(normalizedEmail)}`);
     }
 
-    // Create session token (user can login but will see verification prompt)
-    const token = await sdk.createSessionToken(openId, { name: input.name });
-
-    // Store session in DB
-    await db.createSession({
-      userId: id,
-      token,
-      deviceInfo: getDeviceInfo(ctx.req),
-      ipAddress: getClientIp(ctx.req),
-      isPhantom: false,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-    });
+    // Inactive approval-pending accounts must not receive or retain a usable
+    // session before an administrator activates them.
+    let token: string | null = null;
+    if (!requiresApproval) {
+      token = await sdk.createSessionToken(openId, { name: input.name });
+      await db.createSession({
+        userId: id,
+        token,
+        deviceInfo: getDeviceInfo(ctx.req),
+        ipAddress: getClientIp(ctx.req),
+        isPhantom: false,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+    }
 
     // Audit log
     await createAuditLog({
@@ -197,7 +226,7 @@ export const dropiAuthRouter = router({
       isPhantomMode: false,
       ipAddress: getClientIp(ctx.req),
       userAgent: getDeviceInfo(ctx.req),
-      details: { email: input.email, role: input.dropiRole, channel: input.channel, emailVerificationSent: emailSent },
+      details: { email: normalizedEmail, role: input.dropiRole, channel: input.channel, emailVerificationSent: emailSent },
     });
 
     // Auto-create role application for operational roles requiring approval
@@ -218,7 +247,7 @@ export const dropiAuthRouter = router({
         const { notifyOwner } = await import("./_core/notification");
         await notifyOwner({
           title: "New Role Application",
-          content: `${input.name} (${input.email}) registered as ${input.dropiRole} on ${input.channel}. Requires admin approval.`,
+          content: `${input.name} (${normalizedEmail}) registered as ${input.dropiRole} on ${input.channel}. Requires admin approval.`,
         });
       } catch (e) { /* notification is best-effort */ }
     }
@@ -226,7 +255,7 @@ export const dropiAuthRouter = router({
     const user = await db.getUserById(id);
     return {
       user,
-      token: requiresApproval ? null : token, // Don't give session token if account is inactive
+      token,
       emailVerificationRequired: !requiresApproval,
       accountPendingApproval: requiresApproval,
       verificationRequired: isDeliveryPartner,
@@ -292,7 +321,7 @@ export const dropiAuthRouter = router({
         isPhantomMode: false,
         ipAddress: ip,
         userAgent: getDeviceInfo(ctx.req),
-        details: { email: input.email, reason: "invalid_password" },
+        details: { email: normalizedEmail, reason: "invalid_password" },
       });
       throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
     }
@@ -328,7 +357,7 @@ export const dropiAuthRouter = router({
       isPhantomMode: false,
       ipAddress: ip,
       userAgent: getDeviceInfo(ctx.req),
-      details: { email: input.email },
+      details: { email: normalizedEmail },
     });
 
     return { user, token };
@@ -336,7 +365,6 @@ export const dropiAuthRouter = router({
 
   logout: protectedProcedure.mutation(async ({ ctx }) => {
     const user = ctx.user!;
-    // Audit
     await createAuditLog({
       userId: user.id,
       userRole: user.dropiRole,
@@ -350,6 +378,10 @@ export const dropiAuthRouter = router({
       ipAddress: getClientIp(ctx.req),
       userAgent: getDeviceInfo(ctx.req),
     });
+
+    if (ctx.sessionToken) {
+      await db.deleteSessionByToken(ctx.sessionToken);
+    }
     return { success: true };
   }),
 
@@ -358,18 +390,25 @@ export const dropiAuthRouter = router({
   }),
 
   forgotPassword: publicProcedure.input(forgotPasswordSchema).mutation(async ({ input, ctx }) => {
-    const user = await db.getUserByEmail(input.email);
-    // Always return success to prevent email enumeration
+    const normalizedEmail = input.email.toLowerCase().trim();
+    if (!checkWindowLimit(recoveryRequests, normalizedEmail, RECOVERY_RATE_LIMIT_MAX)) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Too many password recovery requests. Please try again in 15 minutes.",
+      });
+    }
+
+    const user = await db.getUserByEmail(normalizedEmail);
+    // Always return success to prevent email enumeration.
     if (!user) {
       return { success: true, message: "If this email is registered, a 6-digit code has been sent." };
     }
 
-    // Generate 6-digit verification code
+    // Generate 6-digit verification code. db.setResetToken protects it at rest.
     const code = String(randomInt(100000, 1_000_000));
     const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
     await db.setResetToken(user.id, code, expiry);
 
-    // Audit log
     await createAuditLog({
       userId: user.id,
       userRole: user.dropiRole,
@@ -382,14 +421,13 @@ export const dropiAuthRouter = router({
       isPhantomMode: false,
       ipAddress: getClientIp(ctx.req),
       userAgent: getDeviceInfo(ctx.req),
-      details: { email: input.email, codeGenerated: true },
+      details: { email: normalizedEmail, codeGenerated: true },
     });
 
-    // Send recovery email via SMTP
-    const emailSent = await sendRecoveryEmail(input.email, code);
+    const emailSent = await sendRecoveryEmail(normalizedEmail, code);
     if (!emailSent) {
       await db.clearResetToken(user.id);
-      console.error(`[PASSWORD RESET] Delivery failed for userId=${user.id} email=${maskEmail(input.email)}`);
+      console.error(`[PASSWORD RESET] Delivery failed for userId=${user.id} email=${maskEmail(normalizedEmail)}`);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Unable to send reset code right now. Please try again later.",
@@ -400,23 +438,30 @@ export const dropiAuthRouter = router({
   }),
 
   resetPassword: publicProcedure.input(resetPasswordSchema).mutation(async ({ input, ctx }) => {
+    const resetKey = getClientIp(ctx.req);
+    if (!checkWindowLimit(resetAttempts, resetKey, RESET_RATE_LIMIT_MAX)) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Too many reset attempts. Please request a new code or try again later.",
+      });
+    }
+
     const user = await db.getUserByResetToken(input.token);
     if (!user) {
       throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid or expired reset token" });
     }
 
-    // Check expiry
-    if (user.resetTokenExpiry && new Date(user.resetTokenExpiry) < new Date()) {
+    // Missing or malformed expiry is invalid: recovery credentials fail closed.
+    if (isOneTimeCodeExpired(user.resetTokenExpiry)) {
       await db.clearResetToken(user.id);
       throw new TRPCError({ code: "BAD_REQUEST", message: "Reset token has expired. Please request a new one." });
     }
 
-    // Hash new password
+    // db.updateUserPassword atomically revokes every existing session.
     const passwordHash = await bcrypt.hash(input.newPassword, 12);
     await db.updateUserPassword(user.id, passwordHash);
     await db.clearResetToken(user.id);
 
-    // Audit
     await createAuditLog({
       userId: user.id,
       userRole: user.dropiRole,
@@ -429,6 +474,7 @@ export const dropiAuthRouter = router({
       isPhantomMode: false,
       ipAddress: getClientIp(ctx.req),
       userAgent: getDeviceInfo(ctx.req),
+      details: { sessionsRevoked: true },
     });
 
     return { success: true };
@@ -445,6 +491,7 @@ export const dropiAuthRouter = router({
       throw new TRPCError({ code: "UNAUTHORIZED", message: "Current password is incorrect" });
     }
 
+    // Credential changes revoke all existing sessions, including this one.
     const passwordHash = await bcrypt.hash(input.newPassword, 12);
     await db.updateUserPassword(user.id, passwordHash);
 
@@ -460,12 +507,13 @@ export const dropiAuthRouter = router({
       isPhantomMode: false,
       ipAddress: getClientIp(ctx.req),
       userAgent: getDeviceInfo(ctx.req),
+      details: { sessionsRevoked: true },
     });
 
-    return { success: true };
+    return { success: true, reauthenticationRequired: true };
   }),
 
-  // Verify email with 6-digit code
+  // Verify email with 6-digit code.
   verifyEmail: protectedProcedure.input(z.object({
     code: z.string().length(6),
   })).mutation(async ({ input, ctx }) => {
@@ -477,11 +525,18 @@ export const dropiAuthRouter = router({
       return { success: true, message: "Email already verified" };
     }
 
-    if (!user.emailVerifyToken || user.emailVerifyToken !== input.code) {
+    if (
+      !verifyOneTimeCode(
+        user.emailVerifyToken,
+        "email-verification",
+        input.code,
+      )
+    ) {
       throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid verification code" });
     }
 
-    if (user.emailVerifyExpires && new Date(user.emailVerifyExpires) < new Date()) {
+    if (isOneTimeCodeExpired(user.emailVerifyExpires)) {
+      await db.clearEmailVerifyToken(userId);
       throw new TRPCError({ code: "BAD_REQUEST", message: "Verification code has expired. Please request a new one." });
     }
 
@@ -504,7 +559,7 @@ export const dropiAuthRouter = router({
     return { success: true, message: "Email verified successfully" };
   }),
 
-  // Resend verification code
+  // Resend verification code.
   resendVerificationCode: protectedProcedure.mutation(async ({ ctx }) => {
     const userId = ctx.user!.id;
     console.log(`[EMAIL VERIFY] request_received authenticated_user=yes userId=${userId}`);
@@ -524,18 +579,28 @@ export const dropiAuthRouter = router({
       });
     }
 
-    // Generate new code
+    if (shouldThrottleVerificationResend(user.emailVerifyToken, user.emailVerifyExpires)) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Please wait one minute before requesting another verification code.",
+      });
+    }
+
     const code = String(randomInt(100000, 1_000_000));
     const expiry = new Date(Date.now() + 30 * 60 * 1000);
-    await db.setEmailVerifyToken(userId, code, expiry);
+    await db.setEmailVerifyToken(
+      userId,
+      hashOneTimeCode("email-verification", code),
+      expiry,
+    );
     console.log(`[EMAIL VERIFY] code_persisted=yes userId=${userId}`);
 
-    // Send email and surface delivery failures to the caller
     console.log(`[EMAIL VERIFY] mail_transport_invoked=yes userId=${userId}`);
     const sent = await sendVerificationEmail(user.email, code);
     console.log(`[EMAIL VERIFY] mail_delivery_success=${sent} userId=${userId}`);
 
     if (!sent) {
+      await db.clearEmailVerifyToken(userId);
       console.error(`[EMAIL VERIFY] response_status=failure reason=delivery_failed userId=${userId} email=${maskEmail(user.email)}`);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -738,6 +803,18 @@ export const adminAuthRouter = router({
     isActive: z.boolean(),
   })).mutation(async ({ input, ctx }) => {
     const user = ctx.user!;
+    const targetUser = await db.getUserById(input.userId);
+    if (!targetUser) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Target user not found" });
+    }
+    if (!input.isActive && input.userId === user.id) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Administrators cannot deactivate their own active session.",
+      });
+    }
+
+    // Deactivation revokes every target session inside the same DB transaction.
     await db.toggleUserActive(input.userId, input.isActive);
 
     await createAuditLog({
@@ -752,7 +829,13 @@ export const adminAuthRouter = router({
       isPhantomMode: false,
       ipAddress: getClientIp(ctx.req),
       userAgent: getDeviceInfo(ctx.req),
-      details: { targetUserId: input.userId, isActive: input.isActive },
+      details: {
+        targetUserId: input.userId,
+        targetRole: targetUser.dropiRole,
+        targetChannel: targetUser.channel,
+        isActive: input.isActive,
+        sessionsRevoked: !input.isActive,
+      },
     });
 
     return { success: true };
