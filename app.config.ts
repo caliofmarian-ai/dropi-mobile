@@ -42,15 +42,20 @@ const config: ExpoConfig = {
   scheme: env.scheme,
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
-  // EAS Updates — Over-The-Air updates fără reconstruire APK
+  // EAS Updates — Over-The-Air updates without rebuilding the APK.
   updates: {
     url: `https://u.expo.dev/${EAS_PROJECT_ID}`,
     checkAutomatically: "ON_LOAD",
   },
+  // Build and OTA compatibility is intentionally release-version based.
+  // Any native-runtime change must bump `version` and produce a new binary.
   runtimeVersion: {
-    policy: "fingerprint",
+    policy: "appVersion",
   },
   extra: {
+    // Native runtime fallback for the public API endpoint. JavaScript env remains
+    // the primary source; this value prevents a valid build from crashing if an
+    // OTA bundle cannot read the injected EXPO_PUBLIC variable directly.
     apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? "",
     eas: {
       projectId: EAS_PROJECT_ID,
