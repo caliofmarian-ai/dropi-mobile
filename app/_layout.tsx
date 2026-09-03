@@ -35,9 +35,29 @@ import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-run
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
 
+function ConfigErrorScreen({ error }: { error: Error }) {
+  return (
+    <View style={{ flex: 1, backgroundColor: "#1a1a2e", justifyContent: "center", padding: 24 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}>
+        <Text style={{ color: "#e94560", fontSize: 20, fontWeight: "bold", marginBottom: 12 }}>
+          ⚙️ Eroare de configurare
+        </Text>
+        <Text style={{ color: "#ffffff", fontSize: 14, marginBottom: 16, lineHeight: 22 }}>
+          {error.message}
+        </Text>
+        <Text style={{ color: "#aaaaaa", fontSize: 13, lineHeight: 20 }}>
+          Aplicația nu poate porni fără URL-ul API-ului.{"\n\n"}
+          Soluție: asigurați-vă că variabila de mediu{" "}
+          <Text style={{ color: "#e94560", fontFamily: "monospace" }}>EXPO_PUBLIC_API_BASE_URL</Text>{" "}
+          este setată în GitHub Variables (Settings → Secrets and variables → Actions → Variables) și reconstruiți aplicația.
+        </Text>
+      </ScrollView>
+    </View>
+  );
+}
+
 /**
- * Catches configuration errors (e.g. missing EXPO_PUBLIC_API_BASE_URL) and
- * renders a human-readable screen instead of the red Expo crash overlay.
+ * Catches runtime/configuration errors raised by child providers and screens.
  */
 class ConfigErrorBoundary extends Component<
   { children: ReactNode },
@@ -54,24 +74,7 @@ class ConfigErrorBoundary extends Component<
 
   render() {
     if (this.state.error) {
-      return (
-        <View style={{ flex: 1, backgroundColor: "#1a1a2e", justifyContent: "center", padding: 24 }}>
-          <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}>
-            <Text style={{ color: "#e94560", fontSize: 20, fontWeight: "bold", marginBottom: 12 }}>
-              ⚙️ Eroare de configurare
-            </Text>
-            <Text style={{ color: "#ffffff", fontSize: 14, marginBottom: 16, lineHeight: 22 }}>
-              {this.state.error.message}
-            </Text>
-            <Text style={{ color: "#aaaaaa", fontSize: 13, lineHeight: 20 }}>
-              Aplicația nu poate porni fără URL-ul API-ului.{"\n\n"}
-              Soluție: asigurați-vă că variabila de mediu{" "}
-              <Text style={{ color: "#e94560", fontFamily: "monospace" }}>EXPO_PUBLIC_API_BASE_URL</Text>{" "}
-              este setată în GitHub Variables (Settings → Secrets and variables → Actions → Variables) și reconstruiți aplicația.
-            </Text>
-          </ScrollView>
-        </View>
-      );
+      return <ConfigErrorScreen error={this.state.error} />;
     }
     return this.props.children;
   }
@@ -100,16 +103,12 @@ function WSNotificationManager({ queryClient }: { queryClient: QueryClient }) {
   const { playNotificationSound } = useNotificationSound();
 
   const handleNewNotification = useCallback(() => {
-    // Play DROPi notification chime
     playNotificationSound();
-    // Invalidate the unread count query so badge updates instantly
     queryClient.invalidateQueries({ queryKey: [["notifications", "getUnreadCount"]] });
-    // Also invalidate the notification list if it's open
     queryClient.invalidateQueries({ queryKey: [["notifications", "getNotifications"]] });
   }, [queryClient, playNotificationSound]);
 
   const handleUnreadCountUpdate = useCallback((_count: number) => {
-    // Force refetch unread count for badge
     queryClient.invalidateQueries({ queryKey: [["notifications", "getUnreadCount"]] });
   }, [queryClient]);
 
@@ -131,7 +130,6 @@ export default function RootLayout() {
   const [insets, setInsets] = useState<EdgeInsets>(initialInsets);
   const [frame, setFrame] = useState<Rect>(initialFrame);
 
-  // Initialize Manus runtime for cookie injection from parent container
   useEffect(() => {
     initManusRuntime();
   }, []);
@@ -147,7 +145,6 @@ export default function RootLayout() {
     return () => unsubscribe();
   }, [handleSafeAreaUpdate]);
 
-  // Create clients once and reuse them
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -159,9 +156,18 @@ export default function RootLayout() {
         },
       }),
   );
-  const [trpcClient] = useState(() => createTRPCClient());
 
-  // Ensure minimum 8px padding for top and bottom on mobile
+  const [trpcClientState] = useState(() => {
+    try {
+      return { client: createTRPCClient(), error: null as Error | null };
+    } catch (error) {
+      return {
+        client: null,
+        error: error instanceof Error ? error : new Error(String(error)),
+      };
+    }
+  });
+
   const providerInitialMetrics = useMemo(() => {
     const metrics = initialWindowMetrics ?? { insets: initialInsets, frame: initialFrame };
     return {
@@ -173,6 +179,19 @@ export default function RootLayout() {
       },
     };
   }, [initialInsets, initialFrame]);
+
+  const trpcClient = trpcClientState.client;
+  if (!trpcClient) {
+    return (
+      <ThemeProvider>
+        <SafeAreaProvider initialMetrics={providerInitialMetrics}>
+          <ConfigErrorScreen
+            error={trpcClientState.error ?? new Error("DROPi API configuration is unavailable.")}
+          />
+        </SafeAreaProvider>
+      </ThemeProvider>
+    );
+  }
 
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
