@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SignJWT } from "jose";
 
 const dbMock = vi.hoisted(() => ({
+  getDb: vi.fn(),
+  getSessionByToken: vi.fn(),
   getUserByOpenId: vi.fn(),
   upsertUser: vi.fn(),
 }));
@@ -27,10 +29,11 @@ const { sdk } = await import("../server/_core/sdk");
 describe("sdk.authenticateRequest", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dbMock.getDb.mockResolvedValue(null);
     dbMock.upsertUser.mockResolvedValue(undefined);
   });
 
-  it("accepts the mobile Authorization JWT transport without requiring a cookie", async () => {
+  it("accepts the mobile Authorization JWT transport only while its persisted session is valid", async () => {
     const user = {
       id: 11,
       openId: "mobile-open-id",
@@ -63,6 +66,18 @@ describe("sdk.authenticateRequest", () => {
     };
     dbMock.getUserByOpenId.mockResolvedValue(user);
     const token = await sdk.createSessionToken("mobile-open-id", { name: "Mobile User" });
+    dbMock.getSessionByToken.mockResolvedValue({
+      id: 31,
+      userId: user.id,
+      token,
+      isPhantom: false,
+      phantomAdminId: null,
+      expiresAt: new Date(Date.now() + 60_000),
+      createdAt: new Date(),
+      lastActiveAt: new Date(),
+      deviceInfo: null,
+      ipAddress: null,
+    });
 
     const authenticated = await sdk.authenticateRequest({
       headers: {
@@ -70,8 +85,20 @@ describe("sdk.authenticateRequest", () => {
       },
     } as any);
 
+    expect(dbMock.getSessionByToken).toHaveBeenCalledWith(token);
     expect(dbMock.getUserByOpenId).toHaveBeenCalledWith("mobile-open-id");
     expect(authenticated).toBe(user);
+  });
+
+  it("rejects a valid JWT after its persisted session has been revoked", async () => {
+    dbMock.getSessionByToken.mockResolvedValue(undefined);
+    const token = await sdk.createSessionToken("revoked-open-id", { name: "Revoked User" });
+
+    await expect(
+      sdk.authenticateRequest({
+        headers: { authorization: `Bearer ${token}` },
+      } as any),
+    ).rejects.toThrow("Invalid, revoked, or expired persisted session");
   });
 
   it("rejects requests that send neither Authorization JWT nor session cookie", async () => {
@@ -98,7 +125,6 @@ describe("sdk.authenticateRequest", () => {
 
 describe("sdk.verifySession — JWT claim tolerance", () => {
   it("accepts a valid token with an empty appId (VITE_APP_ID not configured on Railway)", async () => {
-    // signSession with appId: "" to simulate Railway without VITE_APP_ID
     const token = await sdk.signSession({ openId: "dropi_user_123", appId: "", name: "Test User" });
     const session = await sdk.verifySession(token);
     expect(session).not.toBeNull();
@@ -147,15 +173,12 @@ describe("sdk.verifySession — JWT claim tolerance", () => {
 // ---------------------------------------------------------------------------
 
 describe("sdk.verifySession — JWT security invariants", () => {
-  // The mock ENV uses cookieSecret = "test-secret-key-must-be-at-least-32-chars!!"
-  // Tokens signed with any other key must be rejected.
   const wrongSecret = new TextEncoder().encode(
     "wrong-secret-key-must-be-at-least-32-chars!!!",
   );
 
   it("rejects a token signed with the wrong secret (HMAC integrity enforced)", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    // Sign with a different key than the one in ENV.cookieSecret
     const forgedToken = await new SignJWT({ openId: "dropi_user_999", appId: "", name: "" })
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
       .setExpirationTime(Math.floor(Date.now() / 1000) + 3600)
@@ -175,7 +198,6 @@ describe("sdk.verifySession — JWT security invariants", () => {
     const correctSecret = new TextEncoder().encode(
       "test-secret-key-must-be-at-least-32-chars!!",
     );
-    // Set exp to 1 second in the past
     const expiredToken = await new SignJWT({ openId: "dropi_user_exp", appId: "", name: "" })
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
       .setExpirationTime(Math.floor(Date.now() / 1000) - 1)
