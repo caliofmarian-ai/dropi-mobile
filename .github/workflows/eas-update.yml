@@ -61,7 +61,7 @@ jobs:
           echo "✅ EXPO_PUBLIC_API_BASE_URL este configurat"
 
       - name: Setup EAS
-        uses: expo/expo-github-action@v8
+        uses: expo/expo-github-action@v9
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
