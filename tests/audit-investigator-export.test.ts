@@ -62,10 +62,11 @@ test("JSON export carries channel, filters, truncation and evidence rows", () =>
 
 test("Audit investigator authority is limited to Owner and Auditor and self-audits in ADMIN", () => {
   const trpc = source("server/_core/trpc.ts");
-  assert.match(trpc, /dropiRole === "system_administrator"/);
-  assert.match(trpc, /dropiRole === "audit_manager" && channel === "ADMIN"/);
-  assert.doesNotMatch(trpc, /dropiRole === "security_officer"/);
-  assert.match(trpc, /Inactive accounts cannot access Audit Core/);
+  const rbac = source("server/rbac-policy.ts");
+  assert.match(trpc, /roles: \["system_administrator", "audit_manager"\]/);
+  assert.match(trpc, /channels: \["ADMIN"\]/);
+  assert.doesNotMatch(trpc, /roles: \[[^\]]*"security_officer"[^\]]*\]/);
+  assert.match(rbac, /Inactive accounts cannot access protected DROPi routes/);
   assert.match(trpc, /auditInvestigatorProcedure = t\.procedure\.use\(requireAuditInvestigator\)\.use\(auditAdminLog\)/);
 });
 
