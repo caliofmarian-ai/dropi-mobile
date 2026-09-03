@@ -9,6 +9,7 @@
 import type { TrpcContext } from "./_core/context";
 import { buildAuditAttribution, type AuditChannel } from "./audit-policy";
 import { createAuditLog } from "./db";
+import { redactSensitive } from "../shared/security-baseline-policy";
 
 export type AuditProcedureType = "query" | "mutation" | "subscription" | "unknown";
 
@@ -34,7 +35,7 @@ function extractResourceId(input: any): string | null {
 }
 
 export function sanitizeAuditInput(input: any): Record<string, unknown> | null {
-  if (!input || typeof input !== "object") return null;
+  if (!input || typeof input !== "object" || Array.isArray(input)) return null;
   const sanitized = { ...input };
   delete sanitized.password;
   delete sanitized.currentPassword;
@@ -44,7 +45,7 @@ export function sanitizeAuditInput(input: any): Record<string, unknown> | null {
   delete sanitized.fileBase64;
   delete sanitized.apiKey;
   delete sanitized.secret;
-  return sanitized;
+  return redactSensitive(sanitized) as Record<string, unknown>;
 }
 
 export function auditAccessKind(procedureType: AuditProcedureType): "READ" | "WRITE" | "STREAM" | "UNKNOWN" {

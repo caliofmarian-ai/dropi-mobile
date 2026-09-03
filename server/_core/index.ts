@@ -12,6 +12,15 @@ import { initNotificationWS, getNotificationWSStats } from "../ws-notifications"
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { startOrchestrator } from "./orchestrator";
+import { ENV } from "./env";
+import { SECURITY_BODY_LIMIT } from "../../shared/security-baseline-policy";
+import {
+  apiRateLimitMiddleware,
+  httpsOnlyMiddleware,
+  safeRequestShapeMiddleware,
+  securityHeadersMiddleware,
+  strictCorsMiddleware,
+} from "../security-http";
 
 // Polyfill globalThis.crypto for jose v6 WebCrypto API (needed on Node.js < 19).
 // jose v6 uses the bare `crypto` identifier which resolves through globalThis.
@@ -46,31 +55,24 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 
 async function startServer() {
   const app = express();
+  // DROPi is deployed behind one trusted ingress/TLS terminator (Railway in the
+  // current deployment). This makes req.ip/req.secure use the nearest proxy only.
+  app.set("trust proxy", 1);
   const server = createServer(app);
 
-  // Enable CORS for all routes - reflect the request origin to support credentials
-  app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (origin) {
-      res.header("Access-Control-Allow-Origin", origin);
-    }
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept, Authorization",
-    );
-    res.header("Access-Control-Allow-Credentials", "true");
+  app.use(securityHeadersMiddleware(ENV.isProduction));
+  app.use(httpsOnlyMiddleware(ENV.isProduction));
+  app.use(strictCorsMiddleware({
+    isProduction: ENV.isProduction,
+    allowedOriginsRaw: process.env.DROPI_ALLOWED_ORIGINS,
+  }));
+  app.use(apiRateLimitMiddleware);
 
-    // Handle preflight requests
-    if (req.method === "OPTIONS") {
-      res.sendStatus(200);
-      return;
-    }
-    next();
-  });
-
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  // Canonical verification documents can be 10 MB before base64 transport.
+  // 16 MB keeps that supported while removing the previous 50 MB global attack surface.
+  app.use(express.json({ limit: SECURITY_BODY_LIMIT }));
+  app.use(express.urlencoded({ limit: SECURITY_BODY_LIMIT, extended: true }));
+  app.use(safeRequestShapeMiddleware);
 
   registerStorageProxy(app);
   registerOAuthRoutes(app);

@@ -4,25 +4,23 @@
  * Automatically fires webhooks to registered B2B partner endpoints
  * when delivery status changes occur. Implements:
  * - HMAC-SHA256 signature verification
+ * - AES-256-GCM at-rest protection for signing secrets
  * - Exponential backoff retry (1min, 5min, 30min)
  * - Failure tracking and auto-deactivation after 10 consecutive failures
  * - Comprehensive logging in webhookLogs table
- *
- * Usage:
- *   import { triggerWebhooks } from "./webhook-trigger";
- *   await triggerWebhooks(storeId, deliveryId, event, payload);
  */
 
 import { getDb } from "./db";
 import { webhookEndpoints, webhookLogs } from "../drizzle/schema";
 import { eq, and, sql } from "drizzle-orm";
 import crypto from "crypto";
+import { protectWebhookSigningSecret, revealWebhookSigningSecret, webhookSecretNeedsRewrap } from "./webhook-secret-policy";
+import { validatePublicWebhookUrl } from "./outbound-url-policy";
 
-// Retry delays in milliseconds: 1min, 5min, 30min
 const RETRY_DELAYS = [60_000, 300_000, 1_800_000];
 const MAX_RETRIES = 3;
 const MAX_CONSECUTIVE_FAILURES = 10;
-const WEBHOOK_TIMEOUT_MS = 10_000; // 10 seconds
+const WEBHOOK_TIMEOUT_MS = 10_000;
 
 export interface WebhookPayload {
   event: string;
@@ -35,10 +33,6 @@ export interface WebhookPayload {
   details?: Record<string, any>;
 }
 
-/**
- * Trigger all matching webhooks for a store when a delivery event occurs.
- * Non-blocking: fires webhooks asynchronously and logs results.
- */
 export async function triggerWebhooks(
   storeId: number,
   deliveryId: number,
@@ -48,7 +42,6 @@ export async function triggerWebhooks(
   const db = await getDb();
   if (!db) return;
 
-  // Find all active webhook endpoints for this store that subscribe to this event
   const endpoints = await db
     .select()
     .from(webhookEndpoints)
@@ -59,7 +52,6 @@ export async function triggerWebhooks(
       )
     );
 
-  // Filter endpoints that subscribe to this event
   const matchingEndpoints = endpoints.filter((ep) => {
     const events: string[] = JSON.parse(ep.events as string);
     return events.includes(event) || events.includes("delivery.status_changed");
@@ -67,20 +59,27 @@ export async function triggerWebhooks(
 
   if (matchingEndpoints.length === 0) return;
 
-  // Fire webhooks concurrently (non-blocking)
   const promises = matchingEndpoints.map((endpoint) =>
     deliverWebhook(endpoint, deliveryId, event, payload, 1).catch((err) => {
-      console.error(`[Webhook] Failed to deliver to ${endpoint.url}:`, err.message);
+      // Never log signing secrets or payload credentials on delivery failure.
+      console.error(`[Webhook] Delivery failed for endpoint ${endpoint.id}:`, err.message);
     })
   );
-
-  // Don't await — fire and forget for non-blocking behavior
   Promise.allSettled(promises);
 }
 
-/**
- * Deliver a single webhook with retry logic.
- */
+async function signingSecretForEndpoint(endpoint: typeof webhookEndpoints.$inferSelect): Promise<string> {
+  const secret = revealWebhookSigningSecret(endpoint.secret);
+  if (webhookSecretNeedsRewrap(endpoint.secret)) {
+    const db = await getDb();
+    if (!db) throw new Error("Database unavailable while rotating webhook secret.");
+    await db.update(webhookEndpoints)
+      .set({ secret: protectWebhookSigningSecret(secret) })
+      .where(eq(webhookEndpoints.id, endpoint.id));
+  }
+  return secret;
+}
+
 async function deliverWebhook(
   endpoint: typeof webhookEndpoints.$inferSelect,
   deliveryId: number,
@@ -92,10 +91,9 @@ async function deliverWebhook(
   if (!db) return;
 
   const payloadStr = JSON.stringify(payload);
-
-  // Generate HMAC-SHA256 signature
+  const signingSecret = await signingSecretForEndpoint(endpoint);
   const signature = crypto
-    .createHmac("sha256", endpoint.secret)
+    .createHmac("sha256", signingSecret)
     .update(payloadStr)
     .digest("hex");
 
@@ -104,7 +102,8 @@ async function deliverWebhook(
   let responseBody: string | null = null;
 
   try {
-    const response = await fetch(endpoint.url, {
+    const validatedUrl = await validatePublicWebhookUrl(endpoint.url);
+    const response = await fetch(validatedUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -116,16 +115,16 @@ async function deliverWebhook(
       },
       body: payloadStr,
       signal: AbortSignal.timeout(WEBHOOK_TIMEOUT_MS),
+      redirect: "error",
     });
 
     responseStatus = response.status;
     responseBody = await response.text().catch(() => null);
-    success = response.ok; // 2xx status codes
+    success = response.ok;
   } catch (err: any) {
     responseBody = err.message || "Connection failed";
   }
 
-  // Log the attempt
   await db.insert(webhookLogs).values({
     webhookEndpointId: endpoint.id,
     deliveryId,
@@ -138,7 +137,6 @@ async function deliverWebhook(
     respondedAt: new Date(),
   });
 
-  // Update endpoint stats
   if (success) {
     await db
       .update(webhookEndpoints)
@@ -161,7 +159,6 @@ async function deliverWebhook(
       })
       .where(eq(webhookEndpoints.id, endpoint.id));
 
-    // Auto-deactivate after MAX_CONSECUTIVE_FAILURES
     if (newFailureCount >= MAX_CONSECUTIVE_FAILURES) {
       await db
         .update(webhookEndpoints)
@@ -171,25 +168,21 @@ async function deliverWebhook(
         })
         .where(eq(webhookEndpoints.id, endpoint.id));
 
-      console.warn(`[Webhook] Endpoint ${endpoint.id} (${endpoint.url}) auto-deactivated after ${MAX_CONSECUTIVE_FAILURES} failures`);
-      return; // Don't retry
+      console.warn(`[Webhook] Endpoint ${endpoint.id} auto-deactivated after ${MAX_CONSECUTIVE_FAILURES} failures`);
+      return;
     }
 
-    // Schedule retry with exponential backoff
     if (attemptNumber < MAX_RETRIES) {
       const delay = RETRY_DELAYS[attemptNumber - 1] || RETRY_DELAYS[RETRY_DELAYS.length - 1];
       setTimeout(() => {
         deliverWebhook(endpoint, deliveryId, event, payload, attemptNumber + 1).catch(
-          (err) => console.error(`[Webhook] Retry ${attemptNumber + 1} failed for ${endpoint.url}:`, err.message)
+          (err) => console.error(`[Webhook] Retry ${attemptNumber + 1} failed for endpoint ${endpoint.id}:`, err.message)
         );
       }, delay);
     }
   }
 }
 
-/**
- * Helper to build a standard webhook payload from a delivery status change.
- */
 export function buildWebhookPayload(
   event: string,
   delivery: {
@@ -213,9 +206,6 @@ export function buildWebhookPayload(
   };
 }
 
-/**
- * Determine which webhook event(s) to fire based on the new status.
- */
 export function getWebhookEvents(newStatus: string): string[] {
   const events: string[] = ["delivery.status_changed"];
 

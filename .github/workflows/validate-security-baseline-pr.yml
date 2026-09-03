@@ -1,0 +1,59 @@
+name: Validate Security Baseline
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/validate-security-baseline-pr.yml
+      - docs/security/SECURITY_BASELINE.md
+      - drizzle/0018_security_secret_envelopes.sql
+      - drizzle/meta/_journal.json
+      - drizzle/schema.ts
+      - server/_core/env.ts
+      - server/_core/index.ts
+      - server/_core/trpc.ts
+      - server/audit-middleware.ts
+      - server/b2b-router.ts
+      - server/db.ts
+      - server/outbound-url-policy.ts
+      - server/rest-gateway.ts
+      - server/security-crypto.ts
+      - server/security-http.ts
+      - server/webhook-secret-policy.ts
+      - server/webhook-trigger.ts
+      - shared/security-baseline-policy.ts
+      - tests/outbound-url-policy.test.ts
+      - tests/security-baseline-contract.test.ts
+      - tests/security-baseline-policy.test.ts
+      - tests/security-crypto.test.ts
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Security baseline contracts
+        run: node --import tsx --test tests/security-baseline-policy.test.ts tests/security-crypto.test.ts tests/outbound-url-policy.test.ts tests/security-baseline-contract.test.ts
+      - name: Audit, privacy, and operational regressions
+        run: node --import tsx --test tests/audit-capture-attribution.test.ts tests/audit-policy.test.ts tests/privacy-policy.test.ts tests/operational-trace-policy.test.ts
+      - name: Authentication regressions
+        run: pnpm exec vitest run tests/auth.login-normalize.test.ts tests/auth.login-session.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"

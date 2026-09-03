@@ -39,7 +39,7 @@ function auditMiddleware(channelOverride?: AuditChannel) {
       return result;
     } catch (error: any) {
       success = false;
-      errorMsg = error?.message || "unknown_error";
+      errorMsg = typeof error?.code === "string" ? error.code : (error?.name || "procedure_error");
       let rawInput: unknown;
       try {
         rawInput = await opts.getRawInput();
