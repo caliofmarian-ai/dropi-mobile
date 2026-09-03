@@ -105,6 +105,11 @@ export async function exchangeOAuthCode(
     hasUser: !!result.user,
   });
 
+  if (!sessionToken || !refreshToken) {
+    throw new Error("OAuth exchange did not return complete session credentials");
+  }
+  await Auth.setSessionCredentials(sessionToken, refreshToken);
+
   return {
     sessionToken,
     refreshToken,
