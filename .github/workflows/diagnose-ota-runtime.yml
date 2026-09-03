@@ -26,11 +26,7 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
-      - name: Generate clean Android native project
-        run: pnpm exec expo prebuild --platform android --clean --no-install
-      - name: Generate local fingerprint
+      - name: Generate clean native projects
+        run: pnpm exec expo prebuild --clean --no-install
+      - name: Generate Android fingerprint after full prebuild
         run: eas fingerprint:generate --platform android --json --non-interactive
-      - name: Publish isolated diagnostic Android update
-        run: eas update --branch ota-runtime-diagnostic --platform android --message "OTA runtime diagnostic after clean prebuild" --non-interactive
-      - name: Inspect diagnostic update
-        run: eas update:list --branch ota-runtime-diagnostic --limit 1 --json
