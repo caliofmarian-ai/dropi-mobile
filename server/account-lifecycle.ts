@@ -4,13 +4,18 @@ import { ENV } from "./_core/env";
 export type OneTimeCodePurpose = "email-verification" | "password-reset";
 
 const HASH_PREFIX = "otc1:";
+const TEST_ONLY_SECRET = "dropi-test-only-one-time-code-secret";
 
 function resolveLifecycleSecret(explicitSecret?: string): string {
   const secret = (explicitSecret ?? process.env.JWT_SECRET ?? ENV.cookieSecret ?? "").trim();
-  if (!secret) {
-    throw new Error("JWT_SECRET is required for DROPi one-time-code protection");
-  }
-  return secret;
+  if (secret) return secret;
+
+  // Repository regression suites intentionally run without deployment secrets.
+  // This deterministic value is reachable only in NODE_ENV=test; production and
+  // development runtime remain fail-closed when JWT_SECRET is absent.
+  if (process.env.NODE_ENV === "test") return TEST_ONLY_SECRET;
+
+  throw new Error("JWT_SECRET is required for DROPi one-time-code protection");
 }
 
 function oneTimeCodeDigest(
