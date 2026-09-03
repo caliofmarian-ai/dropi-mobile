@@ -74,7 +74,7 @@ jobs:
               "server/auth-router.ts",
               'String(Math.floor(100000 + Math.random() * 900000))',
               'String(randomInt(100000, 1_000_000))',
-              expected=2,
+              expected=3,
           )
           PY
       - name: Security assurance contracts
