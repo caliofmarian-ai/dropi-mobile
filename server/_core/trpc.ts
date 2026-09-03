@@ -3,6 +3,11 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { AuditChannel } from "../audit-policy";
 import { logProcedureCall, type AuditProcedureType } from "../audit-middleware";
+import {
+  describeRbacDenial,
+  evaluateRbacAccess,
+  type RbacRequirement,
+} from "../rbac-policy";
 import type { TrpcContext } from "./context";
 
 const t = initTRPC.context<TrpcContext>().create({
@@ -64,63 +69,82 @@ function auditMiddleware(channelOverride?: AuditChannel) {
 const auditLog = auditMiddleware();
 const auditAdminLog = auditMiddleware("ADMIN");
 
-const requireUser = t.middleware(async (opts) => {
-  const { ctx, next } = opts;
-  if (!ctx.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
-  }
-  return next({
-    ctx: { ...ctx, user: ctx.user },
-  });
-});
-
-const requireAuditInvestigator = t.middleware(async (opts) => {
-  const { ctx, next } = opts;
-  const user = ctx.user;
-  if (!user) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
-  }
-  if ((user as any).isActive === false) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Inactive accounts cannot access Audit Core." });
-  }
-
-  const dropiRole = (user as any).dropiRole;
-  const channel = (user as any).channel;
-  const isOwner = user.role === "admin" || dropiRole === "system_administrator";
-  const isAuditor = dropiRole === "audit_manager" && channel === "ADMIN";
-  if (!isOwner && !isAuditor) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Audit Core requires Owner or Auditor authority." });
-  }
-
-  return next({
-    ctx: { ...ctx, user },
-  });
-});
-
-export const protectedProcedure = t.procedure.use(requireUser).use(auditLog);
-
-// Phantom-control operations run while the authenticated identity is the target
-// user, but they are administrative control actions and therefore belong to the
-// ADMIN audit stream. The procedure itself still validates phantom state.
-export const phantomProcedure = t.procedure.use(requireUser).use(auditAdminLog);
-
-// Canonical full-log investigators: Owner/System Administrator and Audit Manager.
-// Every investigator read/export is itself written to the ADMIN audit stream.
-export const auditInvestigatorProcedure = t.procedure.use(requireAuditInvestigator).use(auditAdminLog);
-
-export const adminProcedure = t.procedure.use(
-  t.middleware(async (opts) => {
+/**
+ * Single authorization gate for every authenticated tRPC surface.
+ *
+ * Authentication only proves who the caller is. This middleware additionally
+ * proves that the persisted identity belongs to the canonical DROPi role graph,
+ * that its role/channel pairing is valid, that the account is active, and—when
+ * requested—that the canonical role grants the required role/channel/permission
+ * constraint. AI agents do not receive a bypass; they are evaluated through the
+ * exact same graph as human identities.
+ */
+function rbacMiddleware(
+  requirement: RbacRequirement = {},
+  forbiddenMessage?: string,
+) {
+  return t.middleware(async (opts) => {
     const { ctx, next } = opts;
     const user = ctx.user;
     if (!user) {
       throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
     }
-    const isAdmin = user.role === "admin" || (user as any).dropiRole === "system_administrator";
-    if (!isAdmin) {
-      throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
+
+    const decision = evaluateRbacAccess(user, requirement);
+    if (!decision.allowed) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: forbiddenMessage ?? describeRbacDenial(decision),
+      });
     }
+
     return next({
       ctx: { ...ctx, user },
     });
-  }),
-).use(auditAdminLog);
+  });
+}
+
+const requireProtectedRole = rbacMiddleware();
+const requireAuditInvestigator = rbacMiddleware(
+  {
+    roles: ["system_administrator", "audit_manager"],
+    channels: ["ADMIN"],
+  },
+  "Audit Core requires Owner or Auditor authority.",
+);
+const requireAdmin = rbacMiddleware(
+  {
+    roles: ["system_administrator"],
+    channels: ["ADMIN"],
+  },
+  NOT_ADMIN_ERR_MSG,
+);
+
+/**
+ * Canonical authenticated procedure. Every existing protected route inherits
+ * role/channel/account validation here, so route authors cannot accidentally
+ * create an authentication-only tRPC surface.
+ */
+export const protectedProcedure = t.procedure.use(requireProtectedRole).use(auditLog);
+
+/**
+ * Fine-grained procedure factory for routes that require an explicit canonical
+ * role, channel, or permission in addition to the baseline protected contract.
+ */
+export function rbacProcedure(requirement: RbacRequirement) {
+  return t.procedure.use(rbacMiddleware(requirement)).use(auditLog);
+}
+
+// Phantom-control operations run while the authenticated identity is the target
+// user, but they are administrative control actions and therefore belong to the
+// ADMIN audit stream. The target identity is still validated against RBAC.
+export const phantomProcedure = t.procedure.use(requireProtectedRole).use(auditAdminLog);
+
+// Canonical full-log investigators: Owner/System Administrator and Audit Manager.
+// Every investigator read/export is itself written to the ADMIN audit stream.
+export const auditInvestigatorProcedure = t.procedure.use(requireAuditInvestigator).use(auditAdminLog);
+
+// Administrative routes use the same canonical graph rather than a second,
+// ad-hoc role check. Legacy platform `role=admin` resolves to the canonical
+// System Administrator / ADMIN authority node inside rbac-policy.ts.
+export const adminProcedure = t.procedure.use(requireAdmin).use(auditAdminLog);
