@@ -79,7 +79,7 @@
     "superjson": "^1.13.3",
     "tailwind-merge": "^2.6.0",
     "ws": "^8.21.0",
-    "zod": "^4.2.1"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@expo/ngrok": "^4.1.3",
