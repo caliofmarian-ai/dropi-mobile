@@ -1,24 +1,36 @@
-name: EAS Runtime Fingerprint Diagnostics
+name: EAS Build — Android APK (development)
 
-# Temporary diagnostic workflow. It NEVER starts an EAS build or publishes an update.
-# It inspects only the resolved Expo config source that differs from the installed development APK.
+# Construiește APK-ul de development Android cu Expo EAS
+# Se rulează EXCLUSIV manual (workflow_dispatch) pentru a conserva cota EAS Free plan.
+# NU se declanșează automat la push pe main.
+# APK-ul rezultat este disponibil în dashboard-ul EAS (expo.dev).
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/eas-build-android.yml"
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
-  diagnose:
-    name: Inspect resolved Expo config fingerprint delta
+  build:
+    name: Build Android APK (development)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+
+      - name: Validate EAS_PROJECT_ID
+        run: |
+          if [ -z "${{ vars.EAS_PROJECT_ID }}" ] && grep -q "YOUR_EAS_PROJECT_ID" app.config.ts; then
+            echo "❌ EROARE: EAS_PROJECT_ID nu este configurat"
+            exit 1
+          fi
+          echo "✅ EAS_PROJECT_ID este configurat"
+
+      - name: Validate EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "❌ EROARE: EXPO_TOKEN nu este setat în GitHub Secrets"
+            exit 1
+          fi
+          echo "✅ EXPO_TOKEN este configurat"
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -33,29 +45,41 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Validate EXPO_PUBLIC_API_BASE_URL
+        run: |
+          if [ -z "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" ]; then
+            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu este setat în GitHub Variables"
+            exit 1
+          fi
+          if echo "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" | grep -qE "(localhost|127\.0\.0\.1)"; then
+            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu poate fi localhost sau 127.0.0.1 pe mobile"
+            exit 1
+          fi
+          echo "✅ EXPO_PUBLIC_API_BASE_URL este configurat"
+
       - name: Setup EAS
         uses: expo/expo-github-action@v9
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Inspect Expo config source only
+      - name: Verify EAS CLI
+        run: eas --version
+
+      - name: Build Android APK (development)
+        run: |
+          set +e
+          OUTPUT=$(eas build --profile development --platform android --non-interactive --no-wait 2>&1)
+          EXIT_CODE=$?
+          echo "$OUTPUT"
+          if [ $EXIT_CODE -ne 0 ]; then
+            if echo "$OUTPUT" | grep -qi "used its.*builds from the Free plan\|build quota\|reached your.*build limit"; then
+              echo ""
+              echo "❌ EAS Free plan build quota exhausted for this month."
+            fi
+          fi
+          exit $EXIT_CODE
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
           EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
-          BUILD_ID: 7c98a438-9f8e-4b75-a202-e08079ef6206
-        run: |
-          eas fingerprint:compare --build-id "$BUILD_ID" --json --non-interactive > /tmp/compare.json
-          node <<'NODE'
-          const fs = require('fs');
-          const data = JSON.parse(fs.readFileSync('/tmp/compare.json', 'utf8'));
-          const pick = fp => (fp.sources || []).find(s => (s.filePath || s.id) === 'expoConfig' || (s.reasons || []).includes('expoConfig'));
-          const current = pick(data.fingerprint1);
-          const build = pick(data.fingerprint2);
-          console.log(`current_hash=${data.fingerprint1.hash}`);
-          console.log(`build_hash=${data.fingerprint2.hash}`);
-          console.log('=== CURRENT EXPO CONFIG SOURCE ===');
-          console.log(JSON.stringify(current, null, 2));
-          console.log('=== BUILD EXPO CONFIG SOURCE ===');
-          console.log(JSON.stringify(build, null, 2));
-          NODE
