@@ -1,0 +1,35 @@
+name: Diagnose EAS OTA Runtime
+
+on:
+  push:
+    branches:
+      - ops/ota-runtime-diagnostic
+    paths:
+      - .github/workflows/diagnose-ota-runtime.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: EAS account
+        run: eas whoami
+      - name: Inspect queued development APK
+        run: eas build:view 7c98a438-9f8e-4b75-a202-e08079ef6206 --json --non-interactive
+      - name: Inspect development channel mapping
+        run: eas channel:view development --json --non-interactive
+      - name: Inspect recent development updates
+        run: eas update:list --branch development --limit 5 --json --non-interactive
