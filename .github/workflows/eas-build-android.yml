@@ -1,7 +1,7 @@
 name: EAS Runtime Fingerprint Diagnostics
 
 # Temporary diagnostic workflow. It NEVER starts an EAS build or publishes an update.
-# It compares the existing Android build and OTA fingerprints using Expo's own stored evidence.
+# It isolates the exact fingerprint sources that changed relative to the installed development APK build.
 on:
   pull_request:
     paths:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   diagnose:
-    name: Compare EAS build and OTA fingerprints
+    name: Compare EAS build and current fingerprint sources
     runs-on: ubuntu-latest
 
     steps:
@@ -39,41 +39,37 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Inspect existing APK build metadata
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          BUILD_ID: 7c98a438-9f8e-4b75-a202-e08079ef6206
-        run: |
-          eas build:view "$BUILD_ID" --json > /tmp/build.json
-          echo "=== EXISTING APK BUILD ==="
-          jq -r '{id,status,platform,buildProfile,gitCommitHash,runtimeVersion,appVersion,buildNumber} | to_entries[] | "\(.key)=\(.value)"' /tmp/build.json
-
-      - name: Compare build with same-commit OTA
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
-          BUILD_ID: 7c98a438-9f8e-4b75-a202-e08079ef6206
-          UPDATE_ID: 01a063b7-6afb-7fb0-a56d-aa0028af34ff
-        run: |
-          eas fingerprint:compare --build-id "$BUILD_ID" --update-id "$UPDATE_ID" --json --non-interactive > /tmp/same.json
-          echo "=== BUILD vs SAME-COMMIT OTA ==="
-          jq -r '"keys=" + (keys|join(",")), "fingerprint1_hash=" + (.fingerprint1.hash // "null"), "fingerprint2_hash=" + (.fingerprint2.hash // "null"), "equal=" + ((.fingerprint1.hash == .fingerprint2.hash)|tostring), "diff_type=" + ((.diff // .differences // null)|type)' /tmp/same.json
-
-      - name: Generate current development-profile fingerprint
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
-        run: |
-          eas fingerprint:generate --build-profile development --platform android --json --non-interactive > /tmp/current.json
-          echo "=== CURRENT DEVELOPMENT-PROFILE FINGERPRINT ==="
-          jq -r '"current_hash=" + (.hash // "null"), "source_count=" + ((.sources|length)|tostring)' /tmp/current.json
-
-      - name: Compare existing build with current checkout
+      - name: Isolate changed fingerprint sources
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
           BUILD_ID: 7c98a438-9f8e-4b75-a202-e08079ef6206
         run: |
-          eas fingerprint:compare --build-id "$BUILD_ID" --json --non-interactive > /tmp/current-compare.json
-          echo "=== EXISTING BUILD vs CURRENT CHECKOUT ==="
-          jq -r '"keys=" + (keys|join(",")), "fingerprint1_hash=" + (.fingerprint1.hash // "null"), "fingerprint2_hash=" + (.fingerprint2.hash // "null"), "equal=" + ((.fingerprint1.hash == .fingerprint2.hash)|tostring), "diff_type=" + ((.diff // .differences // null)|type)' /tmp/current-compare.json
+          eas fingerprint:compare --build-id "$BUILD_ID" --json --non-interactive > /tmp/compare.json
+          echo "=== RUNTIME VERDICT ==="
+          jq -r '"current_hash=" + .fingerprint1.hash, "build_hash=" + .fingerprint2.hash, "equal=" + ((.fingerprint1.hash == .fingerprint2.hash)|tostring)' /tmp/compare.json
+          echo "=== CHANGED FINGERPRINT SOURCES ==="
+          node <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync('/tmp/compare.json', 'utf8'));
+          const keyOf = (s, i) => s.filePath || s.id || `${s.type || 'source'}#${i}`;
+          const toMap = (fp) => {
+            const m = new Map();
+            (fp.sources || []).forEach((s, i) => m.set(keyOf(s, i), s));
+            return m;
+          };
+          const current = toMap(data.fingerprint1);
+          const build = toMap(data.fingerprint2);
+          const keys = [...new Set([...current.keys(), ...build.keys()])].sort();
+          let count = 0;
+          for (const key of keys) {
+            const a = current.get(key);
+            const b = build.get(key);
+            const ah = a?.hash ?? a?.contents ?? null;
+            const bh = b?.hash ?? b?.contents ?? null;
+            if (JSON.stringify(ah) === JSON.stringify(bh)) continue;
+            count++;
+            console.log(`${key}\tcurrent=${ah ?? 'MISSING'}\tbuild=${bh ?? 'MISSING'}\tcurrentReasons=${JSON.stringify(a?.reasons ?? [])}\tbuildReasons=${JSON.stringify(b?.reasons ?? [])}`);
+          }
+          console.log(`changed_source_count=${count}`);
+          NODE
