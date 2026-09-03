@@ -5,10 +5,12 @@ on:
     paths:
       - 'app/(tabs)/index.tsx'
       - 'components/c1-live-dashboards.tsx'
+      - 'components/c2-c3-governed-dashboards.tsx'
       - 'components/legacy-home-screen.tsx'
       - 'server/dashboard-router.ts'
       - 'server/routers.ts'
       - 'tests/dashboard-live-data-contract.test.ts'
+      - 'tests/dashboard-channel-boundaries.test.ts'
       - '.github/workflows/validate-live-dashboard-data-pr.yml'
 
 permissions:
@@ -27,8 +29,11 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Live dashboard contract
-        run: pnpm exec vitest run tests/dashboard-live-data-contract.test.ts
+      - name: Live dashboard contracts
+        run: >-
+          pnpm exec vitest run
+          tests/dashboard-live-data-contract.test.ts
+          tests/dashboard-channel-boundaries.test.ts
       - name: M1 dashboard regressions
         run: >-
           pnpm exec vitest run
