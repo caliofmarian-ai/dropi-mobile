@@ -12,7 +12,7 @@ interface AuthContextType {
   isDemo: boolean;
   token: string | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (data: RegisterData) => Promise<{ success: boolean; error?: string }>;
+  register: (data: RegisterData) => Promise<{ success: boolean; error?: string; accountPendingApproval?: boolean }>;
   logout: () => Promise<void>;
   switchRole: (role: DropiRole, channel: Channel) => Promise<void>;
   enterDemoMode: (email: string) => Promise<void>;
@@ -96,11 +96,9 @@ async function apiCall(path: string, input: any, token?: string | null) {
 
   const data = await response.json();
   if (data.error) {
-    // tRPC wraps errors in data.error.json.message
     const msg = data.error?.json?.message || data.error?.message || "API error";
     throw new Error(msg);
   }
-  // tRPC with superjson wraps in result.data.json
   return data.result?.data?.json ?? data.result?.data;
 }
 
@@ -111,7 +109,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isDemo, setIsDemo] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
-  // Restore session on mount
   useEffect(() => {
     (async () => {
       try {
@@ -124,7 +121,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(JSON.parse(storedUser));
           setIsDemo(storedDemo === "true");
           setToken(storedToken);
-          // Bridge existing token to canonical auth store for tRPC
           if (storedToken && storedDemo !== "true") {
             await Auth.setSessionToken(storedToken);
           }
@@ -134,7 +130,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
-  // Real login via API
   const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const result = await apiCall("dropiAuth.login", { email: email.toLowerCase().trim(), password });
@@ -154,7 +149,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dropiUser));
       await AsyncStorage.setItem(TOKEN_KEY, result.token);
       await AsyncStorage.setItem(DEMO_KEY, "false");
-      // Bridge token to canonical auth store so tRPC client can use it
       await Auth.setSessionToken(result.token);
       return { success: true };
     } catch (error: any) {
@@ -162,8 +156,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Real register via API
-  const register = useCallback(async (data: RegisterData): Promise<{ success: boolean; error?: string }> => {
+  const register = useCallback(async (
+    data: RegisterData,
+  ): Promise<{ success: boolean; error?: string; accountPendingApproval?: boolean }> => {
     try {
       const result = await apiCall("dropiAuth.register", {
         email: data.email.toLowerCase().trim(),
@@ -174,6 +169,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         zone: data.zone,
       });
       const dbUser = result.user;
+
+      // Approval-pending accounts are deliberately created without a session.
+      // Do not manufacture a local authenticated state from a null token.
+      if (!result.token) {
+        setUser(null);
+        setToken(null);
+        setIsDemo(false);
+        await AsyncStorage.multiRemove([STORAGE_KEY, TOKEN_KEY, DEMO_KEY]);
+        await Auth.removeSessionToken();
+        return {
+          success: true,
+          accountPendingApproval: Boolean(result.accountPendingApproval),
+        };
+      }
+
       const dropiUser: DropiUser = {
         id: dbUser.id,
         name: dbUser.name || data.name,
@@ -189,15 +199,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dropiUser));
       await AsyncStorage.setItem(TOKEN_KEY, result.token);
       await AsyncStorage.setItem(DEMO_KEY, "false");
-      // Bridge token to canonical auth store so tRPC client can use it
       await Auth.setSessionToken(result.token);
-      return { success: true };
+      return { success: true, accountPendingApproval: false };
     } catch (error: any) {
       return { success: false, error: error.message || "Registration failed" };
     }
   }, []);
 
-  // Demo mode (local only, no server)
   const enterDemoMode = useCallback(async (email: string) => {
     const normalizedEmail = email.toLowerCase().trim();
     const demoUser = DEMO_USERS[normalizedEmail];
@@ -213,7 +221,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     if (!isDemo && token) {
       try {
-        // Unregister push token before logout to stop receiving notifications on this device
         const storedPushToken = await AsyncStorage.getItem("@dropi_push_token");
         if (storedPushToken) {
           await apiCall("notifications.unregisterPushToken", { token: storedPushToken }, token);
@@ -228,7 +235,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setIsDemo(false);
     await AsyncStorage.multiRemove([STORAGE_KEY, TOKEN_KEY, DEMO_KEY]);
-    // Clear canonical auth store
     await Auth.removeSessionToken();
   }, [isDemo, token]);
 
@@ -277,5 +283,4 @@ export function useDropiAuth() {
   return context;
 }
 
-// Export demo users for the login screen
 export const DEMO_ACCOUNTS = DEMO_USERS;
