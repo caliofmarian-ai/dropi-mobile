@@ -1,4 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
+import { and, eq } from "drizzle-orm";
+import { sessions } from "../drizzle/schema";
 import * as db from "./db";
 import { sdk } from "./_core/sdk";
 
@@ -19,6 +21,31 @@ function createRefreshToken(): string {
 
 export function hashRefreshToken(token: string): string {
   return createHash("sha256").update(token, "utf8").digest("hex");
+}
+
+async function deleteSessionById(sessionId: number): Promise<void> {
+  const database = await db.getDb();
+  if (!database) throw new Error("Database not available");
+  await database.delete(sessions).where(eq(sessions.id, sessionId));
+}
+
+async function rotateStoredRefreshToken(
+  sessionId: number,
+  currentHash: string,
+  nextHash: string,
+  expiresAt: Date,
+): Promise<boolean> {
+  const database = await db.getDb();
+  if (!database) throw new Error("Database not available");
+  const result = await database
+    .update(sessions)
+    .set({
+      token: nextHash,
+      expiresAt,
+      lastActiveAt: new Date(),
+    })
+    .where(and(eq(sessions.id, sessionId), eq(sessions.token, currentHash)));
+  return Number((result as any)?.[0]?.affectedRows ?? 0) === 1;
 }
 
 export async function issueRefreshableSession(input: {
@@ -58,19 +85,19 @@ export async function rotateRefreshableSession(
   if (!session || session.isPhantom) return null;
 
   if (new Date(session.expiresAt).getTime() <= Date.now()) {
-    await db.deleteSessionById(session.id);
+    await deleteSessionById(session.id);
     return null;
   }
 
   const user = await db.getUserById(session.userId);
   if (!user || user.isActive === false) {
-    await db.deleteSessionById(session.id);
+    await deleteSessionById(session.id);
     return null;
   }
 
   const nextRefreshToken = createRefreshToken();
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_MS);
-  const rotated = await db.rotateSessionToken(
+  const rotated = await rotateStoredRefreshToken(
     session.id,
     currentHash,
     hashRefreshToken(nextRefreshToken),
