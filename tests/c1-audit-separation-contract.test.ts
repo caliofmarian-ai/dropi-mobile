@@ -39,7 +39,7 @@ test("audit retrieval is always scoped to one explicit governed channel", () => 
 test("phantom exit restores the persisted administrator rather than trusting target role", () => {
   const auth = source("server/auth-router.ts");
   assert.match(auth, /exitPhantom:\s*phantomProcedure/);
-  assert.match(source("server/_core/trpc.ts"), /phantomProcedure = t\.procedure\.use\(requireUser\)\.use\(auditAdminLog\)/);
+  assert.match(source("server/_core/trpc.ts"), /phantomProcedure = t\.procedure\.use\(requireProtectedRole\)\.use\(auditAdminLog\)/);
   assert.match(auth, /requirePhantomAdminId\(ctx\.session\)/);
   assert.match(auth, /db\.getUserById\(phantomAdminId\)/);
   assert.match(auth, /db\.deleteSessionByToken\(ctx\.sessionToken\)/);

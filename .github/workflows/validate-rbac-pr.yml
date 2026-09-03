@@ -1,0 +1,42 @@
+name: Validate RBAC
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - server/rbac-policy.ts
+      - server/_core/trpc.ts
+      - shared/types.ts
+      - tests/rbac.policy.test.ts
+      - tests/trpc.rbac-middleware.test.ts
+      - tests/rbac.protected-routes-contract.test.ts
+      - .github/workflows/validate-rbac-pr.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Canonical RBAC policy and middleware
+        run: pnpm exec vitest run tests/rbac.policy.test.ts tests/trpc.rbac-middleware.test.ts tests/rbac.protected-routes-contract.test.ts
+      - name: Auth regression
+        run: pnpm exec vitest run tests/auth.refresh-rotation.test.ts tests/auth.login-session.test.ts tests/sdk.authenticate-request.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
