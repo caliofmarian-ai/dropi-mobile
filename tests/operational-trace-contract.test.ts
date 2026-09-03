@@ -34,7 +34,7 @@ test("live tracking persists accepted telemetry, fails closed on evidence failur
 });
 
 test("pilot C1 UI routes completion through proof capture and no real order screen uses demo route", () => {
-  const dashboard = source("app/(tabs)/index.tsx");
+  const dashboard = source("components/legacy-home-screen.tsx");
   const detail = source("app/order/[id].tsx");
   assert.match(dashboard, /\/pilot\/complete-order/);
   assert.match(dashboard, /Confirm pickup & start delivery/);
