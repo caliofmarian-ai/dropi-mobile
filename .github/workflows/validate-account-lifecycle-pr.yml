@@ -1,0 +1,50 @@
+name: Validate Account Lifecycle
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - server/account-lifecycle.ts
+      - server/auth-router.ts
+      - server/db.ts
+      - lib/auth-context.tsx
+      - app/forgot-password.tsx
+      - tests/account-lifecycle.policy.test.ts
+      - tests/account-lifecycle.router.test.ts
+      - tests/account-lifecycle.persistence-contract.test.ts
+      - tests/auth.forgot-password.test.ts
+      - tests/auth.verify-email.test.ts
+      - .github/workflows/validate-account-lifecycle-pr.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Account lifecycle contract
+        env:
+          JWT_SECRET: ci-account-lifecycle-secret
+        run: pnpm exec vitest run tests/account-lifecycle.policy.test.ts tests/account-lifecycle.router.test.ts tests/account-lifecycle.persistence-contract.test.ts tests/auth.forgot-password.test.ts tests/auth.verify-email.test.ts
+      - name: Auth and RBAC regression
+        env:
+          JWT_SECRET: ci-account-lifecycle-secret
+        run: pnpm exec vitest run tests/auth.refresh-rotation.test.ts tests/auth.login-session.test.ts tests/sdk.authenticate-request.test.ts tests/rbac.policy.test.ts tests/trpc.rbac-middleware.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
