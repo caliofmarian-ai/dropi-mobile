@@ -55,7 +55,7 @@ describe("live-tracking client wiring", () => {
   });
 
   it("delivery-partner dashboard no longer contains debug tracking IDs", () => {
-    const text = source("app/(tabs)/index.tsx");
+    const text = source("components/legacy-home-screen.tsx");
     expect(text).not.toContain("deliveryId: '1', pilotId: '1'");
     expect(text).not.toContain("params: { deliveryId: '1' }");
   });

@@ -70,7 +70,7 @@ describe("canonical Marketplace order integration", () => {
   });
 
   it("keeps pilot acceptance voluntary and routes completion through proof-backed canonical transition", () => {
-    const dashboard = source("app/(tabs)/index.tsx");
+    const dashboard = source("components/legacy-home-screen.tsx");
     const proofScreen = source("app/pilot/complete-order.tsx");
     expect(dashboard).toContain("trpc.operations.availableMarketplaceOrders.useQuery");
     expect(dashboard).toContain("trpc.operations.myMarketplacePilotOrders.useQuery");
@@ -85,7 +85,7 @@ describe("canonical Marketplace order integration", () => {
   });
 
   it("shows initiated orders to merchants instead of hiding them before validation", () => {
-    const text = source("app/(tabs)/index.tsx");
+    const text = source("components/legacy-home-screen.tsx");
     expect(text).toContain('o.status === "initiated" || o.status === "validated"');
   });
 });

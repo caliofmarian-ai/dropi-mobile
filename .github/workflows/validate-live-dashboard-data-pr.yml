@@ -1,0 +1,43 @@
+name: Validate live dashboard data
+
+on:
+  pull_request:
+    paths:
+      - 'app/(tabs)/index.tsx'
+      - 'components/c1-live-dashboards.tsx'
+      - 'components/legacy-home-screen.tsx'
+      - 'server/dashboard-router.ts'
+      - 'server/routers.ts'
+      - 'tests/dashboard-live-data-contract.test.ts'
+      - '.github/workflows/validate-live-dashboard-data-pr.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Live dashboard contract
+        run: pnpm exec vitest run tests/dashboard-live-data-contract.test.ts
+      - name: M1 dashboard regressions
+        run: >-
+          pnpm exec vitest run
+          tests/order-state-machine.test.ts
+          tests/order-management-integration-contract.test.ts
+          tests/marketplace-controls-integration-contract.test.ts
+          tests/live-tracking-security.test.ts
+          tests/operational-safety-certification.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Whitespace
+        run: git diff --check HEAD^1 HEAD^2
