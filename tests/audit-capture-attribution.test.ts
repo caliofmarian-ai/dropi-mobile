@@ -51,13 +51,14 @@ test("mutation decisions are structured without inventing free-text semantics", 
   assert.equal(extractDecisionMetadata("query", { action: "read" }), null);
 });
 
-test("central tRPC middleware passes procedure type and captures failures with input when available", () => {
+test("central tRPC middleware preserves audit capture after canonical RBAC authorization", () => {
   const trpc = source("server/_core/trpc.ts");
   assert.match(trpc, /procedureType = \(\(opts as any\)\.type \|\| "unknown"\)/);
   assert.match(trpc, /procedureType,/);
   assert.match(trpc, /rawInput = await opts\.getRawInput\(\)/);
-  assert.match(trpc, /export const protectedProcedure = t\.procedure\.use\(requireUser\)\.use\(auditLog\)/);
-  assert.match(trpc, /export const phantomProcedure = t\.procedure\.use\(requireUser\)\.use\(auditAdminLog\)/);
+  assert.match(trpc, /const requireProtectedRole = rbacMiddleware\(\)/);
+  assert.match(trpc, /export const protectedProcedure = t\.procedure\.use\(requireProtectedRole\)\.use\(auditLog\)/);
+  assert.match(trpc, /export const phantomProcedure = t\.procedure\.use\(requireProtectedRole\)\.use\(auditAdminLog\)/);
   assert.match(trpc, /\.use\(auditAdminLog\)/);
 });
 
