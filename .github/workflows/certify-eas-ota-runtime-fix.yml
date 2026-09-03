@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/certify-eas-ota-runtime-fix.yml
       - .github/workflows/eas-update.yml
+      - package.json
       - tests/eas-ota-runtime-contract.test.ts
 
 permissions:
