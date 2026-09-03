@@ -30,7 +30,7 @@ export default function ForgotPasswordScreen() {
     const result = await forgotPassword(email);
     setLoading(false);
     if (result.success) {
-      setSuccess("A 6-digit code has been sent to your email. Check your inbox.");
+      setSuccess("If the account exists, a 6-digit code has been sent. Check your inbox.");
       setStep("code");
     } else {
       setError(result.message || "Failed to send reset code");
@@ -47,7 +47,7 @@ export default function ForgotPasswordScreen() {
       return;
     }
     setError("");
-    setSuccess("Code accepted. Enter your new password.");
+    setSuccess("Code format accepted. DROPi will verify it securely when you reset your password.");
     setStep("newpass");
   }, [code]);
 
@@ -78,11 +78,10 @@ export default function ForgotPasswordScreen() {
     const result = await resetPassword(code, newPassword);
     setLoading(false);
     if (result.success) {
-      setSuccess("Password reset successfully! Redirecting to login...");
+      setSuccess("Password reset successfully. Existing sessions were signed out. Redirecting to login...");
       setTimeout(() => router.replace("/login" as any), 2000);
     } else {
       setError(result.error || "Invalid or expired code. Please request a new one.");
-      // If token is invalid/expired, go back to email step
       if (result.error?.includes("expired") || result.error?.includes("Invalid")) {
         setTimeout(() => {
           setStep("email");
@@ -101,7 +100,6 @@ export default function ForgotPasswordScreen() {
       >
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }} keyboardShouldPersistTaps="handled">
           <View className="flex-1 justify-center max-w-sm w-full self-center">
-            {/* Header */}
             <View className="mb-8">
               <TouchableOpacity onPress={() => safeGoBack(router)} style={{ marginBottom: 16 }}>
                 <Text className="text-primary text-base font-medium">← Back to Login</Text>
@@ -118,21 +116,18 @@ export default function ForgotPasswordScreen() {
               </Text>
             </View>
 
-            {/* Error */}
             {error ? (
               <View className="bg-error/10 border border-error rounded-lg p-3 mb-4">
                 <Text className="text-error text-sm text-center">{error}</Text>
               </View>
             ) : null}
 
-            {/* Success */}
             {success ? (
               <View className="bg-success/10 border border-success rounded-lg p-3 mb-4">
                 <Text className="text-success text-sm text-center">{success}</Text>
               </View>
             ) : null}
 
-            {/* Step 1: Email */}
             {step === "email" && (
               <>
                 <View className="mb-6">
@@ -167,7 +162,6 @@ export default function ForgotPasswordScreen() {
               </>
             )}
 
-            {/* Step 2: Enter 6-digit code */}
             {step === "code" && (
               <>
                 <View className="mb-6">
@@ -195,7 +189,7 @@ export default function ForgotPasswordScreen() {
                   activeOpacity={0.9}
                 >
                   <View className="bg-primary rounded-xl py-4 items-center" style={{ opacity: code.length !== 6 ? 0.5 : 1 }}>
-                    <Text className="text-white font-semibold text-base">Verify Code</Text>
+                    <Text className="text-white font-semibold text-base">Continue</Text>
                   </View>
                 </TouchableOpacity>
 
@@ -208,7 +202,6 @@ export default function ForgotPasswordScreen() {
               </>
             )}
 
-            {/* Step 3: New Password */}
             {step === "newpass" && (
               <>
                 <View className="mb-4">
