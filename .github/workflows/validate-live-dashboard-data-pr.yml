@@ -6,13 +6,14 @@ on:
       - 'app/(tabs)/index.tsx'
       - 'components/admin-governed-dashboards.tsx'
       - 'components/c1-live-dashboards.tsx'
+      - 'components/c1-transactional-dashboards.tsx'
       - 'components/c2-c3-governed-dashboards.tsx'
-      - 'components/legacy-home-screen.tsx'
       - 'server/dashboard-router.ts'
       - 'server/routers.ts'
       - 'tests/admin-dashboard-truthfulness.test.ts'
       - 'tests/dashboard-live-data-contract.test.ts'
       - 'tests/dashboard-channel-boundaries.test.ts'
+      - 'tests/dashboard-routing-completeness.test.ts'
       - '.github/workflows/validate-live-dashboard-data-pr.yml'
 
 permissions:
@@ -37,6 +38,7 @@ jobs:
           tests/dashboard-live-data-contract.test.ts
           tests/dashboard-channel-boundaries.test.ts
           tests/admin-dashboard-truthfulness.test.ts
+          tests/dashboard-routing-completeness.test.ts
       - name: M1 dashboard regressions
         run: >-
           pnpm exec vitest run

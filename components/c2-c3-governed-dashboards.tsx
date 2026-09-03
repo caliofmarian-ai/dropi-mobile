@@ -2,6 +2,7 @@ import { Text, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 
 export type GovernedUnavailableRole =
+  | "operations_manager"
   | "logistics_coordinator"
   | "fleet_manager"
   | "c2_compliance_officer"
@@ -24,6 +25,10 @@ const C2_COPY: Record<Exclude<GovernedUnavailableRole,
   | "c3_data_analyst"
   | "incident_commander"
 >, { title: string; description: string }> = {
+  operations_manager: {
+    title: "COS Operations",
+    description: "The current B2B admin listing endpoint is restricted to system-administrator authority and is not a valid Operations Manager contract. The C2 operations dashboard remains unavailable until BATCH-009 materializes COS tenancy, permissions, and channel-scoped reads.",
+  },
   logistics_coordinator: {
     title: "Logistics",
     description: "The governed COS logistics read model is not active yet. Simulated schedules, delivery totals, and conflict counts are not shown.",
