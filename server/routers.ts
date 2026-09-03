@@ -13,6 +13,7 @@ import { pilotRatingAdminRouter } from "./pilot-rating-admin";
 import { notificationRouter } from "./notification-router";
 import { agentRouter } from "./agent-router";
 import { operationsRouter } from "./operations-router";
+import { dashboardRouter } from "./dashboard-router";
 import { p2pRouter } from "./p2p-router";
 import { privacyRouter } from "./privacy-router";
 import { authorityReportRouter } from "./authority-report-router";
@@ -87,6 +88,9 @@ export const appRouter = router({
 
   // Mobile operational data (orders/missions) for dashboard & detail screens
   operations: operationsRouter,
+
+  // Role-facing read models backed only by persisted canonical evidence
+  dashboard: dashboardRouter,
 });
 
 export type AppRouter = typeof appRouter;
