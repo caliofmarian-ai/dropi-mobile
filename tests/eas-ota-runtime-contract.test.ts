@@ -20,7 +20,7 @@ const easConfig = JSON.parse(read("eas.json")) as {
 };
 
 test("runtime compatibility remains fingerprint-governed", () => {
-  assert.match(appConfig, /runtimeVersion:\s*\{\s*policy:\s*["']fingerprint["']\s*\}/);
+  assert.match(appConfig, /runtimeVersion:\s*\{\s*policy:\s*["']fingerprint["']\s*,?\s*\}/);
 });
 
 test("OTA workflow materializes native projects before publishing", () => {
