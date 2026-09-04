@@ -53,9 +53,6 @@ export function resolveMailTransportConfig(
   const gmailPass = env.GMAIL_APP_PASSWORD?.trim() || "";
   const smtpPort = Number(env.SMTP_PORT || "587");
 
-  // HTTPS mail is preferred when configured. Railway Hobby blocks outbound SMTP,
-  // while normal HTTPS requests are allowed. Keeping SMTP/Gmail as fallbacks lets
-  // production move between providers without changing the auth/recovery flows.
   if (resendApiKey) {
     return {
       mode: "resend",
@@ -81,9 +78,6 @@ export function resolveMailTransportConfig(
 
   if (gmailPass) {
     if (!explicitSmtpUser) {
-      // SMTP_USER is required for Gmail App Password authentication.
-      // Each Gmail App Password is bound to a specific account; without the
-      // account address, authentication will fail with a 535 error.
       console.error(
         "[MAIL] Gmail mode requires SMTP_USER to be set to the Gmail address " +
         "that owns the GMAIL_APP_PASSWORD. " +
@@ -103,13 +97,6 @@ export function resolveMailTransportConfig(
   return null;
 }
 
-/**
- * Pre-resolve a hostname to its first IPv4 address.
- *
- * This prevents ENETUNREACH failures on cloud environments where outbound IPv6
- * connectivity is unreliable. SMTP remains a supported fallback transport, but
- * Railway Hobby should use the HTTPS transport above.
- */
 export async function resolveIPv4Host(hostname: string): Promise<string> {
   try {
     const addresses = await resolve4(hostname);
@@ -130,16 +117,11 @@ function escapeHtml(value: string): string {
 }
 
 /**
- * Render the canonical DROPi password-recovery email.
+ * Canonical branded password-recovery email.
  *
- * The recovery router remains authoritative for code generation and expiry.
- * This renderer only changes presentation. The six-digit code is extracted
- * from the already-generated recovery body so every transport (Resend HTTPS,
- * SMTP, or Gmail fallback) sends the same branded email without duplicating
- * auth logic.
- *
- * Social destinations are deliberately non-clickable placeholders until the
- * owner supplies the official Facebook, TikTok, and Telegram URLs.
+ * The authentication flow still owns code generation and the 15-minute expiry.
+ * This function is presentation only. Social icons are intentionally not links
+ * until the official Facebook, TikTok, and Telegram destinations are approved.
  */
 export function renderPasswordRecoveryEmail(innerHtml: string): string {
   const resetCode = innerHtml.match(/\b\d{6}\b/)?.[0];
@@ -159,7 +141,6 @@ export function renderPasswordRecoveryEmail(innerHtml: string): string {
     <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
       Your DROPi password reset code is ${safeCode}. It expires in 15 minutes.
     </div>
-
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background:#F5F7FB;">
       <tr>
         <td align="center" style="padding:28px 14px;">
@@ -170,9 +151,7 @@ export function renderPasswordRecoveryEmail(innerHtml: string): string {
                   <tr>
                     <td style="width:11px;height:11px;border:2px solid #075FD8;border-radius:50%;font-size:0;line-height:0;">&nbsp;</td>
                     <td style="width:8px;border-top:2px solid #075FD8;font-size:0;line-height:0;">&nbsp;</td>
-                    <td rowspan="2" style="width:27px;height:16px;background:#075FD8;border-radius:9px;text-align:center;vertical-align:middle;">
-                      <span style="display:inline-block;width:7px;height:7px;background:#DCEBFF;border-radius:50%;font-size:0;line-height:0;">&nbsp;</span>
-                    </td>
+                    <td rowspan="2" style="width:27px;height:16px;background:#075FD8;border-radius:9px;text-align:center;vertical-align:middle;"><span style="display:inline-block;width:7px;height:7px;background:#DCEBFF;border-radius:50%;font-size:0;line-height:0;">&nbsp;</span></td>
                     <td style="width:8px;border-top:2px solid #075FD8;font-size:0;line-height:0;">&nbsp;</td>
                     <td style="width:11px;height:11px;border:2px solid #075FD8;border-radius:50%;font-size:0;line-height:0;">&nbsp;</td>
                   </tr>
@@ -187,83 +166,36 @@ export function renderPasswordRecoveryEmail(innerHtml: string): string {
                 <div style="margin-top:7px;color:#697386;font-size:14px;line-height:20px;">Logistics Platform</div>
               </td>
             </tr>
-
-            <tr>
-              <td style="padding:6px 42px 0;">
-                <div style="height:1px;background:#E8ECF4;line-height:1px;font-size:1px;">&nbsp;</div>
-              </td>
-            </tr>
-
+            <tr><td style="padding:6px 42px 0;"><div style="height:1px;background:#E8ECF4;line-height:1px;font-size:1px;">&nbsp;</div></td></tr>
             <tr>
               <td align="center" style="padding:28px 38px 4px;">
-                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 14px;">
-                  <tr>
-                    <td align="center" style="width:54px;height:54px;border-radius:15px;background:#EAF2FF;border:1px solid #D5E5FF;color:#075FD8;font-size:26px;line-height:54px;">&#128274;</td>
-                  </tr>
-                </table>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 14px;"><tr><td align="center" style="width:54px;height:54px;border-radius:15px;background:#EAF2FF;border:1px solid #D5E5FF;color:#075FD8;font-size:26px;line-height:54px;">&#128274;</td></tr></table>
                 <div style="font-size:25px;line-height:32px;font-weight:700;color:#1D2638;">Password Reset Request</div>
-                <p style="margin:13px auto 0;max-width:470px;color:#6A7487;font-size:14px;line-height:22px;">
-                  We received a request to reset your DROPi account password.<br />Use the verification code below to continue.
-                </p>
+                <p style="margin:13px auto 0;max-width:470px;color:#6A7487;font-size:14px;line-height:22px;">We received a request to reset your DROPi account password.<br />Use the verification code below to continue.</p>
               </td>
             </tr>
-
             <tr>
               <td align="center" style="padding:21px 36px 0;">
-                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;background:#EFF5FF;border:1px solid #D8E7FF;border-radius:14px;">
-                  <tr>
-                    <td style="padding:18px 28px;text-align:center;">
-                      <div style="color:#075FD8;font-size:34px;line-height:40px;font-weight:800;letter-spacing:9px;">${safeCode}</div>
-                    </td>
-                  </tr>
-                </table>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;background:#EFF5FF;border:1px solid #D8E7FF;border-radius:14px;"><tr><td style="padding:18px 28px;text-align:center;"><div style="color:#075FD8;font-size:34px;line-height:40px;font-weight:800;letter-spacing:9px;">${safeCode}</div></td></tr></table>
                 <div style="margin-top:11px;color:#7A8495;font-size:12px;line-height:18px;">This code expires in <strong>15 minutes</strong>.</div>
               </td>
             </tr>
-
             <tr>
               <td style="padding:24px 38px 0;">
-                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background:#F3F7FC;border-radius:12px;">
-                  <tr>
-                    <td style="padding:16px 18px;color:#5C687B;font-size:12px;line-height:19px;">
-                      <strong style="color:#39465B;">&#128274; Security notice</strong><br />
-                      If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.
-                    </td>
-                  </tr>
-                </table>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background:#F3F7FC;border-radius:12px;"><tr><td style="padding:16px 18px;color:#5C687B;font-size:12px;line-height:19px;"><strong style="color:#39465B;">&#128274; Security notice</strong><br />If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.</td></tr></table>
               </td>
             </tr>
-
-            <tr>
-              <td align="center" style="padding:25px 38px 7px;color:#5D687A;font-size:12px;line-height:19px;">
-                For your security, never share this verification code with anyone.<br />DROPi will never ask you for your password or recovery code by email.
-              </td>
-            </tr>
-
-            <tr>
-              <td style="padding:18px 42px 0;">
-                <div style="height:1px;background:#E8ECF4;line-height:1px;font-size:1px;">&nbsp;</div>
-              </td>
-            </tr>
-
+            <tr><td align="center" style="padding:25px 38px 7px;color:#5D687A;font-size:12px;line-height:19px;">For your security, never share this verification code with anyone.<br />DROPi will never ask you for your password or recovery code by email.</td></tr>
+            <tr><td style="padding:18px 42px 0;"><div style="height:1px;background:#E8ECF4;line-height:1px;font-size:1px;">&nbsp;</div></td></tr>
             <tr>
               <td align="center" style="padding:22px 32px 6px;">
-                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;">
-                  <tr>
-                    <td style="padding:0 7px;">
-                      <span title="Facebook link to be added" style="display:inline-block;width:34px;height:34px;border-radius:50%;background:#075FD8;color:#FFFFFF;font-size:20px;font-weight:700;line-height:34px;text-align:center;">f</span>
-                    </td>
-                    <td style="padding:0 7px;">
-                      <span title="TikTok link to be added" style="display:inline-block;width:34px;height:34px;border-radius:50%;background:#075FD8;color:#FFFFFF;font-size:16px;font-weight:700;line-height:34px;text-align:center;">&#9835;</span>
-                    </td>
-                    <td style="padding:0 7px;">
-                      <span title="Telegram link to be added" style="display:inline-block;width:34px;height:34px;border-radius:50%;background:#075FD8;color:#FFFFFF;font-size:16px;font-weight:700;line-height:34px;text-align:center;">&#10148;</span>
-                    </td>
-                  </tr>
-                </table>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;"><tr>
+                  <td style="padding:0 7px;"><span title="Facebook link to be added" style="display:inline-block;width:34px;height:34px;border-radius:50%;background:#075FD8;color:#FFFFFF;font-size:20px;font-weight:700;line-height:34px;text-align:center;">f</span></td>
+                  <td style="padding:0 7px;"><span title="TikTok link to be added" style="display:inline-block;width:34px;height:34px;border-radius:50%;background:#075FD8;color:#FFFFFF;font-size:16px;font-weight:700;line-height:34px;text-align:center;">&#9835;</span></td>
+                  <td style="padding:0 7px;"><span title="Telegram link to be added" style="display:inline-block;width:34px;height:34px;border-radius:50%;background:#075FD8;color:#FFFFFF;font-size:16px;font-weight:700;line-height:34px;text-align:center;">&#10148;</span></td>
+                </tr></table>
               </td>
             </tr>
-
             <tr>
               <td align="center" style="padding:12px 30px 28px;color:#8A94A5;font-size:11px;line-height:18px;">
                 <div style="color:#748095;">Support &amp; Help Center&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;Privacy Policy</div>
@@ -279,11 +211,12 @@ export function renderPasswordRecoveryEmail(innerHtml: string): string {
 </html>`;
 }
 
-function prepareEmailHtml(input: {
-  html: string;
-  logLabel: string;
-}): string {
-  return input.logLabel === "password reset email"
+function prepareEmailHtml(input: { html: string; logLabel: string }): string {
+  const isCanonicalRecoveryBody =
+    input.logLabel === "password reset email" &&
+    input.html.includes("You requested a password reset");
+
+  return isCanonicalRecoveryBody
     ? renderPasswordRecoveryEmail(input.html)
     : input.html;
 }
@@ -312,21 +245,15 @@ async function sendViaResend(
     });
 
     if (!response.ok) {
-      console.error(
-        `[MAIL] ${input.logLabel} failed for ${maskEmail(input.to)} via resend: HTTP ${response.status}`,
-      );
+      console.error(`[MAIL] ${input.logLabel} failed for ${maskEmail(input.to)} via resend: HTTP ${response.status}`);
       return false;
     }
 
-    console.log(
-      `[MAIL] ${input.logLabel} sent to ${maskEmail(input.to)} via resend`,
-    );
+    console.log(`[MAIL] ${input.logLabel} sent to ${maskEmail(input.to)} via resend`);
     return true;
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
-    console.error(
-      `[MAIL] ${input.logLabel} failed for ${maskEmail(input.to)} via resend: ${errMsg}`,
-    );
+    console.error(`[MAIL] ${input.logLabel} failed for ${maskEmail(input.to)} via resend: ${errMsg}`);
     return false;
   } finally {
     clearTimeout(timeout);
@@ -354,7 +281,6 @@ export async function sendPlatformEmail(input: {
     return sendViaResend(config, preparedInput);
   }
 
-  // Shared timeout options — prevent indefinite hangs on broken SMTP connections.
   const timeoutOpts = {
     connectionTimeout: 10_000,
     greetingTimeout: 10_000,
@@ -367,23 +293,15 @@ export async function sendPlatformEmail(input: {
         host: config.host,
         port: config.port,
         secure: config.secure,
-        auth: {
-          user: config.user,
-          pass: config.pass,
-        },
+        auth: { user: config.user, pass: config.pass },
         ...timeoutOpts,
       })
       : nodemailer.createTransport({
-        // Explicit host/port/secure — do NOT use `service: "gmail"`.
-        // Pre-resolve smtp.gmail.com to IPv4 to avoid unreliable IPv6 routes.
         host: await resolveIPv4Host("smtp.gmail.com"),
         port: 465,
         secure: true,
         tls: { servername: "smtp.gmail.com" },
-        auth: {
-          user: config.user,
-          pass: config.pass,
-        },
+        auth: { user: config.user, pass: config.pass },
         ...timeoutOpts,
       });
 
@@ -394,17 +312,11 @@ export async function sendPlatformEmail(input: {
       subject: preparedInput.subject,
       html: preparedInput.html,
     });
-    console.log(
-      `[MAIL] ${input.logLabel} sent to ${maskEmail(input.to)} via ${config.mode}`,
-    );
+    console.log(`[MAIL] ${input.logLabel} sent to ${maskEmail(input.to)} via ${config.mode}`);
     return true;
   } catch (error) {
-    // Log only the error message — never log full error objects which may
-    // contain App Passwords, SMTP credentials, or other sensitive details.
     const errMsg = error instanceof Error ? error.message : String(error);
-    console.error(
-      `[MAIL] ${input.logLabel} failed for ${maskEmail(input.to)} via ${config.mode}: ${errMsg}`,
-    );
+    console.error(`[MAIL] ${input.logLabel} failed for ${maskEmail(input.to)} via ${config.mode}: ${errMsg}`);
     return false;
   }
 }
