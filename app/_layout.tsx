@@ -18,6 +18,7 @@ import "react-native-reanimated";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { AuthProvider, useDropiAuth } from "@/lib/auth-context";
+import { PhantomSessionBanner } from "@/components/phantom-session-banner";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { useWSNotifications } from "@/hooks/use-ws-notifications";
 import { useNotificationSound } from "@/lib/notification-sound";
@@ -83,40 +84,37 @@ export const unstable_settings = {
 
 /**
  * Registers push notification token when user is authenticated (non-demo).
- * Must be rendered inside AuthProvider + trpc.Provider.
+ * Phantom sessions are intentionally excluded so an administrator device is not
+ * registered as the impersonated target identity.
  */
 function PushNotificationRegistrar() {
-  const { user, isDemo } = useDropiAuth();
-  usePushNotifications(!!user, isDemo);
+  const { user, isDemo, isPhantom } = useDropiAuth();
+  usePushNotifications(!!user && !isPhantom, isDemo || isPhantom);
   return null;
 }
 
 /**
  * Manages WebSocket notification connection and invalidates tRPC cache on new notifications.
- * Must be rendered inside AuthProvider + trpc.Provider + QueryClientProvider.
+ * Phantom sessions do not subscribe to the target user's notification stream.
  */
 function WSNotificationManager({ queryClient }: { queryClient: QueryClient }) {
-  const { user, isDemo, token } = useDropiAuth();
+  const { user, isDemo, isPhantom, token } = useDropiAuth();
   const { playNotificationSound } = useNotificationSound();
 
   const handleNewNotification = useCallback(() => {
-    // Play DROPi notification chime
     playNotificationSound();
-    // Invalidate the unread count query so badge updates instantly
     queryClient.invalidateQueries({ queryKey: [["notifications", "getUnreadCount"]] });
-    // Also invalidate the notification list if it's open
     queryClient.invalidateQueries({ queryKey: [["notifications", "getNotifications"]] });
   }, [queryClient, playNotificationSound]);
 
   const handleUnreadCountUpdate = useCallback((_count: number) => {
-    // Force refetch unread count for badge
     queryClient.invalidateQueries({ queryKey: [["notifications", "getUnreadCount"]] });
   }, [queryClient]);
 
   useWSNotifications({
     userId: user?.id ?? null,
-    token: token,
-    isDemo,
+    token,
+    isDemo: isDemo || isPhantom,
     onNewNotification: handleNewNotification,
     onUnreadCountUpdate: handleUnreadCountUpdate,
   });
@@ -131,7 +129,6 @@ export default function RootLayout() {
   const [insets, setInsets] = useState<EdgeInsets>(initialInsets);
   const [frame, setFrame] = useState<Rect>(initialFrame);
 
-  // Initialize Manus runtime for cookie injection from parent container
   useEffect(() => {
     initManusRuntime();
   }, []);
@@ -147,7 +144,6 @@ export default function RootLayout() {
     return () => unsubscribe();
   }, [handleSafeAreaUpdate]);
 
-  // Create clients once and reuse them
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -161,7 +157,6 @@ export default function RootLayout() {
   );
   const [trpcClient] = useState(() => createTRPCClient());
 
-  // Ensure minimum 8px padding for top and bottom on mobile
   const providerInitialMetrics = useMemo(() => {
     const metrics = initialWindowMetrics ?? { insets: initialInsets, frame: initialFrame };
     return {
@@ -187,6 +182,7 @@ export default function RootLayout() {
               <Stack.Screen name="mission/[id]" />
               <Stack.Screen name="oauth/callback" />
             </Stack>
+            <PhantomSessionBanner />
             <PushNotificationRegistrar />
             <WSNotificationManager queryClient={queryClient} />
             <StatusBar style="auto" />
