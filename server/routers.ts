@@ -3,6 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { dropiAuthRouter, adminAuthRouter } from "./auth-router";
+import { phantomConsoleRouter } from "./phantom-console-router";
 import { auditRouter } from "./audit-router";
 import { verificationRouter, roleApplicationRouter } from "./verification-router";
 import { storeRouter, productRouter, reviewRouter } from "./marketplace-router";
@@ -38,6 +39,9 @@ export const appRouter = router({
 
   // Admin operations (phantom mode, user management)
   adminAuth: adminAuthRouter,
+
+  // Governed Phantom Console facade: safe target projection + hardened entry.
+  phantomConsole: phantomConsoleRouter,
 
   // Audit Core investigator access (Owner/Auditor; channel-scoped and self-auditing)
   audit: auditRouter,
