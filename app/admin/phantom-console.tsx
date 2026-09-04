@@ -28,6 +28,14 @@ interface PhantomTarget {
   humanPairId: number | null;
 }
 
+interface ProvisionResult {
+  roles: number;
+  humanAccounts: number;
+  aiAccounts: number;
+  pairedAccounts: number;
+  identitiesIncludingBaseSuperAdmin: number;
+}
+
 function getApiTrpcUrl(): string {
   if (Platform.OS === "web") {
     const base = getApiBaseUrl();
@@ -36,20 +44,38 @@ function getApiTrpcUrl(): string {
   return `${getRequiredApiBaseUrl("phantom console")}/api/trpc`;
 }
 
+function authHeaders(token: string): Record<string, string> {
+  return {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+}
+
+async function unwrapResponse<T>(response: Response, fallbackMessage: string): Promise<T> {
+  const data = await response.json();
+  if (data.error) {
+    throw new Error(data.error?.json?.message || data.error?.message || fallbackMessage);
+  }
+  return data.result?.data?.json ?? data.result?.data;
+}
+
 async function loadTargets(token: string): Promise<{ targets: PhantomTarget[]; total: number }> {
   const input = encodeURIComponent(JSON.stringify({ json: { page: 1, limit: 100 } }));
   const response = await fetch(`${getApiTrpcUrl()}/phantomConsole.targets?input=${input}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: authHeaders(token),
     credentials: "include",
   });
-  const data = await response.json();
-  if (data.error) {
-    throw new Error(data.error?.json?.message || data.error?.message || "Unable to load users");
-  }
-  return data.result?.data?.json ?? data.result?.data ?? { targets: [], total: 0 };
+  return unwrapResponse(response, "Unable to load users");
+}
+
+async function provisionAccounts(token: string): Promise<ProvisionResult> {
+  const response = await fetch(`${getApiTrpcUrl()}/phantomConsole.provisionTestAccounts`, {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify({ json: null }),
+    credentials: "include",
+  });
+  return unwrapResponse(response, "Unable to provision test-role accounts");
 }
 
 export default function PhantomConsoleScreen() {
@@ -60,6 +86,7 @@ export default function PhantomConsoleScreen() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [enteringId, setEnteringId] = useState<number | null>(null);
+  const [provisioning, setProvisioning] = useState(false);
 
   const authorized = Boolean(
     user &&
@@ -105,6 +132,36 @@ export default function PhantomConsoleScreen() {
         .some((value) => String(value).toLowerCase().includes(needle)),
     );
   }, [search, targets]);
+
+  const confirmProvision = useCallback(() => {
+    if (!token || provisioning) return;
+    Alert.alert(
+      "Provision test-role accounts?",
+      "This reconciles 29 human test identities and 29 AI mirrors in the live connected database. It only runs when the server-side provisioning flag, password, and zone are explicitly configured. The real base Super Admin is not modified.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Provision",
+          style: "destructive",
+          onPress: async () => {
+            setProvisioning(true);
+            try {
+              const result = await provisionAccounts(token);
+              await refresh();
+              Alert.alert(
+                "Test-role accounts ready",
+                `${result.humanAccounts} human + ${result.aiAccounts} AI mirrors across ${result.roles} roles. ${result.identitiesIncludingBaseSuperAdmin} identities including the unchanged base Super Admin.`,
+              );
+            } catch (err: any) {
+              Alert.alert("Provisioning blocked", err.message || "Unable to provision test-role accounts");
+            } finally {
+              setProvisioning(false);
+            }
+          },
+        },
+      ],
+    );
+  }, [provisioning, refresh, token]);
 
   const confirmEnter = useCallback((target: PhantomTarget) => {
     if (!target.isActive || target.id === user?.id) return;
@@ -165,6 +222,25 @@ export default function PhantomConsoleScreen() {
           <Text className="text-xs text-muted mt-2 leading-5">
             Phantom mode creates a temporary server session for the selected identity. It does not change that user&apos;s password, role, or account ownership. Use Exit Phantom Mode to return to the administrator session.
           </Text>
+        </View>
+
+        <View className="bg-surface border border-border rounded-xl p-4 mb-4">
+          <Text className="text-sm font-semibold text-foreground">Canonical test-role population</Text>
+          <Text className="text-xs text-muted mt-2 leading-5">
+            Provisioning is idempotent and derives all 29 roles from the canonical registry. It requires the temporary server-only IMPL-008 provisioning variables to be configured before this action is allowed.
+          </Text>
+          <TouchableOpacity
+            onPress={confirmProvision}
+            disabled={provisioning}
+            className="border border-primary rounded-lg py-2.5 items-center mt-3"
+            style={{ opacity: provisioning ? 0.55 : 1 }}
+          >
+            {provisioning ? (
+              <ActivityIndicator size="small" color="#0a7ea4" />
+            ) : (
+              <Text className="text-primary text-sm font-semibold">Provision / reconcile 29 human + 29 AI</Text>
+            )}
+          </TouchableOpacity>
         </View>
 
         <TextInput
