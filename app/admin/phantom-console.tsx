@@ -14,6 +14,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { safeGoBack } from "@/lib/safe-back";
 import { useDropiAuth } from "@/lib/auth-context";
 import { getApiBaseUrl, getRequiredApiBaseUrl } from "@/constants/oauth";
+import { DROPI_TEST_BASE_INBOX } from "@/shared/test-role-accounts";
 
 interface PhantomTarget {
   id: number;
@@ -68,11 +69,15 @@ async function loadTargets(token: string): Promise<{ targets: PhantomTarget[]; t
   return unwrapResponse(response, "Unable to load users");
 }
 
-async function provisionAccounts(token: string): Promise<ProvisionResult> {
+async function provisionAccounts(
+  token: string,
+  password: string,
+  zone: string,
+): Promise<ProvisionResult> {
   const response = await fetch(`${getApiTrpcUrl()}/phantomConsole.provisionTestAccounts`, {
     method: "POST",
     headers: authHeaders(token),
-    body: JSON.stringify({ json: null }),
+    body: JSON.stringify({ json: { password, zone } }),
     credentials: "include",
   });
   return unwrapResponse(response, "Unable to provision test-role accounts");
@@ -87,6 +92,10 @@ export default function PhantomConsoleScreen() {
   const [search, setSearch] = useState("");
   const [enteringId, setEnteringId] = useState<number | null>(null);
   const [provisioning, setProvisioning] = useState(false);
+  const [testZone, setTestZone] = useState("");
+  const [testPassword, setTestPassword] = useState("");
+  const [confirmTestPassword, setConfirmTestPassword] = useState("");
+  const [showProvisionPassword, setShowProvisionPassword] = useState(false);
 
   const authorized = Boolean(
     user &&
@@ -94,7 +103,8 @@ export default function PhantomConsoleScreen() {
       !isDemo &&
       !isPhantom &&
       user.dropiRole === "system_administrator" &&
-      user.channel === "ADMIN",
+      user.channel === "ADMIN" &&
+      user.email?.trim().toLowerCase() === DROPI_TEST_BASE_INBOX,
   );
 
   const refresh = useCallback(async () => {
@@ -135,9 +145,27 @@ export default function PhantomConsoleScreen() {
 
   const confirmProvision = useCallback(() => {
     if (!token || provisioning) return;
+
+    const zone = testZone.trim();
+    if (!zone) {
+      Alert.alert("Zone required", "Enter the test operating zone before provisioning.");
+      return;
+    }
+    if (testPassword.length < 12 || !/[A-Z]/.test(testPassword) || !/[0-9]/.test(testPassword)) {
+      Alert.alert(
+        "Password requirements",
+        "Use at least 12 characters with at least one uppercase letter and one number.",
+      );
+      return;
+    }
+    if (testPassword !== confirmTestPassword) {
+      Alert.alert("Passwords do not match", "Re-enter the same test password in both fields.");
+      return;
+    }
+
     Alert.alert(
       "Provision test-role accounts?",
-      "This reconciles 29 human test identities and 29 AI mirrors in the live connected database. It only runs when the server-side provisioning flag, password, and zone are explicitly configured. The real base Super Admin is not modified.",
+      `This will reconcile 29 human test identities and 29 AI mirrors in the live connected database using zone “${zone}”. The base Super Admin and personal customer account are not modified. Existing sessions for canonical test identities are revoked during reconciliation.`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -146,11 +174,13 @@ export default function PhantomConsoleScreen() {
           onPress: async () => {
             setProvisioning(true);
             try {
-              const result = await provisionAccounts(token);
+              const result = await provisionAccounts(token, testPassword, zone);
+              setTestPassword("");
+              setConfirmTestPassword("");
               await refresh();
               Alert.alert(
                 "Test-role accounts ready",
-                `${result.humanAccounts} human + ${result.aiAccounts} AI mirrors across ${result.roles} roles. ${result.identitiesIncludingBaseSuperAdmin} identities including the unchanged base Super Admin.`,
+                `${result.humanAccounts} human + ${result.aiAccounts} AI mirrors across ${result.roles} roles. ${result.identitiesIncludingBaseSuperAdmin} canonical identities including the unchanged base Super Admin.`,
               );
             } catch (err: any) {
               Alert.alert("Provisioning blocked", err.message || "Unable to provision test-role accounts");
@@ -161,7 +191,7 @@ export default function PhantomConsoleScreen() {
         },
       ],
     );
-  }, [provisioning, refresh, token]);
+  }, [confirmTestPassword, provisioning, refresh, testPassword, testZone, token]);
 
   const confirmEnter = useCallback((target: PhantomTarget) => {
     if (!target.isActive || target.id === user?.id) return;
@@ -197,7 +227,7 @@ export default function PhantomConsoleScreen() {
         <View className="bg-surface border border-border rounded-xl p-4">
           <Text className="text-lg font-semibold text-foreground">Phantom Console unavailable</Text>
           <Text className="text-sm text-muted mt-2 leading-5">
-            A real System Administrator / ADMIN session is required. Demo and existing phantom sessions cannot open a new phantom session.
+            The real base System Administrator / ADMIN session is required. Demo, test-admin, and existing phantom sessions cannot provision or open another phantom session.
           </Text>
         </View>
       </ScreenContainer>
@@ -213,7 +243,7 @@ export default function PhantomConsoleScreen() {
           </TouchableOpacity>
           <View className="flex-1">
             <Text className="text-2xl font-bold text-foreground">Phantom Login Console</Text>
-            <Text className="text-xs text-muted">System Administrator only · critical actions are audited</Text>
+            <Text className="text-xs text-muted">Base System Administrator only · critical actions are audited</Text>
           </View>
         </View>
 
@@ -227,8 +257,57 @@ export default function PhantomConsoleScreen() {
         <View className="bg-surface border border-border rounded-xl p-4 mb-4">
           <Text className="text-sm font-semibold text-foreground">Canonical test-role population</Text>
           <Text className="text-xs text-muted mt-2 leading-5">
-            Provisioning is idempotent and derives all 29 roles from the canonical registry. It requires the temporary server-only IMPL-008 provisioning variables to be configured before this action is allowed.
+            Provisioning is idempotent and derives all 29 roles from the canonical registry. Enter the shared test password and operating zone here; no temporary Railway provisioning variables are required for this console action.
           </Text>
+
+          <Text className="text-xs font-medium text-foreground mt-4 mb-1.5">Test operating zone</Text>
+          <TextInput
+            value={testZone}
+            onChangeText={setTestZone}
+            placeholder="e.g. Manila-Central"
+            placeholderTextColor="#9BA1A6"
+            autoCapitalize="words"
+            className="bg-background border border-border rounded-lg px-3 py-2.5 text-foreground"
+          />
+
+          <Text className="text-xs font-medium text-foreground mt-3 mb-1.5">Shared test password</Text>
+          <View className="flex-row items-center bg-background border border-border rounded-lg">
+            <TextInput
+              value={testPassword}
+              onChangeText={setTestPassword}
+              placeholder="12+ chars, uppercase + number"
+              placeholderTextColor="#9BA1A6"
+              secureTextEntry={!showProvisionPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              className="flex-1 px-3 py-2.5 text-foreground"
+            />
+            <TouchableOpacity
+              onPress={() => setShowProvisionPassword((value) => !value)}
+              style={{ paddingHorizontal: 12, paddingVertical: 10 }}
+            >
+              <Text className="text-primary text-xs font-medium">
+                {showProvisionPassword ? "Hide" : "Show"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text className="text-xs font-medium text-foreground mt-3 mb-1.5">Confirm test password</Text>
+          <TextInput
+            value={confirmTestPassword}
+            onChangeText={setConfirmTestPassword}
+            placeholder="Repeat the same password"
+            placeholderTextColor="#9BA1A6"
+            secureTextEntry={!showProvisionPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            className="bg-background border border-border rounded-lg px-3 py-2.5 text-foreground"
+          />
+
+          <Text className="text-[11px] text-muted mt-2 leading-4">
+            The password is sent only for this provisioning request, hashed server-side, and excluded from persisted audit input. It is not stored in the app or returned by the server.
+          </Text>
+
           <TouchableOpacity
             onPress={confirmProvision}
             disabled={provisioning}
