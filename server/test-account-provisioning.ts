@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { eq, or } from "drizzle-orm";
-import { users } from "../drizzle/schema";
+import { pushTokens, sessions, users } from "../drizzle/schema";
 import {
   DROPI_TEST_BASE_INBOX,
   TEST_ROLE_IDENTITIES,
@@ -44,6 +44,14 @@ function platformRole(role: DropiRole): "user" | "admin" {
 
 function zoneFor(channel: Channel, configuredZone: string): string | null {
   return channel === "ADMIN" ? null : configuredZone;
+}
+
+async function clearStaleDeviceAccess(tx: DbTransaction, userId: number) {
+  // Reconciliation may rotate the shared test password. Revoke every previous
+  // server session and push registration for the test identity in the same
+  // transaction so stale devices cannot remain authenticated or receive pushes.
+  await tx.delete(sessions).where(eq(sessions.userId, userId));
+  await tx.delete(pushTokens).where(eq(pushTokens.userId, userId));
 }
 
 async function reconcileIdentity(
@@ -105,11 +113,14 @@ async function reconcileIdentity(
 
   if (existing) {
     await tx.update(users).set(values).where(eq(users.id, existing.id));
+    await clearStaleDeviceAccess(tx, existing.id);
     return existing.id;
   }
 
   const result = await tx.insert(users).values(values);
-  return Number(result[0].insertId);
+  const insertedId = Number(result[0].insertId);
+  await clearStaleDeviceAccess(tx, insertedId);
+  return insertedId;
 }
 
 /**
@@ -118,6 +129,8 @@ async function reconcileIdentity(
  * The base Super Admin is intentionally untouched. Human rows are reconciled
  * first inside one transaction; each AI mirror then receives the actual persisted
  * human row ID in humanPairId. A provisioning failure rolls the whole set back.
+ * Existing sessions and push registrations for these test identities are revoked
+ * when they are reconciled so a rotated test password cannot leave stale access.
  */
 export async function provisionTestRoleAccounts() {
   const { password, zone } = requireProvisioningConfig();
