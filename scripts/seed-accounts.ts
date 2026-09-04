@@ -1,182 +1,17 @@
 /**
- * IMPL-008 test-role provisioning.
- *
- * Creates/reconciles the 29 human test identities and their 29 AI mirrors using
- * the canonical ROLE_CONFIGS-derived registry. The real base Super Admin
- * (dropi.deliveries@gmail.com) is deliberately not modified by this script.
+ * Controlled CLI entrypoint for IMPL-008 test-role provisioning.
  *
  * Required server-side environment:
  *   DROPI_TEST_ACCOUNT_PROVISIONING=enabled
  *   DROPI_TEST_ACCOUNT_PASSWORD=<secret test password>
  *   DROPI_TEST_ACCOUNT_ZONE=<test zone for C1/C2/C3 identities>
  *
- * No password is hard-coded or printed.
+ * No password is hard-coded or printed. The implementation lives in the server
+ * provisioning service so the same governed logic can be invoked from an
+ * authenticated operator surface without creating a second account generator.
  */
 
-import bcrypt from "bcryptjs";
-import { eq, or } from "drizzle-orm";
-import { users } from "../drizzle/schema";
-import { getDb } from "../server/db";
-import {
-  DROPI_TEST_BASE_INBOX,
-  TEST_ROLE_IDENTITIES,
-  TEST_ROLE_IDENTITY_TOTALS,
-  type TestIdentityKind,
-} from "../shared/test-role-accounts";
-import type { Channel, DropiRole } from "../shared/types";
-
-const ENABLE_FLAG = "enabled";
-
-function requireProvisioningConfig() {
-  if (process.env.DROPI_TEST_ACCOUNT_PROVISIONING?.trim().toLowerCase() !== ENABLE_FLAG) {
-    throw new Error(
-      "Test-account provisioning is disabled. Set DROPI_TEST_ACCOUNT_PROVISIONING=enabled explicitly.",
-    );
-  }
-
-  const password = process.env.DROPI_TEST_ACCOUNT_PASSWORD?.trim() || "";
-  if (password.length < 12 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
-    throw new Error(
-      "DROPI_TEST_ACCOUNT_PASSWORD must be at least 12 characters and contain an uppercase letter and a number.",
-    );
-  }
-
-  const zone = process.env.DROPI_TEST_ACCOUNT_ZONE?.trim() || "";
-  if (!zone) {
-    throw new Error("DROPI_TEST_ACCOUNT_ZONE is required for C1/C2/C3 test identities.");
-  }
-
-  return { password, zone };
-}
-
-type DbTransaction = Parameters<NonNullable<Awaited<ReturnType<typeof getDb>>>["transaction"]>[0] extends (
-  tx: infer T,
-) => unknown
-  ? T
-  : never;
-
-function platformRole(role: DropiRole): "user" | "admin" {
-  return role === "system_administrator" ? "admin" : "user";
-}
-
-function zoneFor(channel: Channel, configuredZone: string): string | null {
-  return channel === "ADMIN" ? null : configuredZone;
-}
-
-async function reconcileIdentity(
-  tx: DbTransaction,
-  input: {
-    kind: TestIdentityKind;
-    openId: string;
-    email: string;
-    name: string;
-    role: DropiRole;
-    channel: Channel;
-    zone: string | null;
-    passwordHash: string;
-    humanPairId?: number | null;
-  },
-): Promise<number> {
-  const matches = await tx
-    .select()
-    .from(users)
-    .where(or(eq(users.openId, input.openId), eq(users.email, input.email)));
-
-  const openIdMatch = matches.find((row) => row.openId === input.openId);
-  const emailMatches = matches.filter((row) => row.email === input.email);
-  if (emailMatches.length > 1) {
-    throw new Error(`Refusing to provision duplicate email identity: ${input.email}`);
-  }
-
-  const emailMatch = emailMatches[0];
-  if (openIdMatch && emailMatch && openIdMatch.id !== emailMatch.id) {
-    throw new Error(
-      `Identity conflict for ${input.email}: deterministic openId and email belong to different rows.`,
-    );
-  }
-
-  const existing = openIdMatch ?? emailMatch;
-  const values = {
-    openId: input.openId,
-    name: input.name,
-    email: input.email,
-    loginMethod: "password",
-    role: platformRole(input.role),
-    dropiRole: input.role,
-    channel: input.channel,
-    zone: input.zone,
-    isActive: true,
-    isVerified: true,
-    passwordHash: input.passwordHash,
-    isAIAgent: input.kind === "ai",
-    agentMode: input.kind === "ai" ? ("autonomous" as const) : null,
-    humanPairId: input.kind === "ai" ? (input.humanPairId ?? null) : null,
-    emailVerified: true,
-    failedLoginAttempts: 0,
-    lockedUntil: null,
-    resetToken: null,
-    resetTokenExpiry: null,
-    emailVerifyToken: null,
-    emailVerifyExpires: null,
-  };
-
-  if (existing) {
-    await tx.update(users).set(values).where(eq(users.id, existing.id));
-    return existing.id;
-  }
-
-  const result = await tx.insert(users).values(values);
-  return Number(result[0].insertId);
-}
-
-export async function provisionTestRoleAccounts() {
-  const { password, zone } = requireProvisioningConfig();
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
-  const passwordHash = await bcrypt.hash(password, 12);
-  const pairs: Array<{ role: DropiRole; humanId: number; aiId: number }> = [];
-
-  await db.transaction(async (tx) => {
-    for (const identity of TEST_ROLE_IDENTITIES) {
-      const identityZone = zoneFor(identity.channel, zone);
-      const humanId = await reconcileIdentity(tx, {
-        kind: "human",
-        openId: identity.humanOpenId,
-        email: identity.humanEmail,
-        name: `Test ${identity.label}`,
-        role: identity.role,
-        channel: identity.channel,
-        zone: identityZone,
-        passwordHash,
-      });
-
-      const aiId = await reconcileIdentity(tx, {
-        kind: "ai",
-        openId: identity.aiOpenId,
-        email: identity.aiEmail,
-        name: `AI ${identity.label} Agent`,
-        role: identity.role,
-        channel: identity.channel,
-        zone: identityZone,
-        passwordHash,
-        humanPairId: humanId,
-      });
-
-      pairs.push({ role: identity.role, humanId, aiId });
-    }
-  });
-
-  return {
-    baseSuperAdmin: DROPI_TEST_BASE_INBOX,
-    roles: TEST_ROLE_IDENTITY_TOTALS.roles,
-    humanAccounts: TEST_ROLE_IDENTITY_TOTALS.human,
-    aiAccounts: TEST_ROLE_IDENTITY_TOTALS.ai,
-    pairedAccounts: TEST_ROLE_IDENTITY_TOTALS.pairedAccounts,
-    identitiesIncludingBaseSuperAdmin: TEST_ROLE_IDENTITY_TOTALS.identitiesIncludingBaseSuperAdmin,
-    pairs,
-  };
-}
+import { provisionTestRoleAccounts } from "../server/test-account-provisioning";
 
 async function main() {
   const result = await provisionTestRoleAccounts();
@@ -188,10 +23,8 @@ async function main() {
   );
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error) => {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`[IMPL-008] Provisioning failed: ${message}`);
-    process.exitCode = 1;
-  });
-}
+main().catch((error) => {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`[IMPL-008] Provisioning failed: ${message}`);
+  process.exitCode = 1;
+});
