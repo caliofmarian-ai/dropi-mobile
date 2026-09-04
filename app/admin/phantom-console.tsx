@@ -36,9 +36,9 @@ function getApiTrpcUrl(): string {
   return `${getRequiredApiBaseUrl("phantom console")}/api/trpc`;
 }
 
-async function loadUsers(token: string): Promise<{ users: PhantomTarget[]; total: number }> {
+async function loadTargets(token: string): Promise<{ targets: PhantomTarget[]; total: number }> {
   const input = encodeURIComponent(JSON.stringify({ json: { page: 1, limit: 100 } }));
-  const response = await fetch(`${getApiTrpcUrl()}/adminAuth.listUsers?input=${input}`, {
+  const response = await fetch(`${getApiTrpcUrl()}/phantomConsole.targets?input=${input}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -49,7 +49,7 @@ async function loadUsers(token: string): Promise<{ users: PhantomTarget[]; total
   if (data.error) {
     throw new Error(data.error?.json?.message || data.error?.message || "Unable to load users");
   }
-  return data.result?.data?.json ?? data.result?.data ?? { users: [], total: 0 };
+  return data.result?.data?.json ?? data.result?.data ?? { targets: [], total: 0 };
 }
 
 export default function PhantomConsoleScreen() {
@@ -78,8 +78,8 @@ export default function PhantomConsoleScreen() {
     setLoading(true);
     setError("");
     try {
-      const result = await loadUsers(token);
-      setTargets(result.users || []);
+      const result = await loadTargets(token);
+      setTargets(result.targets || []);
     } catch (err: any) {
       setError(err.message || "Unable to load phantom targets");
     } finally {
