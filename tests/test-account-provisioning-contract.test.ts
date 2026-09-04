@@ -57,6 +57,15 @@ describe("IMPL-008 test-account provisioning contract", () => {
     expect(service).not.toContain("humanPairId: null, // Will be set after");
   });
 
+  it("revokes stale sessions and push registrations when test identities are reconciled", () => {
+    const service = source("server/test-account-provisioning.ts");
+
+    expect(service).toContain("pushTokens, sessions, users");
+    expect(service).toContain("tx.delete(sessions).where(eq(sessions.userId, userId))");
+    expect(service).toContain("tx.delete(pushTokens).where(eq(pushTokens.userId, userId))");
+    expect(service).toContain("await clearStaleDeviceAccess(tx, existing.id)");
+  });
+
   it("does not provision over the real base Super Admin identity", () => {
     const service = source("server/test-account-provisioning.ts");
     expect(service).toContain("base Super Admin is intentionally untouched");
