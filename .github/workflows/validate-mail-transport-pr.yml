@@ -8,6 +8,7 @@ on:
       - server/_core/mail.ts
       - tests/smtp.test.ts
       - tests/mail.resend.test.ts
+      - tests/mail.password-recovery-template.test.ts
       - .env.example
       - .github/workflows/validate-mail-transport-pr.yml
 
@@ -30,8 +31,8 @@ jobs:
           node-version: 22.x
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Mail transport tests
-        run: pnpm exec vitest run tests/smtp.test.ts tests/mail.resend.test.ts
+      - name: Mail transport and recovery-template tests
+        run: pnpm exec vitest run tests/smtp.test.ts tests/mail.resend.test.ts tests/mail.password-recovery-template.test.ts
       - name: TypeScript
         run: pnpm check
       - name: Whitespace
