@@ -5,6 +5,7 @@ import { users } from "../drizzle/schema";
 import { adminProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
 import { adminAuthRouter } from "./auth-router";
+import { provisionTestRoleAccounts } from "./test-account-provisioning";
 
 const targetProjection = {
   id: users.id,
@@ -63,6 +64,29 @@ export const phantomConsoleRouter = router({
 
       return { targets, total: Number(countRows[0]?.count ?? 0) };
     }),
+
+  provisionTestAccounts: adminProcedure.mutation(async () => {
+    try {
+      const result = await provisionTestRoleAccounts();
+      return {
+        roles: result.roles,
+        humanAccounts: result.humanAccounts,
+        aiAccounts: result.aiAccounts,
+        pairedAccounts: result.pairedAccounts,
+        identitiesIncludingBaseSuperAdmin: result.identitiesIncludingBaseSuperAdmin,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Test-account provisioning failed";
+      if (
+        message.includes("provisioning is disabled") ||
+        message.includes("DROPI_TEST_ACCOUNT_PASSWORD") ||
+        message.includes("DROPI_TEST_ACCOUNT_ZONE")
+      ) {
+        throw new TRPCError({ code: "BAD_REQUEST", message });
+      }
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Test-account provisioning failed" });
+    }
+  }),
 
   enter: adminProcedure
     .input(z.object({ targetUserId: z.number().int().positive() }))
