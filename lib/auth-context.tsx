@@ -237,7 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const result = await apiCall("adminAuth.phantomLogin", { targetUserId }, token);
+      const result = await apiCall("phantomConsole.enter", { targetUserId }, token);
       if (!result?.token || !result?.user) throw new Error("Phantom login did not return a valid session");
       await applyAuthenticatedSession(toDropiUser(result.user), result.token, true);
       return { success: true };
