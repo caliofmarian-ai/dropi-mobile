@@ -1,0 +1,61 @@
+name: Validate IMPL-008 Test Roles and Phantom Console
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - shared/test-role-accounts.ts
+      - server/test-account-provisioning.ts
+      - server/phantom-console-router.ts
+      - server/routers.ts
+      - scripts/seed-accounts.ts
+      - lib/auth-context.tsx
+      - hooks/use-biometric-enrollment.ts
+      - app/login.tsx
+      - app/admin/phantom-console.tsx
+      - app/_layout.tsx
+      - components/phantom-session-banner.tsx
+      - components/admin-governed-dashboards.tsx
+      - package.json
+      - .env.example
+      - tests/test-role-accounts.test.ts
+      - tests/test-account-provisioning-contract.test.ts
+      - tests/phantom-console-contract.test.ts
+      - tests/biometric-enrollment-contract.test.ts
+      - tests/demo-role-contract.test.ts
+      - .github/workflows/validate-impl-008-pr.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: IMPL-008 contract tests
+        run: >-
+          pnpm exec vitest run
+          tests/test-role-accounts.test.ts
+          tests/test-account-provisioning-contract.test.ts
+          tests/phantom-console-contract.test.ts
+          tests/biometric-enrollment-contract.test.ts
+          tests/demo-role-contract.test.ts
+      - name: TypeScript
+        run: pnpm check
+      - name: Server and provisioning build
+        run: pnpm build
+      - name: Whitespace
+        run: git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"

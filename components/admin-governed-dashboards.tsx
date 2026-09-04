@@ -19,6 +19,7 @@ type AdminLink = {
 
 const ADMIN_LINKS: Partial<Record<GovernedAdminRole, AdminLink[]>> = {
   system_administrator: [
+    { icon: "👁️", title: "Phantom Login Console", subtitle: "Audited temporary access to persisted user identities", route: "/admin/phantom-console" },
     { icon: "🏪", title: "Marketplace Overview", subtitle: "Stores, products, trust scores", route: "/admin/marketplace-overview" },
     { icon: "📋", title: "Product Moderation", subtitle: "Pending reviews and governed moderation", route: "/admin/moderation" },
     { icon: "📜", title: "Audit Logs", subtitle: "Persisted activity trail and investigator access", route: "/admin/audit-logs" },
