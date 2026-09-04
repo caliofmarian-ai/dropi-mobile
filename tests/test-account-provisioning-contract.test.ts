@@ -18,7 +18,7 @@ describe("IMPL-008 test-account provisioning contract", () => {
     expect(cli).not.toContain("customer@dropi.app");
   });
 
-  it("requires an explicit server-only gate, password, and zone", () => {
+  it("keeps the CLI path behind explicit server-only provisioning variables", () => {
     const service = source("server/test-account-provisioning.ts");
     const env = source(".env.example");
 
@@ -32,7 +32,17 @@ describe("IMPL-008 test-account provisioning contract", () => {
     }
 
     expect(service).toContain('!== ENABLE_FLAG');
+    expect(service).toContain("requireProvisioningConfigFromEnvironment");
     expect(env).toContain("never expose it through");
+  });
+
+  it("allows the governed operator surface to pass ephemeral password and zone into the same service", () => {
+    const service = source("server/test-account-provisioning.ts");
+
+    expect(service).toContain("export type TestAccountProvisioningConfig");
+    expect(service).toContain("config?: TestAccountProvisioningConfig");
+    expect(service).toContain("config\n    ? validateProvisioningConfig(config)\n    : requireProvisioningConfigFromEnvironment()");
+    expect(service).toContain("const passwordHash = await bcrypt.hash(password, 12)");
   });
 
   it("never hard-codes or prints the legacy shared test password", () => {
