@@ -3,11 +3,13 @@ import { Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator,
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth, DEMO_ACCOUNTS } from "@/lib/auth-context";
+import { useBiometricEnrollment } from "@/hooks/use-biometric-enrollment";
 import { CHANNEL_INFO, getRolesForChannel, type Channel } from "@/shared/types";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login, enterDemoMode } = useDropiAuth();
+  const biometric = useBiometricEnrollment();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,7 +45,6 @@ export default function LoginScreen() {
       <ScreenContainer edges={["top", "bottom", "left", "right"]} className="p-4">
         <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}>
           <View className="flex-1">
-            {/* Header */}
             <View className="flex-row items-center mb-6">
               <TouchableOpacity
                 onPress={() => { setShowDemo(false); setSelectedChannel(null); }}
@@ -53,10 +54,17 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text className="text-2xl font-bold text-foreground mb-2">Demo Mode</Text>
-            <Text className="text-sm text-muted mb-6">Select a channel and role to explore the platform.</Text>
+            <Text className="text-2xl font-bold text-foreground mb-2">Visual Demo Mode</Text>
+            <Text className="text-sm text-muted mb-3">
+              Select a channel and role to inspect its dashboard and navigation.
+            </Text>
+            <View className="bg-surface border border-border rounded-xl p-3 mb-6">
+              <Text className="text-xs font-semibold text-foreground">Read-only testing boundary</Text>
+              <Text className="text-xs text-muted mt-1 leading-5">
+                Demo Mode does not create a server session. Protected actions and persistent writes are intentionally unavailable. Use a provisioned test-role account for end-to-end testing.
+              </Text>
+            </View>
 
-            {/* Channel Selector */}
             {!selectedChannel && (
               <View className="gap-3">
                 {(Object.keys(CHANNEL_INFO) as Channel[]).map((ch) => (
@@ -82,7 +90,6 @@ export default function LoginScreen() {
               </View>
             )}
 
-            {/* Role Selector */}
             {selectedChannel && (
               <View className="gap-2">
                 <TouchableOpacity onPress={() => setSelectedChannel(null)}>
@@ -106,7 +113,7 @@ export default function LoginScreen() {
                           <Text className="text-foreground font-medium text-sm">{rc.label}</Text>
                           <Text className="text-muted text-xs">{rc.description}</Text>
                         </View>
-                        <Text className="text-primary text-xs font-medium">Enter →</Text>
+                        <Text className="text-primary text-xs font-medium">View →</Text>
                       </View>
                     </TouchableOpacity>
                   );
@@ -127,20 +134,17 @@ export default function LoginScreen() {
       >
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }} keyboardShouldPersistTaps="handled">
           <View className="flex-1 justify-center max-w-sm w-full self-center">
-            {/* Logo / Title */}
             <View className="items-center mb-10">
               <Text className="text-4xl font-bold text-primary">DROPi</Text>
               <Text className="text-sm text-muted mt-1">Logistics Platform</Text>
             </View>
 
-            {/* Error Message */}
             {error ? (
               <View className="bg-error/10 border border-error rounded-lg p-3 mb-4">
                 <Text className="text-error text-sm text-center">{error}</Text>
               </View>
             ) : null}
 
-            {/* Email Input */}
             <View className="mb-4">
               <Text className="text-sm font-medium text-foreground mb-1.5">Email</Text>
               <TextInput
@@ -156,7 +160,6 @@ export default function LoginScreen() {
               />
             </View>
 
-            {/* Password Input */}
             <View className="mb-6">
               <Text className="text-sm font-medium text-foreground mb-1.5">Password</Text>
               <View className="flex-row items-center bg-surface border border-border rounded-xl">
@@ -179,7 +182,6 @@ export default function LoginScreen() {
               </View>
             </View>
 
-            {/* Login Button */}
             <TouchableOpacity
               onPress={handleLogin}
               disabled={loading}
@@ -194,7 +196,6 @@ export default function LoginScreen() {
               </View>
             </TouchableOpacity>
 
-            {/* Links */}
             <View className="flex-row justify-between mt-4">
               <TouchableOpacity onPress={() => router.push("/forgot-password" as any)}>
                 <Text className="text-primary text-sm">Forgot password?</Text>
@@ -204,21 +205,24 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Separator */}
+            <View className="bg-surface border border-border rounded-xl p-3 mt-6">
+              <Text className="text-xs font-semibold text-foreground">Biometric sign-in</Text>
+              <Text className="text-xs text-muted mt-1 leading-5">{biometric.message}</Text>
+            </View>
+
             <View className="flex-row items-center my-8">
               <View className="flex-1 h-px bg-border" />
               <Text className="text-muted text-xs mx-4">or</Text>
               <View className="flex-1 h-px bg-border" />
             </View>
 
-            {/* Demo Mode Button */}
             <TouchableOpacity
               onPress={() => setShowDemo(true)}
               activeOpacity={0.8}
             >
-              <View className="border-2 border-primary/30 rounded-xl py-3.5 items-center">
-                <Text className="text-primary font-medium text-base">Enter Demo Mode</Text>
-                <Text className="text-muted text-xs mt-0.5">Explore all 29 roles without registration</Text>
+              <View className="border-2 border-primary/30 rounded-xl py-3.5 items-center px-3">
+                <Text className="text-primary font-medium text-base">Enter Visual Demo Mode</Text>
+                <Text className="text-muted text-xs mt-0.5 text-center">Inspect all 29 role dashboards without creating an authenticated server session</Text>
               </View>
             </TouchableOpacity>
           </View>
