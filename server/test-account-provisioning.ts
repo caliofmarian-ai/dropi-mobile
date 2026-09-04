@@ -12,26 +12,38 @@ import { getDb } from "./db";
 
 const ENABLE_FLAG = "enabled";
 
-function requireProvisioningConfig() {
-  if (process.env.DROPI_TEST_ACCOUNT_PROVISIONING?.trim().toLowerCase() !== ENABLE_FLAG) {
-    throw new Error(
-      "Test-account provisioning is disabled. Set DROPI_TEST_ACCOUNT_PROVISIONING=enabled explicitly.",
-    );
-  }
+export type ProvisioningConfig = {
+  password: string;
+  zone: string;
+};
 
-  const password = process.env.DROPI_TEST_ACCOUNT_PASSWORD?.trim() || "";
+function validateProvisioningConfig(config: ProvisioningConfig): ProvisioningConfig {
+  const password = config.password;
   if (password.length < 12 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
     throw new Error(
-      "DROPI_TEST_ACCOUNT_PASSWORD must be at least 12 characters and contain an uppercase letter and a number.",
+      "Test-account password must be at least 12 characters and contain an uppercase letter and a number.",
     );
   }
 
-  const zone = process.env.DROPI_TEST_ACCOUNT_ZONE?.trim() || "";
+  const zone = config.zone.trim();
   if (!zone) {
-    throw new Error("DROPI_TEST_ACCOUNT_ZONE is required for C1/C2/C3 test identities.");
+    throw new Error("A test operating zone is required for C1/C2/C3 test identities.");
   }
 
   return { password, zone };
+}
+
+function requireCliProvisioningConfig(): ProvisioningConfig {
+  if (process.env.DROPI_TEST_ACCOUNT_PROVISIONING?.trim().toLowerCase() !== ENABLE_FLAG) {
+    throw new Error(
+      "Test-account provisioning is disabled. Set DROPI_TEST_ACCOUNT_PROVISIONING=enabled explicitly for CLI provisioning.",
+    );
+  }
+
+  return validateProvisioningConfig({
+    password: process.env.DROPI_TEST_ACCOUNT_PASSWORD || "",
+    zone: process.env.DROPI_TEST_ACCOUNT_ZONE || "",
+  });
 }
 
 type DbTransaction = Parameters<
@@ -131,9 +143,14 @@ async function reconcileIdentity(
  * human row ID in humanPairId. A provisioning failure rolls the whole set back.
  * Existing sessions and push registrations for these test identities are revoked
  * when they are reconciled so a rotated test password cannot leave stale access.
+ *
+ * The authenticated Phantom Console passes the password and zone for one request.
+ * The CLI path remains fail-closed behind explicit server-only environment values.
  */
-export async function provisionTestRoleAccounts() {
-  const { password, zone } = requireProvisioningConfig();
+export async function provisionTestRoleAccounts(config?: ProvisioningConfig) {
+  const { password, zone } = config
+    ? validateProvisioningConfig(config)
+    : requireCliProvisioningConfig();
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
