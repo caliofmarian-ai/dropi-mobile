@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { and, asc, eq, like, or, sql } from "drizzle-orm";
 import { users } from "../drizzle/schema";
+import { DROPI_TEST_BASE_INBOX } from "../shared/test-role-accounts";
 import { adminProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
 import { adminAuthRouter } from "./auth-router";
@@ -19,6 +20,26 @@ const targetProjection = {
   agentMode: users.agentMode,
   humanPairId: users.humanPairId,
 } as const;
+
+function assertBaseSuperAdmin(ctx: {
+  user?: { email?: string | null } | null;
+  session?: { isPhantom?: boolean | null } | null;
+}) {
+  if (ctx.session?.isPhantom) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Test-account provisioning is unavailable from Phantom Mode.",
+    });
+  }
+
+  const email = ctx.user?.email?.trim().toLowerCase();
+  if (email !== DROPI_TEST_BASE_INBOX) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Only the base Super Administrator may provision canonical test-role accounts.",
+    });
+  }
+}
 
 /**
  * Operator-facing phantom console surface.
@@ -65,28 +86,38 @@ export const phantomConsoleRouter = router({
       return { targets, total: Number(countRows[0]?.count ?? 0) };
     }),
 
-  provisionTestAccounts: adminProcedure.mutation(async () => {
-    try {
-      const result = await provisionTestRoleAccounts();
-      return {
-        roles: result.roles,
-        humanAccounts: result.humanAccounts,
-        aiAccounts: result.aiAccounts,
-        pairedAccounts: result.pairedAccounts,
-        identitiesIncludingBaseSuperAdmin: result.identitiesIncludingBaseSuperAdmin,
-      };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Test-account provisioning failed";
-      if (
-        message.includes("provisioning is disabled") ||
-        message.includes("DROPI_TEST_ACCOUNT_PASSWORD") ||
-        message.includes("DROPI_TEST_ACCOUNT_ZONE")
-      ) {
-        throw new TRPCError({ code: "BAD_REQUEST", message });
+  provisionTestAccounts: adminProcedure
+    .input(z.object({
+      password: z.string().min(12).max(128),
+      zone: z.string().trim().min(1).max(120),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      assertBaseSuperAdmin(ctx);
+
+      try {
+        const result = await provisionTestRoleAccounts({
+          password: input.password,
+          zone: input.zone,
+        });
+        return {
+          roles: result.roles,
+          humanAccounts: result.humanAccounts,
+          aiAccounts: result.aiAccounts,
+          pairedAccounts: result.pairedAccounts,
+          identitiesIncludingBaseSuperAdmin: result.identitiesIncludingBaseSuperAdmin,
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Test-account provisioning failed";
+        if (
+          message.includes("password must") ||
+          message.includes("zone is required") ||
+          message.includes("zone must be")
+        ) {
+          throw new TRPCError({ code: "BAD_REQUEST", message });
+        }
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Test-account provisioning failed" });
       }
-      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Test-account provisioning failed" });
-    }
-  }),
+    }),
 
   enter: adminProcedure
     .input(z.object({ targetUserId: z.number().int().positive() }))
