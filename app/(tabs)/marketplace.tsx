@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { ActivityIndicator, FlatList, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { getRequiredApiBaseUrl } from "@/constants/oauth";
 import { useColors } from "@/hooks/use-colors";
 import { useDropiAuth } from "@/lib/auth-context";
 import { trpc } from "@/lib/trpc";
@@ -18,6 +19,11 @@ type MarketplaceProduct = {
   zone: string;
   deliveryModes: unknown;
 };
+
+function storageUrl(path: string) {
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${getRequiredApiBaseUrl("Marketplace media")}${path.startsWith("/") ? path : `/${path}`}`;
+}
 
 function ProductCard({ product, onPress }: { product: MarketplaceProduct; onPress: () => void }) {
   const colors = useColors();
@@ -131,10 +137,30 @@ export default function MarketplaceScreen() {
                 <Text style={{ fontSize: 15, fontWeight: "700", color: colors.foreground, marginBottom: 8 }}>Community offers</Text>
                 {communityOffers.map((offer) => (
                   <View key={offer.id} style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 12, marginBottom: 8, borderWidth: 0.5, borderColor: colors.border }}>
+                    {offer.imagePaths?.[0] && (
+                      <Image
+                        source={{ uri: storageUrl(offer.imagePaths[0]) }}
+                        style={{ width: "100%", height: 180, borderRadius: 10, backgroundColor: colors.background, marginBottom: 10 }}
+                        resizeMode="cover"
+                      />
+                    )}
                     <Text style={{ color: colors.foreground, fontWeight: "700" }}>{offer.title}</Text>
-                    <Text style={{ color: colors.muted, fontSize: 11, marginTop: 3 }}>{offer.offerType.replace("_", " ")} • expires {new Date(offer.expiresAt).toLocaleDateString()}</Text>
+                    <Text style={{ color: colors.muted, fontSize: 11, marginTop: 3 }}>
+                      {offer.category || "Community"} • {offer.itemCondition || "condition not specified"} • {offer.offerType.replace("_", " ")} • expires {new Date(offer.expiresAt).toLocaleDateString()}
+                    </Text>
+                    {offer.description ? <Text style={{ color: colors.muted, fontSize: 12, marginTop: 6 }}>{offer.description}</Text> : null}
                     {offer.offerType === "fixed_price" && offer.fixedPrice != null && (
-                      <Text style={{ color: colors.primary, fontWeight: "700", marginTop: 4 }}>{offer.currency} {Number(offer.fixedPrice).toFixed(2)}</Text>
+                      <Text style={{ color: colors.primary, fontWeight: "700", marginTop: 6 }}>{offer.currency} {Number(offer.fixedPrice).toFixed(2)}</Text>
+                    )}
+                    {offer.foodSafety && (
+                      <View style={{ marginTop: 10, borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 10, backgroundColor: colors.background }}>
+                        <Text style={{ color: colors.foreground, fontWeight: "800", fontSize: 12 }}>Food / consumable safety information</Text>
+                        <Text style={{ color: colors.muted, fontSize: 11, marginTop: 5 }}>Ingredients / contents: {offer.foodSafety.ingredients}</Text>
+                        <Text style={{ color: colors.muted, fontSize: 11, marginTop: 3 }}>Allergens: {offer.foodSafety.allergens}</Text>
+                        <Text style={{ color: colors.muted, fontSize: 11, marginTop: 3 }}>Storage: {offer.foodSafety.storageInstructions}</Text>
+                        {offer.foodSafety.useBy ? <Text style={{ color: colors.muted, fontSize: 11, marginTop: 3 }}>Use by: {new Date(offer.foodSafety.useBy).toLocaleDateString()}</Text> : null}
+                        <Text style={{ color: colors.muted, fontSize: 10, marginTop: 6 }}>This information is provided by the person posting the item and remains subject to DROPi moderation; it is not an independent safety certification.</Text>
+                      </View>
                     )}
                   </View>
                 ))}
