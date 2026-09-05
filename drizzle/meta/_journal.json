@@ -21,6 +21,7 @@
     { "idx": 16, "version": "5", "when": 1788372000000, "tag": "0016_privacy_rights_reporting", "breakpoints": true },
     { "idx": 17, "version": "5", "when": 1788376000000, "tag": "0017_operational_evidence_chain", "breakpoints": true },
     { "idx": 18, "version": "5", "when": 1788400000000, "tag": "0018_security_secret_envelopes", "breakpoints": true },
-    { "idx": 19, "version": "5", "when": 1788615000000, "tag": "0019_p2p_listing_governance", "breakpoints": true }
+    { "idx": 19, "version": "5", "when": 1788615000000, "tag": "0019_p2p_listing_governance", "breakpoints": true },
+    { "idx": 20, "version": "5", "when": 1788628000000, "tag": "0020_p2p_db_media", "breakpoints": true }
   ]
 }
