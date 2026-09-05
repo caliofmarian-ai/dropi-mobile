@@ -37,44 +37,33 @@ interface ProvisionResult {
   identitiesIncludingBaseSuperAdmin: number;
 }
 
-type AccountGroupKey = "real" | "test-human" | "ai";
+type InventoryView = "root" | "test" | "normal" | "all-ai";
+type TestAccountKind = "human" | "ai" | null;
 
 const CHANNEL_ORDER = ["C1", "C2", "C3", "ADMIN"] as const;
-
-const ACCOUNT_GROUPS: ReadonlyArray<{
-  key: AccountGroupKey;
-  title: string;
-  subtitle: string;
-}> = [
-  {
-    key: "real",
-    title: "REAL ACCOUNTS",
-    subtitle: "Registered identities that are not part of the canonical test population.",
-  },
-  {
-    key: "test-human",
-    title: "TEST HUMAN ACCOUNTS",
-    subtitle: "Canonical human test identities created for governed role validation.",
-  },
-  {
-    key: "ai",
-    title: "AI ROLE AGENTS",
-    subtitle: "Canonical AI agents that operate under their assigned role permissions and are linked to a human counterpart.",
-  },
-];
+type GovernedChannel = (typeof CHANNEL_ORDER)[number];
 
 const TEST_HUMAN_EMAILS = new Set(
   TEST_ROLE_IDENTITIES.map((identity) => identity.humanEmail.trim().toLowerCase()),
+);
+const TEST_AI_EMAILS = new Set(
+  TEST_ROLE_IDENTITIES.map((identity) => identity.aiEmail.trim().toLowerCase()),
 );
 
 function normalizedEmail(email: string | null): string {
   return email?.trim().toLowerCase() || "";
 }
 
-function accountGroupFor(target: PhantomTarget): AccountGroupKey {
-  if (target.isAIAgent) return "ai";
-  if (TEST_HUMAN_EMAILS.has(normalizedEmail(target.email))) return "test-human";
-  return "real";
+function isTestHuman(target: PhantomTarget): boolean {
+  return TEST_HUMAN_EMAILS.has(normalizedEmail(target.email));
+}
+
+function isTestAi(target: PhantomTarget): boolean {
+  return TEST_AI_EMAILS.has(normalizedEmail(target.email));
+}
+
+function isNormalAccount(target: PhantomTarget): boolean {
+  return !target.isAIAgent && !isTestHuman(target) && !isTestAi(target);
 }
 
 function getApiTrpcUrl(): string {
@@ -135,6 +124,9 @@ export default function PhantomConsoleScreen() {
   const [provisionZone, setProvisionZone] = useState("");
   const [provisionPassword, setProvisionPassword] = useState("");
   const [showProvisionPassword, setShowProvisionPassword] = useState(false);
+  const [inventoryView, setInventoryView] = useState<InventoryView>("root");
+  const [testAccountKind, setTestAccountKind] = useState<TestAccountKind>(null);
+  const [selectedChannel, setSelectedChannel] = useState<GovernedChannel | null>(null);
 
   const authorized = Boolean(
     user &&
@@ -166,46 +158,91 @@ export default function PhantomConsoleScreen() {
     refresh();
   }, [refresh]);
 
-  const filteredTargets = useMemo(() => {
-    const needle = search.trim().toLowerCase();
-    const sorted = [...targets].sort((a, b) => {
+  const sortedTargets = useMemo(() => {
+    return [...targets].sort((a, b) => {
       const roleCompare = a.dropiRole.localeCompare(b.dropiRole);
       if (roleCompare !== 0) return roleCompare;
-      return Number(a.isAIAgent) - Number(b.isAIAgent);
+      return (a.name || a.email || "").localeCompare(b.name || b.email || "");
     });
-    if (!needle) return sorted;
-    return sorted.filter((target) =>
+  }, [targets]);
+
+  const inventoryCounts = useMemo(() => {
+    const testHumans = targets.filter(isTestHuman).length;
+    const testAi = targets.filter(isTestAi).length;
+    const normal = targets.filter(isNormalAccount).length;
+    const allAi = targets.filter((target) => target.isAIAgent).length;
+    return {
+      testHumans,
+      testAi,
+      testTotal: testHumans + testAi,
+      normal,
+      allAi,
+    };
+  }, [targets]);
+
+  const activePopulation = useMemo(() => {
+    if (inventoryView === "normal") {
+      return sortedTargets.filter(isNormalAccount);
+    }
+    if (inventoryView === "all-ai") {
+      return sortedTargets.filter((target) => target.isAIAgent);
+    }
+    if (inventoryView === "test" && testAccountKind === "human") {
+      return sortedTargets.filter(isTestHuman);
+    }
+    if (inventoryView === "test" && testAccountKind === "ai") {
+      return sortedTargets.filter(isTestAi);
+    }
+    return [];
+  }, [inventoryView, sortedTargets, testAccountKind]);
+
+  const availableChannels = useMemo(() => {
+    return CHANNEL_ORDER.map((channel) => ({
+      channel,
+      count: activePopulation.filter((target) => target.channel === channel).length,
+    })).filter((entry) => entry.count > 0);
+  }, [activePopulation]);
+
+  const visibleTargets = useMemo(() => {
+    if (!selectedChannel) return [];
+    const needle = search.trim().toLowerCase();
+    const inChannel = activePopulation.filter((target) => target.channel === selectedChannel);
+    if (!needle) return inChannel;
+    return inChannel.filter((target) =>
       [target.name, target.email, target.dropiRole, target.channel]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(needle)),
     );
-  }, [search, targets]);
+  }, [activePopulation, search, selectedChannel]);
 
-  const identityCounts = useMemo(() => {
-    return targets.reduce(
-      (counts, target) => {
-        counts[accountGroupFor(target)] += 1;
-        return counts;
-      },
-      { real: 0, "test-human": 0, ai: 0 } as Record<AccountGroupKey, number>,
-    );
-  }, [targets]);
+  const activeTitle = useMemo(() => {
+    if (inventoryView === "normal") return "NORMAL ACCOUNTS";
+    if (inventoryView === "all-ai") return "ALL AI ACCOUNTS";
+    if (inventoryView === "test" && testAccountKind === "human") return "TEST ACCOUNTS · HUMAN";
+    if (inventoryView === "test" && testAccountKind === "ai") return "TEST ACCOUNTS · AI";
+    if (inventoryView === "test") return "TEST ACCOUNTS";
+    return "ACCOUNT DIRECTORY";
+  }, [inventoryView, testAccountKind]);
 
-  const groupedTargets = useMemo(() => {
-    return ACCOUNT_GROUPS.map((group) => {
-      const groupTargets = filteredTargets.filter((target) => accountGroupFor(target) === group.key);
-      const channels = CHANNEL_ORDER.map((channel) => ({
-        channel,
-        targets: groupTargets.filter((target) => target.channel === channel),
-      })).filter((channelGroup) => channelGroup.targets.length > 0);
+  const resetToRoot = useCallback(() => {
+    setInventoryView("root");
+    setTestAccountKind(null);
+    setSelectedChannel(null);
+    setSearch("");
+  }, []);
 
-      return {
-        ...group,
-        total: groupTargets.length,
-        channels,
-      };
-    }).filter((group) => group.total > 0);
-  }, [filteredTargets]);
+  const goDirectoryBack = useCallback(() => {
+    if (selectedChannel) {
+      setSelectedChannel(null);
+      setSearch("");
+      return;
+    }
+    if (inventoryView === "test" && testAccountKind) {
+      setTestAccountKind(null);
+      return;
+    }
+    resetToRoot();
+  }, [inventoryView, resetToRoot, selectedChannel, testAccountKind]);
 
   const confirmProvision = useCallback(() => {
     if (!token || provisioning) return;
@@ -280,8 +317,11 @@ export default function PhantomConsoleScreen() {
 
   const renderTargetCard = useCallback((target: PhantomTarget) => {
     const disabled = !target.isActive || target.id === user?.id || enteringId !== null;
-    const group = accountGroupFor(target);
-    const badge = group === "ai" ? "AI ROLE AGENT" : group === "test-human" ? "TEST HUMAN" : "REAL";
+    const badge = target.isAIAgent
+      ? "AI ROLE AGENT"
+      : isTestHuman(target)
+        ? "TEST HUMAN"
+        : "NORMAL";
 
     return (
       <View key={target.id} className="bg-surface border border-border rounded-xl p-4 mb-3">
@@ -323,6 +363,28 @@ export default function PhantomConsoleScreen() {
       </View>
     );
   }, [confirmEnter, enteringId, user?.id]);
+
+  const renderDirectoryCard = useCallback((
+    title: string,
+    subtitle: string,
+    count: number,
+    onPress: () => void,
+  ) => (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.75} className="mb-3">
+      <View className="bg-surface border border-border rounded-xl p-4">
+        <View className="flex-row items-center justify-between gap-3">
+          <View className="flex-1">
+            <Text className="text-base font-bold text-foreground">{title}</Text>
+            <Text className="text-xs text-muted mt-1 leading-4">{subtitle}</Text>
+          </View>
+          <View className="items-end">
+            <Text className="text-lg font-bold text-primary">{count}</Text>
+            <Text className="text-xs text-primary mt-1">Open →</Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  ), []);
 
   if (!authorized) {
     return (
@@ -418,29 +480,18 @@ export default function PhantomConsoleScreen() {
           </TouchableOpacity>
         </View>
 
-        <TextInput
-          value={search}
-          onChangeText={setSearch}
-          placeholder="Search name, email, role, or channel"
-          placeholderTextColor="#9BA1A6"
-          autoCapitalize="none"
-          className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground mb-3"
-        />
-
         <View className="bg-surface border border-border rounded-xl p-3 mb-4">
-          <Text className="text-xs font-semibold text-foreground">IDENTITY INVENTORY</Text>
-          <Text className="text-xs text-muted mt-1">
-            Real {identityCounts.real} · Test humans {identityCounts["test-human"]} · AI role agents {identityCounts.ai}
-          </Text>
-        </View>
-
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-sm text-muted">
-            {filteredTargets.length} visible / {targets.length} loaded
-          </Text>
-          <TouchableOpacity onPress={refresh} disabled={loading}>
-            <Text className="text-primary text-sm font-medium">Refresh</Text>
-          </TouchableOpacity>
+          <View className="flex-row items-center justify-between gap-3">
+            <View className="flex-1">
+              <Text className="text-xs font-semibold text-foreground">IDENTITY INVENTORY</Text>
+              <Text className="text-xs text-muted mt-1">
+                Test {inventoryCounts.testTotal} · Normal {inventoryCounts.normal} · All AI {inventoryCounts.allAi}
+              </Text>
+            </View>
+            <TouchableOpacity onPress={refresh} disabled={loading}>
+              <Text className="text-primary text-sm font-medium">Refresh</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {loading ? (
@@ -452,32 +503,121 @@ export default function PhantomConsoleScreen() {
           <View className="bg-error/10 border border-error rounded-xl p-4">
             <Text className="text-error text-sm">{error}</Text>
           </View>
-        ) : groupedTargets.length === 0 ? (
-          <View className="bg-surface border border-border rounded-xl p-4">
-            <Text className="text-sm text-muted">No identities match this search.</Text>
-          </View>
         ) : (
-          groupedTargets.map((group) => (
-            <View key={group.key} className="mb-6">
-              <View className="bg-surface border border-border rounded-xl p-3 mb-3">
-                <View className="flex-row items-center justify-between gap-3">
-                  <Text className="text-base font-bold text-foreground">{group.title}</Text>
-                  <Text className="text-sm font-semibold text-primary">{group.total}</Text>
-                </View>
-                <Text className="text-xs text-muted mt-1 leading-4">{group.subtitle}</Text>
-              </View>
-
-              {group.channels.map((channelGroup) => (
-                <View key={`${group.key}-${channelGroup.channel}`} className="mb-3">
-                  <View className="flex-row items-center justify-between px-1 mb-2">
-                    <Text className="text-sm font-bold text-foreground">CHANNEL {channelGroup.channel}</Text>
-                    <Text className="text-xs font-semibold text-muted">{channelGroup.targets.length} accounts</Text>
-                  </View>
-                  {channelGroup.targets.map(renderTargetCard)}
-                </View>
-              ))}
+          <View>
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-lg font-bold text-foreground">{activeTitle}</Text>
+              {inventoryView !== "root" ? (
+                <TouchableOpacity onPress={goDirectoryBack}>
+                  <Text className="text-primary text-sm font-medium">← Back one level</Text>
+                </TouchableOpacity>
+              ) : null}
             </View>
-          ))
+
+            {inventoryView === "root" ? (
+              <View>
+                {renderDirectoryCard(
+                  "TEST ACCOUNTS",
+                  "Open the governed test population, then choose HUMAN or AI.",
+                  inventoryCounts.testTotal,
+                  () => {
+                    setInventoryView("test");
+                    setTestAccountKind(null);
+                    setSelectedChannel(null);
+                  },
+                )}
+                {renderDirectoryCard(
+                  "NORMAL ACCOUNTS",
+                  "Registered non-test human identities, including real operator and customer accounts.",
+                  inventoryCounts.normal,
+                  () => {
+                    setInventoryView("normal");
+                    setTestAccountKind(null);
+                    setSelectedChannel(null);
+                  },
+                )}
+                {renderDirectoryCard(
+                  "ALL AI ACCOUNTS",
+                  "Complete AI inventory. Test AI agents also appear under TEST ACCOUNTS → AI; they are the same database records, not duplicates.",
+                  inventoryCounts.allAi,
+                  () => {
+                    setInventoryView("all-ai");
+                    setTestAccountKind(null);
+                    setSelectedChannel(null);
+                  },
+                )}
+              </View>
+            ) : inventoryView === "test" && testAccountKind === null ? (
+              <View>
+                {renderDirectoryCard(
+                  "HUMAN",
+                  "All canonical human test accounts.",
+                  inventoryCounts.testHumans,
+                  () => {
+                    setTestAccountKind("human");
+                    setSelectedChannel(null);
+                  },
+                )}
+                {renderDirectoryCard(
+                  "AI",
+                  "Canonical AI role-agent identities in the test population.",
+                  inventoryCounts.testAi,
+                  () => {
+                    setTestAccountKind("ai");
+                    setSelectedChannel(null);
+                  },
+                )}
+              </View>
+            ) : selectedChannel === null ? (
+              <View>
+                <Text className="text-xs text-muted mb-3">
+                  Choose a governed channel. Accounts remain hidden until a channel is opened.
+                </Text>
+                {availableChannels.map((entry) =>
+                  renderDirectoryCard(
+                    `CHANNEL ${entry.channel}`,
+                    `Open ${entry.count} account${entry.count === 1 ? "" : "s"} in this channel.`,
+                    entry.count,
+                    () => {
+                      setSelectedChannel(entry.channel);
+                      setSearch("");
+                    },
+                  ),
+                )}
+              </View>
+            ) : (
+              <View>
+                <View className="bg-surface border border-border rounded-xl p-3 mb-3">
+                  <View className="flex-row items-center justify-between">
+                    <View>
+                      <Text className="text-sm font-bold text-foreground">CHANNEL {selectedChannel}</Text>
+                      <Text className="text-xs text-muted mt-1">{activePopulation.filter((target) => target.channel === selectedChannel).length} accounts</Text>
+                    </View>
+                    <TouchableOpacity onPress={goDirectoryBack}>
+                      <Text className="text-primary text-sm font-medium">← Channels</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <TextInput
+                  value={search}
+                  onChangeText={setSearch}
+                  placeholder="Search this channel by name, email, or role"
+                  placeholderTextColor="#9BA1A6"
+                  autoCapitalize="none"
+                  className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground mb-3"
+                />
+
+                {visibleTargets.length === 0 ? (
+                  <View className="bg-surface border border-border rounded-xl p-4">
+                    <Text className="text-sm text-muted">No accounts match this search.</Text>
+                  </View>
+                ) : (
+                  visibleTargets.map(renderTargetCard)
+                )}
+              </View>
+            )}
+          </View>
         )}
       </ScrollView>
     </ScreenContainer>
