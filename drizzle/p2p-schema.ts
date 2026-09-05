@@ -1,4 +1,19 @@
-import { decimal, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { decimal, int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+
+export type P2pFoodSafety = {
+  ingredients: string;
+  allergens: string;
+  storageInstructions: string;
+  useBy?: string | null;
+};
+
+export type P2pPosterDeclarations = {
+  rulesAccepted: boolean;
+  truthfulListing: boolean;
+  authorizedToOffer: boolean;
+  notProhibitedOrRestricted: boolean;
+  moderationAccepted: boolean;
+};
 
 /**
  * C1 occasional community offers for non-commercial users.
@@ -9,6 +24,13 @@ export const p2pCommunityListings = mysqlTable("p2pCommunityListings", {
   ownerId: int("ownerId").notNull(),
   title: varchar("title", { length: 200 }).notNull(),
   description: text("description"),
+  category: varchar("category", { length: 100 }),
+  itemCondition: mysqlEnum("itemCondition", ["new", "used", "prepared", "other"]),
+  imagePaths: json("imagePaths").$type<string[]>(),
+  foodSafety: json("foodSafety").$type<P2pFoodSafety>(),
+  posterDeclarations: json("posterDeclarations").$type<P2pPosterDeclarations>(),
+  policyVersion: varchar("policyVersion", { length: 64 }),
+  policyAcceptedAt: timestamp("policyAcceptedAt"),
   offerType: mysqlEnum("offerType", ["donation", "free_transfer", "fixed_price"]).notNull(),
   fixedPrice: decimal("fixedPrice", { precision: 10, scale: 2 }),
   currency: varchar("currency", { length: 3 }).default("RON").notNull(),
