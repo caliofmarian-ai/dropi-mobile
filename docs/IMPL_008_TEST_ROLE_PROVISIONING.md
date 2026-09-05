@@ -13,7 +13,16 @@ Email identities are derived from `ROLE_CONFIGS` through `shared/test-role-accou
 
 ## Security boundary
 
-Provisioning is disabled by default. It requires all three server-side variables:
+The preferred operator flow is self-service from **System Admin → Phantom Login Console**. Only the real base Super Admin identity may run it, and an existing Phantom session is rejected.
+
+The operator provides two values for the provisioning request:
+
+- a temporary shared test password with at least 12 characters, one uppercase letter, and one number
+- a development/staging operating zone for C1/C2/C3 identities
+
+The password is sent only in the authenticated provisioning request, is immediately converted to a bcrypt hash for the test identities, is cleared from the mobile form after success, and is removed by the audit-input sanitizer before the ADMIN audit record is persisted. It is not committed or stored as an `EXPO_PUBLIC_*` value.
+
+A CLI fallback remains available for controlled server-side operations. That path is disabled by default and requires:
 
 ```text
 DROPI_TEST_ACCOUNT_PROVISIONING=enabled
@@ -21,21 +30,21 @@ DROPI_TEST_ACCOUNT_PASSWORD=<temporary secret test password>
 DROPI_TEST_ACCOUNT_ZONE=<development/staging test zone>
 ```
 
-`DROPI_TEST_ACCOUNT_PASSWORD` is a secret. Never commit it, never expose it through an `EXPO_PUBLIC_*` variable, and never paste it into issue/PR/chat logs.
-
-The provisioner does not contain a default password and does not print the configured password.
+The provisioner contains no default password and never prints the configured password.
 
 ## Operator procedure
 
-1. Set the three variables on the backend service in the intended development/staging environment.
-2. Redeploy the backend so the variables are active.
-3. Sign in with the real System Administrator account.
-4. Open **System Admin → Phantom Login Console**.
+1. Sign in with the real `dropi.deliveries@gmail.com` System Administrator account.
+2. Open **System Admin → Phantom Login Console**.
+3. Enter the test operating zone.
+4. Enter a temporary shared test password. Do not reuse the Super Admin password.
 5. Select **Provision / reconcile 29 human + 29 AI** and confirm.
-6. Verify the console lists paired human and AI identities and that AI rows show a real `humanPairId`.
-7. Disable/remove `DROPI_TEST_ACCOUNT_PROVISIONING` and remove `DROPI_TEST_ACCOUNT_PASSWORD` after provisioning. Redeploy again.
+6. Verify the console lists all persisted identities and that every AI row shows a real `humanPairId`.
+7. Test Human → AI → Phantom → Exit Phantom flows before closing Issue #165.
 
-The operation is idempotent: rerunning it reconciles the deterministic test identities instead of intentionally creating a second role population.
+No Railway provisioning variables or backend redeploy are required for this preferred operator flow.
+
+The operation is idempotent: rerunning it reconciles the deterministic test identities instead of intentionally creating a second role population. Reconciliation also revokes stale sessions and push registrations for those test identities.
 
 ## Phantom validation
 

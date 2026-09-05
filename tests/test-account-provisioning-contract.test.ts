@@ -18,21 +18,41 @@ describe("IMPL-008 test-account provisioning contract", () => {
     expect(cli).not.toContain("customer@dropi.app");
   });
 
-  it("requires an explicit server-only gate, password, and zone", () => {
+  it("supports one-request console input while keeping the CLI fail-closed behind server environment values", () => {
     const service = source("server/test-account-provisioning.ts");
+    const router = source("server/phantom-console-router.ts");
+    const consoleScreen = source("app/admin/phantom-console.tsx");
     const env = source(".env.example");
 
-    for (const variable of [
-      "DROPI_TEST_ACCOUNT_PROVISIONING",
-      "DROPI_TEST_ACCOUNT_PASSWORD",
-      "DROPI_TEST_ACCOUNT_ZONE",
-    ]) {
-      expect(service).toContain(variable);
-      expect(env).toContain(`${variable}=`);
-    }
+    expect(service).toContain("export type ProvisioningConfig");
+    expect(service).toContain("config?: ProvisioningConfig");
+    expect(service).toContain("requireCliProvisioningConfig");
+    expect(service).toContain("DROPI_TEST_ACCOUNT_PROVISIONING");
+    expect(env).toContain("DROPI_TEST_ACCOUNT_PROVISIONING=");
 
-    expect(service).toContain('!== ENABLE_FLAG');
-    expect(env).toContain("never expose it through");
+    expect(router).toContain("password: z.string().min(12).max(128)");
+    expect(router).toContain("zone: z.string().trim().min(1).max(120)");
+    expect(router).toContain("provisionTestRoleAccounts({");
+    expect(consoleScreen).toContain("No Railway provisioning variables are required for this operator flow.");
+    expect(consoleScreen).toContain("JSON.stringify({ json: { password, zone } })");
+  });
+
+  it("restricts console provisioning to the real base Super Admin and excludes phantom sessions", () => {
+    const router = source("server/phantom-console-router.ts");
+
+    expect(router).toContain("requireBaseSuperAdmin(ctx)");
+    expect(router).toContain("ctx.session?.isPhantom");
+    expect(router).toContain("DROPI_TEST_BASE_INBOX.toLowerCase()");
+    expect(router).toContain("Only the real base Super Administrator");
+  });
+
+  it("never persists the operator-entered test password in the audit record", () => {
+    const audit = source("server/audit-middleware.ts");
+    const consoleScreen = source("app/admin/phantom-console.tsx");
+
+    expect(audit).toContain("delete sanitized.password");
+    expect(consoleScreen).toContain("secureTextEntry={!showProvisionPassword}");
+    expect(consoleScreen).toContain('setProvisionPassword("")');
   });
 
   it("never hard-codes or prints the legacy shared test password", () => {
@@ -40,6 +60,7 @@ describe("IMPL-008 test-account provisioning contract", () => {
       source("server/test-account-provisioning.ts"),
       source("scripts/seed-accounts.ts"),
       source("shared/test-role-accounts.ts"),
+      source("app/admin/phantom-console.tsx"),
     ].join("\n");
 
     expect(combined).not.toContain("DROPi2026!");

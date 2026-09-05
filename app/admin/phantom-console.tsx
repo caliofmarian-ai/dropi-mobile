@@ -68,11 +68,15 @@ async function loadTargets(token: string): Promise<{ targets: PhantomTarget[]; t
   return unwrapResponse(response, "Unable to load users");
 }
 
-async function provisionAccounts(token: string): Promise<ProvisionResult> {
+async function provisionAccounts(
+  token: string,
+  password: string,
+  zone: string,
+): Promise<ProvisionResult> {
   const response = await fetch(`${getApiTrpcUrl()}/phantomConsole.provisionTestAccounts`, {
     method: "POST",
     headers: authHeaders(token),
-    body: JSON.stringify({ json: null }),
+    body: JSON.stringify({ json: { password, zone } }),
     credentials: "include",
   });
   return unwrapResponse(response, "Unable to provision test-role accounts");
@@ -87,6 +91,9 @@ export default function PhantomConsoleScreen() {
   const [search, setSearch] = useState("");
   const [enteringId, setEnteringId] = useState<number | null>(null);
   const [provisioning, setProvisioning] = useState(false);
+  const [provisionZone, setProvisionZone] = useState("");
+  const [provisionPassword, setProvisionPassword] = useState("");
+  const [showProvisionPassword, setShowProvisionPassword] = useState(false);
 
   const authorized = Boolean(
     user &&
@@ -135,9 +142,23 @@ export default function PhantomConsoleScreen() {
 
   const confirmProvision = useCallback(() => {
     if (!token || provisioning) return;
+
+    const zone = provisionZone.trim();
+    if (!zone) {
+      Alert.alert("Operating zone required", "Enter the test operating zone before provisioning.");
+      return;
+    }
+    if (provisionPassword.length < 12 || !/[A-Z]/.test(provisionPassword) || !/[0-9]/.test(provisionPassword)) {
+      Alert.alert(
+        "Test password not strong enough",
+        "Use at least 12 characters with at least one uppercase letter and one number.",
+      );
+      return;
+    }
+
     Alert.alert(
       "Provision test-role accounts?",
-      "This reconciles 29 human test identities and 29 AI mirrors in the live connected database. It only runs when the server-side provisioning flag, password, and zone are explicitly configured. The real base Super Admin is not modified.",
+      `This will create or reconcile 29 human test identities and 29 AI mirrors for zone ${zone}. The real base Super Admin is not modified. The password is used for this provisioning request and is not shown in the audit record.`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -146,11 +167,13 @@ export default function PhantomConsoleScreen() {
           onPress: async () => {
             setProvisioning(true);
             try {
-              const result = await provisionAccounts(token);
+              const result = await provisionAccounts(token, provisionPassword, zone);
+              setProvisionPassword("");
+              setShowProvisionPassword(false);
               await refresh();
               Alert.alert(
                 "Test-role accounts ready",
-                `${result.humanAccounts} human + ${result.aiAccounts} AI mirrors across ${result.roles} roles. ${result.identitiesIncludingBaseSuperAdmin} identities including the unchanged base Super Admin.`,
+                `${result.humanAccounts} human + ${result.aiAccounts} AI mirrors across ${result.roles} roles. ${result.identitiesIncludingBaseSuperAdmin} canonical identities including the unchanged base Super Admin.`,
               );
             } catch (err: any) {
               Alert.alert("Provisioning blocked", err.message || "Unable to provision test-role accounts");
@@ -161,7 +184,7 @@ export default function PhantomConsoleScreen() {
         },
       ],
     );
-  }, [provisioning, refresh, token]);
+  }, [provisionPassword, provisionZone, provisioning, refresh, token]);
 
   const confirmEnter = useCallback((target: PhantomTarget) => {
     if (!target.isActive || target.id === user?.id) return;
@@ -227,12 +250,51 @@ export default function PhantomConsoleScreen() {
         <View className="bg-surface border border-border rounded-xl p-4 mb-4">
           <Text className="text-sm font-semibold text-foreground">Canonical test-role population</Text>
           <Text className="text-xs text-muted mt-2 leading-5">
-            Provisioning is idempotent and derives all 29 roles from the canonical registry. It requires the temporary server-only IMPL-008 provisioning variables to be configured before this action is allowed.
+            The real base Super Admin can create or reconcile all 29 human roles and their 29 AI mirrors directly from this console. No Railway provisioning variables are required for this operator flow.
           </Text>
+
+          <Text className="text-xs font-medium text-foreground mt-4 mb-1.5">Test operating zone</Text>
+          <TextInput
+            value={provisionZone}
+            onChangeText={setProvisionZone}
+            placeholder="Enter the test zone"
+            placeholderTextColor="#9BA1A6"
+            autoCapitalize="words"
+            editable={!provisioning}
+            className="bg-background border border-border rounded-lg px-3 py-2.5 text-foreground"
+          />
+
+          <Text className="text-xs font-medium text-foreground mt-3 mb-1.5">Shared test password</Text>
+          <View className="flex-row items-center bg-background border border-border rounded-lg">
+            <TextInput
+              value={provisionPassword}
+              onChangeText={setProvisionPassword}
+              placeholder="12+ chars, uppercase + number"
+              placeholderTextColor="#9BA1A6"
+              secureTextEntry={!showProvisionPassword}
+              editable={!provisioning}
+              autoCapitalize="none"
+              autoCorrect={false}
+              className="flex-1 px-3 py-2.5 text-foreground"
+            />
+            <TouchableOpacity
+              onPress={() => setShowProvisionPassword((value) => !value)}
+              disabled={provisioning}
+              style={{ paddingHorizontal: 12, paddingVertical: 10 }}
+            >
+              <Text className="text-primary text-xs font-medium">
+                {showProvisionPassword ? "Hide" : "Show"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <Text className="text-[11px] text-muted mt-2 leading-4">
+            Used only to hash the test accounts during this request. Do not reuse your Super Admin password.
+          </Text>
+
           <TouchableOpacity
             onPress={confirmProvision}
             disabled={provisioning}
-            className="border border-primary rounded-lg py-2.5 items-center mt-3"
+            className="border border-primary rounded-lg py-2.5 items-center mt-4"
             style={{ opacity: provisioning ? 0.55 : 1 }}
           >
             {provisioning ? (
