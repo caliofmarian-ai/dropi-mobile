@@ -10,7 +10,8 @@ CREATE TABLE `p2pListingMedia` (
   `dataBase64` longtext NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT (now()),
   CONSTRAINT `p2pListingMedia_id` PRIMARY KEY(`id`),
-  CONSTRAINT `p2pListingMedia_mediaUid_unique` UNIQUE(`mediaUid`)
+  CONSTRAINT `p2pListingMedia_mediaUid_unique` UNIQUE(`mediaUid`),
+  CONSTRAINT `p2pListingMedia_listing_fk` FOREIGN KEY (`listingId`) REFERENCES `p2pCommunityListings`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
 CREATE INDEX `p2pListingMedia_listingId_idx` ON `p2pListingMedia` (`listingId`);
