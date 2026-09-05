@@ -7,6 +7,12 @@ import {
   normalizeP2pCommunityOffer,
   P2P_MAX_ACTIVE_COMMUNITY_LISTINGS,
 } from "../server/p2p-policy";
+import {
+  MARKETPLACE_LISTING_POLICY_VERSION,
+  MARKETPLACE_MAX_LISTING_IMAGES,
+  assertMarketplaceListingAttestation,
+  isFoodMarketplaceCategory,
+} from "../shared/marketplace-policy";
 
 const customer = { dropiRole: "customer", channel: "C1", isActive: true };
 
@@ -43,4 +49,25 @@ test("private parcel validates addresses, description and bounded positive weigh
   assert.doesNotThrow(() => assertPrivateParcel({ pickupAddress: "A", deliveryAddress: "B", packageDescription: "Books", weightGrams: 1200 }));
   assert.throws(() => assertPrivateParcel({ pickupAddress: "", deliveryAddress: "B", packageDescription: "Books", weightGrams: 1200 }), /addresses/i);
   assert.throws(() => assertPrivateParcel({ pickupAddress: "A", deliveryAddress: "B", packageDescription: "Books", weightGrams: 50001 }), /50000/i);
+});
+
+test("Marketplace listing attestation is versioned and fail-closed", () => {
+  assert.match(MARKETPLACE_LISTING_POLICY_VERSION, /^marketplace-listing-v\d/);
+  assert.equal(MARKETPLACE_MAX_LISTING_IMAGES, 3);
+  const valid = {
+    rulesAccepted: true,
+    truthfulListing: true,
+    authorizedToOffer: true,
+    notProhibitedRestricted: true,
+    moderationAcknowledged: true,
+  };
+  assert.doesNotThrow(() => assertMarketplaceListingAttestation(valid));
+  assert.throws(() => assertMarketplaceListingAttestation({ ...valid, rulesAccepted: false }), /rules must be accepted/i);
+  assert.throws(() => assertMarketplaceListingAttestation({ ...valid, authorizedToOffer: false }), /authorization/i);
+});
+
+test("food category activates consumption safeguards", () => {
+  assert.equal(isFoodMarketplaceCategory("Food & Groceries"), true);
+  assert.equal(isFoodMarketplaceCategory("food-groceries"), true);
+  assert.equal(isFoodMarketplaceCategory("Electronics"), false);
 });
