@@ -69,16 +69,18 @@ describe("IMPL-008 governed Phantom Console", () => {
     expect(consoleScreen).toContain("critical actions are audited");
   });
 
-  it("separates real, canonical test-human, and AI identities by governed channel", () => {
+  it("separates real, canonical test-human, and AI role-agent identities by governed channel", () => {
     const consoleScreen = source("app/admin/phantom-console.tsx");
 
     expect(consoleScreen).toContain('import { TEST_ROLE_IDENTITIES } from "@/shared/test-role-accounts"');
     expect(consoleScreen).toContain('const CHANNEL_ORDER = ["C1", "C2", "C3", "ADMIN"] as const');
     expect(consoleScreen).toContain('title: "REAL ACCOUNTS"');
     expect(consoleScreen).toContain('title: "TEST HUMAN ACCOUNTS"');
-    expect(consoleScreen).toContain('title: "AI MIRRORS"');
+    expect(consoleScreen).toContain('title: "AI ROLE AGENTS"');
     expect(consoleScreen).toContain('if (target.isAIAgent) return "ai"');
     expect(consoleScreen).toContain('TEST_HUMAN_EMAILS.has(normalizedEmail(target.email))');
+    expect(consoleScreen).toContain('Human counterpart ID:');
     expect(consoleScreen).toContain('CHANNEL {channelGroup.channel}');
+    expect(consoleScreen).not.toContain('title: "AI MIRRORS"');
   });
 });
