@@ -14,6 +14,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { safeGoBack } from "@/lib/safe-back";
 import { useDropiAuth } from "@/lib/auth-context";
 import { getApiBaseUrl, getRequiredApiBaseUrl } from "@/constants/oauth";
+import { TEST_ROLE_IDENTITIES } from "@/shared/test-role-accounts";
 
 interface PhantomTarget {
   id: number;
@@ -34,6 +35,46 @@ interface ProvisionResult {
   aiAccounts: number;
   pairedAccounts: number;
   identitiesIncludingBaseSuperAdmin: number;
+}
+
+type AccountGroupKey = "real" | "test-human" | "ai";
+
+const CHANNEL_ORDER = ["C1", "C2", "C3", "ADMIN"] as const;
+
+const ACCOUNT_GROUPS: ReadonlyArray<{
+  key: AccountGroupKey;
+  title: string;
+  subtitle: string;
+}> = [
+  {
+    key: "real",
+    title: "REAL ACCOUNTS",
+    subtitle: "Registered identities that are not part of the canonical test population.",
+  },
+  {
+    key: "test-human",
+    title: "TEST HUMAN ACCOUNTS",
+    subtitle: "Canonical human test identities created for governed role validation.",
+  },
+  {
+    key: "ai",
+    title: "AI MIRRORS",
+    subtitle: "AI agent identities paired with their canonical human test counterparts.",
+  },
+];
+
+const TEST_HUMAN_EMAILS = new Set(
+  TEST_ROLE_IDENTITIES.map((identity) => identity.humanEmail.trim().toLowerCase()),
+);
+
+function normalizedEmail(email: string | null): string {
+  return email?.trim().toLowerCase() || "";
+}
+
+function accountGroupFor(target: PhantomTarget): AccountGroupKey {
+  if (target.isAIAgent) return "ai";
+  if (TEST_HUMAN_EMAILS.has(normalizedEmail(target.email))) return "test-human";
+  return "real";
 }
 
 function getApiTrpcUrl(): string {
@@ -140,6 +181,32 @@ export default function PhantomConsoleScreen() {
     );
   }, [search, targets]);
 
+  const identityCounts = useMemo(() => {
+    return targets.reduce(
+      (counts, target) => {
+        counts[accountGroupFor(target)] += 1;
+        return counts;
+      },
+      { real: 0, "test-human": 0, ai: 0 } as Record<AccountGroupKey, number>,
+    );
+  }, [targets]);
+
+  const groupedTargets = useMemo(() => {
+    return ACCOUNT_GROUPS.map((group) => {
+      const groupTargets = filteredTargets.filter((target) => accountGroupFor(target) === group.key);
+      const channels = CHANNEL_ORDER.map((channel) => ({
+        channel,
+        targets: groupTargets.filter((target) => target.channel === channel),
+      })).filter((channelGroup) => channelGroup.targets.length > 0);
+
+      return {
+        ...group,
+        total: groupTargets.length,
+        channels,
+      };
+    }).filter((group) => group.total > 0);
+  }, [filteredTargets]);
+
   const confirmProvision = useCallback(() => {
     if (!token || provisioning) return;
 
@@ -210,6 +277,52 @@ export default function PhantomConsoleScreen() {
       ],
     );
   }, [enterPhantomSession, router, user?.id]);
+
+  const renderTargetCard = useCallback((target: PhantomTarget) => {
+    const disabled = !target.isActive || target.id === user?.id || enteringId !== null;
+    const group = accountGroupFor(target);
+    const badge = group === "ai" ? "AI MIRROR" : group === "test-human" ? "TEST HUMAN" : "REAL";
+
+    return (
+      <View key={target.id} className="bg-surface border border-border rounded-xl p-4 mb-3">
+        <View className="flex-row items-start justify-between gap-3">
+          <View className="flex-1">
+            <View className="flex-row flex-wrap items-center gap-2">
+              <Text className="text-base font-semibold text-foreground">
+                {target.name || `User #${target.id}`}
+              </Text>
+              <Text className="text-xs text-primary font-semibold">{badge}</Text>
+              {!target.isActive ? <Text className="text-xs text-error font-semibold">INACTIVE</Text> : null}
+            </View>
+            <Text className="text-xs text-muted mt-1">{target.email || "No email"}</Text>
+            <Text className="text-xs text-muted mt-1">
+              {target.dropiRole} · {target.channel}{target.zone ? ` · ${target.zone}` : ""}
+            </Text>
+            {target.isAIAgent ? (
+              <Text className="text-xs text-muted mt-1">
+                Human pair ID: {target.humanPairId ?? "not materialized"} · mode: {target.agentMode || "unset"}
+              </Text>
+            ) : null}
+          </View>
+
+          <TouchableOpacity
+            disabled={disabled}
+            onPress={() => confirmEnter(target)}
+            className="bg-primary rounded-lg px-3 py-2"
+            style={{ opacity: disabled ? 0.35 : 1 }}
+          >
+            {enteringId === target.id ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text className="text-white text-xs font-semibold">
+                {target.id === user?.id ? "Current" : "Enter"}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }, [confirmEnter, enteringId, user?.id]);
 
   if (!authorized) {
     return (
@@ -311,8 +424,15 @@ export default function PhantomConsoleScreen() {
           placeholder="Search name, email, role, or channel"
           placeholderTextColor="#9BA1A6"
           autoCapitalize="none"
-          className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground mb-4"
+          className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground mb-3"
         />
+
+        <View className="bg-surface border border-border rounded-xl p-3 mb-4">
+          <Text className="text-xs font-semibold text-foreground">IDENTITY INVENTORY</Text>
+          <Text className="text-xs text-muted mt-1">
+            Real {identityCounts.real} · Test humans {identityCounts["test-human"]} · AI mirrors {identityCounts.ai}
+          </Text>
+        </View>
 
         <View className="flex-row justify-between items-center mb-3">
           <Text className="text-sm text-muted">
@@ -332,51 +452,32 @@ export default function PhantomConsoleScreen() {
           <View className="bg-error/10 border border-error rounded-xl p-4">
             <Text className="text-error text-sm">{error}</Text>
           </View>
+        ) : groupedTargets.length === 0 ? (
+          <View className="bg-surface border border-border rounded-xl p-4">
+            <Text className="text-sm text-muted">No identities match this search.</Text>
+          </View>
         ) : (
-          filteredTargets.map((target) => {
-            const disabled = !target.isActive || target.id === user?.id || enteringId !== null;
-            return (
-              <View key={target.id} className="bg-surface border border-border rounded-xl p-4 mb-3">
-                <View className="flex-row items-start justify-between gap-3">
-                  <View className="flex-1">
-                    <View className="flex-row flex-wrap items-center gap-2">
-                      <Text className="text-base font-semibold text-foreground">
-                        {target.name || `User #${target.id}`}
-                      </Text>
-                      <Text className="text-xs text-primary font-semibold">
-                        {target.isAIAgent ? "AI MIRROR" : "HUMAN"}
-                      </Text>
-                      {!target.isActive ? <Text className="text-xs text-error font-semibold">INACTIVE</Text> : null}
-                    </View>
-                    <Text className="text-xs text-muted mt-1">{target.email || "No email"}</Text>
-                    <Text className="text-xs text-muted mt-1">
-                      {target.dropiRole} · {target.channel}{target.zone ? ` · ${target.zone}` : ""}
-                    </Text>
-                    {target.isAIAgent ? (
-                      <Text className="text-xs text-muted mt-1">
-                        Human pair ID: {target.humanPairId ?? "not materialized"} · mode: {target.agentMode || "unset"}
-                      </Text>
-                    ) : null}
-                  </View>
-
-                  <TouchableOpacity
-                    disabled={disabled}
-                    onPress={() => confirmEnter(target)}
-                    className="bg-primary rounded-lg px-3 py-2"
-                    style={{ opacity: disabled ? 0.35 : 1 }}
-                  >
-                    {enteringId === target.id ? (
-                      <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                      <Text className="text-white text-xs font-semibold">
-                        {target.id === user?.id ? "Current" : "Enter"}
-                      </Text>
-                    )}
-                  </TouchableOpacity>
+          groupedTargets.map((group) => (
+            <View key={group.key} className="mb-6">
+              <View className="bg-surface border border-border rounded-xl p-3 mb-3">
+                <View className="flex-row items-center justify-between gap-3">
+                  <Text className="text-base font-bold text-foreground">{group.title}</Text>
+                  <Text className="text-sm font-semibold text-primary">{group.total}</Text>
                 </View>
+                <Text className="text-xs text-muted mt-1 leading-4">{group.subtitle}</Text>
               </View>
-            );
-          })
+
+              {group.channels.map((channelGroup) => (
+                <View key={`${group.key}-${channelGroup.channel}`} className="mb-3">
+                  <View className="flex-row items-center justify-between px-1 mb-2">
+                    <Text className="text-sm font-bold text-foreground">CHANNEL {channelGroup.channel}</Text>
+                    <Text className="text-xs font-semibold text-muted">{channelGroup.targets.length} accounts</Text>
+                  </View>
+                  {channelGroup.targets.map(renderTargetCard)}
+                </View>
+              ))}
+            </View>
+          ))
         )}
       </ScrollView>
     </ScreenContainer>
