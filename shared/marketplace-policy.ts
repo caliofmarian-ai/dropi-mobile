@@ -79,3 +79,33 @@ export function evaluateMarketplaceListingVisibility(input: ListingVisibilityInp
     reasons,
   };
 }
+
+/**
+ * One versioned Marketplace listing declaration is shared by every listing surface.
+ * It records the poster's declaration; it is not a substitute for moderation or legal review.
+ */
+export const MARKETPLACE_LISTING_POLICY_VERSION = "marketplace-listing-v1-2026-09-05" as const;
+export const MARKETPLACE_MAX_LISTING_IMAGES = 3 as const;
+export const MARKETPLACE_MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+export const MARKETPLACE_ITEM_CONDITIONS = ["new", "used", "prepared", "other"] as const;
+export type MarketplaceItemCondition = (typeof MARKETPLACE_ITEM_CONDITIONS)[number];
+
+export type MarketplaceListingAttestation = {
+  rulesAccepted: boolean;
+  truthfulListing: boolean;
+  authorizedToOffer: boolean;
+  notProhibitedRestricted: boolean;
+  moderationAcknowledged: boolean;
+};
+
+export function assertMarketplaceListingAttestation(attestation: MarketplaceListingAttestation): void {
+  if (!attestation.rulesAccepted) throw new Error("Marketplace posting rules must be accepted.");
+  if (!attestation.truthfulListing) throw new Error("The poster must confirm that listing information is truthful.");
+  if (!attestation.authorizedToOffer) throw new Error("The poster must confirm authorization to offer the item.");
+  if (!attestation.notProhibitedRestricted) throw new Error("The poster must confirm the item is not prohibited or restricted by Marketplace rules.");
+  if (!attestation.moderationAcknowledged) throw new Error("Marketplace moderation and removal authority must be acknowledged.");
+}
+
+export function isFoodMarketplaceCategory(category: string): boolean {
+  return normalizeMarketplaceCategory(category) === "Food & Groceries";
+}

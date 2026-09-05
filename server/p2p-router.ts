@@ -3,7 +3,15 @@ import { TRPCError } from "@trpc/server";
 import { and, desc, eq, gt, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { p2pCommunityListings, p2pParcelRequests } from "../drizzle/p2p-schema";
-import { normalizeMarketplaceZone } from "../shared/marketplace-policy";
+import {
+  MARKETPLACE_LISTING_POLICY_VERSION,
+  MARKETPLACE_MAX_IMAGE_BYTES,
+  MARKETPLACE_MAX_LISTING_IMAGES,
+  assertMarketplaceListingAttestation,
+  isFoodMarketplaceCategory,
+  normalizeMarketplaceCategory,
+  normalizeMarketplaceZone,
+} from "../shared/marketplace-policy";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { buildAuditAttribution, type AuditSessionLike } from "./audit-policy";
 import { createAuditLog, getDb } from "./db";
@@ -13,6 +21,28 @@ import {
   assertPrivateParcel,
   normalizeP2pCommunityOffer,
 } from "./p2p-policy";
+import { storagePut } from "./storage";
+
+const listingImageSchema = z.object({
+  fileBase64: z.string().min(1),
+  contentType: z.enum(["image/jpeg", "image/png", "image/webp"]),
+  fileName: z.string().trim().min(1).max(180),
+});
+
+const listingAttestationSchema = z.object({
+  rulesAccepted: z.literal(true),
+  truthfulListing: z.literal(true),
+  authorizedToOffer: z.literal(true),
+  notProhibitedRestricted: z.literal(true),
+  moderationAcknowledged: z.literal(true),
+});
+
+const foodSafetySchema = z.object({
+  ingredients: z.string().trim().min(2).max(3000),
+  allergens: z.string().trim().min(2).max(2000),
+  storageInstructions: z.string().trim().min(2).max(2000),
+  useByDate: z.string().trim().max(40).optional(),
+});
 
 function actorFromContext(user: any) {
   return {
@@ -49,6 +79,34 @@ async function audit(input: {
   });
 }
 
+async function uploadListingImages(ownerId: number, images: z.infer<typeof listingImageSchema>[]): Promise<string[]> {
+  const urls: string[] = [];
+  for (let index = 0; index < images.length; index += 1) {
+    const image = images[index];
+    const buffer = Buffer.from(image.fileBase64, "base64");
+    if (buffer.length <= 0 || buffer.length > MARKETPLACE_MAX_IMAGE_BYTES) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Each listing image must be between 1 byte and 2 MB." });
+    }
+    const ext = image.contentType === "image/png" ? "png" : image.contentType === "image/webp" ? "webp" : "jpg";
+    const key = `p2p-listings/user_${ownerId}/${Date.now()}_${randomUUID()}_${index}.${ext}`;
+    const { url } = await storagePut(key, buffer, image.contentType);
+    urls.push(url);
+  }
+  return urls;
+}
+
+function assertListingReadyForApproval(listing: typeof p2pCommunityListings.$inferSelect): void {
+  if (!listing.category || !listing.itemCondition || !listing.policyVersion || !listing.attestedAt) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Listing is missing governed submission metadata and cannot be approved." });
+  }
+  if (!Array.isArray(listing.imageUrls) || listing.imageUrls.length < 1) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Listing must include at least one item image before approval." });
+  }
+  if (isFoodMarketplaceCategory(listing.category) && !listing.foodSafety) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Food listings require safety and consumption information before approval." });
+  }
+}
+
 export const p2pRouter = router({
   createCommunityOffer: protectedProcedure
     .input(z.object({
@@ -59,6 +117,11 @@ export const p2pRouter = router({
       currency: z.string().length(3).optional(),
       expiresAt: z.coerce.date(),
       zone: z.string().trim().min(1).max(100),
+      category: z.string().trim().min(1).max(100),
+      itemCondition: z.enum(["new", "used", "prepared", "other"]),
+      images: z.array(listingImageSchema).min(1).max(MARKETPLACE_MAX_LISTING_IMAGES),
+      foodSafety: foodSafetySchema.optional(),
+      attestation: listingAttestationSchema,
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -66,8 +129,19 @@ export const p2pRouter = router({
       const actor = actorFromContext(ctx.user);
       assertP2pActor(actor);
       const zone = normalizeMarketplaceZone(input.zone);
+      const category = normalizeMarketplaceCategory(input.category);
+      assertMarketplaceListingAttestation(input.attestation);
+
       if (actor.zone && normalizeMarketplaceZone(actor.zone).toLowerCase() !== zone.toLowerCase()) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Community offers must use the account operating zone." });
+      }
+      if (isFoodMarketplaceCategory(category)) {
+        if (!input.foodSafety) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Food and grocery listings require ingredients, allergen and storage information." });
+        }
+        if (input.itemCondition === "prepared" && !input.foodSafety.useByDate?.trim()) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Prepared food listings require a use-by or consumption date." });
+        }
       }
 
       const [countRow] = await db.select({ count: sql<number>`count(*)` })
@@ -85,6 +159,9 @@ export const p2pRouter = router({
         currency: input.currency,
         expiresAt: input.expiresAt,
       });
+      const imageUrls = await uploadListingImages(actor.id, input.images);
+      const attestedAt = new Date();
+
       const inserted = await db.insert(p2pCommunityListings).values({
         ownerId: actor.id,
         title: input.title,
@@ -93,6 +170,13 @@ export const p2pRouter = router({
         fixedPrice: normalized.fixedPrice,
         currency: normalized.currency,
         zone,
+        category,
+        itemCondition: input.itemCondition,
+        imageUrls,
+        foodSafety: isFoodMarketplaceCategory(category) ? input.foodSafety! : null,
+        attestationData: input.attestation,
+        policyVersion: MARKETPLACE_LISTING_POLICY_VERSION,
+        attestedAt,
         status: "pending_review",
         expiresAt: normalized.expiresAt,
       }).$returningId();
@@ -105,7 +189,16 @@ export const p2pRouter = router({
         action: "p2p.community_offer.created",
         resourceType: "p2p_community_offer",
         resourceId: String(listingId),
-        details: { offerType: input.offerType, zone, expiresAt: input.expiresAt.toISOString() },
+        details: {
+          offerType: input.offerType,
+          zone,
+          category,
+          itemCondition: input.itemCondition,
+          imageCount: imageUrls.length,
+          policyVersion: MARKETPLACE_LISTING_POLICY_VERSION,
+          attestedAt: attestedAt.toISOString(),
+          expiresAt: input.expiresAt.toISOString(),
+        },
       });
       return { listingId, status: "pending_review" as const };
     }),
@@ -159,6 +252,11 @@ export const p2pRouter = router({
         fixedPrice: p2pCommunityListings.fixedPrice,
         currency: p2pCommunityListings.currency,
         zone: p2pCommunityListings.zone,
+        category: p2pCommunityListings.category,
+        itemCondition: p2pCommunityListings.itemCondition,
+        imageUrls: p2pCommunityListings.imageUrls,
+        foodSafety: p2pCommunityListings.foodSafety,
+        policyVersion: p2pCommunityListings.policyVersion,
         expiresAt: p2pCommunityListings.expiresAt,
         createdAt: p2pCommunityListings.createdAt,
       }).from(p2pCommunityListings).where(where).orderBy(desc(p2pCommunityListings.createdAt)).limit(input.limit).offset(input.offset);
@@ -251,8 +349,11 @@ export const p2pRouter = router({
       const [listing] = await db.select().from(p2pCommunityListings).where(eq(p2pCommunityListings.id, input.listingId)).limit(1);
       if (!listing) throw new TRPCError({ code: "NOT_FOUND", message: "Community offer not found" });
       if (listing.status !== "pending_review") throw new TRPCError({ code: "BAD_REQUEST", message: "Only pending community offers can be moderated" });
-      if (input.action === "approve" && listing.expiresAt <= new Date()) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Expired community offers cannot be approved" });
+      if (input.action === "approve") {
+        assertListingReadyForApproval(listing);
+        if (listing.expiresAt <= new Date()) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Expired community offers cannot be approved" });
+        }
       }
       const status = input.action === "approve" ? "approved" : "rejected";
       await db.update(p2pCommunityListings).set({
@@ -267,7 +368,7 @@ export const p2pRouter = router({
         action: `p2p.community_offer.${status}`,
         resourceType: "p2p_community_offer",
         resourceId: String(listing.id),
-        details: { note: input.note || null },
+        details: { note: input.note || null, policyVersion: listing.policyVersion || "legacy-missing" },
         severity: input.action === "reject" ? "warning" : "info",
       });
       return { success: true, status };

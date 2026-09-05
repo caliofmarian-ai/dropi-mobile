@@ -1,4 +1,4 @@
-import { decimal, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { decimal, int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * C1 occasional community offers for non-commercial users.
@@ -13,6 +13,19 @@ export const p2pCommunityListings = mysqlTable("p2pCommunityListings", {
   fixedPrice: decimal("fixedPrice", { precision: 10, scale: 2 }),
   currency: varchar("currency", { length: 3 }).default("RON").notNull(),
   zone: varchar("zone", { length: 100 }).notNull(),
+  // Nullable only for legacy rows created before the governed listing gate.
+  category: varchar("category", { length: 100 }),
+  itemCondition: mysqlEnum("itemCondition", ["new", "used", "prepared", "other"]),
+  imageUrls: json("imageUrls").$type<string[]>(),
+  foodSafety: json("foodSafety").$type<{
+    ingredients: string;
+    allergens: string;
+    storageInstructions: string;
+    useByDate?: string | null;
+  }>(),
+  attestationData: json("attestationData").$type<Record<string, boolean>>(),
+  policyVersion: varchar("policyVersion", { length: 80 }),
+  attestedAt: timestamp("attestedAt"),
   status: mysqlEnum("status", ["pending_review", "approved", "rejected", "closed"]).default("pending_review").notNull(),
   moderationNote: text("moderationNote"),
   moderatedBy: int("moderatedBy"),
