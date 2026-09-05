@@ -1,3 +1,5 @@
+export const MARKETPLACE_LISTING_POLICY_VERSION = "2026-09-05.v1" as const;
+
 export const MARKETPLACE_CATEGORY_POLICIES = [
   { id: "food-groceries", label: "Food & Groceries", minPrice: 1, maxPrice: 5000 },
   { id: "electronics", label: "Electronics", minPrice: 5, maxPrice: 50000 },
@@ -15,6 +17,31 @@ export const MARKETPLACE_CATEGORY_POLICIES = [
 export type MarketplaceCategoryPolicy = (typeof MARKETPLACE_CATEGORY_POLICIES)[number];
 export type MarketplaceCategory = MarketplaceCategoryPolicy["label"];
 
+export const MARKETPLACE_ITEM_CONDITIONS = [
+  { id: "new", label: "New" },
+  { id: "used", label: "Used" },
+  { id: "prepared", label: "Prepared / homemade" },
+  { id: "other", label: "Other" },
+] as const;
+
+export type MarketplaceItemCondition = (typeof MARKETPLACE_ITEM_CONDITIONS)[number]["id"];
+
+export type MarketplacePosterAttestation = {
+  rulesAccepted: boolean;
+  truthfulListing: boolean;
+  authorizedToOffer: boolean;
+  notProhibitedOrRestricted: boolean;
+  moderationAccepted: boolean;
+};
+
+export const MARKETPLACE_POSTING_RULES = [
+  "Use clear, accurate descriptions and real photos of the item being offered.",
+  "Do not list dangerous goods, hazardous materials, counterfeit items, prohibited substances, or other prohibited/restricted goods.",
+  "You must own the item or be authorized to offer it, and the listing must be truthful.",
+  "Safety-sensitive categories may require additional information and compliance review.",
+  "DROPi moderation may reject, remove, or close a listing that does not meet Marketplace rules.",
+] as const;
+
 const categoryByNormalizedKey = new Map<string, MarketplaceCategoryPolicy>();
 for (const policy of MARKETPLACE_CATEGORY_POLICIES) {
   categoryByNormalizedKey.set(policy.id.toLowerCase(), policy);
@@ -31,6 +58,29 @@ export function normalizeMarketplaceCategory(value: string): MarketplaceCategory
     throw new Error("Category is not eligible for the controlled DROPi Marketplace.");
   }
   return policy.label;
+}
+
+export function isMarketplaceFoodCategory(value: string): boolean {
+  return getMarketplaceCategoryPolicy(value)?.id === "food-groceries";
+}
+
+export function assertMarketplacePosterAttestation(input: {
+  policyVersion: string;
+  attestation: MarketplacePosterAttestation;
+}) {
+  if (input.policyVersion !== MARKETPLACE_LISTING_POLICY_VERSION) {
+    throw new Error("Marketplace rules changed. Review and accept the current posting rules before submission.");
+  }
+  const { attestation } = input;
+  if (
+    !attestation.rulesAccepted ||
+    !attestation.truthfulListing ||
+    !attestation.authorizedToOffer ||
+    !attestation.notProhibitedOrRestricted ||
+    !attestation.moderationAccepted
+  ) {
+    throw new Error("All Marketplace posting declarations must be accepted before moderation.");
+  }
 }
 
 export function normalizeMarketplaceZone(value: string): string {
