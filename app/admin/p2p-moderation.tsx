@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useDropiAuth } from "@/lib/auth-context";
+import { p2pMediaSource } from "@/lib/p2p-media-url";
 import { safeGoBack } from "@/lib/safe-back";
 import { trpc } from "@/lib/trpc";
 
@@ -12,7 +13,7 @@ const MODERATOR_ROLES = ["system_administrator", "security_officer", "audit_mana
 export default function P2pModerationScreen() {
   const colors = useColors();
   const router = useRouter();
-  const { user } = useDropiAuth();
+  const { user, token } = useDropiAuth();
   const utils = trpc.useUtils();
   const pending = trpc.p2p.pendingCommunityOffers.useQuery(undefined, { enabled: MODERATOR_ROLES.includes(user?.dropiRole || "") });
   const moderate = trpc.p2p.moderateCommunityOffer.useMutation();
@@ -56,7 +57,7 @@ export default function P2pModerationScreen() {
               {listing.description ? <Text style={{ color: colors.foreground, marginTop: 8 }}>{listing.description}</Text> : null}
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
-                {images.map((url, index) => <Image key={`${url}-${index}`} source={{ uri: url }} style={{ width: 130, height: 130, borderRadius: 10, marginRight: 8 }} />)}
+                {images.map((url, index) => <Image key={`${url}-${index}`} source={p2pMediaSource(url, token)} style={{ width: 130, height: 130, borderRadius: 10, marginRight: 8 }} />)}
               </ScrollView>
               <Text style={{ color: governed ? colors.success : colors.error, fontWeight: "700", fontSize: 12, marginTop: 8 }}>{governed ? `Governed evidence complete · ${listing.policyVersion}` : "Approval blocked: legacy/incomplete governed evidence"}</Text>
               {listing.attestedAt ? <Text style={{ color: colors.muted, fontSize: 11, marginTop: 3 }}>Poster attested: {new Date(listing.attestedAt).toLocaleString()}</Text> : null}
