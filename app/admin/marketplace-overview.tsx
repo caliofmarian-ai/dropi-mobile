@@ -37,6 +37,7 @@ export default function MarketplaceOverviewScreen() {
 
   // Fetch marketplace stats from multiple endpoints
   const pendingProducts = trpc.product.pendingReview.useQuery({ limit: 1, offset: 0 });
+  const pendingP2p = trpc.p2p.pendingCommunityOffers.useQuery();
   const storeList = trpc.store.adminList.useQuery({});
 
   // Compute stats from available data
@@ -49,11 +50,11 @@ export default function MarketplaceOverviewScreen() {
     : 0;
   const lowTrustStores = stores.filter((s: any) => (s.trustScore || 0) < 40).length;
 
-  const isLoading = storeList.isLoading || pendingProducts.isLoading;
+  const isLoading = storeList.isLoading || pendingProducts.isLoading || pendingP2p.isLoading;
 
   const onRefresh = () => {
     setRefreshing(true);
-    Promise.all([storeList.refetch(), pendingProducts.refetch()]).finally(() => setRefreshing(false));
+    Promise.all([storeList.refetch(), pendingProducts.refetch(), pendingP2p.refetch()]).finally(() => setRefreshing(false));
   };
 
   if (isLoading) {
@@ -88,12 +89,21 @@ export default function MarketplaceOverviewScreen() {
         {/* Key Metrics Grid */}
         <View className="flex-row gap-3 mb-3">
           <MetricCard
-            label="Pending Moderation"
+            label="Pending Products"
             value={String(pendingProducts.data?.total || 0)}
             icon="📋"
             color="#F59E0B"
             onPress={() => router.push("/admin/moderation")}
           />
+          <MetricCard
+            label="Pending P2P"
+            value={String(pendingP2p.data?.length || 0)}
+            icon="🤝"
+            color="#2563EB"
+            onPress={() => router.push("/admin/p2p-moderation" as any)}
+          />
+        </View>
+        <View className="flex-row gap-3 mb-3">
           <MetricCard
             label="Pending Stores"
             value={String(pendingStores)}
@@ -101,8 +111,6 @@ export default function MarketplaceOverviewScreen() {
             color="#8B5CF6"
             onPress={() => {}}
           />
-        </View>
-        <View className="flex-row gap-3 mb-3">
           <MetricCard
             label="Trust Alerts"
             value={String(lowTrustStores)}
@@ -110,6 +118,8 @@ export default function MarketplaceOverviewScreen() {
             color="#EF4444"
             onPress={() => {}}
           />
+        </View>
+        <View className="flex-row gap-3 mb-3">
           <MetricCard
             label="Active Stores"
             value={String(activeStores)}
@@ -117,8 +127,6 @@ export default function MarketplaceOverviewScreen() {
             color="#10B981"
             onPress={() => {}}
           />
-        </View>
-        <View className="flex-row gap-3 mb-4">
           <MetricCard
             label="Avg Trust Score"
             value={String(avgTrust)}
@@ -126,6 +134,8 @@ export default function MarketplaceOverviewScreen() {
             color={avgTrust >= 70 ? "#10B981" : avgTrust >= 50 ? "#F59E0B" : "#EF4444"}
             onPress={() => {}}
           />
+        </View>
+        <View className="flex-row gap-3 mb-4">
           <MetricCard
             label="Suspended"
             value={String(suspendedStores)}
@@ -133,6 +143,7 @@ export default function MarketplaceOverviewScreen() {
             color="#EF4444"
             onPress={() => {}}
           />
+          <View style={{ flex: 1 }} />
         </View>
 
         {/* Quick Actions */}
@@ -140,9 +151,16 @@ export default function MarketplaceOverviewScreen() {
         <View className="gap-2 mb-4">
           <ActionButton
             title="Review Pending Products"
-            subtitle="Approve or reject submitted products"
+            subtitle="Approve or reject merchant-submitted products"
             icon="📦"
             onPress={() => router.push("/admin/moderation")}
+            colors={colors}
+          />
+          <ActionButton
+            title="Review P2P Community Offers"
+            subtitle="Inspect photos, declarations and food/consumption information"
+            icon="🤝"
+            onPress={() => router.push("/admin/p2p-moderation" as any)}
             colors={colors}
           />
           <ActionButton
@@ -201,16 +219,11 @@ export default function MarketplaceOverviewScreen() {
   );
 }
 
-// === Helper Components ===
-
 function MetricCard({ label, value, icon, color, onPress }: {
   label: string; value: string; icon: string; color: string; onPress: () => void;
 }) {
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [{ flex: 1, opacity: pressed ? 0.7 : 1 }]}
-    >
+    <Pressable onPress={onPress} style={({ pressed }) => [{ flex: 1, opacity: pressed ? 0.7 : 1 }]}>
       <View className="bg-surface border border-border rounded-2xl p-4">
         <View className="flex-row items-center justify-between mb-2">
           <Text style={{ fontSize: 20 }}>{icon}</Text>
@@ -228,16 +241,7 @@ function ActionButton({ title, subtitle, icon, onPress, colors }: {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [{
-        opacity: pressed ? 0.7 : 1,
-        backgroundColor: colors.surface,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-        padding: 14,
-        flexDirection: "row",
-        alignItems: "center",
-      }]}
+      style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 14, flexDirection: "row", alignItems: "center" }]}
     >
       <Text style={{ fontSize: 20, marginRight: 12 }}>{icon}</Text>
       <View style={{ flex: 1 }}>
@@ -249,19 +253,12 @@ function ActionButton({ title, subtitle, icon, onPress, colors }: {
   );
 }
 
-function HealthBar({ label, count, total, color }: {
-  label: string; count: number; total: number; color: string;
-}) {
+function HealthBar({ label, count, total, color }: { label: string; count: number; total: number; color: string }) {
   const pct = total > 0 ? (count / total) * 100 : 0;
   return (
     <View className="mb-2">
-      <View className="flex-row justify-between mb-1">
-        <Text className="text-xs text-muted">{label}</Text>
-        <Text className="text-xs font-medium text-foreground">{count} ({Math.round(pct)}%)</Text>
-      </View>
-      <View style={{ height: 6, backgroundColor: color + "20", borderRadius: 3 }}>
-        <View style={{ height: 6, width: `${pct}%`, backgroundColor: color, borderRadius: 3 }} />
-      </View>
+      <View className="flex-row justify-between mb-1"><Text className="text-xs text-muted">{label}</Text><Text className="text-xs font-medium text-foreground">{count} ({Math.round(pct)}%)</Text></View>
+      <View style={{ height: 6, backgroundColor: color + "20", borderRadius: 3 }}><View style={{ height: 6, width: `${pct}%`, backgroundColor: color, borderRadius: 3 }} /></View>
     </View>
   );
 }
@@ -278,22 +275,9 @@ function TrustDistribution({ stores }: { stores: any[] }) {
   return (
     <View>
       {ranges.map((range) => {
-        const count = stores.filter((s: any) => {
-          const score = s.trustScore || 0;
-          return score >= range.min && score <= range.max;
-        }).length;
+        const count = stores.filter((s: any) => { const score = s.trustScore || 0; return score >= range.min && score <= range.max; }).length;
         const pct = stores.length > 0 ? (count / stores.length) * 100 : 0;
-        return (
-          <View key={range.label} className="mb-2">
-            <View className="flex-row justify-between mb-1">
-              <Text className="text-xs text-muted">{range.label}</Text>
-              <Text className="text-xs font-medium text-foreground">{count}</Text>
-            </View>
-            <View style={{ height: 4, backgroundColor: range.color + "20", borderRadius: 2 }}>
-              <View style={{ height: 4, width: `${Math.max(pct, 2)}%`, backgroundColor: range.color, borderRadius: 2 }} />
-            </View>
-          </View>
-        );
+        return <View key={range.label} className="mb-2"><View className="flex-row justify-between mb-1"><Text className="text-xs text-muted">{range.label}</Text><Text className="text-xs font-medium text-foreground">{count}</Text></View><View style={{ height: 4, backgroundColor: range.color + "20", borderRadius: 2 }}><View style={{ height: 4, width: `${Math.max(pct, 2)}%`, backgroundColor: range.color, borderRadius: 2 }} /></View></View>;
       })}
     </View>
   );
