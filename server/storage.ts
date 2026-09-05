@@ -29,15 +29,8 @@ function appendHashSuffix(relKey: string): string {
   return `${relKey.slice(0, lastDot)}_${hash}${relKey.slice(lastDot)}`;
 }
 
-export async function storagePut(
-  relKey: string,
-  data: Buffer | Uint8Array | string,
-  contentType = "application/octet-stream",
-): Promise<{ key: string; url: string }> {
+async function requestPresignedPut(key: string) {
   const { forgeUrl, forgeKey } = getForgeConfig();
-  const key = appendHashSuffix(normalizeKey(relKey));
-
-  // 1. Get presigned PUT URL from Forge
   const presignUrl = new URL("v1/storage/presign/put", forgeUrl + "/");
   presignUrl.searchParams.set("path", key);
 
@@ -50,10 +43,32 @@ export async function storagePut(
     throw new Error(`Storage presign failed (${presignResp.status}): ${msg}`);
   }
 
-  const { url: s3Url } = (await presignResp.json()) as { url: string };
-  if (!s3Url) throw new Error("Forge returned empty presign URL");
+  const { url } = (await presignResp.json()) as { url: string };
+  if (!url) throw new Error("Forge returned empty presign URL");
+  return url;
+}
 
-  // 2. PUT file directly to S3
+/**
+ * Creates a one-time direct-upload target without exposing the Forge credential.
+ * The caller must authenticate/authorize before this helper is invoked and must
+ * constrain the key namespace/content type itself.
+ */
+export async function storageCreatePresignedPut(
+  relKey: string,
+): Promise<{ key: string; uploadUrl: string; publicPath: string }> {
+  const key = appendHashSuffix(normalizeKey(relKey));
+  const uploadUrl = await requestPresignedPut(key);
+  return { key, uploadUrl, publicPath: `/manus-storage/${key}` };
+}
+
+export async function storagePut(
+  relKey: string,
+  data: Buffer | Uint8Array | string,
+  contentType = "application/octet-stream",
+): Promise<{ key: string; url: string }> {
+  const key = appendHashSuffix(normalizeKey(relKey));
+  const s3Url = await requestPresignedPut(key);
+
   const blob =
     typeof data === "string"
       ? new Blob([data], { type: contentType })
