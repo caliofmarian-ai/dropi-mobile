@@ -53,21 +53,26 @@ function getApiTrpcUrl(): string {
 }
 
 // Visual demo identities are derived from the same canonical role registry as
-// real IMPL-008 test accounts. They deliberately have negative local IDs and no
-// server token so they cannot be mistaken for persisted accounts.
+// real IMPL-008 test accounts, but they deliberately use reserved `.invalid`
+// addresses, negative local IDs, and no server token. This prevents a visual
+// demo identity from being confused with the DB-backed TEST HUMAN account for
+// the same role.
 const DEMO_USERS: Record<string, DropiUser> = Object.fromEntries(
-  TEST_ROLE_IDENTITIES.map((identity, index) => [
-    identity.humanEmail,
-    {
-      id: -(index + 1),
-      name: `Demo ${identity.label}`,
-      email: identity.humanEmail,
-      dropiRole: identity.role,
-      channel: identity.channel,
-      zone: identity.channel === "ADMIN" ? null : "Demo Zone",
-      isAuthenticated: true,
-    },
-  ]),
+  TEST_ROLE_IDENTITIES.map((identity, index) => {
+    const demoEmail = `visual-demo+${identity.role}@dropi.invalid`;
+    return [
+      demoEmail,
+      {
+        id: -(index + 1),
+        name: `Demo ${identity.label}`,
+        email: demoEmail,
+        dropiRole: identity.role,
+        channel: identity.channel,
+        zone: identity.channel === "ADMIN" ? null : "Demo Zone",
+        isAuthenticated: true,
+      },
+    ] as const;
+  }),
 );
 
 async function apiCall(path: string, input: any, token?: string | null) {
