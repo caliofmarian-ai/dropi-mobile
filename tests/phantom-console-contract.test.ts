@@ -69,18 +69,31 @@ describe("IMPL-008 governed Phantom Console", () => {
     expect(consoleScreen).toContain("critical actions are audited");
   });
 
-  it("separates real, canonical test-human, and AI role-agent identities by governed channel", () => {
+  it("uses a hierarchical account directory instead of rendering every identity in one long list", () => {
     const consoleScreen = source("app/admin/phantom-console.tsx");
 
-    expect(consoleScreen).toContain('import { TEST_ROLE_IDENTITIES } from "@/shared/test-role-accounts"');
+    expect(consoleScreen).toContain('type InventoryView = "root" | "test" | "normal" | "all-ai"');
+    expect(consoleScreen).toContain('type TestAccountKind = "human" | "ai" | null');
     expect(consoleScreen).toContain('const CHANNEL_ORDER = ["C1", "C2", "C3", "ADMIN"] as const');
-    expect(consoleScreen).toContain('title: "REAL ACCOUNTS"');
-    expect(consoleScreen).toContain('title: "TEST HUMAN ACCOUNTS"');
-    expect(consoleScreen).toContain('title: "AI ROLE AGENTS"');
-    expect(consoleScreen).toContain('if (target.isAIAgent) return "ai"');
-    expect(consoleScreen).toContain('TEST_HUMAN_EMAILS.has(normalizedEmail(target.email))');
-    expect(consoleScreen).toContain('Human counterpart ID:');
-    expect(consoleScreen).toContain('CHANNEL {channelGroup.channel}');
+    expect(consoleScreen).toContain('"TEST ACCOUNTS"');
+    expect(consoleScreen).toContain('"NORMAL ACCOUNTS"');
+    expect(consoleScreen).toContain('"ALL AI ACCOUNTS"');
+    expect(consoleScreen).toContain('"HUMAN"');
+    expect(consoleScreen).toContain('"AI"');
+    expect(consoleScreen).toContain('`CHANNEL ${entry.channel}`');
+    expect(consoleScreen).toContain("Accounts remain hidden until a channel is opened.");
+  });
+
+  it("keeps test AI classification distinct while allowing a global all-AI view", () => {
+    const consoleScreen = source("app/admin/phantom-console.tsx");
+
+    expect(consoleScreen).toContain("TEST_HUMAN_EMAILS");
+    expect(consoleScreen).toContain("TEST_AI_EMAILS");
+    expect(consoleScreen).toContain("identity.aiEmail.trim().toLowerCase()");
+    expect(consoleScreen).toContain("sortedTargets.filter(isTestAi)");
+    expect(consoleScreen).toContain("sortedTargets.filter((target) => target.isAIAgent)");
+    expect(consoleScreen).toContain("they are the same database records, not duplicates");
+    expect(consoleScreen).toContain("Human counterpart ID:");
     expect(consoleScreen).not.toContain('title: "AI MIRRORS"');
   });
 });
