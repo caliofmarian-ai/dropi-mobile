@@ -58,8 +58,8 @@ const ACCOUNT_GROUPS: ReadonlyArray<{
   },
   {
     key: "ai",
-    title: "AI MIRRORS",
-    subtitle: "AI agent identities paired with their canonical human test counterparts.",
+    title: "AI ROLE AGENTS",
+    subtitle: "Canonical AI agents that operate under their assigned role permissions and are linked to a human counterpart.",
   },
 ];
 
@@ -225,7 +225,7 @@ export default function PhantomConsoleScreen() {
 
     Alert.alert(
       "Provision test-role accounts?",
-      `This will create or reconcile 29 human test identities and 29 AI mirrors for zone ${zone}. The real base Super Admin is not modified. The password is used for this provisioning request and is not shown in the audit record.`,
+      `This will create or reconcile 29 human test identities and 29 AI role agents for zone ${zone}. The AI agents retain the same canonical role permissions as their human counterparts. The real base Super Admin is not modified. The password is used for this provisioning request and is not shown in the audit record.`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -240,7 +240,7 @@ export default function PhantomConsoleScreen() {
               await refresh();
               Alert.alert(
                 "Test-role accounts ready",
-                `${result.humanAccounts} human + ${result.aiAccounts} AI mirrors across ${result.roles} roles. ${result.identitiesIncludingBaseSuperAdmin} canonical identities including the unchanged base Super Admin.`,
+                `${result.humanAccounts} human + ${result.aiAccounts} AI role agents across ${result.roles} roles. ${result.identitiesIncludingBaseSuperAdmin} canonical identities including the unchanged base Super Admin.`,
               );
             } catch (err: any) {
               Alert.alert("Provisioning blocked", err.message || "Unable to provision test-role accounts");
@@ -281,7 +281,7 @@ export default function PhantomConsoleScreen() {
   const renderTargetCard = useCallback((target: PhantomTarget) => {
     const disabled = !target.isActive || target.id === user?.id || enteringId !== null;
     const group = accountGroupFor(target);
-    const badge = group === "ai" ? "AI MIRROR" : group === "test-human" ? "TEST HUMAN" : "REAL";
+    const badge = group === "ai" ? "AI ROLE AGENT" : group === "test-human" ? "TEST HUMAN" : "REAL";
 
     return (
       <View key={target.id} className="bg-surface border border-border rounded-xl p-4 mb-3">
@@ -300,7 +300,7 @@ export default function PhantomConsoleScreen() {
             </Text>
             {target.isAIAgent ? (
               <Text className="text-xs text-muted mt-1">
-                Human pair ID: {target.humanPairId ?? "not materialized"} · mode: {target.agentMode || "unset"}
+                Human counterpart ID: {target.humanPairId ?? "not materialized"} · mode: {target.agentMode || "unset"}
               </Text>
             ) : null}
           </View>
@@ -363,7 +363,7 @@ export default function PhantomConsoleScreen() {
         <View className="bg-surface border border-border rounded-xl p-4 mb-4">
           <Text className="text-sm font-semibold text-foreground">Canonical test-role population</Text>
           <Text className="text-xs text-muted mt-2 leading-5">
-            The real base Super Admin can create or reconcile all 29 human roles and their 29 AI mirrors directly from this console. No Railway provisioning variables are required for this operator flow.
+            The real base Super Admin can create or reconcile all 29 human roles and their 29 AI role agents directly from this console. Each AI agent carries the assigned role permissions and is linked to its human counterpart. No Railway provisioning variables are required for this operator flow.
           </Text>
 
           <Text className="text-xs font-medium text-foreground mt-4 mb-1.5">Test operating zone</Text>
@@ -430,7 +430,7 @@ export default function PhantomConsoleScreen() {
         <View className="bg-surface border border-border rounded-xl p-3 mb-4">
           <Text className="text-xs font-semibold text-foreground">IDENTITY INVENTORY</Text>
           <Text className="text-xs text-muted mt-1">
-            Real {identityCounts.real} · Test humans {identityCounts["test-human"]} · AI mirrors {identityCounts.ai}
+            Real {identityCounts.real} · Test humans {identityCounts["test-human"]} · AI role agents {identityCounts.ai}
           </Text>
         </View>
 
