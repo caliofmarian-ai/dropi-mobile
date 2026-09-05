@@ -7,11 +7,14 @@ function source(relativePath: string) {
 }
 
 describe("IMPL-008 visual demo role boundary", () => {
-  it("derives demo roles from the canonical test-role registry", () => {
+  it("derives demo roles from the canonical registry without reusing DB-backed test emails", () => {
     const auth = source("lib/auth-context.tsx");
 
     expect(auth).toContain('import { TEST_ROLE_IDENTITIES } from "@/shared/test-role-accounts"');
     expect(auth).toContain("TEST_ROLE_IDENTITIES.map((identity, index)");
+    expect(auth).toContain('const demoEmail = `visual-demo+${identity.role}@dropi.invalid`;');
+    expect(auth).toContain("email: demoEmail");
+    expect(auth).not.toContain("email: identity.humanEmail");
     expect(auth).not.toContain("customer@dropi.app");
     expect(auth).not.toContain("pilot@dropi.app");
   });
