@@ -13,6 +13,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { startOrchestrator } from "./orchestrator";
 import { ENV } from "./env";
+import { registerP2pMediaRoutes } from "../p2p-media";
 import { SECURITY_BODY_LIMIT } from "../../shared/security-baseline-policy";
 import {
   apiRateLimitMiddleware,
@@ -75,6 +76,7 @@ async function startServer() {
   app.use(safeRequestShapeMiddleware);
 
   registerStorageProxy(app);
+  registerP2pMediaRoutes(app);
   registerOAuthRoutes(app);
 
   app.get("/api/health", (_req, res) => {
