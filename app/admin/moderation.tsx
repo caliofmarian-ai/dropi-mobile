@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -15,6 +16,12 @@ import { useColors } from "@/hooks/use-colors";
 import { useDropiAuth } from "@/lib/auth-context";
 import { safeGoBack } from "@/lib/safe-back";
 import { getRequiredApiBaseUrl } from "@/constants/oauth";
+import { trpc } from "@/lib/trpc";
+
+function storageUrl(path: string) {
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${getRequiredApiBaseUrl("moderation media")}${path.startsWith("/") ? path : `/${path}`}`;
+}
 
 export default function AdminModerationPanel() {
   const colors = useColors();
@@ -29,10 +36,19 @@ export default function AdminModerationPanel() {
   const [rejectNote, setRejectNote] = useState<Record<number, string>>({});
   const [showRejectInput, setShowRejectInput] = useState<number | null>(null);
   const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0 });
+  const [p2pRejectNote, setP2pRejectNote] = useState<Record<number, string>>({});
+  const [p2pActionLoading, setP2pActionLoading] = useState<number | null>(null);
 
-  // Check admin access (system_administrator, security_officer, audit_manager can moderate)
+  // Existing merchant moderation visibility is preserved. P2P moderation below
+  // is intentionally narrower because the server's adminProcedure is System Administrator only.
   const adminRoles = ["system_administrator", "security_officer", "audit_manager", "configuration_manager", "analytics_manager"];
   const isAdmin = adminRoles.includes(user?.dropiRole || "");
+  const isSystemAdministrator = user?.dropiRole === "system_administrator" && user?.channel === "ADMIN";
+
+  const p2pPending = trpc.p2p.pendingCommunityOffers.useQuery(undefined, {
+    enabled: isSystemAdministrator,
+  });
+  const moderateP2p = trpc.p2p.moderateCommunityOffer.useMutation();
 
   const apiCall = useCallback(async (path: string, method = "GET", body?: any) => {
     const baseUrl = getRequiredApiBaseUrl("admin moderation");
@@ -49,14 +65,12 @@ export default function AdminModerationPanel() {
 
   const fetchProducts = useCallback(async () => {
     try {
-      // Use the pendingReview endpoint for pending, or a general admin list
       if (filter === "pending_review") {
         const res = await apiCall("/api/trpc/product.pendingReview?input=" + encodeURIComponent(JSON.stringify({ json: { limit: 50, offset: 0 } })));
         const data = res?.result?.data?.json;
         setProducts(data?.products || []);
         setStats((s) => ({ ...s, pending: data?.total || 0 }));
       } else {
-        // For other filters, use listActive with admin override or just show pending
         const res = await apiCall("/api/trpc/product.pendingReview?input=" + encodeURIComponent(JSON.stringify({ json: { limit: 100, offset: 0 } })));
         const data = res?.result?.data?.json;
         setProducts(data?.products || []);
@@ -76,7 +90,7 @@ export default function AdminModerationPanel() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchProducts();
+    await Promise.all([fetchProducts(), isSystemAdministrator ? p2pPending.refetch() : Promise.resolve()]);
     setRefreshing(false);
   };
 
@@ -115,6 +129,31 @@ export default function AdminModerationPanel() {
     setActionLoading(null);
   };
 
+  async function moderateCommunityOffer(listingId: number, action: "approve" | "reject") {
+    const note = p2pRejectNote[listingId]?.trim();
+    if (action === "reject" && !note) {
+      return Alert.alert("Rejection reason required", "Explain why the community offer does not meet Marketplace rules.");
+    }
+    setP2pActionLoading(listingId);
+    try {
+      await moderateP2p.mutateAsync({
+        listingId,
+        action,
+        note: action === "approve" ? "Governance evidence reviewed by System Administrator" : note,
+      });
+      setP2pRejectNote((current) => {
+        const next = { ...current };
+        delete next[listingId];
+        return next;
+      });
+      await p2pPending.refetch();
+    } catch (error) {
+      Alert.alert("Community offer not moderated", error instanceof Error ? error.message : "Request failed.");
+    } finally {
+      setP2pActionLoading(null);
+    }
+  }
+
   if (!isAdmin) {
     return (
       <ScreenContainer className="p-6">
@@ -123,10 +162,7 @@ export default function AdminModerationPanel() {
           <Text className="text-muted mt-2 text-center">
             Only administrators and marketplace moderators can access this panel.
           </Text>
-          <Pressable
-            onPress={() => safeGoBack(router)}
-            style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, marginTop: 24 }]}
-          >
+          <Pressable onPress={() => safeGoBack(router)} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, marginTop: 24 }]}>
             <View className="bg-primary px-6 py-3 rounded-xl">
               <Text className="text-background font-semibold">Go Back</Text>
             </View>
@@ -142,7 +178,6 @@ export default function AdminModerationPanel() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        {/* Header */}
         <View className="px-6 pt-6 pb-4">
           <View className="flex-row items-center justify-between">
             <Pressable onPress={() => safeGoBack(router)} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
@@ -153,7 +188,102 @@ export default function AdminModerationPanel() {
           </View>
         </View>
 
-        {/* Stats Cards */}
+        {isSystemAdministrator && (
+          <View className="px-6 mb-6">
+            <View className="flex-row items-center justify-between mb-3">
+              <View>
+                <Text className="text-lg font-bold text-foreground">P2P Community offers</Text>
+                <Text className="text-xs text-muted mt-1">System Administrator reviews item media, classification and policy evidence before public approval.</Text>
+              </View>
+              {p2pPending.isFetching && <ActivityIndicator size="small" color={colors.primary} />}
+            </View>
+
+            {(p2pPending.data || []).length === 0 ? (
+              <View className="bg-surface rounded-xl p-4 border border-border">
+                <Text className="text-muted text-sm">No P2P community offers pending review.</Text>
+              </View>
+            ) : (
+              (p2pPending.data || []).map((listing) => {
+                const images = Array.isArray(listing.imagePaths) ? listing.imagePaths : [];
+                const declarations = listing.posterDeclarations;
+                const completeEvidence = Boolean(
+                  listing.category && listing.itemCondition && listing.policyVersion && images.length > 0 && declarations,
+                );
+                return (
+                  <View key={listing.id} className="bg-surface rounded-2xl border border-border overflow-hidden mb-4">
+                    {images[0] ? (
+                      <Image source={{ uri: storageUrl(images[0]) }} style={{ width: "100%", height: 210, backgroundColor: colors.background }} resizeMode="cover" />
+                    ) : (
+                      <View style={{ height: 90, alignItems: "center", justifyContent: "center", backgroundColor: colors.background }}>
+                        <Text style={{ color: colors.error, fontWeight: "700" }}>No governed item photo</Text>
+                      </View>
+                    )}
+                    <View className="p-4">
+                      <Text className="text-base font-bold text-foreground">{listing.title}</Text>
+                      <Text className="text-xs text-muted mt-1">
+                        {listing.category || "Legacy / unclassified"} • {listing.itemCondition || "condition missing"} • {listing.offerType.replace("_", " ")} • {listing.zone}
+                      </Text>
+                      {listing.fixedPrice != null && <Text className="text-primary font-bold mt-2">{listing.currency} {Number(listing.fixedPrice).toFixed(2)}</Text>}
+                      {listing.description ? <Text className="text-sm text-muted mt-2">{listing.description}</Text> : null}
+
+                      <View className="bg-background rounded-xl p-3 mt-3">
+                        <Text className="text-xs font-bold text-foreground">Governance evidence</Text>
+                        <Text className="text-xs text-muted mt-2">Photos: {images.length}</Text>
+                        <Text className="text-xs text-muted mt-1">Policy: {listing.policyVersion || "missing"}</Text>
+                        <Text className="text-xs text-muted mt-1">Accepted: {listing.policyAcceptedAt ? new Date(listing.policyAcceptedAt).toLocaleString() : "missing"}</Text>
+                        {declarations ? (
+                          <>
+                            <Text className="text-xs text-muted mt-1">Rules accepted: {declarations.rulesAccepted ? "yes" : "no"}</Text>
+                            <Text className="text-xs text-muted mt-1">Truthful listing: {declarations.truthfulListing ? "yes" : "no"}</Text>
+                            <Text className="text-xs text-muted mt-1">Authorized to offer: {declarations.authorizedToOffer ? "yes" : "no"}</Text>
+                            <Text className="text-xs text-muted mt-1">Not prohibited/restricted declared: {declarations.notProhibitedOrRestricted ? "yes" : "no"}</Text>
+                            <Text className="text-xs text-muted mt-1">Moderation accepted: {declarations.moderationAccepted ? "yes" : "no"}</Text>
+                          </>
+                        ) : <Text className="text-xs text-error mt-1">Poster declarations missing</Text>}
+                      </View>
+
+                      {listing.foodSafety && (
+                        <View className="bg-background rounded-xl p-3 mt-3">
+                          <Text className="text-xs font-bold text-foreground">Food / consumable declarations</Text>
+                          <Text className="text-xs text-muted mt-2">Ingredients / contents: {listing.foodSafety.ingredients}</Text>
+                          <Text className="text-xs text-muted mt-1">Allergens: {listing.foodSafety.allergens}</Text>
+                          <Text className="text-xs text-muted mt-1">Storage: {listing.foodSafety.storageInstructions}</Text>
+                          {listing.foodSafety.useBy ? <Text className="text-xs text-muted mt-1">Use by: {new Date(listing.foodSafety.useBy).toLocaleDateString()}</Text> : null}
+                        </View>
+                      )}
+
+                      {!completeEvidence && (
+                        <Text className="text-xs text-error font-semibold mt-3">Legacy/incomplete listing. Backend approval is blocked until current governance evidence exists.</Text>
+                      )}
+
+                      <TextInput
+                        value={p2pRejectNote[listing.id] || ""}
+                        onChangeText={(value) => setP2pRejectNote((current) => ({ ...current, [listing.id]: value }))}
+                        placeholder="Rejection reason (required only for reject)"
+                        placeholderTextColor={colors.muted}
+                        multiline
+                        style={{ minHeight: 62, marginTop: 12, borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 10, color: colors.foreground, backgroundColor: colors.background, textAlignVertical: "top" }}
+                      />
+                      <View className="flex-row gap-3 mt-3">
+                        <Pressable disabled={p2pActionLoading === listing.id} onPress={() => void moderateCommunityOffer(listing.id, "reject")} style={({ pressed }) => [{ opacity: pressed || p2pActionLoading === listing.id ? 0.6 : 1, flex: 1 }]}>
+                          <View className="bg-error/10 border border-error/30 py-3 rounded-xl items-center">
+                            <Text className="text-error font-semibold">Reject</Text>
+                          </View>
+                        </Pressable>
+                        <Pressable disabled={p2pActionLoading === listing.id || !completeEvidence} onPress={() => void moderateCommunityOffer(listing.id, "approve")} style={({ pressed }) => [{ opacity: pressed || p2pActionLoading === listing.id || !completeEvidence ? 0.5 : 1, flex: 1 }]}>
+                          <View className="bg-success py-3 rounded-xl items-center">
+                            {p2pActionLoading === listing.id ? <ActivityIndicator size="small" color="#fff" /> : <Text className="text-background font-semibold">Approve</Text>}
+                          </View>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </View>
+                );
+              })
+            )}
+          </View>
+        )}
+
         <View className="px-6 flex-row gap-3 mb-4">
           <View className="flex-1 bg-warning/10 rounded-xl p-3 items-center">
             <Text className="text-2xl font-bold text-warning">{stats.pending}</Text>
@@ -169,17 +299,10 @@ export default function AdminModerationPanel() {
           </View>
         </View>
 
-        {/* Filter Tabs */}
         <View className="px-6 flex-row gap-2 mb-4">
           {(["pending_review", "approved", "rejected"] as const).map((f) => (
-            <Pressable
-              key={f}
-              onPress={() => setFilter(f)}
-              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-            >
-              <View
-                className={`px-4 py-2 rounded-full ${filter === f ? "bg-primary" : "bg-surface"}`}
-              >
+            <Pressable key={f} onPress={() => setFilter(f)} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
+              <View className={`px-4 py-2 rounded-full ${filter === f ? "bg-primary" : "bg-surface"}`}>
                 <Text className={`text-sm font-medium ${filter === f ? "text-background" : "text-muted"}`}>
                   {f === "pending_review" ? "Pending" : f === "approved" ? "Approved" : "Rejected"}
                 </Text>
@@ -188,7 +311,10 @@ export default function AdminModerationPanel() {
           ))}
         </View>
 
-        {/* Product Queue */}
+        <View className="px-6 mb-2">
+          <Text className="text-lg font-bold text-foreground">Merchant products</Text>
+        </View>
+
         {loading ? (
           <View className="py-12 items-center">
             <ActivityIndicator size="large" color={colors.primary} />
@@ -206,75 +332,35 @@ export default function AdminModerationPanel() {
           <View className="px-6 gap-4">
             {products.map((product) => (
               <View key={product.id} className="bg-surface rounded-2xl border border-border overflow-hidden">
-                {/* Product Header */}
                 <View className="p-4 border-b border-border">
                   <View className="flex-row items-start justify-between">
                     <View className="flex-1 mr-3">
-                      <Text className="text-base font-semibold text-foreground" numberOfLines={2}>
-                        {product.name}
-                      </Text>
-                      <Text className="text-sm text-muted mt-1">
-                        {product.category} • {product.zone}
-                      </Text>
+                      <Text className="text-base font-semibold text-foreground" numberOfLines={2}>{product.name}</Text>
+                      <Text className="text-sm text-muted mt-1">{product.category} • {product.zone}</Text>
                     </View>
                     <View className="bg-primary/10 px-3 py-1 rounded-full">
-                      <Text className="text-primary font-bold text-sm">
-                        {parseFloat(product.price).toFixed(2)} {product.currency}
-                      </Text>
+                      <Text className="text-primary font-bold text-sm">{parseFloat(product.price).toFixed(2)} {product.currency}</Text>
                     </View>
                   </View>
                 </View>
 
-                {/* Product Details */}
                 <View className="p-4 gap-2">
-                  {product.description && (
-                    <Text className="text-sm text-muted" numberOfLines={3}>
-                      {product.description}
-                    </Text>
-                  )}
-
+                  {product.description && <Text className="text-sm text-muted" numberOfLines={3}>{product.description}</Text>}
                   <View className="flex-row flex-wrap gap-2 mt-1">
-                    <View className="bg-background px-2 py-1 rounded">
-                      <Text className="text-xs text-muted">
-                        Weight: {parseFloat(product.weight).toFixed(0)}g
-                      </Text>
-                    </View>
-                    {product.dimensions && (
-                      <View className="bg-background px-2 py-1 rounded">
-                        <Text className="text-xs text-muted">
-                          {product.dimensions.l}×{product.dimensions.w}×{product.dimensions.h}cm
-                        </Text>
-                      </View>
-                    )}
-                    {product.deliveryModes && (
-                      <View className="bg-background px-2 py-1 rounded">
-                        <Text className="text-xs text-muted">
-                          🚚 {(product.deliveryModes as string[]).join(", ")}
-                        </Text>
-                      </View>
-                    )}
-                    {product.isFragile && (
-                      <View className="bg-warning/10 px-2 py-1 rounded">
-                        <Text className="text-xs text-warning">⚠️ Fragile</Text>
-                      </View>
-                    )}
+                    <View className="bg-background px-2 py-1 rounded"><Text className="text-xs text-muted">Weight: {parseFloat(product.weight).toFixed(0)}g</Text></View>
+                    {product.dimensions && <View className="bg-background px-2 py-1 rounded"><Text className="text-xs text-muted">{product.dimensions.l}×{product.dimensions.w}×{product.dimensions.h}cm</Text></View>}
+                    {product.deliveryModes && <View className="bg-background px-2 py-1 rounded"><Text className="text-xs text-muted">🚚 {(product.deliveryModes as string[]).join(", ")}</Text></View>}
+                    {product.isFragile && <View className="bg-warning/10 px-2 py-1 rounded"><Text className="text-xs text-warning">⚠️ Fragile</Text></View>}
                   </View>
-
-                  {/* Auto-moderation notes */}
                   {product.moderationNote && (
                     <View className="bg-warning/5 border border-warning/20 rounded-lg p-3 mt-2">
                       <Text className="text-xs font-medium text-warning mb-1">Auto-Moderation Notes:</Text>
                       <Text className="text-xs text-muted">{product.moderationNote}</Text>
                     </View>
                   )}
-
-                  {/* Images count */}
-                  <Text className="text-xs text-muted mt-1">
-                    📷 {product.images?.length || 0} image(s) • Stock: {product.stock ?? "∞"}
-                  </Text>
+                  <Text className="text-xs text-muted mt-1">📷 {product.images?.length || 0} image(s) • Stock: {product.stock ?? "∞"}</Text>
                 </View>
 
-                {/* Action Buttons (only for pending) */}
                 {filter === "pending_review" && (
                   <View className="p-4 border-t border-border">
                     {showRejectInput === product.id ? (
@@ -290,51 +376,24 @@ export default function AdminModerationPanel() {
                           style={{ minHeight: 70, color: colors.foreground }}
                         />
                         <View className="flex-row gap-2">
-                          <Pressable
-                            onPress={() => { setShowRejectInput(null); }}
-                            style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, flex: 1 }]}
-                          >
-                            <View className="bg-surface border border-border py-3 rounded-xl items-center">
-                              <Text className="text-muted font-medium">Cancel</Text>
-                            </View>
+                          <Pressable onPress={() => { setShowRejectInput(null); }} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, flex: 1 }]}>
+                            <View className="bg-surface border border-border py-3 rounded-xl items-center"><Text className="text-muted font-medium">Cancel</Text></View>
                           </Pressable>
-                          <Pressable
-                            onPress={() => handleReject(product.id)}
-                            disabled={actionLoading === product.id}
-                            style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, flex: 1 }]}
-                          >
+                          <Pressable onPress={() => handleReject(product.id)} disabled={actionLoading === product.id} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, flex: 1 }]}>
                             <View className="bg-error py-3 rounded-xl items-center">
-                              {actionLoading === product.id ? (
-                                <ActivityIndicator size="small" color="#fff" />
-                              ) : (
-                                <Text className="text-background font-semibold">Confirm Reject</Text>
-                              )}
+                              {actionLoading === product.id ? <ActivityIndicator size="small" color="#fff" /> : <Text className="text-background font-semibold">Confirm Reject</Text>}
                             </View>
                           </Pressable>
                         </View>
                       </View>
                     ) : (
                       <View className="flex-row gap-3">
-                        <Pressable
-                          onPress={() => setShowRejectInput(product.id)}
-                          disabled={actionLoading === product.id}
-                          style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, flex: 1 }]}
-                        >
-                          <View className="bg-error/10 border border-error/30 py-3 rounded-xl items-center">
-                            <Text className="text-error font-semibold">Reject</Text>
-                          </View>
+                        <Pressable onPress={() => setShowRejectInput(product.id)} disabled={actionLoading === product.id} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, flex: 1 }]}>
+                          <View className="bg-error/10 border border-error/30 py-3 rounded-xl items-center"><Text className="text-error font-semibold">Reject</Text></View>
                         </Pressable>
-                        <Pressable
-                          onPress={() => handleApprove(product.id)}
-                          disabled={actionLoading === product.id}
-                          style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, flex: 1 }]}
-                        >
+                        <Pressable onPress={() => handleApprove(product.id)} disabled={actionLoading === product.id} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, flex: 1 }]}>
                           <View className="bg-success py-3 rounded-xl items-center">
-                            {actionLoading === product.id ? (
-                              <ActivityIndicator size="small" color="#fff" />
-                            ) : (
-                              <Text className="text-background font-semibold">Approve</Text>
-                            )}
+                            {actionLoading === product.id ? <ActivityIndicator size="small" color="#fff" /> : <Text className="text-background font-semibold">Approve</Text>}
                           </View>
                         </Pressable>
                       </View>
