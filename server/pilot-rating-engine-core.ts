@@ -1,16 +1,16 @@
 /**
  * DROPi Pilot Rating Engine
- * 
+ *
  * Canonical reference: Delivery_Multimodal §5 — Selecția pilotului
  * "Selecția este făcută de sistem pe baza: eligibilității tehnice,
  *  poziționării, ratingului, istoricului de livrări, mecanismelor de rotație."
- * 
+ *
  * Rating Formula (Blueprint §6.1):
  *   rating = (0.40 × completionRate/100)×5
  *          + (0.25 × onTimeRate/100)×5
  *          + (0.20 × customerRating)
  *          + (0.15 × (1 - incidentRate/100))×5
- * 
+ *
  * Protections (Cap. 6, §6.5.3 DSS):
  * - Rating cannot be manually influenced by any actor
  * - Calculation is deterministic and audited
@@ -494,7 +494,7 @@ export interface PilotCandidate {
 /**
  * Get the automatically selected pilot for a delivery (C1 Marketplace).
  * Returns the top-scored candidate based on proximity, rating, completion, and rotation.
- * 
+ *
  * Canonical: "Pilotul NU este ales «primul care apasă». Selecția este făcută de sistem."
  */
 export async function getAutoSelectedPilot(
@@ -595,7 +595,7 @@ export async function getAutoSelectedPilot(
 /**
  * Get eligible pilots for manual selection in C2/C3 COS channels.
  * Only returns pilots with rating >= cosMinRating AND cosEligible = TRUE.
- * 
+ *
  * Canonical: "COS oferă entității control asupra fluxului (logic)"
  * Condition: "rating bun" (good rating) — defined as >= cosMinRating (default 4.00)
  */
