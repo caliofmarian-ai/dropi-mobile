@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
+import { useLiveTracking } from "@/hooks/use-live-tracking";
 import { useDropiAuth } from "@/lib/auth-context";
 import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
-import { DeliveryMap, createDemoRoute } from "@/components/delivery-map";
-import type { VehicleType } from "@/components/delivery-map";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApiBaseUrl } from "@/constants/oauth";
 import { trpc } from "@/lib/trpc";
@@ -58,12 +57,37 @@ export default function MissionDetailScreen() {
   const [phase, setPhase] = useState<MissionPhase>("detail");
   const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
   const [checkingVerification, setCheckingVerification] = useState(false);
+  const [checks, setChecks] = useState<CheckItem[]>([]);
+  const [statusUpdating, setStatusUpdating] = useState(false);
+
+  // Hooks must stay above all loading/not-found returns so the hook order cannot
+  // change when the mission query resolves.
+  const pilotUpdateStatus = trpc.b2bDelivery.pilotUpdateStatus.useMutation({
+    onError: (err) => {
+      console.warn("[Pilot Status] Update failed:", err.message);
+    },
+  });
+
+  const liveDeliveryId = Number(mission?.orderId || 0);
+  const {
+    position: livePosition,
+    eta: liveEta,
+    connected: liveConnected,
+    error: liveTrackingError,
+  } = useLiveTracking({
+    deliveryId: liveDeliveryId,
+    target: "b2b",
+    enabled: phase === "inflight" && Number.isSafeInteger(liveDeliveryId) && liveDeliveryId > 0,
+  });
 
   const vehicleType = mission?.vehicleType || "drone";
   const isDrone = vehicleType === "drone";
-  const initialChecks = isDrone ? DRONE_PREFLIGHT : TERRESTRIAL_PREFLIGHT;
-  const [checks, setChecks] = useState<CheckItem[]>(initialChecks);
-  const [statusUpdating, setStatusUpdating] = useState(false);
+
+  useEffect(() => {
+    if (!mission?.vehicleType) return;
+    const template = mission.vehicleType === "drone" ? DRONE_PREFLIGHT : TERRESTRIAL_PREFLIGHT;
+    setChecks(template.map((check) => ({ ...check, checked: false })));
+  }, [missionId, mission?.vehicleType]);
 
   if (missionQuery.isLoading) {
     return (
@@ -73,22 +97,17 @@ export default function MissionDetailScreen() {
     );
   }
 
-  // tRPC mutation for pilot status updates (triggers webhooks server-side)
-  const pilotUpdateStatus = trpc.b2bDelivery.pilotUpdateStatus.useMutation({
-    onError: (err) => {
-      console.warn("[Pilot Status] Update failed:", err.message);
-      // Non-blocking: mission flow continues even if server update fails
-    },
-  });
-
-  // Helper to sync status to server (non-blocking for UX)
+  // Helper to sync status to server. Operational transitions fail closed when
+  // the mission is missing its persisted B2B delivery identifier.
   const syncStatusToServer = async (newStatus: string, extras?: { failureReason?: string; incidentType?: "stop" | "fallback" | "failure" }) => {
-    // Only sync if mission has a B2B delivery ID (orderId maps to delivery)
-    if (!mission?.orderId) return;
+    const deliveryId = Number(mission?.orderId);
+    if (!Number.isSafeInteger(deliveryId) || deliveryId <= 0) {
+      throw new Error("Mission is missing a persisted B2B delivery identifier.");
+    }
     setStatusUpdating(true);
     try {
       await pilotUpdateStatus.mutateAsync({
-        deliveryId: mission.orderId,
+        deliveryId,
         newStatus: newStatus as any,
         ...(extras?.failureReason && { failureReason: extras.failureReason }),
         ...(extras?.incidentType && { incidentType: extras.incidentType }),
@@ -108,7 +127,7 @@ export default function MissionDetailScreen() {
 
   const vehicleInfo = VEHICLE_INFO[vehicleType];
   const modeInfo = DELIVERY_MODE_INFO[mission.deliveryMode];
-  const allChecked = checks.every((c) => c.checked);
+  const allChecked = checks.length > 0 && checks.every((c) => c.checked);
 
   const toggleCheck = (checkId: string) => {
     setChecks((prev) => prev.map((c) => (c.id === checkId ? { ...c, checked: !c.checked } : c)));
@@ -372,49 +391,81 @@ export default function MissionDetailScreen() {
 
   // IN-FLIGHT / IN-TRANSIT PHASE
   if (phase === "inflight") {
+    const telemetryState = liveConnected ? (livePosition ? "LIVE" : "WAITING") : "OFFLINE";
+    const telemetryColor = liveConnected ? colors.success : colors.error;
+
     return (
       <ScreenContainer edges={["top", "bottom", "left", "right"]}>
         <View className="flex-1">
-          {/* Interactive Map - Live Supervision */}
+          {/* Operational telemetry — never substitute simulated values for a live stream. */}
           <View className="mx-4 mt-4 flex-1">
             <View className="flex-row items-center justify-between mb-2">
-              <Text className="text-foreground font-semibold text-base">📍 Supervizare Live</Text>
+              <Text className="text-foreground font-semibold text-base">📍 Supervizare misiune</Text>
               <View className="flex-row items-center">
-                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.success, marginRight: 6 }} />
-                <Text className="text-muted text-xs">LIVE</Text>
+                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: telemetryColor, marginRight: 6 }} />
+                <Text className="text-muted text-xs">{telemetryState}</Text>
               </View>
             </View>
-            <DeliveryMap
-              route={createDemoRoute(
-                (mission.vehicleType || "drone") as VehicleType,
-                "in_transit",
-                0.45
+
+            <View className="bg-surface border border-border rounded-xl p-4">
+              {livePosition ? (
+                <>
+                  <View className="flex-row justify-between mb-3">
+                    <View>
+                      <Text className="text-muted text-xs">LAT</Text>
+                      <Text className="text-foreground text-base font-semibold">{livePosition.lat.toFixed(6)}</Text>
+                    </View>
+                    <View style={{ alignItems: "flex-end" }}>
+                      <Text className="text-muted text-xs">LNG</Text>
+                      <Text className="text-foreground text-base font-semibold">{livePosition.lng.toFixed(6)}</Text>
+                    </View>
+                  </View>
+
+                  <View className="flex-row justify-between mb-3">
+                    <View>
+                      <Text className="text-muted text-xs">Speed</Text>
+                      <Text className="text-primary text-sm font-bold">{(livePosition.speed * 3.6).toFixed(1)} km/h</Text>
+                    </View>
+                    <View style={{ alignItems: "center" }}>
+                      <Text className="text-muted text-xs">Heading</Text>
+                      <Text className="text-foreground text-sm font-semibold">{livePosition.heading.toFixed(0)}°</Text>
+                    </View>
+                    <View style={{ alignItems: "flex-end" }}>
+                      <Text className="text-muted text-xs">Altitude</Text>
+                      <Text className="text-foreground text-sm font-semibold">
+                        {livePosition.altitude != null ? `${livePosition.altitude.toFixed(0)}m` : "—"}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="flex-row justify-between">
+                    <View>
+                      <Text className="text-muted text-xs">{vehicleInfo.inTransitLabel}</Text>
+                      <Text className="text-foreground text-xs mt-1">{mission.merchantName} → {mission.deliveryZone}</Text>
+                    </View>
+                    <View style={{ alignItems: "flex-end" }}>
+                      <Text className="text-muted text-xs">ETA</Text>
+                      <Text className="text-primary text-sm font-bold">
+                        {liveEta ? (liveEta.seconds < 60 ? `${liveEta.seconds}s` : `${Math.ceil(liveEta.seconds / 60)} min`) : "—"}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text className="text-muted text-xs mt-3">
+                    {liveConnected ? "Last live update" : "Last received telemetry (connection offline)"}: {new Date(livePosition.timestamp).toLocaleTimeString()}
+                  </Text>
+                </>
+              ) : (
+                <View style={{ alignItems: "center", paddingVertical: 18 }}>
+                  <Text style={{ fontSize: 30 }}>📡</Text>
+                  <Text className="text-foreground text-sm font-semibold mt-2">
+                    {liveConnected ? "Waiting for live telemetry" : "Live telemetry offline"}
+                  </Text>
+                  <Text className="text-muted text-xs text-center mt-2">
+                    {liveTrackingError || "No operational position has been received. DROPi will not substitute simulated telemetry."}
+                  </Text>
+                </View>
               )}
-              height={200}
-              showRoute={true}
-              showETA={true}
-            />
-            {/* Telemetry overlay */}
-            <View className="bg-surface border border-border rounded-xl p-3 mt-2">
-              <View className="flex-row justify-between">
-                <Text className="text-foreground text-sm font-semibold">{vehicleInfo.inTransitLabel}</Text>
-                <Text className="text-primary text-sm font-bold">ETA: {Math.ceil(mission.estimatedTime * 0.6)} min</Text>
-              </View>
-              <Text className="text-muted text-xs mt-1">{mission.merchantName} → {mission.deliveryZone}</Text>
-              <View className="flex-row mt-2 gap-4">
-                {isDrone ? (
-                  <>
-                    <Text className="text-muted text-xs">📶 Alt: 85m</Text>
-                    <Text className="text-muted text-xs">⚡ Speed: 65 km/h</Text>
-                    <Text className="text-muted text-xs">🔋 Battery: 74%</Text>
-                  </>
-                ) : (
-                  <>
-                    <Text className="text-muted text-xs">⚡ Speed: 28 km/h</Text>
-                    <Text className="text-muted text-xs">📍 Dist: {(mission.distance * 0.6).toFixed(1)} km</Text>
-                  </>
-                )}
-              </View>
             </View>
           </View>
 
