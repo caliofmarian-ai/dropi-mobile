@@ -60,6 +60,24 @@ describe("live-tracking client wiring", () => {
     expect(text).not.toContain("params: { deliveryId: '1' }");
   });
 
+  it("routes active C1 Marketplace pilots to real order broadcasting with the persisted vehicle type", () => {
+    const text = source("components/c1-transactional-dashboards.tsx");
+    expect(text).toContain('item.status === "in_execution"');
+    expect(text).toContain('pathname: "/pilot/broadcast"');
+    expect(text).toContain('deliveryId: String(item.id)');
+    expect(text).toContain('target: "order"');
+    expect(text).toContain('vehicleType: (item as any).vehicleType || "auto"');
+    expect(text).toContain("📡 Broadcast Position");
+  });
+
+  it("keeps C1 Marketplace completion on the proof-backed path while broadcasting", () => {
+    const dashboard = source("components/c1-transactional-dashboards.tsx");
+    const broadcaster = source("app/pilot/broadcast.tsx");
+    expect(dashboard).toContain("Record proof & complete");
+    expect(dashboard).toContain('pathname: "/pilot/complete-order"');
+    expect(broadcaster).toContain('isBroadcasting && target === "b2b"');
+  });
+
   it("mission inflight actions route using the real B2B mission identifier", () => {
     const text = source("app/mission/[id].tsx");
     expect(text).toContain("deliveryId: String(mission.orderId)");

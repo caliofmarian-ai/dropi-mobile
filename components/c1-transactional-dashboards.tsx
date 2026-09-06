@@ -229,6 +229,21 @@ function DeliveryPartnerDashboard() {
                         <Text className="text-white text-sm font-bold">Confirm pickup & start delivery</Text>
                       </TouchableOpacity>
                     )}
+                    {item.status === "in_execution" && (
+                      <TouchableOpacity
+                        className="bg-primary/10 border border-primary rounded-lg py-2 items-center mt-3"
+                        onPress={() => router.push({
+                          pathname: "/pilot/broadcast",
+                          params: {
+                            deliveryId: String(item.id),
+                            target: "order",
+                            vehicleType: (item as any).vehicleType || "auto",
+                          },
+                        } as any)}
+                      >
+                        <Text className="text-primary text-sm font-bold">📡 Broadcast Position</Text>
+                      </TouchableOpacity>
+                    )}
                     {(item.status === "in_execution" || item.status === "fallback") && (
                       <TouchableOpacity
                         className="bg-success rounded-lg py-2 items-center mt-3"
