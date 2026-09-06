@@ -96,6 +96,61 @@ describe("dropiAuth.forgotPassword", () => {
     expect(mailMock.sendPlatformEmail).toHaveBeenCalledTimes(1);
   });
 
+  it("routes canonical TEST HUMAN recovery to the governed base inbox", async () => {
+    const alias = "dropi.deliveries+human.delivery_partner@gmail.com";
+    dbMock.getUserByEmail.mockResolvedValue({
+      id: 151,
+      email: alias,
+      dropiRole: "delivery_partner",
+      channel: "C1",
+      isAIAgent: false,
+    });
+    const caller = dropiAuthRouter.createCaller(createPublicContext());
+
+    await caller.forgotPassword({ email: alias });
+
+    expect(dbMock.getUserByEmail).toHaveBeenCalledWith(alias);
+    expect(dbMock.setResetToken).toHaveBeenCalledWith(151, expect.stringMatching(/^\d{6}$/), expect.any(Date));
+    expect(mailMock.sendPlatformEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "dropi.deliveries@gmail.com" }),
+    );
+  });
+
+  it("routes canonical TEST AI recovery to the governed base inbox", async () => {
+    const alias = "dropi.deliveries+ai.delivery_partner@gmail.com";
+    dbMock.getUserByEmail.mockResolvedValue({
+      id: 152,
+      email: alias,
+      dropiRole: "delivery_partner",
+      channel: "C1",
+      isAIAgent: true,
+    });
+    const caller = dropiAuthRouter.createCaller(createPublicContext());
+
+    await caller.forgotPassword({ email: alias });
+
+    expect(mailMock.sendPlatformEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "dropi.deliveries@gmail.com" }),
+    );
+  });
+
+  it("keeps a normal user's own address as the recovery delivery target", async () => {
+    dbMock.getUserByEmail.mockResolvedValue({
+      id: 9,
+      email: "normal.user@example.org",
+      dropiRole: "customer",
+      channel: "C1",
+      isAIAgent: false,
+    });
+    const caller = dropiAuthRouter.createCaller(createPublicContext());
+
+    await caller.forgotPassword({ email: "normal.user@example.org" });
+
+    expect(mailMock.sendPlatformEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "normal.user@example.org" }),
+    );
+  });
+
   it("does not log the 6-digit reset code to any console channel", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
