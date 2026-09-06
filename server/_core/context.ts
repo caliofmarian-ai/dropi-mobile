@@ -1,5 +1,6 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import type { Session, User } from "../../drizzle/schema";
+import { syncOperationalPilotVerification } from "../pilot-operational-verification";
 import { getRequestSessionToken } from "../request-session";
 import { sdk } from "./sdk";
 
@@ -23,6 +24,19 @@ export async function createContext(opts: CreateExpressContextOptions): Promise<
   } catch (error) {
     // Authentication is optional for public procedures.
     user = null;
+  }
+
+  if (user?.dropiRole === "delivery_partner") {
+    try {
+      // users.isVerified is a materialized operational flag, not authority by
+      // itself. Reconcile only the authenticated pilot from approved, unexpired
+      // driving/drone evidence so ordinary requests do not scan every pilot.
+      const operationallyVerified = await syncOperationalPilotVerification(user.id);
+      user = { ...user, isVerified: operationallyVerified };
+    } catch (error) {
+      // Fail closed if current license evidence cannot be confirmed.
+      user = { ...user, isVerified: false };
+    }
   }
 
   if (user && sessionToken) {

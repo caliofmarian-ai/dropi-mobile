@@ -11,6 +11,9 @@ The Security Baseline remains authoritative for its deployment boundary: reposit
 - Registration derives account activation and delivery-partner verification state server-side.
 - The database service enforces the delivery-partner verification invariant independently of the registration router: a delivery partner cannot be created as verified by omission or by requesting `isVerified=true`.
 - Moving an existing account into the delivery-partner role resets verification to false; verification must then come from the governed verification flow.
+- Delivery-partner operational verification is evidence-derived: only an approved, unexpired `driving_license` or `drone_license` qualifies. Approved insurance, vehicle registration, background checks, or `other` evidence do not grant mission authority.
+- `users.isVerified` is a materialized operational flag, not an independent source of authority. It is reconciled from current qualifying evidence, and loss/expiry of the last qualifying license forces the pilot out of the available pool.
+- Verification status, admin review messaging, pilot selection, live tracking, and mission guards use the same operational-verification policy so non-license approval cannot silently grant pilot capability.
 - Email-verification and password-reset six-digit credentials use Node cryptographic randomness rather than `Math.random()`.
 - Existing login/session, account-lock, rate-limit, and protected-procedure regressions remain part of the permanent assurance gate.
 
@@ -18,7 +21,8 @@ The Security Baseline remains authoritative for its deployment boundary: reposit
 
 - Live tracking authenticates the first WebSocket message with the existing session mechanism.
 - Pilot identity is derived from the authenticated user, not from a client-supplied `pilotId`.
-- Pilot broadcast requires the delivery-partner role, verified state, active account, and assignment to the target.
+- Pilot broadcast requires the delivery-partner role, current qualifying verification evidence, active account, and assignment to the target.
+- Automatic and COS pilot selection refresh operational verification before candidate selection; manual assignment also checks current qualifying evidence before rating eligibility.
 - Subscriber authorization is checked against the target resource; C1 order and B2B stream namespaces remain distinct.
 - Proof-backed completion and operational-evidence persistence remain authoritative; a WebSocket `delivery_complete` message cannot complete an order or B2B delivery.
 - Cross-layer regressions preserve C1/C2/C3/ADMIN separation, STOP/fallback/failure distinctions, and audit/privacy boundaries already certified in M2.

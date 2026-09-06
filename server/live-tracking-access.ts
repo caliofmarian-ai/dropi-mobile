@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import type { User } from "../drizzle/schema";
 import { b2bDeliveries, orders, stores } from "../drizzle/schema";
 import * as db from "./db";
+import { isOperationalPilotVerified } from "./pilot-operational-verification";
 import { sdk } from "./_core/sdk";
 
 export type TrackingTarget = "order" | "b2b";
@@ -53,6 +54,9 @@ type AccessDependencies = {
   verifySession: (token: string) => Promise<VerifiedSession>;
   getUserByOpenId: (openId: string) => Promise<User | undefined>;
   loadResource: (target: TrackingTarget, resourceId: number) => Promise<TrackingResource | null>;
+  // Tests can omit this and exercise legacy fixtures through the persisted flag.
+  // Production DEFAULT_DEPENDENCIES always supplies the evidence-derived resolver.
+  isOperationalPilotVerified?: (userId: number) => Promise<boolean>;
 };
 
 async function loadTrackingResource(target: TrackingTarget, resourceId: number): Promise<TrackingResource | null> {
@@ -92,6 +96,7 @@ const DEFAULT_DEPENDENCIES: AccessDependencies = {
   verifySession: sdk.verifySession.bind(sdk),
   getUserByOpenId: db.getUserByOpenId,
   loadResource: loadTrackingResource,
+  isOperationalPilotVerified,
 };
 
 function isAdmin(user: User): boolean {
@@ -113,17 +118,21 @@ function canSubscribe(user: User, resource: TrackingResource): boolean {
   return resource.storeOwnerId === user.id || resource.assignedPilotId === user.id;
 }
 
-function assertPilotAccess(user: User, resource: TrackingResource): void {
-  const candidate = user as User & {
-    dropiRole?: string | null;
-    isVerified?: boolean | null;
-  };
+function assertPilotAccess(
+  user: User,
+  resource: TrackingResource,
+  operationallyVerified: boolean,
+): void {
+  const candidate = user as User & { dropiRole?: string | null };
 
   if (candidate.dropiRole !== "delivery_partner") {
     throw new TrackingAccessError("FORBIDDEN", "Only delivery partners can broadcast live tracking.");
   }
-  if (!candidate.isVerified) {
-    throw new TrackingAccessError("PILOT_NOT_VERIFIED", "Delivery partner verification is required for live tracking.");
+  if (!operationallyVerified) {
+    throw new TrackingAccessError(
+      "PILOT_NOT_VERIFIED",
+      "An approved, unexpired driving or drone license is required for live tracking.",
+    );
   }
   if (resource.assignedPilotId !== user.id) {
     throw new TrackingAccessError("FORBIDDEN", "This tracking target is not assigned to the authenticated pilot.");
@@ -163,7 +172,10 @@ export async function authorizeTrackingSession(
   }
 
   if (input.mode === "pilot") {
-    assertPilotAccess(user, resource);
+    const operationallyVerified = dependencies.isOperationalPilotVerified
+      ? await dependencies.isOperationalPilotVerified(user.id)
+      : Boolean(user.isVerified);
+    assertPilotAccess(user, resource, operationallyVerified);
   } else if (!canSubscribe(user, resource)) {
     throw new TrackingAccessError("FORBIDDEN", "This account is not allowed to subscribe to this tracking target.");
   }
