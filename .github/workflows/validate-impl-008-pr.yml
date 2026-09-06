@@ -8,6 +8,8 @@ on:
       - shared/test-role-accounts.ts
       - server/test-account-provisioning.ts
       - server/phantom-console-router.ts
+      - server/auth-router.ts
+      - server/_core/mail.ts
       - server/routers.ts
       - scripts/seed-accounts.ts
       - lib/auth-context.tsx
@@ -21,6 +23,7 @@ on:
       - .env.example
       - tests/test-role-accounts.test.ts
       - tests/test-account-provisioning-contract.test.ts
+      - tests/test-account-auth-recovery-379-contract.test.ts
       - tests/phantom-console-contract.test.ts
       - tests/biometric-enrollment-contract.test.ts
       - tests/demo-role-contract.test.ts
@@ -50,6 +53,7 @@ jobs:
           pnpm exec vitest run
           tests/test-role-accounts.test.ts
           tests/test-account-provisioning-contract.test.ts
+          tests/test-account-auth-recovery-379-contract.test.ts
           tests/phantom-console-contract.test.ts
           tests/biometric-enrollment-contract.test.ts
           tests/demo-role-contract.test.ts
