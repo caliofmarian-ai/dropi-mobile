@@ -12,12 +12,18 @@ export interface TestRoleIdentity {
   label: string;
   humanEmail: string;
   aiEmail: string;
+  humanUsername: string;
+  aiUsername: string;
   humanOpenId: string;
   aiOpenId: string;
 }
 
 export function buildTestRoleEmail(role: DropiRole, kind: TestIdentityKind): string {
   return `${DROPI_TEST_LOCAL_PART}+${kind}.${role}@${DROPI_TEST_DOMAIN}`;
+}
+
+export function buildTestRoleUsername(role: DropiRole, kind: TestIdentityKind): string {
+  return `${kind}.${role}`;
 }
 
 export function buildTestRoleOpenId(role: DropiRole, kind: TestIdentityKind): string {
@@ -36,6 +42,8 @@ export const TEST_ROLE_IDENTITIES: TestRoleIdentity[] = ROLE_CONFIGS.map((config
   label: config.label,
   humanEmail: buildTestRoleEmail(config.role, "human"),
   aiEmail: buildTestRoleEmail(config.role, "ai"),
+  humanUsername: buildTestRoleUsername(config.role, "human"),
+  aiUsername: buildTestRoleUsername(config.role, "ai"),
   humanOpenId: buildTestRoleOpenId(config.role, "human"),
   aiOpenId: buildTestRoleOpenId(config.role, "ai"),
 }));

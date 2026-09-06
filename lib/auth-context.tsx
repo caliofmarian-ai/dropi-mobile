@@ -15,7 +15,7 @@ interface AuthContextType {
   isDemo: boolean;
   isPhantom: boolean;
   token: string | null;
-  login: (email: string, password: string) => Promise<AuthActionResult>;
+  login: (identifier: string, password: string) => Promise<AuthActionResult>;
   register: (data: RegisterData) => Promise<AuthActionResult & { accountPendingApproval?: boolean }>;
   logout: () => Promise<void>;
   switchRole: (role: DropiRole, channel: Channel) => Promise<void>;
@@ -174,13 +174,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
-  const login = useCallback(async (email: string, password: string): Promise<AuthActionResult> => {
+  const login = useCallback(async (identifier: string, password: string): Promise<AuthActionResult> => {
     try {
-      const normalizedEmail = email.toLowerCase().trim();
-      const result = await apiCall("dropiAuth.login", { email: normalizedEmail, password });
+      const normalizedIdentifier = identifier.toLowerCase().trim();
+      const result = await apiCall("dropiAuth.login", { identifier: normalizedIdentifier, password });
       if (!result?.token || !result?.user) throw new Error("Login response did not contain a valid session");
+      const fallbackName = normalizedIdentifier.includes("@")
+        ? normalizedIdentifier.split("@")[0]
+        : normalizedIdentifier;
       await applyAuthenticatedSession(
-        toDropiUser(result.user, normalizedEmail.split("@")[0]),
+        toDropiUser(result.user, fallbackName),
         result.token,
         false,
       );

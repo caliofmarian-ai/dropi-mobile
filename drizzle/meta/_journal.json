@@ -24,6 +24,7 @@
     { "idx": 19, "version": "5", "when": 1788615000000, "tag": "0019_p2p_listing_governance", "breakpoints": true },
     { "idx": 20, "version": "5", "when": 1788628000000, "tag": "0020_p2p_db_media", "breakpoints": true },
     { "idx": 21, "version": "5", "when": 1788685000000, "tag": "0021_dropi_account_media", "breakpoints": true },
-    { "idx": 22, "version": "5", "when": 1788693000000, "tag": "0022_verification_evidence_attachments", "breakpoints": true }
+    { "idx": 22, "version": "5", "when": 1788693000000, "tag": "0022_verification_evidence_attachments", "breakpoints": true },
+    { "idx": 23, "version": "5", "when": 1788697200000, "tag": "0023_usernames", "breakpoints": true }
   ]
 }

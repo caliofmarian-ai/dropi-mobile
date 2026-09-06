@@ -23,6 +23,7 @@ const targetProjection = {
   id: users.id,
   name: users.name,
   email: users.email,
+  username: users.username,
   dropiRole: users.dropiRole,
   channel: users.channel,
   zone: users.zone,
@@ -76,6 +77,7 @@ export const phantomConsoleRouter = router({
         conditions.push(or(
           like(users.name, `%${search}%`),
           like(users.email, `%${search}%`),
+          like(users.username, `%${search}%`),
           like(users.dropiRole, `%${search}%`),
           like(users.channel, `%${search}%`),
         ));

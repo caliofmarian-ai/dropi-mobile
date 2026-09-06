@@ -90,6 +90,18 @@ export async function getUserByEmail(email: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getUserByLoginIdentifier(identifier: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const normalized = identifier.toLowerCase().trim();
+  const result = await db
+    .select()
+    .from(users)
+    .where(or(eq(users.email, normalized), eq(users.username, normalized)))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
 export async function getUserById(id: number) {
   const db = await getDb();
   if (!db) return undefined;

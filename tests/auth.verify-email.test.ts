@@ -31,6 +31,7 @@ function _baseUser() {
     id: 7,
     openId: "user-open-id",
     email: "user@example.com",
+    username: null,
     name: "User Example",
     loginMethod: "email",
     role: "user" as const,

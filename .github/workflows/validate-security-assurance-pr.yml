@@ -14,6 +14,7 @@ on:
       - drizzle/verification-evidence-schema.ts
       - drizzle/0021_dropi_account_media.sql
       - drizzle/0022_verification_evidence_attachments.sql
+      - drizzle/0023_usernames.sql
       - drizzle/meta/_journal.json
       - server/auth-router.ts
       - server/test-account-provisioning.ts
@@ -67,6 +68,7 @@ on:
       - tests/outbound-url-policy.test.ts
       - tests/security-baseline-contract.test.ts
       - tests/auth.login-normalize.test.ts
+      - tests/auth.username-login-384-contract.test.ts
       - tests/auth.login-session.test.ts
       - tests/live-tracking-security.test.ts
       - tests/live-tracking-client-contract.test.ts
@@ -111,6 +113,7 @@ jobs:
           tests/test-account-provisioning-contract.test.ts
           tests/test-account-auth-recovery-379-contract.test.ts
           tests/auth.login-normalize.test.ts
+          tests/auth.username-login-384-contract.test.ts
           tests/auth.login-session.test.ts
           tests/live-tracking-security.test.ts
           tests/live-tracking-client-contract.test.ts
