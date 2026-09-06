@@ -22,8 +22,9 @@ jobs:
         run: python scripts/patch-auth-username-384.py
       - name: Commit implementation
         run: |
+          git restore .github/workflows/validate-security-assurance-pr.yml
           git config user.name "DROPi Automation"
           git config user.email "dropi.deliveries@gmail.com"
-          git add drizzle shared server lib app tests .github/workflows/validate-security-assurance-pr.yml
+          git add drizzle shared server lib app tests
           git commit -m "AUTH-384: support email or username login"
           git push origin HEAD:fix/auth-username-login-384
