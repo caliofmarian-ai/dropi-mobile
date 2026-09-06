@@ -19,6 +19,7 @@ import {
 import { notifyOrderTransition } from "./order-transition-notifications";
 import { sendPreferenceAwarePush } from "./preference-aware-push";
 import { evaluateMarketplaceListingVisibility, normalizeMarketplaceZone, sameMarketplaceZone } from "../shared/marketplace-policy";
+import { canActorSeeOwnerQaMission, readOwnerQaMissionMetadata } from "../shared/owner-qa-mission-fixtures";
 import type { CompletionProofInput } from "../shared/operational-trace-policy";
 import { appendOperationalEventWithDb, createDeliveryProofWithDb } from "./operational-trace-service";
 
@@ -280,6 +281,14 @@ export async function transitionMarketplaceOrder(input: {
   if (!order) throw new Error("Order not found.");
 
   const previousStatus = order.status as OrderStatus;
+  const ownerQaFixture = readOwnerQaMissionMetadata(order.items);
+  if (
+    ownerQaFixture &&
+    input.actor.dropiRole === "delivery_partner" &&
+    ownerQaFixture.targetPilotId !== input.actor.id
+  ) {
+    throw new Error("Owner QA mission is reserved for its governed TEST HUMAN Delivery Partner.");
+  }
   const authorization = assertOrderTransitionAuthorized(
     {
       customerId: order.customerId,
@@ -442,7 +451,8 @@ export async function listReadyMarketplaceOrders(actor: MarketplaceOrderActor) {
   const filters = [eq(orders.status, "ready")];
   if (actor.zone) filters.push(eq(orders.zone, actor.zone));
 
-  return db.select().from(orders).where(and(...filters)).orderBy(desc(orders.createdAt)).limit(100);
+  const rows = await db.select().from(orders).where(and(...filters)).orderBy(desc(orders.createdAt)).limit(100);
+  return rows.filter((row) => canActorSeeOwnerQaMission(row.items, actor.id));
 }
 
 export async function listAssignedMarketplaceOrders(actor: MarketplaceOrderActor) {

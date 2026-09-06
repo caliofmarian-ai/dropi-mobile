@@ -11,9 +11,14 @@ on:
       - "server/operational-trace-service.ts"
       - "server/order-management-service.ts"
       - "server/operations-router.ts"
+      - "server/owner-qa-mission-fixtures.ts"
+      - "server/phantom-console-router.ts"
       - "server/live-tracking.ts"
       - "server/b2b-router.ts"
       - "shared/operational-trace-policy.ts"
+      - "shared/owner-qa-mission-fixtures.ts"
+      - "components/c1-transactional-dashboards.tsx"
+      - "app/admin/phantom-console.tsx"
       - "app/pilot/complete-order.tsx"
       - "app/pilot/complete-mission.tsx"
       - "app/order/*.tsx"
@@ -23,6 +28,8 @@ on:
       - "tests/operational-trace-contract.test.ts"
       - "tests/operational-mission-safety-contract.test.ts"
       - "tests/mission-runtime-truthfulness-contract.test.ts"
+      - "tests/owner-qa-mission-fixtures-380-contract.test.ts"
+      - "tests/owner-qa-mission-fixtures-380.test.ts"
       - ".github/workflows/validate-operational-trace-pr.yml"
 
 jobs:
@@ -55,6 +62,8 @@ jobs:
           tests/order-state-machine.test.ts
           tests/order-transition-notifications.test.ts
           tests/order-management-integration-contract.test.ts
+          tests/owner-qa-mission-fixtures-380-contract.test.ts
+          tests/owner-qa-mission-fixtures-380.test.ts
           tests/push-state-notifications.test.ts
           tests/push-state-integration-contract.test.ts
           tests/live-tracking-security.test.ts
