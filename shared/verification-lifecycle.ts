@@ -80,7 +80,7 @@ export function deriveVerificationLifecycle(
   if (daysUntilExpiry <= VERIFICATION_EXPIRY_WARNING_DAYS) {
     return {
       state: "expiring",
-      label: `Approved · expires in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? "" : "s"}`,
+      label: `Expiring · expires in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? "" : "s"}`,
       expiryDate,
       daysUntilExpiry,
     };
