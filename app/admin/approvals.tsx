@@ -7,17 +7,21 @@ import {
   ActivityIndicator,
   Alert,
   TextInput,
+  Image,
+  Linking,
+  Modal,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
 import { getApiBaseUrl } from "@/constants/oauth";
+import { resolveDropiMediaUrl } from "@/lib/media-url";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { safeGoBack } from "@/lib/safe-back";
 
 const TOKEN_KEY = "@dropi_token";
 
-// API helper
 async function apiCall(path: string, input: any, method: "POST" | "GET" = "POST") {
   const base = getApiBaseUrl();
   const url = `${base}/api/trpc/${path}`;
@@ -47,6 +51,17 @@ async function apiCall(path: string, input: any, method: "POST" | "GET" = "POST"
 }
 
 type Tab = "verifications" | "roles";
+
+type VerificationPreview = {
+  storage: "dropi";
+  documentType: string;
+  status: string;
+  fileName: string;
+  contentType: string;
+  byteLength: number;
+  sha256: string;
+  dataBase64: string;
+};
 
 interface VerificationItem {
   verification: {
@@ -82,13 +97,15 @@ interface RoleApplicationItem {
 
 export default function AdminApprovalsScreen() {
   const router = useRouter();
-  const { user } = useDropiAuth();
+  useDropiAuth();
 
   const [activeTab, setActiveTab] = useState<Tab>("verifications");
   const [verifications, setVerifications] = useState<VerificationItem[]>([]);
   const [roleApps, setRoleApps] = useState<RoleApplicationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<number | null>(null);
+  const [previewLoadingId, setPreviewLoadingId] = useState<number | null>(null);
+  const [preview, setPreview] = useState<VerificationPreview | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectId, setShowRejectId] = useState<number | null>(null);
 
@@ -120,7 +137,6 @@ export default function AdminApprovalsScreen() {
     loadData();
   }, [loadData]);
 
-  // Approve/Reject verification
   const handleVerificationDecision = async (verificationId: number, decision: "approved" | "rejected") => {
     if (decision === "rejected" && !rejectionReason.trim()) {
       Alert.alert("Required", "Please provide a rejection reason");
@@ -145,7 +161,66 @@ export default function AdminApprovalsScreen() {
     }
   };
 
-  // Approve/Reject role application
+  const openPdfPreview = async (data: VerificationPreview) => {
+    try {
+      const safeName = data.fileName.replace(/[^a-zA-Z0-9._-]/g, "_") || "verification.pdf";
+      if (Platform.OS === "web") {
+        const binary = globalThis.atob(data.dataBase64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+        const blobUrl = URL.createObjectURL(new Blob([bytes], { type: data.contentType }));
+        window.open(blobUrl, "_blank", "noopener,noreferrer");
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+        return;
+      }
+
+      const FS = require("expo-file-system/legacy");
+      const fileUri = `${FS.cacheDirectory}${safeName}`;
+      await FS.writeAsStringAsync(fileUri, data.dataBase64, { encoding: FS.EncodingType.Base64 });
+      const openUri = Platform.OS === "android" && FS.getContentUriAsync
+        ? await FS.getContentUriAsync(fileUri)
+        : fileUri;
+      await Linking.openURL(openUri);
+    } catch (err: any) {
+      Alert.alert("Preview unavailable", err.message || "The PDF was verified but could not be opened by this device.");
+    }
+  };
+
+  const handlePreviewVerification = async (verificationId: number) => {
+    setPreviewLoadingId(verificationId);
+    try {
+      const data = await apiCall("verificationMedia.getByVerificationId", { verificationId }, "GET");
+      if (data?.storage === "legacy") {
+        const legacyUrl = resolveDropiMediaUrl(data.legacyUrl);
+        if (legacyUrl && /^(https?:\/\/|\/)/i.test(data.legacyUrl)) {
+          try {
+            await Linking.openURL(legacyUrl);
+          } catch {
+            Alert.alert("Legacy evidence unavailable", data.message || "This historical file requires re-upload.");
+          }
+        } else {
+          Alert.alert("Legacy evidence", data.message || "This historical file requires re-upload.");
+        }
+        return;
+      }
+
+      if (data?.storage !== "dropi") {
+        throw new Error("Unsupported verification evidence response");
+      }
+
+      const typed = data as VerificationPreview;
+      if (typed.contentType === "application/pdf") {
+        await openPdfPreview(typed);
+      } else {
+        setPreview(typed);
+      }
+    } catch (err: any) {
+      Alert.alert("Evidence unavailable", err.message || "Could not load verification evidence");
+    } finally {
+      setPreviewLoadingId(null);
+    }
+  };
+
   const handleRoleDecision = async (applicationId: number, decision: "approved" | "rejected") => {
     if (decision === "rejected" && !rejectionReason.trim()) {
       Alert.alert("Required", "Please provide a rejection reason");
@@ -188,18 +263,13 @@ export default function AdminApprovalsScreen() {
   return (
     <ScreenContainer className="p-4">
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* Header */}
         <View className="flex-row items-center mb-4">
-          <TouchableOpacity
-            onPress={() => safeGoBack(router)}
-            style={{ padding: 8, marginRight: 12 }}
-          >
+          <TouchableOpacity onPress={() => safeGoBack(router)} style={{ padding: 8, marginRight: 12 }}>
             <Text className="text-primary text-lg">← Back</Text>
           </TouchableOpacity>
           <Text className="text-2xl font-bold text-foreground">Approval Panel</Text>
         </View>
 
-        {/* Tab Selector */}
         <View className="flex-row bg-surface rounded-xl p-1 mb-6 border border-border">
           <TouchableOpacity
             onPress={() => setActiveTab("verifications")}
@@ -219,7 +289,6 @@ export default function AdminApprovalsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Verifications Tab */}
         {activeTab === "verifications" && (
           <>
             {verifications.length === 0 ? (
@@ -229,7 +298,6 @@ export default function AdminApprovalsScreen() {
             ) : (
               verifications.map((item) => (
                 <View key={item.verification.id} className="bg-surface rounded-xl p-4 mb-3 border border-border">
-                  {/* User Info */}
                   <View className="flex-row items-center justify-between mb-2">
                     <View>
                       <Text className="font-bold text-foreground">{item.userName || "Unknown"}</Text>
@@ -240,11 +308,8 @@ export default function AdminApprovalsScreen() {
                     </View>
                   </View>
 
-                  {/* Document Details */}
                   <View className="bg-background rounded-lg p-3 mb-3">
-                    <Text className="text-sm text-foreground font-medium">
-                      {formatDocType(item.verification.documentType)}
-                    </Text>
+                    <Text className="text-sm text-foreground font-medium">{formatDocType(item.verification.documentType)}</Text>
                     {item.verification.licenseNumber && (
                       <Text className="text-sm text-muted mt-1">Number: {item.verification.licenseNumber}</Text>
                     )}
@@ -254,12 +319,21 @@ export default function AdminApprovalsScreen() {
                     {item.verification.notes && (
                       <Text className="text-sm text-muted mt-1">Notes: {item.verification.notes}</Text>
                     )}
-                    <Text className="text-xs text-muted mt-2">
-                      Submitted: {new Date(item.verification.createdAt).toLocaleDateString()}
-                    </Text>
+                    <Text className="text-xs text-muted mt-2">Submitted: {new Date(item.verification.createdAt).toLocaleDateString()}</Text>
                   </View>
 
-                  {/* Rejection Reason Input */}
+                  <TouchableOpacity
+                    onPress={() => handlePreviewVerification(item.verification.id)}
+                    disabled={previewLoadingId === item.verification.id}
+                    className="bg-primary/10 border border-primary/30 rounded-lg py-3 items-center mb-3"
+                  >
+                    {previewLoadingId === item.verification.id ? (
+                      <ActivityIndicator size="small" color="#0a7ea4" />
+                    ) : (
+                      <Text className="text-primary font-semibold">View Private Evidence</Text>
+                    )}
+                  </TouchableOpacity>
+
                   {showRejectId === item.verification.id && (
                     <View className="mb-3">
                       <TextInput
@@ -274,7 +348,6 @@ export default function AdminApprovalsScreen() {
                     </View>
                   )}
 
-                  {/* Action Buttons */}
                   <View className="flex-row gap-3">
                     {showRejectId === item.verification.id ? (
                       <>
@@ -289,11 +362,7 @@ export default function AdminApprovalsScreen() {
                           disabled={processing === item.verification.id}
                           className="flex-1 bg-error rounded-lg py-3 items-center"
                         >
-                          {processing === item.verification.id ? (
-                            <ActivityIndicator color="#fff" size="small" />
-                          ) : (
-                            <Text className="text-background font-semibold">Confirm Reject</Text>
-                          )}
+                          {processing === item.verification.id ? <ActivityIndicator color="#fff" size="small" /> : <Text className="text-background font-semibold">Confirm Reject</Text>}
                         </TouchableOpacity>
                       </>
                     ) : (
@@ -309,11 +378,7 @@ export default function AdminApprovalsScreen() {
                           disabled={processing === item.verification.id}
                           className="flex-1 bg-success rounded-lg py-3 items-center"
                         >
-                          {processing === item.verification.id ? (
-                            <ActivityIndicator color="#fff" size="small" />
-                          ) : (
-                            <Text className="text-background font-semibold">Approve</Text>
-                          )}
+                          {processing === item.verification.id ? <ActivityIndicator color="#fff" size="small" /> : <Text className="text-background font-semibold">Approve</Text>}
                         </TouchableOpacity>
                       </>
                     )}
@@ -324,7 +389,6 @@ export default function AdminApprovalsScreen() {
           </>
         )}
 
-        {/* Role Applications Tab */}
         {activeTab === "roles" && (
           <>
             {roleApps.length === 0 ? (
@@ -334,7 +398,6 @@ export default function AdminApprovalsScreen() {
             ) : (
               roleApps.map((item) => (
                 <View key={item.application.id} className="bg-surface rounded-xl p-4 mb-3 border border-border">
-                  {/* User Info */}
                   <View className="flex-row items-center justify-between mb-2">
                     <View>
                       <Text className="font-bold text-foreground">{item.userName || "Unknown"}</Text>
@@ -345,19 +408,15 @@ export default function AdminApprovalsScreen() {
                     </View>
                   </View>
 
-                  {/* Current Role */}
                   <View className="flex-row gap-2 mb-2">
                     <View className="bg-background rounded-lg px-3 py-1">
                       <Text className="text-xs text-muted">Current: {formatDocType(item.currentRole || "none")} ({item.currentChannel})</Text>
                     </View>
                   </View>
 
-                  {/* Requested Role */}
                   <View className="bg-background rounded-lg p-3 mb-3">
                     <View className="flex-row items-center gap-2 mb-2">
-                      <Text className="text-sm font-bold text-primary">
-                        Requesting: {formatDocType(item.application.requestedRole)}
-                      </Text>
+                      <Text className="text-sm font-bold text-primary">Requesting: {formatDocType(item.application.requestedRole)}</Text>
                       <View className="bg-primary/10 px-2 py-0.5 rounded">
                         <Text className="text-xs text-primary font-medium">{item.application.requestedChannel}</Text>
                       </View>
@@ -377,12 +436,9 @@ export default function AdminApprovalsScreen() {
                       </View>
                     )}
 
-                    <Text className="text-xs text-muted mt-2">
-                      Applied: {new Date(item.application.createdAt).toLocaleDateString()}
-                    </Text>
+                    <Text className="text-xs text-muted mt-2">Applied: {new Date(item.application.createdAt).toLocaleDateString()}</Text>
                   </View>
 
-                  {/* Rejection Reason Input */}
                   {showRejectId === item.application.id + 10000 && (
                     <View className="mb-3">
                       <TextInput
@@ -397,7 +453,6 @@ export default function AdminApprovalsScreen() {
                     </View>
                   )}
 
-                  {/* Action Buttons */}
                   <View className="flex-row gap-3">
                     {showRejectId === item.application.id + 10000 ? (
                       <>
@@ -412,11 +467,7 @@ export default function AdminApprovalsScreen() {
                           disabled={processing === item.application.id}
                           className="flex-1 bg-error rounded-lg py-3 items-center"
                         >
-                          {processing === item.application.id ? (
-                            <ActivityIndicator color="#fff" size="small" />
-                          ) : (
-                            <Text className="text-background font-semibold">Confirm Reject</Text>
-                          )}
+                          {processing === item.application.id ? <ActivityIndicator color="#fff" size="small" /> : <Text className="text-background font-semibold">Confirm Reject</Text>}
                         </TouchableOpacity>
                       </>
                     ) : (
@@ -432,11 +483,7 @@ export default function AdminApprovalsScreen() {
                           disabled={processing === item.application.id}
                           className="flex-1 bg-success rounded-lg py-3 items-center"
                         >
-                          {processing === item.application.id ? (
-                            <ActivityIndicator color="#fff" size="small" />
-                          ) : (
-                            <Text className="text-background font-semibold">Approve</Text>
-                          )}
+                          {processing === item.application.id ? <ActivityIndicator color="#fff" size="small" /> : <Text className="text-background font-semibold">Approve</Text>}
                         </TouchableOpacity>
                       </>
                     )}
@@ -447,6 +494,27 @@ export default function AdminApprovalsScreen() {
           </>
         )}
       </ScrollView>
+
+      <Modal visible={Boolean(preview)} transparent animationType="fade" onRequestClose={() => setPreview(null)}>
+        <View className="flex-1 bg-black/80 items-center justify-center p-5">
+          <View className="bg-background rounded-2xl p-4 w-full" style={{ maxWidth: 620, maxHeight: "90%" }}>
+            <Text className="text-lg font-bold text-foreground mb-1">Private Verification Evidence</Text>
+            <Text className="text-xs text-muted mb-3">
+              Integrity verified • {preview?.fileName} • {preview ? Math.ceil(preview.byteLength / 1024) : 0} KB
+            </Text>
+            {preview?.contentType.startsWith("image/") && (
+              <Image
+                source={{ uri: `data:${preview.contentType};base64,${preview.dataBase64}` }}
+                resizeMode="contain"
+                style={{ width: "100%", height: 420, backgroundColor: "#111" }}
+              />
+            )}
+            <TouchableOpacity onPress={() => setPreview(null)} className="bg-primary rounded-xl py-3 items-center mt-4">
+              <Text className="text-background font-semibold">Close Evidence</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 }
