@@ -19,7 +19,7 @@ import {
 import { notifyOrderTransition } from "./order-transition-notifications";
 import { sendPreferenceAwarePush } from "./preference-aware-push";
 import { evaluateMarketplaceListingVisibility, normalizeMarketplaceZone, sameMarketplaceZone } from "../shared/marketplace-policy";
-import { canActorSeeOwnerQaMission } from "../shared/owner-qa-mission-fixtures";
+import { canActorSeeOwnerQaMission, readOwnerQaMissionMetadata } from "../shared/owner-qa-mission-fixtures";
 import type { CompletionProofInput } from "../shared/operational-trace-policy";
 import { appendOperationalEventWithDb, createDeliveryProofWithDb } from "./operational-trace-service";
 
