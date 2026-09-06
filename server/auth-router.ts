@@ -8,6 +8,7 @@ import { maskEmail, sendPlatformEmail } from "./_core/mail";
 import * as db from "./db";
 import { createAuditLog } from "./db";
 import { requirePhantomAdminId } from "./audit-policy";
+import { DROPI_TEST_BASE_INBOX, TEST_ROLE_IDENTITIES } from "../shared/test-role-accounts";
 import {
   hashOneTimeCode,
   isOneTimeCodeExpired,
@@ -59,6 +60,18 @@ async function sendRecoveryEmail(toEmail: string, code: string): Promise<boolean
         </div>
       `,
   });
+}
+
+const CANONICAL_TEST_ACCOUNT_EMAILS = new Set(
+  TEST_ROLE_IDENTITIES.flatMap((identity) => [identity.humanEmail, identity.aiEmail])
+    .map((email) => email.trim().toLowerCase()),
+);
+
+function resolveRecoveryDeliveryEmail(accountEmail: string): string {
+  const normalized = accountEmail.trim().toLowerCase();
+  return CANONICAL_TEST_ACCOUNT_EMAILS.has(normalized)
+    ? DROPI_TEST_BASE_INBOX
+    : normalized;
 }
 
 // ===== VALIDATION SCHEMAS =====
@@ -398,6 +411,7 @@ export const dropiAuthRouter = router({
     const code = String(randomInt(100000, 1_000_000));
     const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
     await db.setResetToken(user.id, code, expiry);
+    const recoveryDeliveryEmail = resolveRecoveryDeliveryEmail(normalizedEmail);
 
     await createAuditLog({
       userId: user.id,
@@ -411,10 +425,14 @@ export const dropiAuthRouter = router({
       isPhantomMode: false,
       ipAddress: getClientIp(ctx.req),
       userAgent: getDeviceInfo(ctx.req),
-      details: { email: normalizedEmail, codeGenerated: true },
+      details: {
+        email: normalizedEmail,
+        codeGenerated: true,
+        recoveryDeliveryRoutedToBaseInbox: recoveryDeliveryEmail !== normalizedEmail,
+      },
     });
 
-    const emailSent = await sendRecoveryEmail(normalizedEmail, code);
+    const emailSent = await sendRecoveryEmail(recoveryDeliveryEmail, code);
     if (!emailSent) {
       await db.clearResetToken(user.id);
       console.error(`[PASSWORD RESET] Delivery failed for userId=${user.id} email=${maskEmail(normalizedEmail)}`);
