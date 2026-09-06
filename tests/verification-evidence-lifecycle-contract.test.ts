@@ -97,8 +97,11 @@ describe("VER-378 governed verification evidence lifecycle", () => {
     expect(lifecycle).toContain("VERIFICATION_EXPIRY_WARNING_DAYS = 30");
     expect(lifecycle).toContain('state: "expiring"');
     expect(lifecycle).toContain('state: "expired"');
-    expect(screen).toContain("Pending review");
-    expect(screen).toContain("Rejected");
+    expect(lifecycle).toContain('label: "Pending review"');
+    expect(lifecycle).toContain('label: "Rejected"');
+    expect(lifecycle).toContain('label: "Expiring"');
+    expect(lifecycle).toContain('label: "Expired"');
+    expect(screen).toContain("{lifecycle.label}");
     expect(screen).toContain("Expiry:");
     expect(screen).toContain("Mission access requires an approved, unexpired driving or drone license.");
     expect(screen).toContain("Insurance, registration, background checks and other approved documents do not unlock missions by themselves.");
