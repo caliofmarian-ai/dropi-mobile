@@ -16,9 +16,15 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import { useColors } from "@/hooks/use-colors";
+import {
+  getCoverGeometry,
+  getSourceCropRect,
+} from "@/lib/profile-photo-crop";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CONTAINER_SIZE = Math.min(SCREEN_WIDTH - 48, 300);
+const MIN_SCALE = 1;
+const MAX_SCALE = 5;
 
 interface ImageCropperProps {
   imageUri: string;
@@ -28,8 +34,11 @@ interface ImageCropperProps {
 
 /**
  * Image cropper with pinch-to-zoom and pan gestures.
- * Uses react-native-gesture-handler for natural touch interactions
- * and expo-image-manipulator for the actual crop operation.
+ *
+ * The preview renders the real source aspect ratio at cover scale rather than
+ * asking React Native to pre-crop a square via resizeMode="cover". The same
+ * cover geometry is then converted back to source coordinates for the persisted
+ * crop, so the visible circle and saved image represent the same region.
  */
 export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCropperProps) {
   const colors = useColors();
@@ -37,7 +46,6 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
   const [processing, setProcessing] = useState(false);
   const [currentScale, setCurrentScale] = useState(1);
 
-  // Shared values for gestures
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
   const translateX = useSharedValue(0);
@@ -45,8 +53,16 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
   const savedTranslateX = useSharedValue(0);
   const savedTranslateY = useSharedValue(0);
 
-  // Get image dimensions on mount
   useEffect(() => {
+    scale.value = 1;
+    savedScale.value = 1;
+    translateX.value = 0;
+    translateY.value = 0;
+    savedTranslateX.value = 0;
+    savedTranslateY.value = 0;
+    setCurrentScale(1);
+    setImageSize({ width: 0, height: 0 });
+
     Image.getSize(
       imageUri,
       (width, height) => {
@@ -54,31 +70,40 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
       },
       () => {
         setImageSize({ width: 1000, height: 1000 });
-      }
+      },
     );
-  }, [imageUri]);
+  }, [imageUri, savedScale, savedTranslateX, savedTranslateY, scale, translateX, translateY]);
 
-  // Pinch gesture for zooming
+  const geometry = imageSize.width > 0 && imageSize.height > 0
+    ? getCoverGeometry(imageSize.width, imageSize.height, CONTAINER_SIZE)
+    : { baseScale: 1, displayWidth: CONTAINER_SIZE, displayHeight: CONTAINER_SIZE };
+
   const pinchGesture = Gesture.Pinch()
-    .onUpdate((e) => {
-      scale.value = Math.min(Math.max(savedScale.value * e.scale, 0.5), 5);
+    .onUpdate((event) => {
+      scale.value = Math.min(Math.max(savedScale.value * event.scale, MIN_SCALE), MAX_SCALE);
     })
     .onEnd(() => {
+      const maxX = Math.max(0, (geometry.displayWidth * scale.value - CONTAINER_SIZE) / 2);
+      const maxY = Math.max(0, (geometry.displayHeight * scale.value - CONTAINER_SIZE) / 2);
+      translateX.value = Math.min(Math.max(translateX.value, -maxX), maxX);
+      translateY.value = Math.min(Math.max(translateY.value, -maxY), maxY);
       savedScale.value = scale.value;
+      savedTranslateX.value = translateX.value;
+      savedTranslateY.value = translateY.value;
       runOnJS(setCurrentScale)(scale.value);
     });
 
-  // Pan gesture for moving the image
   const panGesture = Gesture.Pan()
-    .onUpdate((e) => {
-      const maxTranslate = (CONTAINER_SIZE * scale.value - CONTAINER_SIZE) / 2;
+    .onUpdate((event) => {
+      const maxX = Math.max(0, (geometry.displayWidth * scale.value - CONTAINER_SIZE) / 2);
+      const maxY = Math.max(0, (geometry.displayHeight * scale.value - CONTAINER_SIZE) / 2);
       translateX.value = Math.min(
-        Math.max(savedTranslateX.value + e.translationX, -maxTranslate),
-        maxTranslate
+        Math.max(savedTranslateX.value + event.translationX, -maxX),
+        maxX,
       );
       translateY.value = Math.min(
-        Math.max(savedTranslateY.value + e.translationY, -maxTranslate),
-        maxTranslate
+        Math.max(savedTranslateY.value + event.translationY, -maxY),
+        maxY,
       );
     })
     .onEnd(() => {
@@ -86,7 +111,6 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
       savedTranslateY.value = translateY.value;
     });
 
-  // Double-tap to reset
   const doubleTapGesture = Gesture.Tap()
     .numberOfTaps(2)
     .onStart(() => {
@@ -99,20 +123,21 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
       runOnJS(setCurrentScale)(1);
     });
 
-  // Compose gestures: pinch and pan are simultaneous, double-tap is exclusive
   const composedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
   const allGestures = Gesture.Exclusive(doubleTapGesture, composedGesture);
 
-  // Animated style for the image
-  const animatedImageStyle = useAnimatedStyle(() => ({
+  // Translation and scale are deliberately separated into nested views so
+  // translation remains measured in final viewport pixels and is not scaled.
+  const animatedTranslateStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: translateX.value },
       { translateY: translateY.value },
-      { scale: scale.value },
     ],
   }));
+  const animatedScaleStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
-  // Reset function
   const handleReset = () => {
     scale.value = withTiming(1, { duration: 200 });
     translateX.value = withTiming(0, { duration: 200 });
@@ -123,18 +148,26 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
     setCurrentScale(1);
   };
 
-  // Zoom button controls (fallback for web or accessibility)
   const handleZoomIn = () => {
-    const newScale = Math.min(savedScale.value + 0.3, 5);
+    const newScale = Math.min(savedScale.value + 0.3, MAX_SCALE);
     scale.value = withTiming(newScale, { duration: 150 });
     savedScale.value = newScale;
     setCurrentScale(newScale);
   };
 
   const handleZoomOut = () => {
-    const newScale = Math.max(savedScale.value - 0.3, 0.5);
+    const newScale = Math.max(savedScale.value - 0.3, MIN_SCALE);
+    const maxX = Math.max(0, (geometry.displayWidth * newScale - CONTAINER_SIZE) / 2);
+    const maxY = Math.max(0, (geometry.displayHeight * newScale - CONTAINER_SIZE) / 2);
+    const nextX = Math.min(Math.max(savedTranslateX.value, -maxX), maxX);
+    const nextY = Math.min(Math.max(savedTranslateY.value, -maxY), maxY);
+
     scale.value = withTiming(newScale, { duration: 150 });
+    translateX.value = withTiming(nextX, { duration: 150 });
+    translateY.value = withTiming(nextY, { duration: 150 });
     savedScale.value = newScale;
+    savedTranslateX.value = nextX;
+    savedTranslateY.value = nextY;
     setCurrentScale(newScale);
   };
 
@@ -146,36 +179,22 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
         return;
       }
 
-      // Calculate the crop region based on current transform
-      const currentScaleVal = savedScale.value;
-      const currentTX = savedTranslateX.value;
-      const currentTY = savedTranslateY.value;
-
-      const displayScale = CONTAINER_SIZE / Math.min(imageSize.width, imageSize.height);
-      const effectiveScale = displayScale * currentScaleVal;
-
-      // The visible crop area in image coordinates
-      const cropSizeInImage = CONTAINER_SIZE / effectiveScale;
-      const centerX = imageSize.width / 2 - currentTX / effectiveScale;
-      const centerY = imageSize.height / 2 - currentTY / effectiveScale;
-
-      let originX = Math.max(0, centerX - cropSizeInImage / 2);
-      let originY = Math.max(0, centerY - cropSizeInImage / 2);
-      let cropWidth = Math.min(cropSizeInImage, imageSize.width - originX);
-      let cropHeight = Math.min(cropSizeInImage, imageSize.height - originY);
-
-      // Ensure square crop
-      const cropDim = Math.min(cropWidth, cropHeight);
-      cropWidth = cropDim;
-      cropHeight = cropDim;
+      const cropRect = getSourceCropRect({
+        imageWidth: imageSize.width,
+        imageHeight: imageSize.height,
+        containerSize: CONTAINER_SIZE,
+        scale: savedScale.value,
+        translateX: savedTranslateX.value,
+        translateY: savedTranslateY.value,
+      });
 
       if (Platform.OS === "web") {
         const croppedUri = await cropWithCanvas(
           imageUri,
-          originX,
-          originY,
-          cropWidth,
-          cropHeight
+          cropRect.originX,
+          cropRect.originY,
+          cropRect.width,
+          cropRect.height,
         );
         onCropComplete(croppedUri);
       } else {
@@ -185,10 +204,10 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
           [
             {
               crop: {
-                originX: Math.round(originX),
-                originY: Math.round(originY),
-                width: Math.round(cropWidth),
-                height: Math.round(cropHeight),
+                originX: Math.round(cropRect.originX),
+                originY: Math.round(cropRect.originY),
+                width: Math.round(cropRect.width),
+                height: Math.round(cropRect.height),
               },
             },
             { resize: { width: 500, height: 500 } },
@@ -196,7 +215,7 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
           {
             compress: 0.85,
             format: ImageManipulator.SaveFormat.JPEG,
-          }
+          },
         );
         onCropComplete(result.uri);
       }
@@ -210,7 +229,6 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
 
   return (
     <View className="flex-1">
-      {/* Instructions */}
       <View className="items-center mb-3">
         <Text className="text-sm font-medium text-foreground">
           Pinch to zoom, drag to position
@@ -220,7 +238,6 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
         </Text>
       </View>
 
-      {/* Crop Area with Gesture Handler */}
       <View className="items-center mb-4">
         <View
           style={{
@@ -237,28 +254,32 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
             <Animated.View
               style={[
                 {
-                  width: CONTAINER_SIZE,
-                  height: CONTAINER_SIZE,
-                  alignItems: "center",
-                  justifyContent: "center",
+                  position: "absolute",
+                  left: (CONTAINER_SIZE - geometry.displayWidth) / 2,
+                  top: (CONTAINER_SIZE - geometry.displayHeight) / 2,
+                  width: geometry.displayWidth,
+                  height: geometry.displayHeight,
                 },
-                animatedImageStyle,
+                animatedTranslateStyle,
               ]}
             >
-              <Image
-                source={{ uri: imageUri }}
-                style={{
-                  width: CONTAINER_SIZE,
-                  height: CONTAINER_SIZE,
-                }}
-                resizeMode="cover"
-              />
+              <Animated.View
+                style={[
+                  { width: "100%", height: "100%" },
+                  animatedScaleStyle,
+                ]}
+              >
+                <Image
+                  source={{ uri: imageUri }}
+                  style={{ width: "100%", height: "100%" }}
+                  resizeMode="stretch"
+                />
+              </Animated.View>
             </Animated.View>
           </GestureDetector>
         </View>
       </View>
 
-      {/* Zoom Controls (buttons for accessibility / web fallback) */}
       <View className="flex-row items-center justify-center gap-4 mb-4">
         <TouchableOpacity
           onPress={handleZoomOut}
@@ -311,7 +332,6 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
         </TouchableOpacity>
       </View>
 
-      {/* Action Buttons */}
       <View className="flex-row gap-3">
         <TouchableOpacity
           onPress={onCancel}
@@ -336,15 +356,12 @@ export function ImageCropper({ imageUri, onCropComplete, onCancel }: ImageCroppe
   );
 }
 
-/**
- * Web-only: crop image using canvas
- */
 async function cropWithCanvas(
   uri: string,
   originX: number,
   originY: number,
   width: number,
-  height: number
+  height: number,
 ): Promise<string> {
   return new Promise((resolve) => {
     const img = new (window as any).Image();
@@ -367,10 +384,9 @@ async function cropWithCanvas(
         0,
         0,
         500,
-        500
+        500,
       );
-      const croppedDataUrl = canvas.toDataURL("image/jpeg", 0.85);
-      resolve(croppedDataUrl);
+      resolve(canvas.toDataURL("image/jpeg", 0.85));
     };
     img.onerror = () => resolve(uri);
     img.src = uri;
