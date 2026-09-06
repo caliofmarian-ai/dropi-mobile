@@ -1,4 +1,5 @@
 name: Patch Resend Only 379
+# One-shot implementation helper; removed before review.
 
 on:
   push:
