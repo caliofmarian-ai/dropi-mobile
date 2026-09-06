@@ -40,13 +40,14 @@ test("loss or expiry of qualifying evidence forces the pilot offline", () => {
   assert.match(service, /invalidUserIds/);
 });
 
-test("authenticated pilot context is reconciled from current evidence and fails closed", () => {
+test("authenticated pilot context reconciles only the current pilot and fails closed", () => {
   const context = source("server/_core/context.ts");
 
-  assert.match(context, /refreshOperationalPilotVerificationFlags/);
-  assert.match(context, /verifiedUserIds\.has\(user\.id\)/);
-  assert.match(context, /if \(user\.dropiRole === "delivery_partner"\)/);
+  assert.match(context, /if \(user\?\.dropiRole === "delivery_partner"\)/);
+  assert.match(context, /syncOperationalPilotVerification\(user\.id\)/);
+  assert.match(context, /isVerified: operationallyVerified/);
   assert.match(context, /isVerified: false/);
+  assert.doesNotMatch(context, /refreshOperationalPilotVerificationFlags/);
 });
 
 test("live tracking production access resolves operational evidence instead of trusting a stale flag", () => {
