@@ -143,19 +143,3 @@ contract_path.write_text(contract)
 
 behavior = Path("tests/test-account-independent-passwords-397.test.ts")
 behavior.write_text('''import { describe, expect, it } from "vitest";\nimport { passwordWriteForTestAccountReconciliation } from "../server/test-account-provisioning";\n\ndescribe("AUTH-397 independent TEST passwords", () => {\n  it("does not write over two different existing password hashes", () => {\n    const humanHash = "$2b$12$existing-human-hash";\n    const aiHash = "$2b$12$existing-ai-hash";\n    const bootstrapHash = "$2b$12$bootstrap-hash";\n\n    expect(passwordWriteForTestAccountReconciliation(humanHash, bootstrapHash)).toEqual({});\n    expect(passwordWriteForTestAccountReconciliation(aiHash, bootstrapHash)).toEqual({});\n  });\n\n  it("uses the bootstrap hash only for a new or passwordless identity", () => {\n    const bootstrapHash = "$2b$12$bootstrap-hash";\n\n    expect(passwordWriteForTestAccountReconciliation(undefined, bootstrapHash)).toEqual({\n      passwordHash: bootstrapHash,\n    });\n    expect(passwordWriteForTestAccountReconciliation(null, bootstrapHash)).toEqual({\n      passwordHash: bootstrapHash,\n    });\n    expect(passwordWriteForTestAccountReconciliation("", bootstrapHash)).toEqual({\n      passwordHash: bootstrapHash,\n    });\n  });\n});\n''')
-
-wf_path = Path(".github/workflows/validate-impl-008-pr.yml")
-wf = wf_path.read_text()
-assert "      - tests/test-account-provisioning-contract.test.ts\n" in wf
-wf = wf.replace(
-    "      - tests/test-account-provisioning-contract.test.ts\n",
-    "      - tests/test-account-provisioning-contract.test.ts\n      - tests/test-account-independent-passwords-397.test.ts\n",
-    1,
-)
-assert "          tests/test-account-provisioning-contract.test.ts\n" in wf
-wf = wf.replace(
-    "          tests/test-account-provisioning-contract.test.ts\n",
-    "          tests/test-account-provisioning-contract.test.ts\n          tests/test-account-independent-passwords-397.test.ts\n",
-    1,
-)
-wf_path.write_text(wf)
