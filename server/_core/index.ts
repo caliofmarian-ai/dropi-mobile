@@ -14,6 +14,7 @@ import { createContext } from "./context";
 import { startOrchestrator } from "./orchestrator";
 import { ENV } from "./env";
 import { registerP2pMediaRoutes } from "../p2p-media";
+import { registerDropiMediaRoutes } from "../dropi-media";
 import { SECURITY_BODY_LIMIT } from "../../shared/security-baseline-policy";
 import {
   apiRateLimitMiddleware,
@@ -75,8 +76,11 @@ async function startServer() {
   app.use(express.urlencoded({ limit: SECURITY_BODY_LIMIT, extended: true }));
   app.use(safeRequestShapeMiddleware);
 
+  // Legacy /manus-storage URLs remain readable only when historical Forge
+  // configuration still exists. No new account-media writes use that provider.
   registerStorageProxy(app);
   registerP2pMediaRoutes(app);
+  registerDropiMediaRoutes(app);
   registerOAuthRoutes(app);
 
   app.get("/api/health", (_req, res) => {
