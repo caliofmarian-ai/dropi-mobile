@@ -39,10 +39,19 @@ async function sendVerificationEmail(toEmail: string, code: string): Promise<boo
   });
 }
 
-async function sendRecoveryEmail(toEmail: string, code: string): Promise<boolean> {
+async function sendRecoveryEmail(
+  toEmail: string,
+  code: string,
+  recoveryAccountLabel?: string | null,
+): Promise<boolean> {
+  const accountMarker = recoveryAccountLabel
+    ? `<p data-dropi-recovery-account="${recoveryAccountLabel}" style="color:#666;font-size:13px;">Account: <strong>${recoveryAccountLabel}</strong></p>`
+    : "";
   return sendPlatformEmail({
     to: toEmail,
-    subject: "DROPi - Password Reset Code",
+    subject: recoveryAccountLabel
+      ? `DROPi - Password Reset Code — ${recoveryAccountLabel}`
+      : "DROPi - Password Reset Code",
     logLabel: "password reset email",
     html: `
         <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
@@ -50,6 +59,7 @@ async function sendRecoveryEmail(toEmail: string, code: string): Promise<boolean
           <p style="color: #666; font-size: 14px;">Logistics Platform</p>
           <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 16px 0;" />
           <p>You requested a password reset. Use the code below to set a new password:</p>
+          ${accountMarker}
           <div style="background: #F3F4F6; border-radius: 8px; padding: 16px; text-align: center; margin: 24px 0;">
             <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #111;">${code}</span>
           </div>
@@ -67,11 +77,26 @@ const CANONICAL_TEST_ACCOUNT_EMAILS = new Set(
     .map((email) => email.trim().toLowerCase()),
 );
 
+function resolveCanonicalTestRecoveryLabel(accountEmail: string): string | null {
+  const normalized = accountEmail.trim().toLowerCase();
+  for (const identity of TEST_ROLE_IDENTITIES) {
+    if (identity.humanEmail.toLowerCase() === normalized) return identity.humanUsername;
+    if (identity.aiEmail.toLowerCase() === normalized) return identity.aiUsername;
+  }
+  return null;
+}
+
 function resolveRecoveryDeliveryEmail(accountEmail: string): string {
   const normalized = accountEmail.trim().toLowerCase();
   return CANONICAL_TEST_ACCOUNT_EMAILS.has(normalized)
     ? DROPI_TEST_BASE_INBOX
     : normalized;
+}
+
+function maskRecoveryIdentifier(identifier: string): string {
+  return identifier.includes("@")
+    ? maskEmail(identifier)
+    : `${identifier.slice(0, 2)}***`;
 }
 
 // ===== VALIDATION SCHEMAS =====
@@ -91,9 +116,10 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-const forgotPasswordSchema = z.object({
-  email: z.string().email(),
-});
+const forgotPasswordSchema = z.union([
+  z.object({ email: z.string().email() }),
+  z.object({ identifier: z.string().trim().min(3).max(320) }),
+]);
 
 const resetPasswordSchema = z.object({
   token: z.string().min(6, "Please enter the 6-digit code from your email").max(6),
@@ -393,25 +419,42 @@ export const dropiAuthRouter = router({
   }),
 
   forgotPassword: publicProcedure.input(forgotPasswordSchema).mutation(async ({ input, ctx }) => {
-    const normalizedEmail = input.email.toLowerCase().trim();
-    if (!checkWindowLimit(recoveryRequests, normalizedEmail, RECOVERY_RATE_LIMIT_MAX)) {
+    const normalizedIdentifier = ("identifier" in input ? input.identifier : input.email)
+      .toLowerCase()
+      .trim();
+    const identifierType = normalizedIdentifier.includes("@") ? "email" : "username";
+    const maskedIdentifier = maskRecoveryIdentifier(normalizedIdentifier);
+
+    if (!checkWindowLimit(recoveryRequests, normalizedIdentifier, RECOVERY_RATE_LIMIT_MAX)) {
+      console.warn(`[PASSWORD RESET] outcome=rate_limited identifier_type=${identifierType} identifier=${maskedIdentifier}`);
       throw new TRPCError({
         code: "TOO_MANY_REQUESTS",
         message: "Too many password recovery requests. Please try again in 15 minutes.",
       });
     }
 
-    const user = await db.getUserByEmail(normalizedEmail);
-    // Always return success to prevent email enumeration.
+    const user = await db.getUserByLoginIdentifier(normalizedIdentifier);
+    // Always return generic success to prevent account enumeration. The server
+    // records only a masked diagnostic outcome for owner troubleshooting.
     if (!user) {
-      return { success: true, message: "If this email is registered, a 6-digit code has been sent." };
+      console.info(`[PASSWORD RESET] outcome=user_not_found identifier_type=${identifierType} identifier=${maskedIdentifier}`);
+      return { success: true, message: "If this account is registered, a 6-digit code has been sent." };
     }
+
+    const normalizedEmail = user.email?.toLowerCase().trim() || "";
+    if (!normalizedEmail) {
+      console.error(`[PASSWORD RESET] outcome=missing_email userId=${user.id}`);
+      return { success: true, message: "If this account is registered, a 6-digit code has been sent." };
+    }
+
+    console.info(`[PASSWORD RESET] outcome=user_found userId=${user.id} identifier_type=${identifierType}`);
 
     // Generate 6-digit verification code. db.setResetToken protects it at rest.
     const code = String(randomInt(100000, 1_000_000));
     const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
     await db.setResetToken(user.id, code, expiry);
     const recoveryDeliveryEmail = resolveRecoveryDeliveryEmail(normalizedEmail);
+    const recoveryAccountLabel = resolveCanonicalTestRecoveryLabel(normalizedEmail);
 
     await createAuditLog({
       userId: user.id,
@@ -427,22 +470,26 @@ export const dropiAuthRouter = router({
       userAgent: getDeviceInfo(ctx.req),
       details: {
         email: normalizedEmail,
+        identifierType,
         codeGenerated: true,
         recoveryDeliveryRoutedToBaseInbox: recoveryDeliveryEmail !== normalizedEmail,
+        canonicalTestRecovery: Boolean(recoveryAccountLabel),
       },
     });
 
-    const emailSent = await sendRecoveryEmail(recoveryDeliveryEmail, code);
+    console.info(`[PASSWORD RESET] outcome=delivery_attempted userId=${user.id} routed_to_base=${recoveryDeliveryEmail !== normalizedEmail}`);
+    const emailSent = await sendRecoveryEmail(recoveryDeliveryEmail, code, recoveryAccountLabel);
     if (!emailSent) {
       await db.clearResetToken(user.id);
-      console.error(`[PASSWORD RESET] Delivery failed for userId=${user.id} email=${maskEmail(normalizedEmail)}`);
+      console.error(`[PASSWORD RESET] outcome=provider_rejected userId=${user.id} email=${maskEmail(normalizedEmail)}`);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Unable to send reset code right now. Please try again later.",
       });
     }
 
-    return { success: true, message: "If this email is registered, a 6-digit code has been sent." };
+    console.info(`[PASSWORD RESET] outcome=provider_accepted userId=${user.id}`);
+    return { success: true, message: "If this account is registered, a 6-digit code has been sent." };
   }),
 
   resetPassword: publicProcedure.input(resetPasswordSchema).mutation(async ({ input, ctx }) => {

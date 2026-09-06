@@ -10,7 +10,7 @@ export default function ForgotPasswordScreen() {
   const { forgotPassword, resetPassword } = useDropiAuth();
 
   const [step, setStep] = useState<"email" | "code" | "newpass">("email");
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,14 +20,14 @@ export default function ForgotPasswordScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSendCode = useCallback(async () => {
-    if (!email.trim()) {
-      setError("Please enter your email address");
+    if (!identifier.trim()) {
+      setError("Please enter your email address or username");
       return;
     }
     setLoading(true);
     setError("");
     setSuccess("");
-    const result = await forgotPassword(email);
+    const result = await forgotPassword(identifier);
     setLoading(false);
     if (result.success) {
       setSuccess("If the account exists, a 6-digit code has been sent. Check your inbox.");
@@ -35,7 +35,7 @@ export default function ForgotPasswordScreen() {
     } else {
       setError(result.message || "Failed to send reset code");
     }
-  }, [email, forgotPassword]);
+  }, [identifier, forgotPassword]);
 
   const handleVerifyCode = useCallback(() => {
     if (!code.trim() || code.length !== 6) {
@@ -109,9 +109,9 @@ export default function ForgotPasswordScreen() {
               </Text>
               <Text className="text-sm text-muted mt-2">
                 {step === "email"
-                  ? "Enter your email address and we'll send you a 6-digit verification code."
+                  ? "Enter your email address or username and we'll send a 6-digit verification code to the account email."
                   : step === "code"
-                  ? "Enter the 6-digit code sent to your email."
+                  ? "Enter the 6-digit code sent to the account email."
                   : "Choose a new password for your account."}
               </Text>
             </View>
@@ -131,14 +131,14 @@ export default function ForgotPasswordScreen() {
             {step === "email" && (
               <>
                 <View className="mb-6">
-                  <Text className="text-sm font-medium text-foreground mb-1.5">Email Address</Text>
+                  <Text className="text-sm font-medium text-foreground mb-1.5">Email or Username</Text>
                   <TextInput
                     className="bg-surface border border-border rounded-xl px-4 py-3.5 text-foreground text-base"
-                    placeholder="your@email.com"
+                    placeholder="email@example.com or username"
                     placeholderTextColor="#9BA1A6"
-                    value={email}
-                    onChangeText={(t) => { setEmail(t); setError(""); }}
-                    keyboardType="email-address"
+                    value={identifier}
+                    onChangeText={(t) => { setIdentifier(t); setError(""); }}
+                    keyboardType="default"
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="done"

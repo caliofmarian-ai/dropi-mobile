@@ -21,6 +21,17 @@ describe("DROPi password recovery email template", () => {
     expect(html).toContain("Secure. Fast. Delivered.");
   });
 
+  it("shows the canonical TEST account label when supplied", () => {
+    const html = renderPasswordRecoveryEmail(`
+      <p>You requested a password reset. Use the code below to set a new password:</p>
+      <p data-dropi-recovery-account="human.delivery_partner">Account: human.delivery_partner</p>
+      <span>654321</span>
+    `);
+
+    expect(html).toContain("Account:");
+    expect(html).toContain("human.delivery_partner");
+  });
+
   it("shows Facebook, TikTok and Telegram as non-clickable placeholders", () => {
     const html = renderPasswordRecoveryEmail(`
       <p>You requested a password reset. Use the code below to set a new password:</p>

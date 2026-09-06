@@ -53,6 +53,8 @@ export function renderPasswordRecoveryEmail(innerHtml: string): string {
   if (!resetCode) return innerHtml;
 
   const safeCode = escapeHtml(resetCode);
+  const recoveryAccount = innerHtml.match(/data-dropi-recovery-account="([a-z0-9._-]+)"/i)?.[1];
+  const safeRecoveryAccount = recoveryAccount ? escapeHtml(recoveryAccount) : null;
 
   return `<!doctype html>
 <html lang="en">
@@ -97,6 +99,7 @@ export function renderPasswordRecoveryEmail(innerHtml: string): string {
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 14px;"><tr><td align="center" style="width:54px;height:54px;border-radius:15px;background:#EAF2FF;border:1px solid #D5E5FF;color:#075FD8;font-size:26px;line-height:54px;">&#128274;</td></tr></table>
                 <div style="font-size:25px;line-height:32px;font-weight:700;color:#1D2638;">Password Reset Request</div>
                 <p style="margin:13px auto 0;max-width:470px;color:#6A7487;font-size:14px;line-height:22px;">We received a request to reset your DROPi account password.<br />Use the verification code below to continue.</p>
+                ${safeRecoveryAccount ? `<div style="margin-top:12px;color:#39465B;font-size:13px;line-height:20px;">Account: <strong>${safeRecoveryAccount}</strong></div>` : ""}
               </td>
             </tr>
             <tr>

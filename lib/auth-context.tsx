@@ -22,7 +22,7 @@ interface AuthContextType {
   enterDemoMode: (email: string) => Promise<void>;
   enterPhantomSession: (targetUserId: number) => Promise<AuthActionResult>;
   exitPhantomSession: () => Promise<AuthActionResult>;
-  forgotPassword: (email: string) => Promise<{ success: boolean; message?: string }>;
+  forgotPassword: (identifier: string) => Promise<{ success: boolean; message?: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<AuthActionResult>;
 }
 
@@ -300,9 +300,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   }, [isDemo, user]);
 
-  const forgotPassword = useCallback(async (email: string): Promise<{ success: boolean; message?: string }> => {
+  const forgotPassword = useCallback(async (identifier: string): Promise<{ success: boolean; message?: string }> => {
     try {
-      const result = await apiCall("dropiAuth.forgotPassword", { email: email.toLowerCase().trim() });
+      const result = await apiCall("dropiAuth.forgotPassword", { identifier: identifier.toLowerCase().trim() });
       return { success: true, message: result.message };
     } catch (error: any) {
       return { success: false, message: error.message || "Failed to send reset code" };

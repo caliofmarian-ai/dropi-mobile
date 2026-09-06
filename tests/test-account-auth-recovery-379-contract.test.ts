@@ -38,8 +38,10 @@ describe("AUTH-379 canonical test-account recovery contract", () => {
     expect(router).toContain("dropiAuthRouter.createCaller(ctx).forgotPassword({ email })");
     expect(router).not.toMatch(/resetToken\s*[:=]/);
     expect(auth).toContain("await db.setResetToken(user.id, code, expiry)");
+    expect(auth).toContain("db.getUserByLoginIdentifier(normalizedIdentifier)");
+    expect(auth).toContain("resolveCanonicalTestRecoveryLabel(normalizedEmail)");
     expect(auth).toContain("const recoveryDeliveryEmail = resolveRecoveryDeliveryEmail(normalizedEmail)");
-    expect(auth).toContain("const emailSent = await sendRecoveryEmail(recoveryDeliveryEmail, code)");
+    expect(auth).toContain("const emailSent = await sendRecoveryEmail(recoveryDeliveryEmail, code, recoveryAccountLabel)");
     expect(auth).toContain("await db.clearResetToken(user.id)");
   });
 
@@ -56,8 +58,8 @@ describe("AUTH-379 canonical test-account recovery contract", () => {
   it("keeps public anti-enumeration behavior intact", () => {
     const auth = source("server/auth-router.ts");
 
-    expect(auth).toContain("Always return success to prevent email enumeration");
-    expect(auth).toContain('If this email is registered, a 6-digit code has been sent.');
+    expect(auth).toContain("Always return generic success to prevent account enumeration");
+    expect(auth).toContain('If this account is registered, a 6-digit code has been sent.');
     expect(auth).toContain("Unable to send reset code right now. Please try again later.");
   });
 
