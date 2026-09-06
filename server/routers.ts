@@ -3,6 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { dropiAuthRouter, adminAuthRouter } from "./auth-router";
+import { passwordRecoveryRouter } from "./password-recovery-router";
 import { phantomConsoleRouter } from "./phantom-console-router";
 import { auditRouter } from "./audit-router";
 import { verificationRouter, roleApplicationRouter } from "./verification-router";
@@ -37,6 +38,10 @@ export const appRouter = router({
 
   // DROPi-native authentication (email + password)
   dropiAuth: dropiAuthRouter,
+
+  // Account-addressed password recovery. The historical dropiAuth reset route
+  // remains available for backward compatibility with already-installed clients.
+  passwordRecovery: passwordRecoveryRouter,
 
   // Admin operations (phantom mode, user management)
   adminAuth: adminAuthRouter,
