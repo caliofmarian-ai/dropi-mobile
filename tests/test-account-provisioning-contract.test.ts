@@ -83,6 +83,21 @@ describe("IMPL-008 test-account provisioning contract", () => {
     expect(service).not.toContain("humanPairId: null, // Will be set after");
   });
 
+  it("never manufactures Delivery Partner verification during test-account reconciliation", () => {
+    const service = source("server/test-account-provisioning.ts");
+    const operational = source("server/pilot-operational-verification.ts");
+
+    expect(service).toContain('import { syncOperationalPilotVerification } from "./pilot-operational-verification"');
+    expect(service).toContain('return role !== "delivery_partner"');
+    expect(service).toContain("isVerified: verificationDuringReconciliation(input.role)");
+    expect(service).not.toContain("isVerified: true,");
+    expect(service).toContain('if (pair.role !== "delivery_partner") continue');
+    expect(service).toContain("await syncOperationalPilotVerification(pair.humanId)");
+    expect(service).toContain("await syncOperationalPilotVerification(pair.aiId)");
+    expect(operational).toContain("hasCurrentOperationalPilotVerification");
+    expect(operational).toContain("const verified = hasCurrentOperationalPilotVerification");
+  });
+
   it("revokes stale sessions and push registrations when test identities are reconciled", () => {
     const service = source("server/test-account-provisioning.ts");
 
