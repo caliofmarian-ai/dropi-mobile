@@ -103,11 +103,21 @@ function verificationDuringReconciliation(role: DropiRole): boolean {
 }
 
 async function clearStaleDeviceAccess(tx: DbTransaction, userId: number) {
-  // Reconciliation may rotate the shared test password. Revoke every previous
-  // server session and push registration for the test identity in the same
-  // transaction so stale devices cannot remain authenticated or receive pushes.
+  // Reconciliation refreshes governed identity fields and may change role/zone
+  // authority. Revoke every previous server session and push registration for the
+  // test identity even though an existing account's password is preserved.
   await tx.delete(sessions).where(eq(sessions.userId, userId));
   await tx.delete(pushTokens).where(eq(pushTokens.userId, userId));
+}
+
+export function passwordWriteForTestAccountReconciliation(
+  existingPasswordHash: string | null | undefined,
+  bootstrapPasswordHash: string,
+): { passwordHash?: string } {
+  if (typeof existingPasswordHash === "string" && existingPasswordHash.trim().length > 0) {
+    return {};
+  }
+  return { passwordHash: bootstrapPasswordHash };
 }
 
 async function reconcileIdentity(
@@ -121,7 +131,7 @@ async function reconcileIdentity(
     role: DropiRole;
     channel: Channel;
     zone: string | null;
-    passwordHash: string;
+    bootstrapPasswordHash: string;
     humanPairId?: number | null;
   },
 ): Promise<number> {
@@ -156,7 +166,6 @@ async function reconcileIdentity(
     zone: input.zone,
     isActive: true,
     isVerified: verificationDuringReconciliation(input.role),
-    passwordHash: input.passwordHash,
     isAIAgent: input.kind === "ai",
     agentMode: input.kind === "ai" ? ("autonomous" as const) : null,
     humanPairId: input.kind === "ai" ? (input.humanPairId ?? null) : null,
@@ -170,12 +179,19 @@ async function reconcileIdentity(
   };
 
   if (existing) {
-    await tx.update(users).set(values).where(eq(users.id, existing.id));
+    const credentialValues = passwordWriteForTestAccountReconciliation(
+      existing.passwordHash,
+      input.bootstrapPasswordHash,
+    );
+    await tx.update(users).set({ ...values, ...credentialValues }).where(eq(users.id, existing.id));
     await clearStaleDeviceAccess(tx, existing.id);
     return existing.id;
   }
 
-  const result = await tx.insert(users).values(values);
+  const result = await tx.insert(users).values({
+    ...values,
+    passwordHash: input.bootstrapPasswordHash,
+  });
   const insertedId = Number(result[0].insertId);
   await clearStaleDeviceAccess(tx, insertedId);
   return insertedId;
@@ -190,9 +206,11 @@ async function reconcileIdentity(
  * Existing sessions and push registrations for these test identities are revoked
  * when they are reconciled so a rotated test password cannot leave stale access.
  *
- * Server environment values are the only credential/zone authority. Neither the
- * mobile Phantom Console nor another request may provide a competing password.
- * Delivery Partner verification remains governed by reviewed qualifying evidence;
+ * Server environment values provide the bootstrap credential for newly created TEST
+ * identities and the canonical zone. Existing TEST password hashes are preserved so
+ * each account may keep an independent password set through normal recovery/reset.
+ * Neither the mobile Phantom Console nor another request may provide a competing
+ * bootstrap password. Delivery Partner verification remains governed by reviewed qualifying evidence;
  * provisioning itself never grants pilot mission authority.
  */
 export async function provisionTestRoleAccounts() {
@@ -200,7 +218,7 @@ export async function provisionTestRoleAccounts() {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const passwordHash = await bcrypt.hash(password, 12);
+  const bootstrapPasswordHash = await bcrypt.hash(password, 12);
   const pairs: Array<{ role: DropiRole; humanId: number; aiId: number }> = [];
 
   await db.transaction(async (tx) => {
@@ -215,7 +233,7 @@ export async function provisionTestRoleAccounts() {
         role: identity.role,
         channel: identity.channel,
         zone: identityZone,
-        passwordHash,
+        bootstrapPasswordHash,
       });
 
       const aiId = await reconcileIdentity(tx, {
@@ -227,7 +245,7 @@ export async function provisionTestRoleAccounts() {
         role: identity.role,
         channel: identity.channel,
         zone: identityZone,
-        passwordHash,
+        bootstrapPasswordHash,
         humanPairId: humanId,
       });
 

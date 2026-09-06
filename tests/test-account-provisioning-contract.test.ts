@@ -18,7 +18,7 @@ describe("IMPL-008 test-account provisioning contract", () => {
     expect(cli).not.toContain("customer@dropi.app");
   });
 
-  it("uses server environment as the single password and zone authority", () => {
+  it("uses server environment as bootstrap-password and zone authority", () => {
     const service = source("server/test-account-provisioning.ts");
     const router = source("server/phantom-console-router.ts");
     const consoleScreen = source("app/admin/phantom-console.tsx");
@@ -37,7 +37,7 @@ describe("IMPL-008 test-account provisioning contract", () => {
     expect(router).toContain("provisionTestRoleAccounts()");
     expect(router).not.toContain("password: z.string().min(12).max(128)");
     expect(router).not.toContain("zone: z.string().trim().min(1).max(120)");
-    expect(consoleScreen).toContain("Railway/server environment is the only password and zone authority");
+    expect(consoleScreen).toContain("Railway/server environment provides the bootstrap password for newly created test accounts");
     expect(consoleScreen).toContain("JSON.stringify({ json: {} })");
   });
 
@@ -57,7 +57,7 @@ describe("IMPL-008 test-account provisioning contract", () => {
     expect(consoleScreen).not.toContain("showProvisionPassword");
     expect(consoleScreen).not.toContain("secureTextEntry");
     expect(consoleScreen).not.toContain("Shared test password");
-    expect(consoleScreen).toContain("The mobile app never asks for or transmits the shared test password");
+    expect(consoleScreen).toContain("The mobile app never asks for or transmits the bootstrap password");
   });
 
   it("never hard-codes or prints the legacy shared test password", () => {
@@ -71,6 +71,17 @@ describe("IMPL-008 test-account provisioning contract", () => {
     expect(combined).not.toContain("DROPi2026!");
     expect(combined).not.toContain("DROPiAdmin2026!");
     expect(combined).not.toMatch(/console\.(log|error|warn)\([^)]*password/i);
+  });
+
+  it("preserves independent existing passwords and uses bootstrap only when a password is missing", () => {
+    const service = source("server/test-account-provisioning.ts");
+
+    expect(service).toContain("passwordWriteForTestAccountReconciliation");
+    expect(service).toContain("existing.passwordHash");
+    expect(service).toContain("input.bootstrapPasswordHash");
+    expect(service).toContain(".set({ ...values, ...credentialValues })");
+    expect(service).toContain("passwordHash: input.bootstrapPasswordHash");
+    expect(service).not.toContain("Reconciliation may rotate the shared test password");
   });
 
   it("materializes AI pairing from the persisted human row ID inside one transaction", () => {
