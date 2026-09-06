@@ -154,8 +154,9 @@ export default function PilotBroadcastScreen() {
         </Pressable>
       </View>
 
-      {/* Complete Delivery Button — shown only when broadcasting */}
-      {isBroadcasting && (
+      {/* Legacy B2B completion control is intentionally hidden for C1.
+          Marketplace completion remains proof-backed from Mission Radar. */}
+      {isBroadcasting && target === "b2b" && (
         <View className="items-center mb-6">
           <Pressable
             onPress={handleCompleteDelivery}
