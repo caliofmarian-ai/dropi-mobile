@@ -312,7 +312,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const verifyResetCode = useCallback(async (identifier: string, resetToken: string): Promise<AuthActionResult> => {
     try {
-      await apiCall("dropiAuth.verifyResetCode", {
+      await apiCall("passwordRecovery.verifyResetCode", {
         identifier: identifier.toLowerCase().trim(),
         token: resetToken,
       });
@@ -328,7 +328,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     newPassword: string,
   ): Promise<AuthActionResult> => {
     try {
-      await apiCall("dropiAuth.resetPassword", {
+      await apiCall("passwordRecovery.resetPassword", {
         identifier: identifier.toLowerCase().trim(),
         token: resetToken,
         newPassword,
