@@ -1,27 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const createTransportMock = vi.hoisted(() => vi.fn());
 const fetchMock = vi.hoisted(() => vi.fn());
-
-vi.mock("nodemailer", () => ({
-  default: { createTransport: createTransportMock },
-}));
-
-vi.mock("node:dns/promises", () => ({ resolve4: vi.fn() }));
 
 const { resolveMailTransportConfig, sendPlatformEmail } = await import(
   "../server/_core/mail"
 );
 
-describe("sendPlatformEmail — HTTPS/Resend transport", () => {
+describe("sendPlatformEmail — Resend-only HTTPS transport", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubGlobal("fetch", fetchMock);
-    vi.stubEnv("RESEND_API_KEY", "test-key");
+    vi.stubEnv("RESEND_API_KEY", "configured-for-test");
     vi.stubEnv("RESEND_FROM", '"DROPi Platform" <onboarding@resend.dev>');
-    vi.stubEnv("SMTP_HOST", "");
-    vi.stubEnv("SMTP_PASS", "");
-    vi.stubEnv("GMAIL_APP_PASSWORD", "");
     fetchMock.mockResolvedValue({ ok: true, status: 200 });
   });
 
@@ -31,15 +21,25 @@ describe("sendPlatformEmail — HTTPS/Resend transport", () => {
     vi.restoreAllMocks();
   });
 
-  it("prefers HTTPS transport when RESEND_API_KEY is configured", () => {
-    vi.stubEnv("SMTP_HOST", "smtp.example.com");
-    vi.stubEnv("SMTP_PASS", "smtp-test-value");
-    vi.stubEnv("SMTP_USER", "mailer@example.com");
-
-    expect(resolveMailTransportConfig()?.mode).toBe("resend");
+  it("resolves a complete Resend configuration", () => {
+    expect(resolveMailTransportConfig()).toEqual({
+      mode: "resend",
+      from: '"DROPi Platform" <onboarding@resend.dev>',
+      apiKey: "configured-for-test",
+    });
   });
 
-  it("sends recovery mail through HTTPS without opening SMTP", async () => {
+  it("fails closed when RESEND_API_KEY is missing", () => {
+    vi.stubEnv("RESEND_API_KEY", "");
+    expect(resolveMailTransportConfig()).toBeNull();
+  });
+
+  it("fails closed when RESEND_FROM is missing", () => {
+    vi.stubEnv("RESEND_FROM", "");
+    expect(resolveMailTransportConfig()).toBeNull();
+  });
+
+  it("sends recovery mail through the Resend HTTPS API", async () => {
     const result = await sendPlatformEmail({
       to: "dropi.deliveries@gmail.com",
       subject: "DROPi Password Reset",
@@ -48,15 +48,11 @@ describe("sendPlatformEmail — HTTPS/Resend transport", () => {
     });
 
     expect(result).toBe(true);
-    expect(createTransportMock).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-
     const [url, options] = fetchMock.mock.calls[0];
     expect(url).toBe("https://api.resend.com/emails");
     expect(options.method).toBe("POST");
-
-    const body = JSON.parse(options.body);
-    expect(body).toEqual({
+    expect(JSON.parse(options.body)).toEqual({
       from: '"DROPi Platform" <onboarding@resend.dev>',
       to: ["dropi.deliveries@gmail.com"],
       subject: "DROPi Password Reset",
@@ -64,50 +60,30 @@ describe("sendPlatformEmail — HTTPS/Resend transport", () => {
     });
   });
 
-  it("returns false on an HTTP provider failure", async () => {
+  it("returns false on provider HTTP failure", async () => {
     fetchMock.mockResolvedValueOnce({ ok: false, status: 403 });
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
     const result = await sendPlatformEmail({
       to: "dropi.deliveries@gmail.com",
       subject: "DROPi Password Reset",
       html: "<p>123456</p>",
       logLabel: "password reset email",
     });
-
     expect(result).toBe(false);
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining("via resend: HTTP 403"),
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("via resend: HTTP 403"));
   });
 
-  it("returns false when the HTTPS request throws", async () => {
-    fetchMock.mockRejectedValueOnce(new Error("network unavailable"));
-    vi.spyOn(console, "error").mockImplementation(() => {});
-
-    const result = await sendPlatformEmail({
-      to: "dropi.deliveries@gmail.com",
-      subject: "DROPi Password Reset",
-      html: "<p>123456</p>",
-      logLabel: "password reset email",
-    });
-
-    expect(result).toBe(false);
-  });
-
-  it("does not log the configured API key on failure", async () => {
-    fetchMock.mockRejectedValueOnce(new Error("request failed"));
+  it("returns false when Resend configuration is incomplete and never attempts fetch", async () => {
+    vi.stubEnv("RESEND_API_KEY", "");
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-    await sendPlatformEmail({
+    const result = await sendPlatformEmail({
       to: "dropi.deliveries@gmail.com",
       subject: "DROPi Password Reset",
       html: "<p>123456</p>",
       logLabel: "password reset email",
     });
-
-    for (const call of consoleSpy.mock.calls) {
-      expect(call.map(String).join(" ")).not.toContain("test-key");
-    }
+    expect(result).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Resend is not configured"));
   });
 });

@@ -1,29 +1,11 @@
-import nodemailer from "nodemailer";
-import { resolve4 } from "node:dns/promises";
 
 type MailEnv = Readonly<Record<string, string | undefined>>;
 
-type MailTransportConfig =
-  | {
-    mode: "resend";
-    from: string;
-    apiKey: string;
-  }
-  | {
-    mode: "smtp";
-    from: string;
-    user: string;
-    host: string;
-    port: number;
-    secure: boolean;
-    pass: string;
-  }
-  | {
-    mode: "gmail";
-    from: string;
-    user: string;
-    pass: string;
-  };
+type MailTransportConfig = {
+  mode: "resend";
+  from: string;
+  apiKey: string;
+};
 
 const RESEND_EMAIL_API_URL = "https://api.resend.com/emails";
 const RESEND_DEVELOPMENT_FROM = '"DROPi Platform" <onboarding@resend.dev>';
@@ -35,10 +17,6 @@ export function maskEmail(email: string): string {
   return `${localPart.slice(0, 2)}***@${domain}`;
 }
 
-function getMailFromAddress(user: string, env: MailEnv): string {
-  return env.SMTP_FROM?.trim() || `"DROPi Platform" <${user}>`;
-}
-
 function getResendFromAddress(env: MailEnv): string {
   return env.RESEND_FROM?.trim() || RESEND_DEVELOPMENT_FROM;
 }
@@ -46,65 +24,12 @@ function getResendFromAddress(env: MailEnv): string {
 export function resolveMailTransportConfig(
   env: MailEnv = process.env,
 ): MailTransportConfig | null {
-  const resendApiKey = env.RESEND_API_KEY?.trim() || "";
-  const smtpHost = env.SMTP_HOST?.trim() || "";
-  const explicitSmtpUser = env.SMTP_USER?.trim() || "";
-  const smtpPass = env.SMTP_PASS?.trim() || "";
-  const gmailPass = env.GMAIL_APP_PASSWORD?.trim() || "";
-  const smtpPort = Number(env.SMTP_PORT || "587");
+  const apiKey = env.RESEND_API_KEY?.trim() || "";
+  const from = env.RESEND_FROM?.trim() || "";
 
-  if (resendApiKey) {
-    return {
-      mode: "resend",
-      from: getResendFromAddress(env),
-      apiKey: resendApiKey,
-    };
-  }
+  if (!apiKey || !from) return null;
 
-  if (smtpHost && smtpPass) {
-    const user = explicitSmtpUser || "noreply";
-    const from = getMailFromAddress(user, env);
-    const port = Number.isFinite(smtpPort) && smtpPort > 0 ? smtpPort : 587;
-    return {
-      mode: "smtp",
-      from,
-      user,
-      host: smtpHost,
-      port,
-      secure: port === 465,
-      pass: smtpPass,
-    };
-  }
-
-  if (gmailPass) {
-    if (!explicitSmtpUser) {
-      console.error(
-        "[MAIL] Gmail mode requires SMTP_USER to be set to the Gmail address " +
-        "that owns the GMAIL_APP_PASSWORD. " +
-        "Add SMTP_USER=<your-gmail-address> as an environment variable.",
-      );
-      return null;
-    }
-    const from = getMailFromAddress(explicitSmtpUser, env);
-    return {
-      mode: "gmail",
-      from,
-      user: explicitSmtpUser,
-      pass: gmailPass,
-    };
-  }
-
-  return null;
-}
-
-export async function resolveIPv4Host(hostname: string): Promise<string> {
-  try {
-    const addresses = await resolve4(hostname);
-    if (addresses.length > 0) return addresses[0];
-  } catch {
-    // resolve4 failed — fall back to hostname-based connection
-  }
-  return hostname;
+  return { mode: "resend", from, apiKey };
 }
 
 function escapeHtml(value: string): string {
@@ -268,7 +193,7 @@ export async function sendPlatformEmail(input: {
 }): Promise<boolean> {
   const config = resolveMailTransportConfig();
   if (!config) {
-    console.error(`[MAIL] ${input.logLabel} skipped: no mail transport configured`);
+    console.error(`[MAIL] ${input.logLabel} skipped: Resend is not configured`);
     return false;
   }
 
@@ -277,46 +202,5 @@ export async function sendPlatformEmail(input: {
     html: prepareEmailHtml(input),
   };
 
-  if (config.mode === "resend") {
-    return sendViaResend(config, preparedInput);
-  }
-
-  const timeoutOpts = {
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: 15_000,
-  };
-
-  const transporter =
-    config.mode === "smtp"
-      ? nodemailer.createTransport({
-        host: config.host,
-        port: config.port,
-        secure: config.secure,
-        auth: { user: config.user, pass: config.pass },
-        ...timeoutOpts,
-      })
-      : nodemailer.createTransport({
-        host: await resolveIPv4Host("smtp.gmail.com"),
-        port: 465,
-        secure: true,
-        tls: { servername: "smtp.gmail.com" },
-        auth: { user: config.user, pass: config.pass },
-        ...timeoutOpts,
-      });
-
-  try {
-    await transporter.sendMail({
-      from: config.from,
-      to: preparedInput.to,
-      subject: preparedInput.subject,
-      html: preparedInput.html,
-    });
-    console.log(`[MAIL] ${input.logLabel} sent to ${maskEmail(input.to)} via ${config.mode}`);
-    return true;
-  } catch (error) {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    console.error(`[MAIL] ${input.logLabel} failed for ${maskEmail(input.to)} via ${config.mode}: ${errMsg}`);
-    return false;
-  }
+  return sendViaResend(config, preparedInput);
 }

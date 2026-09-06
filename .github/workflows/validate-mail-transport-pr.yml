@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - server/_core/mail.ts
-      - tests/smtp.test.ts
       - tests/mail.resend.test.ts
       - tests/mail.password-recovery-template.test.ts
       - .env.example
@@ -31,8 +30,14 @@ jobs:
           node-version: 22.x
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Mail transport and recovery-template tests
-        run: pnpm exec vitest run tests/smtp.test.ts tests/mail.resend.test.ts tests/mail.password-recovery-template.test.ts
+      - name: Resend transport and recovery-template tests
+        run: pnpm exec vitest run tests/mail.resend.test.ts tests/mail.password-recovery-template.test.ts
+      - name: Reject SMTP/Gmail fallback in canonical mail module
+        run: |
+          if grep -E 'nodemailer|SMTP_HOST|SMTP_PASS|GMAIL_APP_PASSWORD|smtp\.gmail\.com' server/_core/mail.ts; then
+            echo "FAIL: canonical DROPi mail transport must remain Resend-only"
+            exit 1
+          fi
       - name: TypeScript
         run: pnpm check
       - name: Whitespace
