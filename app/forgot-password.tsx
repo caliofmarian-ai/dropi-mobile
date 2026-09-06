@@ -7,7 +7,7 @@ import { safeGoBack } from "@/lib/safe-back";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
-  const { forgotPassword, resetPassword } = useDropiAuth();
+  const { forgotPassword, verifyResetCode, resetPassword } = useDropiAuth();
 
   const [step, setStep] = useState<"email" | "code" | "newpass">("email");
   const [identifier, setIdentifier] = useState("");
@@ -27,17 +27,20 @@ export default function ForgotPasswordScreen() {
     setLoading(true);
     setError("");
     setSuccess("");
+    setCode("");
+    setNewPassword("");
+    setConfirmPassword("");
     const result = await forgotPassword(identifier);
     setLoading(false);
     if (result.success) {
-      setSuccess("If the account exists, a 6-digit code has been sent. Check your inbox.");
+      setSuccess("If the account exists, a 6-digit code has been sent. Check your inbox and use the newest message.");
       setStep("code");
     } else {
       setError(result.message || "Failed to send reset code");
     }
   }, [identifier, forgotPassword]);
 
-  const handleVerifyCode = useCallback(() => {
+  const handleVerifyCode = useCallback(async () => {
     if (!code.trim() || code.length !== 6) {
       setError("Please enter the 6-digit code from your email");
       return;
@@ -46,10 +49,19 @@ export default function ForgotPasswordScreen() {
       setError("Code must be 6 digits");
       return;
     }
+
+    setLoading(true);
     setError("");
-    setSuccess("Code format accepted. DROPi will verify it securely when you reset your password.");
-    setStep("newpass");
-  }, [code]);
+    setSuccess("");
+    const result = await verifyResetCode(identifier, code);
+    setLoading(false);
+    if (result.success) {
+      setSuccess("Code verified securely. You can now choose a new password.");
+      setStep("newpass");
+    } else {
+      setError(result.error || "Invalid or expired code. Use the newest code from your inbox or request another one.");
+    }
+  }, [code, identifier, verifyResetCode]);
 
   const handleResetPassword = useCallback(async () => {
     if (!newPassword.trim()) {
@@ -75,22 +87,21 @@ export default function ForgotPasswordScreen() {
 
     setLoading(true);
     setError("");
-    const result = await resetPassword(code, newPassword);
+    const result = await resetPassword(identifier, code, newPassword);
     setLoading(false);
     if (result.success) {
       setSuccess("Password reset successfully. Existing sessions were signed out. Redirecting to login...");
       setTimeout(() => router.replace("/login" as any), 2000);
     } else {
-      setError(result.error || "Invalid or expired code. Please request a new one.");
-      if (result.error?.includes("expired") || result.error?.includes("Invalid")) {
-        setTimeout(() => {
-          setStep("email");
-          setCode("");
-          setSuccess("");
-        }, 2000);
+      setSuccess("");
+      setError(result.error || "Invalid or expired code. Use the newest code from your inbox or request another one.");
+      if (result.error?.toLowerCase().includes("expired") || result.error?.toLowerCase().includes("invalid")) {
+        setStep("code");
+        setNewPassword("");
+        setConfirmPassword("");
       }
     }
-  }, [newPassword, confirmPassword, code, resetPassword, router]);
+  }, [newPassword, confirmPassword, identifier, code, resetPassword, router]);
 
   return (
     <ScreenContainer edges={["top", "bottom", "left", "right"]} className="p-6">
@@ -111,7 +122,7 @@ export default function ForgotPasswordScreen() {
                 {step === "email"
                   ? "Enter your email address or username and we'll send a 6-digit verification code to the account email."
                   : step === "code"
-                  ? "Enter the 6-digit code sent to the account email."
+                  ? "Enter the newest 6-digit code sent to the account email. DROPi will verify it before you can change the password."
                   : "Choose a new password for your account."}
               </Text>
             </View>
@@ -171,7 +182,7 @@ export default function ForgotPasswordScreen() {
                     placeholder="000000"
                     placeholderTextColor="#9BA1A6"
                     value={code}
-                    onChangeText={(t) => { setCode(t.replace(/[^0-9]/g, "").slice(0, 6)); setError(""); }}
+                    onChangeText={(t) => { setCode(t.replace(/[^0-9]/g, "").slice(0, 6)); setError(""); setSuccess(""); }}
                     keyboardType="number-pad"
                     maxLength={6}
                     returnKeyType="done"
@@ -179,7 +190,7 @@ export default function ForgotPasswordScreen() {
                     style={{ fontSize: 24, letterSpacing: 8 }}
                   />
                   <Text className="text-xs text-muted mt-2 text-center">
-                    Code expires in 15 minutes
+                    Code expires in 15 minutes. Only the newest code is valid after a resend.
                   </Text>
                 </View>
 
@@ -188,8 +199,12 @@ export default function ForgotPasswordScreen() {
                   disabled={loading || code.length !== 6}
                   activeOpacity={0.9}
                 >
-                  <View className="bg-primary rounded-xl py-4 items-center" style={{ opacity: code.length !== 6 ? 0.5 : 1 }}>
-                    <Text className="text-white font-semibold text-base">Continue</Text>
+                  <View className="bg-primary rounded-xl py-4 items-center" style={{ opacity: loading || code.length !== 6 ? 0.5 : 1 }}>
+                    {loading ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text className="text-white font-semibold text-base">Verify Code</Text>
+                    )}
                   </View>
                 </TouchableOpacity>
 
@@ -197,7 +212,7 @@ export default function ForgotPasswordScreen() {
                   onPress={() => { setStep("email"); setCode(""); setError(""); setSuccess(""); }}
                   style={{ marginTop: 16 }}
                 >
-                  <Text className="text-primary text-sm text-center">Didn’t receive code? Send again</Text>
+                  <Text className="text-primary text-sm text-center">Didn’t receive the latest code? Send again</Text>
                 </TouchableOpacity>
               </>
             )}
