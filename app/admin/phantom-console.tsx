@@ -370,7 +370,7 @@ export default function PhantomConsoleScreen() {
 
     Alert.alert(
       "Reconcile canonical test accounts?",
-      `This will rotate/reconcile 29 human test identities and 29 AI role agents using the server-owned password and zone ${controlStatus.provisioning.zone}. Existing test-account sessions and push registrations will be revoked. The real base Super Admin is not modified.`,
+      `This will reconcile 29 human test identities and 29 AI role agents using the server-owned bootstrap password only for missing/new identities and zone ${controlStatus.provisioning.zone}. Existing test-account passwords are preserved. Existing sessions and push registrations will be revoked. The real base Super Admin is not modified.`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -383,7 +383,7 @@ export default function PhantomConsoleScreen() {
               await refresh();
               Alert.alert(
                 "Test-role accounts reconciled",
-                `${result.humanAccounts} human + ${result.aiAccounts} AI role agents across ${result.roles} roles now use the authoritative server configuration.`,
+                `${result.humanAccounts} human + ${result.aiAccounts} AI role agents across ${result.roles} roles were reconciled. Existing passwords were preserved; only newly created identities use the server bootstrap password.`,
               );
             } catch (err: any) {
               Alert.alert("Reconciliation blocked", err.message || "Unable to reconcile test-role accounts");
@@ -623,7 +623,7 @@ export default function PhantomConsoleScreen() {
         <View className="bg-surface border border-border rounded-xl p-4 mb-4">
           <Text className="text-sm font-semibold text-foreground">Canonical test-account control</Text>
           <Text className="text-xs text-muted mt-2 leading-5">
-            Railway/server environment is the only password and zone authority. The mobile app never asks for or transmits the shared test password. Reconciliation rotates every canonical test-account hash and revokes stale test sessions.
+            Railway/server environment provides the bootstrap password for newly created test accounts and the canonical zone. The mobile app never asks for or transmits the bootstrap password. Existing test-account passwords are preserved, so each account can keep its own password after recovery. Reconciliation refreshes governed identity fields and revokes stale test sessions.
           </Text>
 
           <View className="mt-4 gap-1">
@@ -631,7 +631,7 @@ export default function PhantomConsoleScreen() {
               Provisioning: {controlStatus?.provisioning.ready ? "READY" : "BLOCKED"}
             </Text>
             <Text className="text-xs text-muted">
-              Enabled {controlStatus?.provisioning.enabled ? "✓" : "✕"} · Password configured {controlStatus?.provisioning.passwordConfigured ? "✓" : "✕"} · Policy {controlStatus?.provisioning.passwordPolicySatisfied ? "✓" : "✕"} · Zone {controlStatus?.provisioning.zone || "not configured"}
+              Enabled {controlStatus?.provisioning.enabled ? "✓" : "✕"} · Bootstrap password configured {controlStatus?.provisioning.passwordConfigured ? "✓" : "✕"} · Policy {controlStatus?.provisioning.passwordPolicySatisfied ? "✓" : "✕"} · Zone {controlStatus?.provisioning.zone || "not configured"}
             </Text>
             <Text className="text-xs text-muted">
               Mail: {controlStatus?.mail.configured ? `${controlStatus.mail.mode || "configured"} · ${controlStatus.mail.from || "sender configured"}` : "NOT CONFIGURED"}
