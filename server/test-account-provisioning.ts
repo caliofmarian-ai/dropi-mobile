@@ -11,15 +11,29 @@ import type { Channel, DropiRole } from "../shared/types";
 import { getDb } from "./db";
 
 const ENABLE_FLAG = "enabled";
+type ProvisioningEnv = Readonly<Record<string, string | undefined>>;
 
-export type ProvisioningConfig = {
+type ProvisioningConfig = {
   password: string;
   zone: string;
 };
 
+export type TestAccountProvisioningStatus = {
+  enabled: boolean;
+  passwordConfigured: boolean;
+  passwordPolicySatisfied: boolean;
+  zoneConfigured: boolean;
+  zone: string | null;
+  ready: boolean;
+};
+
+function passwordMeetsPolicy(password: string): boolean {
+  return password.length >= 12 && /[A-Z]/.test(password) && /[0-9]/.test(password);
+}
+
 function validateProvisioningConfig(config: ProvisioningConfig): ProvisioningConfig {
   const password = config.password;
-  if (password.length < 12 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+  if (!passwordMeetsPolicy(password)) {
     throw new Error(
       "Test-account password must be at least 12 characters and contain an uppercase letter and a number.",
     );
@@ -33,16 +47,37 @@ function validateProvisioningConfig(config: ProvisioningConfig): ProvisioningCon
   return { password, zone };
 }
 
-function requireCliProvisioningConfig(): ProvisioningConfig {
-  if (process.env.DROPI_TEST_ACCOUNT_PROVISIONING?.trim().toLowerCase() !== ENABLE_FLAG) {
+export function getTestAccountProvisioningStatus(
+  env: ProvisioningEnv = process.env,
+): TestAccountProvisioningStatus {
+  const enabled = env.DROPI_TEST_ACCOUNT_PROVISIONING?.trim().toLowerCase() === ENABLE_FLAG;
+  const password = env.DROPI_TEST_ACCOUNT_PASSWORD || "";
+  const zone = env.DROPI_TEST_ACCOUNT_ZONE?.trim() || "";
+  const passwordConfigured = password.length > 0;
+  const passwordPolicySatisfied = passwordMeetsPolicy(password);
+  const zoneConfigured = zone.length > 0;
+
+  return {
+    enabled,
+    passwordConfigured,
+    passwordPolicySatisfied,
+    zoneConfigured,
+    zone: zoneConfigured ? zone : null,
+    ready: enabled && passwordConfigured && passwordPolicySatisfied && zoneConfigured,
+  };
+}
+
+function requireServerProvisioningConfig(env: ProvisioningEnv = process.env): ProvisioningConfig {
+  const status = getTestAccountProvisioningStatus(env);
+  if (!status.enabled) {
     throw new Error(
-      "Test-account provisioning is disabled. Set DROPI_TEST_ACCOUNT_PROVISIONING=enabled explicitly for CLI provisioning.",
+      "Test-account provisioning is disabled. Set DROPI_TEST_ACCOUNT_PROVISIONING=enabled on the server.",
     );
   }
 
   return validateProvisioningConfig({
-    password: process.env.DROPI_TEST_ACCOUNT_PASSWORD || "",
-    zone: process.env.DROPI_TEST_ACCOUNT_ZONE || "",
+    password: env.DROPI_TEST_ACCOUNT_PASSWORD || "",
+    zone: env.DROPI_TEST_ACCOUNT_ZONE || "",
   });
 }
 
@@ -144,13 +179,11 @@ async function reconcileIdentity(
  * Existing sessions and push registrations for these test identities are revoked
  * when they are reconciled so a rotated test password cannot leave stale access.
  *
- * The authenticated Phantom Console passes the password and zone for one request.
- * The CLI path remains fail-closed behind explicit server-only environment values.
+ * Server environment values are the only credential/zone authority. Neither the
+ * mobile Phantom Console nor another request may provide a competing password.
  */
-export async function provisionTestRoleAccounts(config?: ProvisioningConfig) {
-  const { password, zone } = config
-    ? validateProvisioningConfig(config)
-    : requireCliProvisioningConfig();
+export async function provisionTestRoleAccounts() {
+  const { password, zone } = requireServerProvisioningConfig();
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
