@@ -1,0 +1,29 @@
+name: Finalize owner QA 380
+
+on:
+  push:
+    branches:
+      - fix/owner-mission-fixtures-380-v2
+    paths:
+      - .github/workflows/finalize-owner-qa-380.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/owner-mission-fixtures-380-v2
+          fetch-depth: 0
+      - name: Apply final QA-380 hardening
+        run: python scripts/finalize-owner-qa-380.py
+      - name: Commit hardening
+        run: |
+          git config user.name "DROPi Automation"
+          git config user.email "dropi.deliveries@gmail.com"
+          git add server/order-management-service.ts app/admin/phantom-console.tsx
+          git commit -m "QA-380: enforce target pilot binding and canonical username UI"
+          git push origin HEAD:fix/owner-mission-fixtures-380-v2
