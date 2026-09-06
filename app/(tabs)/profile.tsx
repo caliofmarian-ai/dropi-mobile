@@ -6,6 +6,7 @@ import { useDropiAuth } from "@/lib/auth-context";
 import { getRoleConfig, CHANNEL_INFO } from "@/shared/types";
 import { ProfileCompletionBar } from "@/components/profile-completion-bar";
 import { ProfilePhotoModal } from "@/components/profile-photo-modal";
+import { resolveDropiMediaUrl } from "@/lib/media-url";
 
 export default function ProfileScreen() {
   const { user, logout } = useDropiAuth();
@@ -33,6 +34,7 @@ export default function ProfileScreen() {
   const channelInfo = CHANNEL_INFO[user.channel];
   const roleColor = channelInfo?.color || "#0066FF";
   const currentPhoto = photoUrl || user.profilePhotoUrl;
+  const currentPhotoUri = resolveDropiMediaUrl(currentPhoto);
 
   return (
     <ScreenContainer className="px-4 pt-4">
@@ -56,9 +58,9 @@ export default function ProfileScreen() {
                 backgroundColor: roleColor + "20",
               }}
             >
-              {currentPhoto ? (
+              {currentPhotoUri ? (
                 <Image
-                  source={{ uri: currentPhoto }}
+                  source={{ uri: currentPhotoUri }}
                   style={{ width: 56, height: 56 }}
                   resizeMode="cover"
                 />
@@ -213,7 +215,7 @@ export default function ProfileScreen() {
         visible={photoModalVisible}
         onClose={() => setPhotoModalVisible(false)}
         onPhotoUploaded={(url) => setPhotoUrl(url || null)}
-        currentPhotoUrl={currentPhoto}
+        currentPhotoUrl={currentPhotoUri}
       />
     </ScreenContainer>
   );
