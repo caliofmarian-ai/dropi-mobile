@@ -12,6 +12,7 @@ import {
   transitionMarketplaceOrder,
 } from "./order-management-service";
 import { RECEPTION_METHODS } from "../shared/operational-trace-policy";
+import { readOwnerQaMissionMetadata } from "../shared/owner-qa-mission-fixtures";
 import { attestDeliveryProof, getOperationalTrace } from "./operational-trace-service";
 
 const ORDER_STATUS_VALUES = [
@@ -79,6 +80,12 @@ function toMarketplacePilotCard(
   row: typeof orders.$inferSelect,
   merchantName: string,
 ) {
+  const ownerQaFixture = readOwnerQaMissionMetadata(row.items);
+  const deliveryMode: MobileDeliveryMode = ownerQaFixture
+    ? ownerQaFixture.deliveryMode === "drone" ? "drone" : "van"
+    : "auto";
+  const vehicleType: MobileVehicleType = ownerQaFixture?.vehicleType ?? "auto";
+
   return {
     id: row.id,
     orderId: row.id,
@@ -90,8 +97,11 @@ function toMarketplacePilotCard(
     estimatedTime: row.estimatedTime ?? 0,
     merchantName,
     status: row.status,
-    vehicleType: "auto" as const,
-    deliveryMode: "auto" as const,
+    vehicleType,
+    deliveryMode,
+    vehicleId: ownerQaFixture?.vehicleId ?? null,
+    isOwnerQaFixture: Boolean(ownerQaFixture),
+    ownerQaLabel: ownerQaFixture?.label ?? null,
   };
 }
 
