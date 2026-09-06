@@ -35,7 +35,8 @@ test("live tracking authenticates and derives pilot authority server-side", () =
   assert.match(liveTracking, /authorizeTrackingSession\(/);
   assert.doesNotMatch(liveTracking, /searchParams\.get\(["']pilotId["']\)/);
   assert.match(liveAccess, /candidate\.dropiRole !== "delivery_partner"/);
-  assert.match(liveAccess, /!candidate\.isVerified/);
+  assert.match(liveAccess, /isOperationalPilotVerified/);
+  assert.match(liveAccess, /operationallyVerified/);
   assert.match(liveAccess, /resource\.assignedPilotId !== user\.id/);
   assert.match(liveAccess, /resource\.customerId === user\.id/);
   assert.match(liveAccess, /resource\.storeOwnerId === user\.id/);

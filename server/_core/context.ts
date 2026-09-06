@@ -1,6 +1,7 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import type { Session, User } from "../../drizzle/schema";
 import { getRequestSessionToken } from "../request-session";
+import { refreshOperationalPilotVerificationFlags } from "../pilot-operational-verification";
 import { sdk } from "./sdk";
 
 export type TrpcContext = {
@@ -23,6 +24,27 @@ export async function createContext(opts: CreateExpressContextOptions): Promise<
   } catch (error) {
     // Authentication is optional for public procedures.
     user = null;
+  }
+
+  if (user) {
+    try {
+      // users.isVerified is a materialized operational flag, not authority by
+      // itself. Reconcile it from approved, unexpired driving/drone licenses on
+      // every authenticated request so expiry/rejection cannot remain stale.
+      const refresh = await refreshOperationalPilotVerificationFlags();
+      if (user.dropiRole === "delivery_partner") {
+        user = {
+          ...user,
+          isVerified: refresh.refreshed && refresh.verifiedUserIds.has(user.id),
+        };
+      }
+    } catch (error) {
+      // Fail closed for pilots if evidence cannot be refreshed. Other roles do
+      // not derive their authorization from delivery-partner license evidence.
+      if (user.dropiRole === "delivery_partner") {
+        user = { ...user, isVerified: false };
+      }
+    }
   }
 
   if (user && sessionToken) {
