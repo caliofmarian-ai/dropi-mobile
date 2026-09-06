@@ -19,7 +19,8 @@ function positive(value: number, label: string): number {
 }
 
 function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
+  const result = Math.min(Math.max(value, min), max);
+  return result === 0 ? 0 : result;
 }
 
 /**
