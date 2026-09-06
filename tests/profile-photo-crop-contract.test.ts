@@ -7,14 +7,14 @@ function source(relativePath: string) {
 }
 
 describe("PROFILE-377 cropper integration", () => {
-  it("renders source aspect geometry instead of pre-cropping with cover", () => {
+  it("renders source aspect geometry instead of relying on a square image pre-crop", () => {
     const cropper = source("components/image-cropper.tsx");
 
     expect(cropper).toContain("getCoverGeometry");
     expect(cropper).toContain("geometry.displayWidth");
     expect(cropper).toContain("geometry.displayHeight");
+    expect(cropper).toContain('style={{ width: "100%", height: "100%" }}');
     expect(cropper).toContain('resizeMode="stretch"');
-    expect(cropper).not.toContain('resizeMode="cover"');
   });
 
   it("uses the same geometry for the persisted source rectangle", () => {
