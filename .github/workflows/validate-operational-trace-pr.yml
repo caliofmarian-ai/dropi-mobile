@@ -55,7 +55,6 @@ jobs:
           tests/operational-trace-contract.test.ts
           tests/operational-mission-safety-contract.test.ts
           tests/mission-runtime-truthfulness-contract.test.ts
-          tests/owner-qa-mission-fixtures-380-contract.test.ts
           tests/audit-capture-attribution.test.ts
       - name: Delivery, tracking and safety regressions
         run: >-
@@ -63,6 +62,7 @@ jobs:
           tests/order-state-machine.test.ts
           tests/order-transition-notifications.test.ts
           tests/order-management-integration-contract.test.ts
+          tests/owner-qa-mission-fixtures-380-contract.test.ts
           tests/owner-qa-mission-fixtures-380.test.ts
           tests/push-state-notifications.test.ts
           tests/push-state-integration-contract.test.ts
