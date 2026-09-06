@@ -94,13 +94,13 @@ export async function storagePut(
   const sha256 = createHash("sha256").update(buffer).digest("hex");
   const url = mediaUrl(purpose, mediaUid, sha256);
 
-  // A profile source key represents a replaceable singleton. Verification
-  // evidence is append-only at the storage layer and is never deleted here.
+  // A profile photo is one replaceable public object per account. Delete every
+  // previous profile-photo row for the owner even when the replacement changes
+  // extension/MIME type. Verification evidence remains append-only here.
   if (purpose === "profile_photo" && ownerId) {
     await db.delete(dropiAccountMedia).where(and(
       eq(dropiAccountMedia.ownerId, ownerId),
       eq(dropiAccountMedia.purpose, "profile_photo"),
-      eq(dropiAccountMedia.sourceKey, sourceKey),
     ));
   }
 
