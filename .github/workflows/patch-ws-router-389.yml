@@ -1,0 +1,33 @@
+name: Patch WS router 389
+
+on:
+  push:
+    branches:
+      - fix/websocket-upgrade-router-389
+    paths:
+      - scripts/patch-ws-router-389.py
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/websocket-upgrade-router-389
+          fetch-depth: 0
+      - name: Apply WebSocket routing patch
+        run: python scripts/patch-ws-router-389.py
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/live-tracking.ts server/_core/index.ts
+          if git diff --cached --quiet; then
+            echo "No patch changes"
+            exit 0
+          fi
+          git commit -m "WS-389: route tracking through shared upgrade router"
+          git push origin HEAD:fix/websocket-upgrade-router-389
