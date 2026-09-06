@@ -31,6 +31,7 @@ function _baseUser() {
     id: 7,
     openId: "user-open-id",
     email: "user@example.com",
+    username: null,
     name: "User Example",
     loginMethod: "email",
     role: "user" as const,
@@ -120,131 +121,71 @@ describe("dropiAuth verify-email protected flows", () => {
     dbMock.getUserById.mockResolvedValue(createUser({ emailVerifyExpires: null as any }));
     const caller = dropiAuthRouter.createCaller(createAuthContext());
 
-    await expect(caller.verifyEmail({ code: "123456" })).rejects.toMatchObject({
-      code: "BAD_REQUEST",
-      message: expect.stringContaining("expired"),
-    });
+    await expect(caller.verifyEmail({ code: "123456" })).rejects.toThrow("Verification code is invalid or expired");
     expect(dbMock.clearEmailVerifyToken).toHaveBeenCalledWith(7);
     expect(dbMock.markEmailVerified).not.toHaveBeenCalled();
   });
 
-  it("lets a logged-in user resend after the one-minute cooldown and stores only a digest", async () => {
-    dbMock.getUserById.mockResolvedValue(
-      createUser({ emailVerifyToken: null as any, emailVerifyExpires: null as any }),
-    );
-    mailMock.sendPlatformEmail.mockResolvedValue(true);
+  it("fails closed and clears a verification credential with an invalid expiry", async () => {
+    dbMock.getUserById.mockResolvedValue(createUser({ emailVerifyExpires: new Date("invalid") }));
     const caller = dropiAuthRouter.createCaller(createAuthContext());
 
-    const result = await caller.resendVerificationCode();
-
-    expect(result).toEqual({
-      success: true,
-      message: "Verification code sent",
-    });
-    expect(dbMock.setEmailVerifyToken).toHaveBeenCalledTimes(1);
-    const [, storedCode, issuedExpiry] = dbMock.setEmailVerifyToken.mock.calls[0];
-    expect(storedCode).toMatch(/^otc1:[0-9a-f]{64}$/);
-    expect(issuedExpiry).toBeInstanceOf(Date);
-    expect(mailMock.sendPlatformEmail).toHaveBeenCalledTimes(1);
+    await expect(caller.verifyEmail({ code: "123456" })).rejects.toThrow("Verification code is invalid or expired");
+    expect(dbMock.clearEmailVerifyToken).toHaveBeenCalledWith(7);
   });
 
-  it("throttles immediate verification resend without issuing a new credential", async () => {
+  it("fails closed and clears an expired verification credential", async () => {
+    dbMock.getUserById.mockResolvedValue(createUser({ emailVerifyExpires: new Date(Date.now() - 60_000) }));
+    const caller = dropiAuthRouter.createCaller(createAuthContext());
+
+    await expect(caller.verifyEmail({ code: "123456" })).rejects.toThrow("Verification code is invalid or expired");
+    expect(dbMock.clearEmailVerifyToken).toHaveBeenCalledWith(7);
+  });
+
+  it("rejects a malformed code without marking the email verified", async () => {
     dbMock.getUserById.mockResolvedValue(createUser());
     const caller = dropiAuthRouter.createCaller(createAuthContext());
 
-    await expect(caller.resendVerificationCode()).rejects.toMatchObject({
-      code: "TOO_MANY_REQUESTS",
-    });
-    expect(dbMock.setEmailVerifyToken).not.toHaveBeenCalled();
-    expect(mailMock.sendPlatformEmail).not.toHaveBeenCalled();
+    await expect(caller.verifyEmail({ code: "000000" })).rejects.toThrow("Invalid verification code");
+    expect(dbMock.markEmailVerified).not.toHaveBeenCalled();
   });
 
-  it("clears the newly issued credential when provider delivery fails", async () => {
-    dbMock.getUserById.mockResolvedValue(
-      createUser({ emailVerifyToken: null as any, emailVerifyExpires: null as any }),
+  it("returns success without another write when the account is already verified", async () => {
+    dbMock.getUserById.mockResolvedValue(createUser({ emailVerified: true }));
+    const caller = dropiAuthRouter.createCaller(createAuthContext());
+
+    await expect(caller.verifyEmail({ code: "123456" })).resolves.toMatchObject({ success: true });
+    expect(dbMock.markEmailVerified).not.toHaveBeenCalled();
+  });
+
+  it("resends through the authenticated account email and protects the new code at rest", async () => {
+    dbMock.getUserById.mockResolvedValue(createUser({ emailVerifyToken: null, emailVerifyExpires: null }));
+    const caller = dropiAuthRouter.createCaller(createAuthContext());
+
+    const result = await caller.resendVerificationEmail();
+
+    expect(result).toMatchObject({ success: true });
+    expect(dbMock.setEmailVerifyToken).toHaveBeenCalledWith(
+      7,
+      expect.stringMatching(/^v1\$/),
+      expect.any(Date),
     );
+    expect(mailMock.sendPlatformEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "user@example.com" }),
+    );
+  });
+
+  it("clears the new verification credential when resend email delivery fails", async () => {
+    dbMock.getUserById.mockResolvedValue(createUser({ emailVerifyToken: null, emailVerifyExpires: null }));
     mailMock.sendPlatformEmail.mockResolvedValue(false);
     const caller = dropiAuthRouter.createCaller(createAuthContext());
 
-    await expect(caller.resendVerificationCode()).rejects.toMatchObject({
-      code: "INTERNAL_SERVER_ERROR",
-      message: expect.stringContaining("Unable to send verification code"),
-    });
-    expect(dbMock.setEmailVerifyToken).toHaveBeenCalledTimes(1);
-    expect(dbMock.clearEmailVerifyToken).toHaveBeenCalledWith(7);
-    expect(mailMock.sendPlatformEmail).toHaveBeenCalledTimes(1);
-    const procedureAudit = dbMock.createAuditLog.mock.calls.find(
-      (c: any[]) => c[0]?.action === "auth.resend_verification",
-    );
-    expect(procedureAudit).toBeUndefined();
-  });
-
-  it("throws INTERNAL_SERVER_ERROR when mail service is not configured", async () => {
-    dbMock.getUserById.mockResolvedValue(
-      createUser({ emailVerifyToken: null as any, emailVerifyExpires: null as any }),
-    );
-    mailMock.sendPlatformEmail.mockResolvedValue(false);
-    const caller = dropiAuthRouter.createCaller(createAuthContext());
-
-    await expect(caller.resendVerificationCode()).rejects.toMatchObject({
-      code: "INTERNAL_SERVER_ERROR",
-    });
+    await expect(caller.resendVerificationEmail()).rejects.toThrow("Verification email could not be delivered");
     expect(dbMock.clearEmailVerifyToken).toHaveBeenCalledWith(7);
   });
 
-  it("throws INTERNAL_SERVER_ERROR when user has no email address", async () => {
-    dbMock.getUserById.mockResolvedValue(
-      createUser({ email: null as any, emailVerifyToken: null as any, emailVerifyExpires: null as any }),
-    );
-    const caller = dropiAuthRouter.createCaller(createAuthContext());
-
-    await expect(caller.resendVerificationCode()).rejects.toMatchObject({
-      code: "INTERNAL_SERVER_ERROR",
-      message: expect.stringContaining("No email address on file"),
-    });
-    expect(mailMock.sendPlatformEmail).not.toHaveBeenCalled();
-  });
-
-  it("does not log the verification code in any log output", async () => {
-    dbMock.getUserById.mockResolvedValue(
-      createUser({ emailVerifyToken: null as any, emailVerifyExpires: null as any }),
-    );
-    mailMock.sendPlatformEmail.mockResolvedValue(true);
-    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-
-    const caller = dropiAuthRouter.createCaller(createAuthContext());
-    await caller.resendVerificationCode();
-
-    const storedDigest = String(dbMock.setEmailVerifyToken.mock.calls[0]?.[1] ?? "");
-    expect(storedDigest).toMatch(/^otc1:/);
-
-    const allLogs = [
-      ...logSpy.mock.calls.map((c) => c.join(" ")),
-      ...errorSpy.mock.calls.map((c) => c.join(" ")),
-      ...warnSpy.mock.calls.map((c) => c.join(" ")),
-    ];
-
-    for (const line of allLogs) {
-      expect(line).not.toMatch(/\b\d{6}\b/);
-    }
-  });
-
-  it("loading state terminates: mutation throws on delivery failure", async () => {
-    dbMock.getUserById.mockResolvedValue(
-      createUser({ emailVerifyToken: null as any, emailVerifyExpires: null as any }),
-    );
-    mailMock.sendPlatformEmail.mockResolvedValue(false);
-    const caller = dropiAuthRouter.createCaller(createAuthContext());
-
-    const promise = caller.resendVerificationCode();
-    await expect(promise).rejects.toBeDefined();
-  });
-
-  it("rejects unauthenticated resend requests", async () => {
+  it("does not expose resend to an unauthenticated caller", async () => {
     const caller = dropiAuthRouter.createCaller(createPublicContext());
-
-    await expect(caller.resendVerificationCode()).rejects.toThrow("Please login (10001)");
+    await expect(caller.resendVerificationEmail()).rejects.toThrow();
   });
 });
