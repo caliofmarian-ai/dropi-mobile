@@ -93,9 +93,11 @@ test("native profile and admin surfaces consume governed media correctly", () =>
 
   assert.match(profile, /resolveDropiMediaUrl\(currentPhoto\)/);
   assert.match(helper, /getApiBaseUrl\(\)/);
-  assert.match(admin, /View Private Evidence/);
+  assert.match(admin, /Review All Private Evidence/);
   assert.match(admin, /verificationMedia\.getByVerificationId/);
-  assert.match(admin, /data:\$\{preview\.contentType\};base64/);
+  assert.match(admin, /evidenceBundle\?\.attachments\.map/);
+  assert.match(admin, /data:\$\{attachment\.contentType\};base64/);
+  assert.match(admin, /Integrity verified/);
   assert.match(admin, /getContentUriAsync/);
   assert.match(routers, /verificationMedia: verificationMediaRouter/);
 });

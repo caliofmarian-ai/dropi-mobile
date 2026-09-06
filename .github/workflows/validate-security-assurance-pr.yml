@@ -11,7 +11,9 @@ on:
       - docs/security/VULNERABILITY_MANAGEMENT.md
       - drizzle.config.ts
       - drizzle/account-media-schema.ts
+      - drizzle/verification-evidence-schema.ts
       - drizzle/0021_dropi_account_media.sql
+      - drizzle/0022_verification_evidence_attachments.sql
       - drizzle/meta/_journal.json
       - server/auth-router.ts
       - server/test-account-provisioning.ts
@@ -41,16 +43,20 @@ on:
       - server/security-http.ts
       - shared/security-baseline-policy.ts
       - shared/test-role-accounts.ts
+      - shared/verification-lifecycle.ts
       - lib/media-url.ts
       - lib/profile-photo-crop.ts
       - components/image-cropper.tsx
       - components/profile-photo-modal.tsx
       - app/(tabs)/profile.tsx
+      - app/verify-documents.tsx
       - app/admin/approvals.tsx
       - app/admin/phantom-console.tsx
       - tests/dropi-account-media-storage-contract.test.ts
       - tests/profile-photo-crop-geometry.test.ts
       - tests/profile-photo-crop-contract.test.ts
+      - tests/verification-lifecycle.test.ts
+      - tests/verification-evidence-lifecycle-contract.test.ts
       - tests/test-account-provisioning-contract.test.ts
       - tests/test-account-auth-recovery-379-contract.test.ts
       - tests/security-assurance-policy.test.ts
@@ -95,11 +101,13 @@ jobs:
           tests/security-assurance-contract.test.ts
       - name: Security baseline regressions
         run: node --import tsx --test tests/security-baseline-policy.test.ts tests/security-crypto.test.ts tests/outbound-url-policy.test.ts tests/security-baseline-contract.test.ts
-      - name: Auth, profile and operational security regressions
+      - name: Auth, profile, verification and operational security regressions
         run: >-
           pnpm exec vitest run
           tests/profile-photo-crop-geometry.test.ts
           tests/profile-photo-crop-contract.test.ts
+          tests/verification-lifecycle.test.ts
+          tests/verification-evidence-lifecycle-contract.test.ts
           tests/test-account-provisioning-contract.test.ts
           tests/test-account-auth-recovery-379-contract.test.ts
           tests/auth.login-normalize.test.ts
@@ -110,5 +118,7 @@ jobs:
           tests/order-management-integration-contract.test.ts
       - name: TypeScript
         run: pnpm check
+      - name: Server build
+        run: pnpm build
       - name: Whitespace
         run: git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"

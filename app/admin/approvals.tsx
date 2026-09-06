@@ -1,66 +1,49 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
-  TextInput,
   Image,
   Linking,
   Modal,
   Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { ScreenContainer } from "@/components/screen-container";
-import { useDropiAuth } from "@/lib/auth-context";
-import { getApiBaseUrl } from "@/constants/oauth";
-import { resolveDropiMediaUrl } from "@/lib/media-url";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ScreenContainer } from "@/components/screen-container";
+import { getApiBaseUrl } from "@/constants/oauth";
+import { useDropiAuth } from "@/lib/auth-context";
+import { resolveDropiMediaUrl } from "@/lib/media-url";
 import { safeGoBack } from "@/lib/safe-back";
 
 const TOKEN_KEY = "@dropi_token";
 
-async function apiCall(path: string, input: any, method: "POST" | "GET" = "POST") {
-  const base = getApiBaseUrl();
-  const url = `${base}/api/trpc/${path}`;
-  const token = await AsyncStorage.getItem(TOKEN_KEY);
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  if (method === "GET") {
-    const queryUrl = input
-      ? `${url}?input=${encodeURIComponent(JSON.stringify({ json: input }))}`
-      : url;
-    const response = await fetch(queryUrl, { headers, credentials: "include" });
-    const data = await response.json();
-    if (data.error) throw new Error(data.error?.json?.message || data.error?.message || "API error");
-    return data.result?.data?.json ?? data.result?.data;
-  }
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ json: input }),
-    credentials: "include",
-  });
-  const data = await response.json();
-  if (data.error) throw new Error(data.error?.json?.message || data.error?.message || "API error");
-  return data.result?.data?.json ?? data.result?.data;
-}
-
 type Tab = "verifications" | "roles";
+type EvidenceLabel = "front" | "back" | "page" | "evidence";
 
-type VerificationPreview = {
-  storage: "dropi";
-  documentType: string;
-  status: string;
+type EvidenceAttachment = {
+  id: number | null;
+  label: EvidenceLabel;
+  ordinal: number;
+  mediaUid: string;
   fileName: string;
   contentType: string;
   byteLength: number;
   sha256: string;
   dataBase64: string;
+};
+
+type VerificationEvidenceBundle = {
+  storage: "dropi";
+  evidenceModel: "multi_attachment" | "legacy_single_url";
+  documentType: string;
+  status: string;
+  attachmentCount: number;
+  attachments: EvidenceAttachment[];
 };
 
 interface VerificationItem {
@@ -71,6 +54,7 @@ interface VerificationItem {
     licenseNumber: string | null;
     vehicleType: string | null;
     status: string;
+    expiryDate: string | null;
     notes: string | null;
     createdAt: string;
   };
@@ -95,6 +79,42 @@ interface RoleApplicationItem {
   currentChannel: string | null;
 }
 
+async function apiCall(path: string, input: any, method: "POST" | "GET" = "POST") {
+  const base = getApiBaseUrl();
+  const url = `${base}/api/trpc/${path}`;
+  const token = await AsyncStorage.getItem(TOKEN_KEY);
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  if (method === "GET") {
+    const queryUrl = input
+      ? `${url}?input=${encodeURIComponent(JSON.stringify({ json: input }))}`
+      : url;
+    const response = await fetch(queryUrl, { headers, credentials: "include" });
+    const data = await response.json();
+    if (data.error) throw new Error(data.error?.json?.message || data.error?.message || "API error");
+    return data.result?.data?.json ?? data.result?.data;
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ json: input }),
+    credentials: "include",
+  });
+  const data = await response.json();
+  if (data.error) throw new Error(data.error?.json?.message || data.error?.message || "API error");
+  return data.result?.data?.json ?? data.result?.data;
+}
+
+function formatDocType(type: string) {
+  return type.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatEvidenceLabel(label: EvidenceLabel) {
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 export default function AdminApprovalsScreen() {
   const router = useRouter();
   useDropiAuth();
@@ -105,7 +125,8 @@ export default function AdminApprovalsScreen() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<number | null>(null);
   const [previewLoadingId, setPreviewLoadingId] = useState<number | null>(null);
-  const [preview, setPreview] = useState<VerificationPreview | null>(null);
+  const [evidenceBundle, setEvidenceBundle] = useState<VerificationEvidenceBundle | null>(null);
+  const [selectedImage, setSelectedImage] = useState<EvidenceAttachment | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectId, setShowRejectId] = useState<number | null>(null);
 
@@ -131,7 +152,7 @@ export default function AdminApprovalsScreen() {
     setLoading(true);
     await Promise.all([loadVerifications(), loadRoleApplications()]);
     setLoading(false);
-  }, [loadVerifications, loadRoleApplications]);
+  }, [loadRoleApplications, loadVerifications]);
 
   useEffect(() => {
     loadData();
@@ -152,6 +173,7 @@ export default function AdminApprovalsScreen() {
       });
       setShowRejectId(null);
       setRejectionReason("");
+      setEvidenceBundle(null);
       await loadVerifications();
       Alert.alert("Done", `Verification ${decision}`);
     } catch (err: any) {
@@ -161,7 +183,7 @@ export default function AdminApprovalsScreen() {
     }
   };
 
-  const openPdfPreview = async (data: VerificationPreview) => {
+  const openPdfPreview = async (data: EvidenceAttachment) => {
     try {
       const safeName = data.fileName.replace(/[^a-zA-Z0-9._-]/g, "_") || "verification.pdf";
       if (Platform.OS === "web") {
@@ -203,17 +225,10 @@ export default function AdminApprovalsScreen() {
         }
         return;
       }
-
-      if (data?.storage !== "dropi") {
-        throw new Error("Unsupported verification evidence response");
+      if (data?.storage !== "dropi" || !Array.isArray(data.attachments) || data.attachments.length === 0) {
+        throw new Error("Verification evidence response contains no attachments");
       }
-
-      const typed = data as VerificationPreview;
-      if (typed.contentType === "application/pdf") {
-        await openPdfPreview(typed);
-      } else {
-        setPreview(typed);
-      }
+      setEvidenceBundle(data as VerificationEvidenceBundle);
     } catch (err: any) {
       Alert.alert("Evidence unavailable", err.message || "Could not load verification evidence");
     } finally {
@@ -243,10 +258,6 @@ export default function AdminApprovalsScreen() {
     } finally {
       setProcessing(null);
     }
-  };
-
-  const formatDocType = (type: string) => {
-    return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   };
 
   if (loading) {
@@ -289,228 +300,277 @@ export default function AdminApprovalsScreen() {
           </TouchableOpacity>
         </View>
 
-        {activeTab === "verifications" && (
-          <>
-            {verifications.length === 0 ? (
-              <View className="bg-surface rounded-xl p-6 items-center border border-border">
-                <Text className="text-muted text-center">No pending verifications</Text>
-              </View>
-            ) : (
-              verifications.map((item) => (
-                <View key={item.verification.id} className="bg-surface rounded-xl p-4 mb-3 border border-border">
-                  <View className="flex-row items-center justify-between mb-2">
-                    <View>
-                      <Text className="font-bold text-foreground">{item.userName || "Unknown"}</Text>
-                      <Text className="text-xs text-muted">{item.userEmail}</Text>
-                    </View>
-                    <View className="bg-amber-100 px-3 py-1 rounded-full">
-                      <Text className="text-amber-700 text-xs font-semibold">Pending</Text>
-                    </View>
+        {activeTab === "verifications" ? (
+          verifications.length === 0 ? (
+            <View className="bg-surface rounded-xl p-6 items-center border border-border">
+              <Text className="text-muted text-center">No pending verifications</Text>
+            </View>
+          ) : (
+            verifications.map((item) => (
+              <View key={item.verification.id} className="bg-surface rounded-xl p-4 mb-3 border border-border">
+                <View className="flex-row items-start justify-between gap-3 mb-2">
+                  <View className="flex-1">
+                    <Text className="font-bold text-foreground">{item.userName || "Unknown"}</Text>
+                    <Text className="text-xs text-muted">{item.userEmail}</Text>
                   </View>
-
-                  <View className="bg-background rounded-lg p-3 mb-3">
-                    <Text className="text-sm text-foreground font-medium">{formatDocType(item.verification.documentType)}</Text>
-                    {item.verification.licenseNumber && (
-                      <Text className="text-sm text-muted mt-1">Number: {item.verification.licenseNumber}</Text>
-                    )}
-                    {item.verification.vehicleType && (
-                      <Text className="text-sm text-muted mt-1">Vehicle: {formatDocType(item.verification.vehicleType)}</Text>
-                    )}
-                    {item.verification.notes && (
-                      <Text className="text-sm text-muted mt-1">Notes: {item.verification.notes}</Text>
-                    )}
-                    <Text className="text-xs text-muted mt-2">Submitted: {new Date(item.verification.createdAt).toLocaleDateString()}</Text>
-                  </View>
-
-                  <TouchableOpacity
-                    onPress={() => handlePreviewVerification(item.verification.id)}
-                    disabled={previewLoadingId === item.verification.id}
-                    className="bg-primary/10 border border-primary/30 rounded-lg py-3 items-center mb-3"
-                  >
-                    {previewLoadingId === item.verification.id ? (
-                      <ActivityIndicator size="small" color="#0a7ea4" />
-                    ) : (
-                      <Text className="text-primary font-semibold">View Private Evidence</Text>
-                    )}
-                  </TouchableOpacity>
-
-                  {showRejectId === item.verification.id && (
-                    <View className="mb-3">
-                      <TextInput
-                        value={rejectionReason}
-                        onChangeText={setRejectionReason}
-                        placeholder="Reason for rejection..."
-                        multiline
-                        className="bg-background border border-border rounded-lg px-4 py-3 text-foreground"
-                        placeholderTextColor="#687076"
-                        style={{ minHeight: 60, textAlignVertical: "top" }}
-                      />
-                    </View>
-                  )}
-
-                  <View className="flex-row gap-3">
-                    {showRejectId === item.verification.id ? (
-                      <>
-                        <TouchableOpacity
-                          onPress={() => { setShowRejectId(null); setRejectionReason(""); }}
-                          className="flex-1 bg-background border border-border rounded-lg py-3 items-center"
-                        >
-                          <Text className="text-foreground font-medium">Cancel</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => handleVerificationDecision(item.verification.id, "rejected")}
-                          disabled={processing === item.verification.id}
-                          className="flex-1 bg-error rounded-lg py-3 items-center"
-                        >
-                          {processing === item.verification.id ? <ActivityIndicator color="#fff" size="small" /> : <Text className="text-background font-semibold">Confirm Reject</Text>}
-                        </TouchableOpacity>
-                      </>
-                    ) : (
-                      <>
-                        <TouchableOpacity
-                          onPress={() => setShowRejectId(item.verification.id)}
-                          className="flex-1 bg-background border border-error rounded-lg py-3 items-center"
-                        >
-                          <Text className="text-error font-medium">Reject</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => handleVerificationDecision(item.verification.id, "approved")}
-                          disabled={processing === item.verification.id}
-                          className="flex-1 bg-success rounded-lg py-3 items-center"
-                        >
-                          {processing === item.verification.id ? <ActivityIndicator color="#fff" size="small" /> : <Text className="text-background font-semibold">Approve</Text>}
-                        </TouchableOpacity>
-                      </>
-                    )}
+                  <View className="bg-blue-100 px-3 py-1 rounded-full">
+                    <Text className="text-blue-700 text-xs font-semibold">Pending review</Text>
                   </View>
                 </View>
-              ))
-            )}
-          </>
-        )}
 
-        {activeTab === "roles" && (
-          <>
-            {roleApps.length === 0 ? (
-              <View className="bg-surface rounded-xl p-6 items-center border border-border">
-                <Text className="text-muted text-center">No pending role applications</Text>
-              </View>
-            ) : (
-              roleApps.map((item) => (
-                <View key={item.application.id} className="bg-surface rounded-xl p-4 mb-3 border border-border">
-                  <View className="flex-row items-center justify-between mb-2">
-                    <View>
-                      <Text className="font-bold text-foreground">{item.userName || "Unknown"}</Text>
-                      <Text className="text-xs text-muted">{item.userEmail}</Text>
-                    </View>
-                    <View className="bg-amber-100 px-3 py-1 rounded-full">
-                      <Text className="text-amber-700 text-xs font-semibold">Pending</Text>
-                    </View>
-                  </View>
+                <View className="bg-background rounded-lg p-3 mb-3">
+                  <Text className="text-sm text-foreground font-medium">{formatDocType(item.verification.documentType)}</Text>
+                  {item.verification.licenseNumber ? (
+                    <Text className="text-sm text-muted mt-1">Number: {item.verification.licenseNumber}</Text>
+                  ) : null}
+                  {item.verification.vehicleType ? (
+                    <Text className="text-sm text-muted mt-1">Vehicle: {formatDocType(item.verification.vehicleType)}</Text>
+                  ) : null}
+                  {item.verification.expiryDate ? (
+                    <Text className="text-sm text-muted mt-1">Expiry: {new Date(item.verification.expiryDate).toLocaleDateString()}</Text>
+                  ) : null}
+                  {item.verification.notes ? (
+                    <Text className="text-sm text-muted mt-1">Notes: {item.verification.notes}</Text>
+                  ) : null}
+                  <Text className="text-xs text-muted mt-2">Submitted: {new Date(item.verification.createdAt).toLocaleDateString()}</Text>
+                </View>
 
-                  <View className="flex-row gap-2 mb-2">
-                    <View className="bg-background rounded-lg px-3 py-1">
-                      <Text className="text-xs text-muted">Current: {formatDocType(item.currentRole || "none")} ({item.currentChannel})</Text>
-                    </View>
-                  </View>
-
-                  <View className="bg-background rounded-lg p-3 mb-3">
-                    <View className="flex-row items-center gap-2 mb-2">
-                      <Text className="text-sm font-bold text-primary">Requesting: {formatDocType(item.application.requestedRole)}</Text>
-                      <View className="bg-primary/10 px-2 py-0.5 rounded">
-                        <Text className="text-xs text-primary font-medium">{item.application.requestedChannel}</Text>
-                      </View>
-                    </View>
-
-                    {item.application.motivation && (
-                      <View className="mb-2">
-                        <Text className="text-xs font-medium text-foreground">Motivation:</Text>
-                        <Text className="text-sm text-muted mt-1">{item.application.motivation}</Text>
-                      </View>
-                    )}
-
-                    {item.application.qualifications && (
-                      <View>
-                        <Text className="text-xs font-medium text-foreground">Qualifications:</Text>
-                        <Text className="text-sm text-muted mt-1">{item.application.qualifications}</Text>
-                      </View>
-                    )}
-
-                    <Text className="text-xs text-muted mt-2">Applied: {new Date(item.application.createdAt).toLocaleDateString()}</Text>
-                  </View>
-
-                  {showRejectId === item.application.id + 10000 && (
-                    <View className="mb-3">
-                      <TextInput
-                        value={rejectionReason}
-                        onChangeText={setRejectionReason}
-                        placeholder="Reason for rejection..."
-                        multiline
-                        className="bg-background border border-border rounded-lg px-4 py-3 text-foreground"
-                        placeholderTextColor="#687076"
-                        style={{ minHeight: 60, textAlignVertical: "top" }}
-                      />
-                    </View>
+                <TouchableOpacity
+                  onPress={() => handlePreviewVerification(item.verification.id)}
+                  disabled={previewLoadingId === item.verification.id}
+                  className="bg-primary/10 border border-primary/30 rounded-lg py-3 items-center mb-3"
+                >
+                  {previewLoadingId === item.verification.id ? (
+                    <ActivityIndicator size="small" color="#0a7ea4" />
+                  ) : (
+                    <Text className="text-primary font-semibold">Review All Private Evidence</Text>
                   )}
+                </TouchableOpacity>
 
-                  <View className="flex-row gap-3">
-                    {showRejectId === item.application.id + 10000 ? (
-                      <>
-                        <TouchableOpacity
-                          onPress={() => { setShowRejectId(null); setRejectionReason(""); }}
-                          className="flex-1 bg-background border border-border rounded-lg py-3 items-center"
-                        >
-                          <Text className="text-foreground font-medium">Cancel</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => handleRoleDecision(item.application.id, "rejected")}
-                          disabled={processing === item.application.id}
-                          className="flex-1 bg-error rounded-lg py-3 items-center"
-                        >
-                          {processing === item.application.id ? <ActivityIndicator color="#fff" size="small" /> : <Text className="text-background font-semibold">Confirm Reject</Text>}
-                        </TouchableOpacity>
-                      </>
-                    ) : (
-                      <>
-                        <TouchableOpacity
-                          onPress={() => setShowRejectId(item.application.id + 10000)}
-                          className="flex-1 bg-background border border-error rounded-lg py-3 items-center"
-                        >
-                          <Text className="text-error font-medium">Reject</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => handleRoleDecision(item.application.id, "approved")}
-                          disabled={processing === item.application.id}
-                          className="flex-1 bg-success rounded-lg py-3 items-center"
-                        >
-                          {processing === item.application.id ? <ActivityIndicator color="#fff" size="small" /> : <Text className="text-background font-semibold">Approve</Text>}
-                        </TouchableOpacity>
-                      </>
-                    )}
+                {showRejectId === item.verification.id ? (
+                  <View className="mb-3">
+                    <TextInput
+                      value={rejectionReason}
+                      onChangeText={setRejectionReason}
+                      placeholder="Reason for rejection..."
+                      multiline
+                      className="bg-background border border-border rounded-lg px-4 py-3 text-foreground"
+                      placeholderTextColor="#687076"
+                      style={{ minHeight: 60, textAlignVertical: "top" }}
+                    />
+                  </View>
+                ) : null}
+
+                <View className="flex-row gap-3">
+                  {showRejectId === item.verification.id ? (
+                    <>
+                      <TouchableOpacity
+                        onPress={() => { setShowRejectId(null); setRejectionReason(""); }}
+                        className="flex-1 bg-background border border-border rounded-lg py-3 items-center"
+                      >
+                        <Text className="text-foreground font-medium">Cancel</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => handleVerificationDecision(item.verification.id, "rejected")}
+                        disabled={processing === item.verification.id}
+                        className="flex-1 bg-error rounded-lg py-3 items-center"
+                      >
+                        {processing === item.verification.id
+                          ? <ActivityIndicator color="#fff" size="small" />
+                          : <Text className="text-background font-semibold">Confirm Reject</Text>}
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <>
+                      <TouchableOpacity
+                        onPress={() => setShowRejectId(item.verification.id)}
+                        className="flex-1 bg-background border border-error rounded-lg py-3 items-center"
+                      >
+                        <Text className="text-error font-medium">Reject</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => handleVerificationDecision(item.verification.id, "approved")}
+                        disabled={processing === item.verification.id}
+                        className="flex-1 bg-success rounded-lg py-3 items-center"
+                      >
+                        {processing === item.verification.id
+                          ? <ActivityIndicator color="#fff" size="small" />
+                          : <Text className="text-background font-semibold">Approve</Text>}
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </View>
+              </View>
+            ))
+          )
+        ) : roleApps.length === 0 ? (
+          <View className="bg-surface rounded-xl p-6 items-center border border-border">
+            <Text className="text-muted text-center">No pending role applications</Text>
+          </View>
+        ) : (
+          roleApps.map((item) => {
+            const rejectKey = item.application.id + 10000;
+            return (
+              <View key={item.application.id} className="bg-surface rounded-xl p-4 mb-3 border border-border">
+                <View className="flex-row items-center justify-between mb-2">
+                  <View>
+                    <Text className="font-bold text-foreground">{item.userName || "Unknown"}</Text>
+                    <Text className="text-xs text-muted">{item.userEmail}</Text>
+                  </View>
+                  <View className="bg-amber-100 px-3 py-1 rounded-full">
+                    <Text className="text-amber-700 text-xs font-semibold">Pending</Text>
                   </View>
                 </View>
-              ))
-            )}
-          </>
+
+                <View className="bg-background rounded-lg p-3 mb-3">
+                  <Text className="text-xs text-muted">
+                    Current: {formatDocType(item.currentRole || "none")} ({item.currentChannel || "none"})
+                  </Text>
+                  <Text className="text-sm font-bold text-primary mt-2">
+                    Requesting: {formatDocType(item.application.requestedRole)} · {item.application.requestedChannel}
+                  </Text>
+                  {item.application.motivation ? (
+                    <Text className="text-sm text-muted mt-2">Motivation: {item.application.motivation}</Text>
+                  ) : null}
+                  {item.application.qualifications ? (
+                    <Text className="text-sm text-muted mt-2">Qualifications: {item.application.qualifications}</Text>
+                  ) : null}
+                  <Text className="text-xs text-muted mt-2">Applied: {new Date(item.application.createdAt).toLocaleDateString()}</Text>
+                </View>
+
+                {showRejectId === rejectKey ? (
+                  <View className="mb-3">
+                    <TextInput
+                      value={rejectionReason}
+                      onChangeText={setRejectionReason}
+                      placeholder="Reason for rejection..."
+                      multiline
+                      className="bg-background border border-border rounded-lg px-4 py-3 text-foreground"
+                      placeholderTextColor="#687076"
+                      style={{ minHeight: 60, textAlignVertical: "top" }}
+                    />
+                  </View>
+                ) : null}
+
+                <View className="flex-row gap-3">
+                  {showRejectId === rejectKey ? (
+                    <>
+                      <TouchableOpacity
+                        onPress={() => { setShowRejectId(null); setRejectionReason(""); }}
+                        className="flex-1 bg-background border border-border rounded-lg py-3 items-center"
+                      >
+                        <Text className="text-foreground font-medium">Cancel</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => handleRoleDecision(item.application.id, "rejected")}
+                        disabled={processing === item.application.id}
+                        className="flex-1 bg-error rounded-lg py-3 items-center"
+                      >
+                        {processing === item.application.id
+                          ? <ActivityIndicator color="#fff" size="small" />
+                          : <Text className="text-background font-semibold">Confirm Reject</Text>}
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <>
+                      <TouchableOpacity
+                        onPress={() => setShowRejectId(rejectKey)}
+                        className="flex-1 bg-background border border-error rounded-lg py-3 items-center"
+                      >
+                        <Text className="text-error font-medium">Reject</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => handleRoleDecision(item.application.id, "approved")}
+                        disabled={processing === item.application.id}
+                        className="flex-1 bg-success rounded-lg py-3 items-center"
+                      >
+                        {processing === item.application.id
+                          ? <ActivityIndicator color="#fff" size="small" />
+                          : <Text className="text-background font-semibold">Approve</Text>}
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </View>
+              </View>
+            );
+          })
         )}
       </ScrollView>
 
-      <Modal visible={Boolean(preview)} transparent animationType="fade" onRequestClose={() => setPreview(null)}>
-        <View className="flex-1 bg-black/80 items-center justify-center p-5">
-          <View className="bg-background rounded-2xl p-4 w-full" style={{ maxWidth: 620, maxHeight: "90%" }}>
-            <Text className="text-lg font-bold text-foreground mb-1">Private Verification Evidence</Text>
-            <Text className="text-xs text-muted mb-3">
-              Integrity verified • {preview?.fileName} • {preview ? Math.ceil(preview.byteLength / 1024) : 0} KB
+      <Modal
+        visible={Boolean(evidenceBundle)}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEvidenceBundle(null)}
+      >
+        <View className="flex-1 bg-black/80 items-center justify-center p-4">
+          <View className="bg-background rounded-2xl p-4 w-full" style={{ maxWidth: 680, maxHeight: "92%" }}>
+            <Text className="text-lg font-bold text-foreground">Private Verification Evidence</Text>
+            <Text className="text-xs text-muted mt-1 mb-3">
+              {evidenceBundle?.attachmentCount || 0} attachment{evidenceBundle?.attachmentCount === 1 ? "" : "s"} · every file passed owner binding, metadata, byte-length and SHA-256 integrity checks.
             </Text>
-            {preview?.contentType.startsWith("image/") && (
+            <ScrollView contentContainerStyle={{ paddingBottom: 8 }}>
+              {evidenceBundle?.attachments.map((attachment, index) => (
+                <View key={`${attachment.mediaUid}-${attachment.ordinal}`} className="border border-border rounded-xl p-3 mb-3 bg-surface">
+                  <View className="flex-row items-start justify-between gap-3">
+                    <View className="flex-1">
+                      <Text className="text-sm font-semibold text-foreground">
+                        {index + 1}. {formatEvidenceLabel(attachment.label)} · {attachment.fileName}
+                      </Text>
+                      <Text className="text-xs text-muted mt-1">
+                        {attachment.contentType} · {Math.ceil(attachment.byteLength / 1024)} KB
+                      </Text>
+                      <Text className="text-[10px] text-muted mt-1" numberOfLines={1}>
+                        SHA-256 {attachment.sha256}
+                      </Text>
+                    </View>
+                    <Text className="text-xs text-green-600 font-semibold">✓ Integrity verified</Text>
+                  </View>
+
+                  {attachment.contentType.startsWith("image/") ? (
+                    <TouchableOpacity onPress={() => setSelectedImage(attachment)} className="mt-3">
+                      <Image
+                        source={{ uri: `data:${attachment.contentType};base64,${attachment.dataBase64}` }}
+                        resizeMode="contain"
+                        style={{ width: "100%", height: 180, backgroundColor: "#111" }}
+                      />
+                      <Text className="text-primary text-xs font-semibold text-center mt-2">Open image</Text>
+                    </TouchableOpacity>
+                  ) : attachment.contentType === "application/pdf" ? (
+                    <TouchableOpacity onPress={() => openPdfPreview(attachment)} className="border border-primary rounded-lg py-3 items-center mt-3">
+                      <Text className="text-primary font-semibold">Open PDF in device viewer</Text>
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
+              ))}
+            </ScrollView>
+            <TouchableOpacity onPress={() => setEvidenceBundle(null)} className="bg-primary rounded-xl py-3 items-center mt-2">
+              <Text className="text-background font-semibold">Close Evidence File</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={Boolean(selectedImage)}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedImage(null)}
+      >
+        <View className="flex-1 bg-black/90 items-center justify-center p-4">
+          <View className="w-full" style={{ maxWidth: 760 }}>
+            <Text className="text-white text-center font-semibold mb-3">
+              {selectedImage ? `${formatEvidenceLabel(selectedImage.label)} · ${selectedImage.fileName}` : "Evidence image"}
+            </Text>
+            {selectedImage ? (
               <Image
-                source={{ uri: `data:${preview.contentType};base64,${preview.dataBase64}` }}
+                source={{ uri: `data:${selectedImage.contentType};base64,${selectedImage.dataBase64}` }}
                 resizeMode="contain"
-                style={{ width: "100%", height: 420, backgroundColor: "#111" }}
+                style={{ width: "100%", height: 560 }}
               />
-            )}
-            <TouchableOpacity onPress={() => setPreview(null)} className="bg-primary rounded-xl py-3 items-center mt-4">
-              <Text className="text-background font-semibold">Close Evidence</Text>
+            ) : null}
+            <TouchableOpacity onPress={() => setSelectedImage(null)} className="bg-primary rounded-xl py-3 items-center mt-4">
+              <Text className="text-background font-semibold">Close Image</Text>
             </TouchableOpacity>
           </View>
         </View>

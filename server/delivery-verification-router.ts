@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { router, protectedProcedure, adminProcedure } from "./_core/trpc";
 import { verifications, users } from "../drizzle/schema";
+import { dropiAccountMedia } from "../drizzle/account-media-schema";
+import { verificationEvidenceAttachments } from "../drizzle/verification-evidence-schema";
 import { getDb } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, inArray } from "drizzle-orm";
 import { maskEmail, sendPlatformEmail } from "./_core/mail";
 import { storagePut } from "./storage";
 import { notifyOwner } from "./_core/notification";
@@ -15,21 +17,41 @@ import {
   syncOperationalPilotVerification,
 } from "./pilot-operational-verification";
 
+const DOCUMENT_TYPES = [
+  "driving_license",
+  "drone_license",
+  "vehicle_registration",
+  "insurance",
+  "background_check",
+  "other",
+] as const;
+const EVIDENCE_LABELS = ["front", "back", "page", "evidence"] as const;
+const MAX_EVIDENCE_ATTACHMENTS = 5;
+
+const evidenceSchema = z.object({
+  mediaUid: z.string().uuid(),
+  label: z.enum(EVIDENCE_LABELS).default("evidence"),
+});
+
+function verificationMediaUrl(mediaUid: string, sha256: string): string {
+  return `/api/dropi-media/verification/${mediaUid}/${sha256}`;
+}
+
 // ===== VERIFICATION ROUTER (Delivery Partner Documents) =====
 export const verificationRouter = router({
-  // Upload a document file to the configured storage provider.
-  // P0 #368 separately replaces the remaining Forge-backed provider.
+  // Upload one private evidence object. A verification submission may later bind
+  // one to five of these objects into one governed review decision.
   uploadDocument: protectedProcedure
     .input(z.object({
-      fileName: z.string(),
-      fileBase64: z.string(),
+      fileName: z.string().min(1).max(255),
+      fileBase64: z.string().min(1),
       contentType: z.string().default("application/octet-stream"),
     }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user!.id;
       const buffer = Buffer.from(input.fileBase64, "base64");
       if (buffer.length > 10 * 1024 * 1024) {
-        throw new Error("File too large. Maximum size is 10MB.");
+        throw new Error("File too large. Maximum size is 10MB per attachment.");
       }
 
       const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
@@ -39,18 +61,31 @@ export const verificationRouter = router({
 
       const storagePath = `verifications/user_${userId}/${Date.now()}_${input.fileName}`;
       const { key, url } = await storagePut(storagePath, buffer, input.contentType);
-      console.log(`[UPLOAD] User ${userId} uploaded document: ${key}`);
-      return { key, url, fileName: input.fileName };
+      console.log(`[UPLOAD] User ${userId} uploaded private verification evidence: ${key}`);
+      return { mediaUid: key, key, url, fileName: input.fileName, contentType: input.contentType, byteLength: buffer.length };
     }),
 
   submit: protectedProcedure
     .input(z.object({
-      documentType: z.enum(["driving_license", "drone_license", "vehicle_registration", "insurance", "background_check", "other"]),
-      documentUrl: z.string().optional(),
+      documentType: z.enum(DOCUMENT_TYPES),
+      // Legacy compatibility for already-installed clients. New clients bind
+      // DROPi-owned media through `evidence` instead of trusting an arbitrary URL.
+      documentUrl: z.string().max(500).optional(),
+      evidence: z.array(evidenceSchema).min(1).max(MAX_EVIDENCE_ATTACHMENTS).optional(),
       licenseNumber: z.string().min(1).max(100),
       expiryDate: z.string().optional(),
       vehicleType: z.enum(["drone", "car", "van", "ebike", "motorcycle"]).optional(),
-      notes: z.string().optional(),
+      notes: z.string().max(2000).optional(),
+    }).superRefine((input, ctx) => {
+      if (!input.documentUrl && (!input.evidence || input.evidence.length === 0)) {
+        ctx.addIssue({ code: "custom", message: "At least one verification evidence attachment is required" });
+      }
+      if (input.evidence) {
+        const uids = input.evidence.map((item) => item.mediaUid);
+        if (new Set(uids).size !== uids.length) {
+          ctx.addIssue({ code: "custom", message: "The same evidence file cannot be attached twice" });
+        }
+      }
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -72,25 +107,115 @@ export const verificationRouter = router({
         throw new Error("You already have a pending verification for this document type");
       }
 
-      const [result] = await db.insert(verifications).values({
-        userId,
-        documentType: input.documentType,
-        documentUrl: input.documentUrl || null,
-        licenseNumber: input.licenseNumber,
-        expiryDate: input.expiryDate ? new Date(input.expiryDate) : null,
-        vehicleType: input.vehicleType || null,
-        notes: input.notes || null,
+      const requestedEvidence = input.evidence || [];
+      const mediaUids = requestedEvidence.map((item) => item.mediaUid);
+      const mediaRows = mediaUids.length > 0
+        ? await db
+          .select({
+            mediaUid: dropiAccountMedia.mediaUid,
+            ownerId: dropiAccountMedia.ownerId,
+            purpose: dropiAccountMedia.purpose,
+            fileName: dropiAccountMedia.fileName,
+            contentType: dropiAccountMedia.contentType,
+            byteLength: dropiAccountMedia.byteLength,
+            sha256: dropiAccountMedia.sha256,
+          })
+          .from(dropiAccountMedia)
+          .where(and(
+            eq(dropiAccountMedia.ownerId, userId),
+            eq(dropiAccountMedia.purpose, "verification_document"),
+            inArray(dropiAccountMedia.mediaUid, mediaUids),
+          ))
+        : [];
+
+      if (mediaRows.length !== mediaUids.length) {
+        throw new Error("One or more evidence attachments are unavailable or do not belong to this account");
+      }
+
+      const mediaByUid = new Map(mediaRows.map((row) => [row.mediaUid, row]));
+      const attachmentValues = requestedEvidence.map((requested, ordinal) => {
+        const media = mediaByUid.get(requested.mediaUid);
+        if (!media) throw new Error("Verification evidence binding failed");
+        return {
+          verificationId: 0,
+          mediaUid: media.mediaUid,
+          label: requested.label,
+          ordinal,
+          fileName: media.fileName,
+          contentType: media.contentType,
+          byteLength: media.byteLength,
+          sha256: media.sha256,
+        };
+      });
+      const firstMedia = requestedEvidence.length > 0
+        ? mediaByUid.get(requestedEvidence[0].mediaUid)
+        : null;
+      const compatibilityUrl = firstMedia
+        ? verificationMediaUrl(firstMedia.mediaUid, firstMedia.sha256)
+        : (input.documentUrl || null);
+
+      const verificationId = await db.transaction(async (tx) => {
+        const [result] = await tx.insert(verifications).values({
+          userId,
+          documentType: input.documentType,
+          documentUrl: compatibilityUrl,
+          licenseNumber: input.licenseNumber,
+          expiryDate: input.expiryDate ? new Date(input.expiryDate) : null,
+          vehicleType: input.vehicleType || null,
+          notes: input.notes || null,
+        });
+        const insertedId = Number(result.insertId);
+
+        if (attachmentValues.length > 0) {
+          await tx.insert(verificationEvidenceAttachments).values(
+            attachmentValues.map((value) => ({ ...value, verificationId: insertedId })),
+          );
+        }
+        return insertedId;
       });
 
-      return { success: true, verificationId: result.insertId };
+      return {
+        success: true,
+        verificationId,
+        attachmentCount: attachmentValues.length || (input.documentUrl ? 1 : 0),
+      };
     }),
 
   myVerifications: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
     if (!db) return [];
-    return db.select().from(verifications)
+    const rows = await db.select().from(verifications)
       .where(eq(verifications.userId, ctx.user!.id))
       .orderBy(desc(verifications.createdAt));
+    if (rows.length === 0) return [];
+
+    const evidence = await db
+      .select({
+        verificationId: verificationEvidenceAttachments.verificationId,
+        label: verificationEvidenceAttachments.label,
+        ordinal: verificationEvidenceAttachments.ordinal,
+        fileName: verificationEvidenceAttachments.fileName,
+        contentType: verificationEvidenceAttachments.contentType,
+      })
+      .from(verificationEvidenceAttachments)
+      .where(inArray(verificationEvidenceAttachments.verificationId, rows.map((row) => row.id)))
+      .orderBy(verificationEvidenceAttachments.verificationId, verificationEvidenceAttachments.ordinal);
+    const byVerification = new Map<number, typeof evidence>();
+    for (const item of evidence) {
+      const list = byVerification.get(item.verificationId) || [];
+      list.push(item);
+      byVerification.set(item.verificationId, list);
+    }
+
+    return rows.map((row) => {
+      const attachments = byVerification.get(row.id) || [];
+      return {
+        ...row,
+        attachmentCount: attachments.length || (row.documentUrl ? 1 : 0),
+        attachments,
+        evidenceModel: attachments.length > 0 ? "multi_attachment" as const : "legacy_single_url" as const,
+      };
+    });
   }),
 
   myStatus: protectedProcedure.query(async ({ ctx }) => {
@@ -112,7 +237,6 @@ export const verificationRouter = router({
       .where(eq(verifications.userId, userId));
     const operationallyVerified = hasCurrentOperationalPilotVerification(results as any[]);
 
-    // Keep the materialized user flag aligned with the evidence-derived result.
     await syncOperationalPilotVerification(userId);
 
     return {
