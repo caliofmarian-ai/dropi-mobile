@@ -1,7 +1,7 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import type { Session, User } from "../../drizzle/schema";
+import { syncOperationalPilotVerification } from "../pilot-operational-verification";
 import { getRequestSessionToken } from "../request-session";
-import { refreshOperationalPilotVerificationFlags } from "../pilot-operational-verification";
 import { sdk } from "./sdk";
 
 export type TrpcContext = {
@@ -26,24 +26,16 @@ export async function createContext(opts: CreateExpressContextOptions): Promise<
     user = null;
   }
 
-  if (user) {
+  if (user?.dropiRole === "delivery_partner") {
     try {
       // users.isVerified is a materialized operational flag, not authority by
-      // itself. Reconcile it from approved, unexpired driving/drone licenses on
-      // every authenticated request so expiry/rejection cannot remain stale.
-      const refresh = await refreshOperationalPilotVerificationFlags();
-      if (user.dropiRole === "delivery_partner") {
-        user = {
-          ...user,
-          isVerified: refresh.refreshed && refresh.verifiedUserIds.has(user.id),
-        };
-      }
+      // itself. Reconcile only the authenticated pilot from approved, unexpired
+      // driving/drone evidence so ordinary requests do not scan every pilot.
+      const operationallyVerified = await syncOperationalPilotVerification(user.id);
+      user = { ...user, isVerified: operationallyVerified };
     } catch (error) {
-      // Fail closed for pilots if evidence cannot be refreshed. Other roles do
-      // not derive their authorization from delivery-partner license evidence.
-      if (user.dropiRole === "delivery_partner") {
-        user = { ...user, isVerified: false };
-      }
+      // Fail closed if current license evidence cannot be confirmed.
+      user = { ...user, isVerified: false };
     }
   }
 
