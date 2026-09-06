@@ -23,6 +23,7 @@ on:
       - .env.example
       - tests/test-role-accounts.test.ts
       - tests/test-account-provisioning-contract.test.ts
+      - tests/test-account-independent-passwords-397.test.ts
       - tests/test-account-auth-recovery-379-contract.test.ts
       - tests/phantom-console-contract.test.ts
       - tests/biometric-enrollment-contract.test.ts
@@ -53,6 +54,7 @@ jobs:
           pnpm exec vitest run
           tests/test-role-accounts.test.ts
           tests/test-account-provisioning-contract.test.ts
+          tests/test-account-independent-passwords-397.test.ts
           tests/test-account-auth-recovery-379-contract.test.ts
           tests/phantom-console-contract.test.ts
           tests/biometric-enrollment-contract.test.ts
