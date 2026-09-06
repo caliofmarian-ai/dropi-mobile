@@ -14,6 +14,11 @@ import {
   getTestAccountProvisioningStatus,
   provisionTestRoleAccounts,
 } from "./test-account-provisioning";
+import {
+  getOwnerQaMissionFixtureStatus,
+  reconcileOwnerQaMissionFixtures,
+  resetOwnerQaMissionFixtures,
+} from "./owner-qa-mission-fixtures";
 
 const deliveryPartnerTestIdentity = TEST_ROLE_IDENTITIES.find(
   (identity) => identity.role === "delivery_partner",
@@ -50,6 +55,20 @@ function requireDeliveryPartnerTestEmail(): string {
     });
   }
   return deliveryPartnerTestIdentity.humanEmail;
+}
+
+function throwOwnerQaFixtureError(error: unknown): never {
+  const message = error instanceof Error ? error.message : "Owner QA mission fixture operation failed";
+  const precondition =
+    message.includes("disabled") ||
+    message.includes("not provisioned") ||
+    message.includes("does not match") ||
+    message.includes("operating zone") ||
+    message.includes("must share one operating zone");
+  throw new TRPCError({
+    code: precondition ? "PRECONDITION_FAILED" : "INTERNAL_SERVER_ERROR",
+    message: precondition ? message : "Owner QA mission fixture operation failed",
+  });
 }
 
 /**
@@ -189,6 +208,43 @@ export const phantomConsoleRouter = router({
         baseInbox: DROPI_TEST_BASE_INBOX,
         message: "Recovery request accepted by the canonical password-reset flow. Check the base Gmail inbox.",
       };
+    }),
+
+  ownerQaMissionFixtureStatus: adminProcedure.query(async ({ ctx }) => {
+    requireBaseSuperAdmin(ctx);
+    try {
+      return await getOwnerQaMissionFixtureStatus();
+    } catch (error) {
+      throwOwnerQaFixtureError(error);
+    }
+  }),
+
+  reconcileOwnerQaMissionFixtures: adminProcedure
+    .input(z.object({}).optional())
+    .mutation(async ({ ctx }) => {
+      requireBaseSuperAdmin(ctx);
+      try {
+        return await reconcileOwnerQaMissionFixtures({
+          actor: { id: ctx.user!.id, dropiRole: ctx.user!.dropiRole },
+          session: ctx.session,
+        });
+      } catch (error) {
+        throwOwnerQaFixtureError(error);
+      }
+    }),
+
+  resetOwnerQaMissionFixtures: adminProcedure
+    .input(z.object({}).optional())
+    .mutation(async ({ ctx }) => {
+      requireBaseSuperAdmin(ctx);
+      try {
+        return await resetOwnerQaMissionFixtures({
+          actor: { id: ctx.user!.id, dropiRole: ctx.user!.dropiRole },
+          session: ctx.session,
+        });
+      } catch (error) {
+        throwOwnerQaFixtureError(error);
+      }
     }),
 
   enter: adminProcedure
