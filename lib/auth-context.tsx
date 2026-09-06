@@ -23,7 +23,8 @@ interface AuthContextType {
   enterPhantomSession: (targetUserId: number) => Promise<AuthActionResult>;
   exitPhantomSession: () => Promise<AuthActionResult>;
   forgotPassword: (identifier: string) => Promise<{ success: boolean; message?: string }>;
-  resetPassword: (token: string, newPassword: string) => Promise<AuthActionResult>;
+  verifyResetCode: (identifier: string, token: string) => Promise<AuthActionResult>;
+  resetPassword: (identifier: string, token: string, newPassword: string) => Promise<AuthActionResult>;
 }
 
 interface RegisterData {
@@ -309,9 +310,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const resetPassword = useCallback(async (resetToken: string, newPassword: string): Promise<AuthActionResult> => {
+  const verifyResetCode = useCallback(async (identifier: string, resetToken: string): Promise<AuthActionResult> => {
     try {
-      await apiCall("dropiAuth.resetPassword", { token: resetToken, newPassword });
+      await apiCall("passwordRecovery.verifyResetCode", {
+        identifier: identifier.toLowerCase().trim(),
+        token: resetToken,
+      });
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message || "Invalid or expired reset code" };
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (
+    identifier: string,
+    resetToken: string,
+    newPassword: string,
+  ): Promise<AuthActionResult> => {
+    try {
+      await apiCall("passwordRecovery.resetPassword", {
+        identifier: identifier.toLowerCase().trim(),
+        token: resetToken,
+        newPassword,
+      });
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message || "Password reset failed" };
@@ -333,6 +354,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       enterPhantomSession,
       exitPhantomSession,
       forgotPassword,
+      verifyResetCode,
       resetPassword,
     }}>
       {children}
