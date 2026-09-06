@@ -38,8 +38,19 @@ describe("AUTH-379 canonical test-account recovery contract", () => {
     expect(router).toContain("dropiAuthRouter.createCaller(ctx).forgotPassword({ email })");
     expect(router).not.toMatch(/resetToken\s*[:=]/);
     expect(auth).toContain("await db.setResetToken(user.id, code, expiry)");
-    expect(auth).toContain("const emailSent = await sendRecoveryEmail(normalizedEmail, code)");
+    expect(auth).toContain("const recoveryDeliveryEmail = resolveRecoveryDeliveryEmail(normalizedEmail)");
+    expect(auth).toContain("const emailSent = await sendRecoveryEmail(recoveryDeliveryEmail, code)");
     expect(auth).toContain("await db.clearResetToken(user.id)");
+  });
+
+  it("routes only canonical TEST identities to the governed base inbox", () => {
+    const auth = source("server/auth-router.ts");
+
+    expect(auth).toContain("CANONICAL_TEST_ACCOUNT_EMAILS");
+    expect(auth).toContain("TEST_ROLE_IDENTITIES.flatMap");
+    expect(auth).toContain("? DROPI_TEST_BASE_INBOX");
+    expect(auth).toContain(": normalized");
+    expect(auth).toContain("recoveryDeliveryRoutedToBaseInbox");
   });
 
   it("keeps public anti-enumeration behavior intact", () => {
