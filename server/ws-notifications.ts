@@ -12,7 +12,6 @@
  * - Heartbeat mechanism cleans up stale connections
  * - Supports multiple devices per user (all get the notification)
  */
-import { Server as HttpServer } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { URL } from "url";
 
@@ -22,11 +21,13 @@ const userConnections = new Map<number, Set<WebSocket>>();
 let wssInstance: WebSocketServer | null = null;
 
 /**
- * Initialize WebSocket notification server on the existing HTTP server.
- * Path: /ws/notifications
+ * Initialize the notification WebSocket handler.
+ *
+ * The returned server is `noServer`; the shared HTTP upgrade router mounts it at
+ * `/ws/notifications` so it cannot interfere with other WebSocket namespaces.
  */
-export function initNotificationWS(server: HttpServer): void {
-  const wss = new WebSocketServer({ server, path: "/ws/notifications" });
+export function initNotificationWS(): WebSocketServer {
+  const wss = new WebSocketServer({ noServer: true });
   wssInstance = wss;
 
   wss.on("connection", (ws, req) => {
@@ -97,7 +98,8 @@ export function initNotificationWS(server: HttpServer): void {
     ws.on("close", () => clearInterval(pingInterval));
   });
 
-  console.log("[ws] Notification WebSocket initialized at /ws/notifications");
+  console.log("[ws] Notification WebSocket handler initialized for /ws/notifications");
+  return wss;
 }
 
 /**
