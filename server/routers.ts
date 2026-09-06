@@ -6,6 +6,7 @@ import { dropiAuthRouter, adminAuthRouter } from "./auth-router";
 import { phantomConsoleRouter } from "./phantom-console-router";
 import { auditRouter } from "./audit-router";
 import { verificationRouter, roleApplicationRouter } from "./verification-router";
+import { verificationMediaRouter } from "./verification-media-router";
 import { storeRouter, productRouter, reviewRouter } from "./marketplace-router";
 import { trustRouter } from "./trust-router";
 import { apiKeyRouter, b2bDeliveryRouter, webhookRouter, apiAnalyticsRouter } from "./b2b-router";
@@ -48,6 +49,9 @@ export const appRouter = router({
 
   // Delivery Partner document verification
   verification: verificationRouter,
+
+  // Admin-only governed access to private verification evidence
+  verificationMedia: verificationMediaRouter,
 
   // Role applications (C2/C3/Admin operational roles)
   roleApplications: roleApplicationRouter,
