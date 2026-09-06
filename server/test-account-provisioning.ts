@@ -107,6 +107,7 @@ async function reconcileIdentity(
     kind: TestIdentityKind;
     openId: string;
     email: string;
+    username: string;
     name: string;
     role: DropiRole;
     channel: Channel;
@@ -138,6 +139,7 @@ async function reconcileIdentity(
     openId: input.openId,
     name: input.name,
     email: input.email,
+    username: input.username,
     loginMethod: "password",
     role: platformRole(input.role),
     dropiRole: input.role,
@@ -197,6 +199,7 @@ export async function provisionTestRoleAccounts() {
         kind: "human",
         openId: identity.humanOpenId,
         email: identity.humanEmail,
+        username: identity.humanUsername,
         name: `Test ${identity.label}`,
         role: identity.role,
         channel: identity.channel,
@@ -208,6 +211,7 @@ export async function provisionTestRoleAccounts() {
         kind: "ai",
         openId: identity.aiOpenId,
         email: identity.aiEmail,
+        username: identity.aiUsername,
         name: `AI ${identity.label} Agent`,
         role: identity.role,
         channel: identity.channel,

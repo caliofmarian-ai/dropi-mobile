@@ -74,7 +74,7 @@ const registerSchema = z.object({
 });
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  identifier: z.string().trim().min(3).max(320),
   password: z.string().min(1),
 });
 
@@ -264,51 +264,45 @@ export const dropiAuthRouter = router({
 
   login: publicProcedure.input(loginSchema).mutation(async ({ input, ctx }) => {
     const ip = getClientIp(ctx.req);
-    const normalizedEmail = input.email.toLowerCase().trim();
-    const maskedLoginEmail = maskEmail(normalizedEmail);
+    const normalizedIdentifier = input.identifier.toLowerCase().trim();
+    const identifierType = normalizedIdentifier.includes("@") ? "email" : "username";
+    const maskedIdentifier = identifierType === "email"
+      ? maskEmail(normalizedIdentifier)
+      : `${normalizedIdentifier.slice(0, 2)}***`;
 
-    console.info(`[AUTH LOGIN] request_received email=${maskedLoginEmail}`);
+    console.info(`[AUTH LOGIN] request_received identifier_type=${identifierType} identifier=${maskedIdentifier}`);
 
-    // Rate limiting (per email — mobile users share IPs)
-    if (!checkRateLimit(normalizedEmail)) {
-      console.warn(`[AUTH LOGIN] failure_reason=rate_limited email=${maskedLoginEmail}`);
+    if (!checkRateLimit(normalizedIdentifier)) {
+      console.warn(`[AUTH LOGIN] failure_reason=rate_limited identifier_type=${identifierType} identifier=${maskedIdentifier}`);
       throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many login attempts for this account. Please try again in 15 minutes." });
     }
 
-    // Find user — always use the normalised email so lookups match provisioned rows
-    const user = await db.getUserByEmail(normalizedEmail);
-    console.info(`[AUTH LOGIN] user_found=${user ? "yes" : "no"} email=${maskedLoginEmail}`);
+    const user = await db.getUserByLoginIdentifier(normalizedIdentifier);
+    console.info(`[AUTH LOGIN] user_found=${user ? "yes" : "no"} identifier_type=${identifierType} identifier=${maskedIdentifier}`);
     if (!user || !user.passwordHash) {
-      console.warn(
-        `[AUTH LOGIN] failure_reason=${!user ? "user_not_found" : "missing_password_hash"} email=${maskedLoginEmail}`,
-      );
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+      console.warn(`[AUTH LOGIN] failure_reason=${!user ? "user_not_found" : "missing_password_hash"} identifier_type=${identifierType} identifier=${maskedIdentifier}`);
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email/username or password" });
     }
 
-    // Check if account is locked
     if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
-      console.warn(`[AUTH LOGIN] failure_reason=account_locked email=${maskedLoginEmail}`);
+      console.warn(`[AUTH LOGIN] failure_reason=account_locked userId=${user.id}`);
       const minutesLeft = Math.ceil((new Date(user.lockedUntil).getTime() - Date.now()) / 60000);
       throw new TRPCError({ code: "FORBIDDEN", message: `Account locked. Try again in ${minutesLeft} minutes.` });
     }
 
-    // Check if account is active
     if (!user.isActive) {
-      console.warn(`[AUTH LOGIN] failure_reason=account_inactive email=${maskedLoginEmail}`);
+      console.warn(`[AUTH LOGIN] failure_reason=account_inactive userId=${user.id}`);
       throw new TRPCError({ code: "FORBIDDEN", message: "Account has been deactivated. Contact support." });
     }
 
-    // Verify password
     const valid = await bcrypt.compare(input.password, user.passwordHash);
-    console.info(`[AUTH LOGIN] bcrypt_compare=${valid} email=${maskedLoginEmail}`);
+    console.info(`[AUTH LOGIN] bcrypt_compare=${valid} userId=${user.id}`);
     if (!valid) {
-      console.warn(`[AUTH LOGIN] failure_reason=invalid_password email=${maskedLoginEmail}`);
+      console.warn(`[AUTH LOGIN] failure_reason=invalid_password userId=${user.id}`);
       await db.incrementFailedLogin(user.id);
-      // Lock after 10 failed attempts
       if ((user.failedLoginAttempts || 0) + 1 >= 10) {
-        await db.lockAccount(user.id, new Date(Date.now() + 30 * 60 * 1000)); // 30 min lock
+        await db.lockAccount(user.id, new Date(Date.now() + 30 * 60 * 1000));
       }
-      // Audit failed login
       await createAuditLog({
         userId: user.id,
         userRole: user.dropiRole,
@@ -321,20 +315,17 @@ export const dropiAuthRouter = router({
         isPhantomMode: false,
         ipAddress: ip,
         userAgent: getDeviceInfo(ctx.req),
-        details: { email: normalizedEmail, reason: "invalid_password" },
+        details: { identifierType, reason: "invalid_password" },
       });
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email/username or password" });
     }
 
-    // Reset failed attempts on successful login
     await db.resetFailedLogin(user.id);
     await db.updateUserLastLogin(user.id, ip, getDeviceInfo(ctx.req));
 
-    // Create session token
     const token = await sdk.createSessionToken(user.openId, { name: user.name || "" });
-    console.info(`[AUTH LOGIN] jwt_created=true email=${maskedLoginEmail}`);
+    console.info(`[AUTH LOGIN] jwt_created=true userId=${user.id}`);
 
-    // Store session
     await db.createSession({
       userId: user.id,
       token,
@@ -344,7 +335,6 @@ export const dropiAuthRouter = router({
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
-    // Audit successful login
     await createAuditLog({
       userId: user.id,
       userRole: user.dropiRole,
@@ -357,7 +347,7 @@ export const dropiAuthRouter = router({
       isPhantomMode: false,
       ipAddress: ip,
       userAgent: getDeviceInfo(ctx.req),
-      details: { email: normalizedEmail },
+      details: { identifierType },
     });
 
     return { user, token };

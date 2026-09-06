@@ -21,7 +21,7 @@ export default function LoginScreen() {
 
   const handleLogin = useCallback(async () => {
     if (!email.trim() || !password.trim()) {
-      setError("Please enter email and password");
+      setError("Please enter email or username and password");
       return;
     }
     setLoading(true);
@@ -146,14 +146,14 @@ export default function LoginScreen() {
             ) : null}
 
             <View className="mb-4">
-              <Text className="text-sm font-medium text-foreground mb-1.5">Email</Text>
+              <Text className="text-sm font-medium text-foreground mb-1.5">Email or Username</Text>
               <TextInput
                 className="bg-surface border border-border rounded-xl px-4 py-3.5 text-foreground text-base"
-                placeholder="your@email.com"
+                placeholder="email@example.com or username"
                 placeholderTextColor="#9BA1A6"
                 value={email}
                 onChangeText={(t) => { setEmail(t); setError(""); }}
-                keyboardType="email-address"
+                keyboardType="default"
                 autoCapitalize="none"
                 autoCorrect={false}
                 returnKeyType="next"
