@@ -2,11 +2,22 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { and, asc, eq, like, or, sql } from "drizzle-orm";
 import { users } from "../drizzle/schema";
-import { DROPI_TEST_BASE_INBOX } from "../shared/test-role-accounts";
+import {
+  DROPI_TEST_BASE_INBOX,
+  TEST_ROLE_IDENTITIES,
+} from "../shared/test-role-accounts";
 import { adminProcedure, router } from "./_core/trpc";
+import { resolveMailTransportConfig } from "./_core/mail";
 import { getDb } from "./db";
-import { adminAuthRouter } from "./auth-router";
-import { provisionTestRoleAccounts } from "./test-account-provisioning";
+import { adminAuthRouter, dropiAuthRouter } from "./auth-router";
+import {
+  getTestAccountProvisioningStatus,
+  provisionTestRoleAccounts,
+} from "./test-account-provisioning";
+
+const deliveryPartnerTestIdentity = TEST_ROLE_IDENTITIES.find(
+  (identity) => identity.role === "delivery_partner",
+);
 
 const targetProjection = {
   id: users.id,
@@ -29,6 +40,16 @@ function requireBaseSuperAdmin(ctx: { user: typeof users.$inferSelect | null; se
       message: "Only the real base Super Administrator can provision canonical test-role accounts.",
     });
   }
+}
+
+function requireDeliveryPartnerTestEmail(): string {
+  if (!deliveryPartnerTestIdentity) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Canonical Delivery Partner test identity is unavailable.",
+    });
+  }
+  return deliveryPartnerTestIdentity.humanEmail;
 }
 
 /**
@@ -76,18 +97,48 @@ export const phantomConsoleRouter = router({
       return { targets, total: Number(countRows[0]?.count ?? 0) };
     }),
 
+  testAccountControlStatus: adminProcedure.query(async ({ ctx }) => {
+    requireBaseSuperAdmin(ctx);
+    const db = await getDb();
+    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+
+    const email = requireDeliveryPartnerTestEmail();
+    const [deliveryPartner] = await db
+      .select({
+        id: users.id,
+        isActive: users.isActive,
+        emailVerified: users.emailVerified,
+        passwordHash: users.passwordHash,
+      })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+    const mailConfig = resolveMailTransportConfig();
+
+    return {
+      provisioning: getTestAccountProvisioningStatus(),
+      mail: {
+        configured: Boolean(mailConfig),
+        mode: mailConfig?.mode ?? null,
+        from: mailConfig?.from ?? null,
+      },
+      deliveryPartner: {
+        email,
+        baseInbox: DROPI_TEST_BASE_INBOX,
+        exists: Boolean(deliveryPartner),
+        active: Boolean(deliveryPartner?.isActive),
+        passwordReady: Boolean(deliveryPartner?.passwordHash),
+        emailVerified: Boolean(deliveryPartner?.emailVerified),
+      },
+    };
+  }),
+
   provisionTestAccounts: adminProcedure
-    .input(z.object({
-      password: z.string().min(12).max(128),
-      zone: z.string().trim().min(1).max(120),
-    }))
-    .mutation(async ({ input, ctx }) => {
+    .input(z.object({}).optional())
+    .mutation(async ({ ctx }) => {
       requireBaseSuperAdmin(ctx);
       try {
-        const result = await provisionTestRoleAccounts({
-          password: input.password,
-          zone: input.zone,
-        });
+        const result = await provisionTestRoleAccounts();
         return {
           roles: result.roles,
           humanAccounts: result.humanAccounts,
@@ -98,13 +149,46 @@ export const phantomConsoleRouter = router({
       } catch (error) {
         const message = error instanceof Error ? error.message : "Test-account provisioning failed";
         if (
+          message.includes("Test-account provisioning is disabled") ||
           message.includes("Test-account password") ||
           message.includes("test operating zone")
         ) {
-          throw new TRPCError({ code: "BAD_REQUEST", message });
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message });
         }
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Test-account provisioning failed" });
       }
+    }),
+
+  sendDeliveryPartnerRecoveryProbe: adminProcedure
+    .input(z.object({}).optional())
+    .mutation(async ({ ctx }) => {
+      requireBaseSuperAdmin(ctx);
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+
+      const email = requireDeliveryPartnerTestEmail();
+      const [deliveryPartner] = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+      if (!deliveryPartner) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Canonical Delivery Partner test account is not provisioned. Reconcile test accounts first.",
+        });
+      }
+
+      // Exercise the exact public recovery implementation. That procedure owns
+      // rate limiting, token persistence, provider delivery, failure cleanup and
+      // the auth.forgot_password audit event. No recovery code is exposed here.
+      await dropiAuthRouter.createCaller(ctx).forgotPassword({ email });
+      return {
+        accepted: true,
+        alias: email,
+        baseInbox: DROPI_TEST_BASE_INBOX,
+        message: "Recovery request accepted by the canonical password-reset flow. Check the base Gmail inbox.",
+      };
     }),
 
   enter: adminProcedure

@@ -9,6 +9,9 @@ function source(relativePath: string) {
 describe("IMPL-008 governed Phantom Console", () => {
   it("exposes only the operator-safe target projection", () => {
     const router = source("server/phantom-console-router.ts");
+    const projectionStart = router.indexOf("const targetProjection = {");
+    const projectionEnd = router.indexOf("} as const;", projectionStart);
+    const targetProjection = router.slice(projectionStart, projectionEnd);
 
     for (const field of [
       "id: users.id",
@@ -20,14 +23,14 @@ describe("IMPL-008 governed Phantom Console", () => {
       "isAIAgent: users.isAIAgent",
       "humanPairId: users.humanPairId",
     ]) {
-      expect(router).toContain(field);
+      expect(targetProjection).toContain(field);
     }
 
-    expect(router).not.toContain("passwordHash: users.passwordHash");
-    expect(router).not.toContain("resetToken: users.resetToken");
-    expect(router).not.toContain("emailVerifyToken: users.emailVerifyToken");
-    expect(router).not.toContain("lastIp: users.lastIp");
-    expect(router).not.toContain("lastDevice: users.lastDevice");
+    expect(targetProjection).not.toContain("passwordHash: users.passwordHash");
+    expect(targetProjection).not.toContain("resetToken: users.resetToken");
+    expect(targetProjection).not.toContain("emailVerifyToken: users.emailVerifyToken");
+    expect(targetProjection).not.toContain("lastIp: users.lastIp");
+    expect(targetProjection).not.toContain("lastDevice: users.lastDevice");
   });
 
   it("fails closed for self-target and inactive target before delegating to canonical phantom auth", () => {

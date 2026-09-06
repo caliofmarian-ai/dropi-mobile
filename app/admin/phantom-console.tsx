@@ -37,6 +37,37 @@ interface ProvisionResult {
   identitiesIncludingBaseSuperAdmin: number;
 }
 
+interface TestAccountControlStatus {
+  provisioning: {
+    enabled: boolean;
+    passwordConfigured: boolean;
+    passwordPolicySatisfied: boolean;
+    zoneConfigured: boolean;
+    zone: string | null;
+    ready: boolean;
+  };
+  mail: {
+    configured: boolean;
+    mode: string | null;
+    from: string | null;
+  };
+  deliveryPartner: {
+    email: string;
+    baseInbox: string;
+    exists: boolean;
+    active: boolean;
+    passwordReady: boolean;
+    emailVerified: boolean;
+  };
+}
+
+interface RecoveryProbeResult {
+  accepted: boolean;
+  alias: string;
+  baseInbox: string;
+  message: string;
+}
+
 type InventoryView = "root" | "test" | "normal" | "all-ai";
 type TestAccountKind = "human" | "ai" | null;
 
@@ -98,32 +129,46 @@ async function loadTargets(token: string): Promise<{ targets: PhantomTarget[]; t
   return unwrapResponse(response, "Unable to load users");
 }
 
-async function provisionAccounts(
-  token: string,
-  password: string,
-  zone: string,
-): Promise<ProvisionResult> {
+async function loadControlStatus(token: string): Promise<TestAccountControlStatus> {
+  const input = encodeURIComponent(JSON.stringify({ json: null }));
+  const response = await fetch(`${getApiTrpcUrl()}/phantomConsole.testAccountControlStatus?input=${input}`, {
+    headers: authHeaders(token),
+    credentials: "include",
+  });
+  return unwrapResponse(response, "Unable to load test-account control status");
+}
+
+async function reconcileAccounts(token: string): Promise<ProvisionResult> {
   const response = await fetch(`${getApiTrpcUrl()}/phantomConsole.provisionTestAccounts`, {
     method: "POST",
     headers: authHeaders(token),
-    body: JSON.stringify({ json: { password, zone } }),
+    body: JSON.stringify({ json: {} }),
     credentials: "include",
   });
-  return unwrapResponse(response, "Unable to provision test-role accounts");
+  return unwrapResponse(response, "Unable to reconcile test-role accounts");
+}
+
+async function sendRecoveryProbe(token: string): Promise<RecoveryProbeResult> {
+  const response = await fetch(`${getApiTrpcUrl()}/phantomConsole.sendDeliveryPartnerRecoveryProbe`, {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify({ json: {} }),
+    credentials: "include",
+  });
+  return unwrapResponse(response, "Unable to send Delivery Partner recovery probe");
 }
 
 export default function PhantomConsoleScreen() {
   const router = useRouter();
   const { user, token, isDemo, isPhantom, enterPhantomSession } = useDropiAuth();
   const [targets, setTargets] = useState<PhantomTarget[]>([]);
+  const [controlStatus, setControlStatus] = useState<TestAccountControlStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [enteringId, setEnteringId] = useState<number | null>(null);
   const [provisioning, setProvisioning] = useState(false);
-  const [provisionZone, setProvisionZone] = useState("");
-  const [provisionPassword, setProvisionPassword] = useState("");
-  const [showProvisionPassword, setShowProvisionPassword] = useState(false);
+  const [diagnosingRecovery, setDiagnosingRecovery] = useState(false);
   const [inventoryView, setInventoryView] = useState<InventoryView>("root");
   const [testAccountKind, setTestAccountKind] = useState<TestAccountKind>(null);
   const [selectedChannel, setSelectedChannel] = useState<GovernedChannel | null>(null);
@@ -145,10 +190,14 @@ export default function PhantomConsoleScreen() {
     setLoading(true);
     setError("");
     try {
-      const result = await loadTargets(token);
-      setTargets(result.targets || []);
+      const [targetResult, statusResult] = await Promise.all([
+        loadTargets(token),
+        loadControlStatus(token),
+      ]);
+      setTargets(targetResult.targets || []);
+      setControlStatus(statusResult);
     } catch (err: any) {
-      setError(err.message || "Unable to load phantom targets");
+      setError(err.message || "Unable to load phantom console");
     } finally {
       setLoading(false);
     }
@@ -181,18 +230,10 @@ export default function PhantomConsoleScreen() {
   }, [targets]);
 
   const activePopulation = useMemo(() => {
-    if (inventoryView === "normal") {
-      return sortedTargets.filter(isNormalAccount);
-    }
-    if (inventoryView === "all-ai") {
-      return sortedTargets.filter((target) => target.isAIAgent);
-    }
-    if (inventoryView === "test" && testAccountKind === "human") {
-      return sortedTargets.filter(isTestHuman);
-    }
-    if (inventoryView === "test" && testAccountKind === "ai") {
-      return sortedTargets.filter(isTestAi);
-    }
+    if (inventoryView === "normal") return sortedTargets.filter(isNormalAccount);
+    if (inventoryView === "all-ai") return sortedTargets.filter((target) => target.isAIAgent);
+    if (inventoryView === "test" && testAccountKind === "human") return sortedTargets.filter(isTestHuman);
+    if (inventoryView === "test" && testAccountKind === "ai") return sortedTargets.filter(isTestAi);
     return [];
   }, [inventoryView, sortedTargets, testAccountKind]);
 
@@ -246,41 +287,33 @@ export default function PhantomConsoleScreen() {
 
   const confirmProvision = useCallback(() => {
     if (!token || provisioning) return;
-
-    const zone = provisionZone.trim();
-    if (!zone) {
-      Alert.alert("Operating zone required", "Enter the test operating zone before provisioning.");
-      return;
-    }
-    if (provisionPassword.length < 12 || !/[A-Z]/.test(provisionPassword) || !/[0-9]/.test(provisionPassword)) {
+    if (!controlStatus?.provisioning.ready) {
       Alert.alert(
-        "Test password not strong enough",
-        "Use at least 12 characters with at least one uppercase letter and one number.",
+        "Server provisioning not ready",
+        "Railway must provide DROPI_TEST_ACCOUNT_PROVISIONING=enabled, a policy-compliant DROPI_TEST_ACCOUNT_PASSWORD, and DROPI_TEST_ACCOUNT_ZONE.",
       );
       return;
     }
 
     Alert.alert(
-      "Provision test-role accounts?",
-      `This will create or reconcile 29 human test identities and 29 AI role agents for zone ${zone}. The AI agents retain the same canonical role permissions as their human counterparts. The real base Super Admin is not modified. The password is used for this provisioning request and is not shown in the audit record.`,
+      "Reconcile canonical test accounts?",
+      `This will rotate/reconcile 29 human test identities and 29 AI role agents using the server-owned password and zone ${controlStatus.provisioning.zone}. Existing test-account sessions and push registrations will be revoked. The real base Super Admin is not modified.`,
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Provision",
+          text: "Reconcile",
           style: "destructive",
           onPress: async () => {
             setProvisioning(true);
             try {
-              const result = await provisionAccounts(token, provisionPassword, zone);
-              setProvisionPassword("");
-              setShowProvisionPassword(false);
+              const result = await reconcileAccounts(token);
               await refresh();
               Alert.alert(
-                "Test-role accounts ready",
-                `${result.humanAccounts} human + ${result.aiAccounts} AI role agents across ${result.roles} roles. ${result.identitiesIncludingBaseSuperAdmin} canonical identities including the unchanged base Super Admin.`,
+                "Test-role accounts reconciled",
+                `${result.humanAccounts} human + ${result.aiAccounts} AI role agents across ${result.roles} roles now use the authoritative server configuration.`,
               );
             } catch (err: any) {
-              Alert.alert("Provisioning blocked", err.message || "Unable to provision test-role accounts");
+              Alert.alert("Reconciliation blocked", err.message || "Unable to reconcile test-role accounts");
             } finally {
               setProvisioning(false);
             }
@@ -288,7 +321,44 @@ export default function PhantomConsoleScreen() {
         },
       ],
     );
-  }, [provisionPassword, provisionZone, provisioning, refresh, token]);
+  }, [controlStatus, provisioning, refresh, token]);
+
+  const confirmRecoveryProbe = useCallback(() => {
+    if (!token || diagnosingRecovery || !controlStatus) return;
+    if (!controlStatus.deliveryPartner.exists) {
+      Alert.alert("Account missing", "Reconcile canonical test accounts before testing password recovery.");
+      return;
+    }
+    if (!controlStatus.mail.configured) {
+      Alert.alert("Mail transport unavailable", "Configure the server mail provider before testing recovery delivery.");
+      return;
+    }
+
+    Alert.alert(
+      "Send real recovery code?",
+      `DROPi will run the real password-recovery flow for ${controlStatus.deliveryPartner.email}. Gmail plus-addressing should deliver it to ${controlStatus.deliveryPartner.baseInbox}.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Send code",
+          onPress: async () => {
+            setDiagnosingRecovery(true);
+            try {
+              const result = await sendRecoveryProbe(token);
+              Alert.alert(
+                "Recovery request accepted",
+                `${result.alias} → ${result.baseInbox}\n\n${result.message}`,
+              );
+            } catch (err: any) {
+              Alert.alert("Recovery delivery failed", err.message || "Unable to send recovery code");
+            } finally {
+              setDiagnosingRecovery(false);
+            }
+          },
+        },
+      ],
+    );
+  }, [controlStatus, diagnosingRecovery, token]);
 
   const confirmEnter = useCallback((target: PhantomTarget) => {
     if (!target.isActive || target.id === user?.id) return;
@@ -328,9 +398,7 @@ export default function PhantomConsoleScreen() {
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1">
             <View className="flex-row flex-wrap items-center gap-2">
-              <Text className="text-base font-semibold text-foreground">
-                {target.name || `User #${target.id}`}
-              </Text>
+              <Text className="text-base font-semibold text-foreground">{target.name || `User #${target.id}`}</Text>
               <Text className="text-xs text-primary font-semibold">{badge}</Text>
               {!target.isActive ? <Text className="text-xs text-error font-semibold">INACTIVE</Text> : null}
             </View>
@@ -344,7 +412,6 @@ export default function PhantomConsoleScreen() {
               </Text>
             ) : null}
           </View>
-
           <TouchableOpacity
             disabled={disabled}
             onPress={() => confirmEnter(target)}
@@ -354,9 +421,7 @@ export default function PhantomConsoleScreen() {
             {enteringId === target.id ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text className="text-white text-xs font-semibold">
-                {target.id === user?.id ? "Current" : "Enter"}
-              </Text>
+              <Text className="text-white text-xs font-semibold">{target.id === user?.id ? "Current" : "Enter"}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -423,61 +488,57 @@ export default function PhantomConsoleScreen() {
         </View>
 
         <View className="bg-surface border border-border rounded-xl p-4 mb-4">
-          <Text className="text-sm font-semibold text-foreground">Canonical test-role population</Text>
+          <Text className="text-sm font-semibold text-foreground">Canonical test-account control</Text>
           <Text className="text-xs text-muted mt-2 leading-5">
-            The real base Super Admin can create or reconcile all 29 human roles and their 29 AI role agents directly from this console. Each AI agent carries the assigned role permissions and is linked to its human counterpart. No Railway provisioning variables are required for this operator flow.
+            Railway/server environment is the only password and zone authority. The mobile app never asks for or transmits the shared test password. Reconciliation rotates every canonical test-account hash and revokes stale test sessions.
           </Text>
 
-          <Text className="text-xs font-medium text-foreground mt-4 mb-1.5">Test operating zone</Text>
-          <TextInput
-            value={provisionZone}
-            onChangeText={setProvisionZone}
-            placeholder="Enter the test zone"
-            placeholderTextColor="#9BA1A6"
-            autoCapitalize="words"
-            editable={!provisioning}
-            className="bg-background border border-border rounded-lg px-3 py-2.5 text-foreground"
-          />
-
-          <Text className="text-xs font-medium text-foreground mt-3 mb-1.5">Shared test password</Text>
-          <View className="flex-row items-center bg-background border border-border rounded-lg">
-            <TextInput
-              value={provisionPassword}
-              onChangeText={setProvisionPassword}
-              placeholder="12+ chars, uppercase + number"
-              placeholderTextColor="#9BA1A6"
-              secureTextEntry={!showProvisionPassword}
-              editable={!provisioning}
-              autoCapitalize="none"
-              autoCorrect={false}
-              className="flex-1 px-3 py-2.5 text-foreground"
-            />
-            <TouchableOpacity
-              onPress={() => setShowProvisionPassword((value) => !value)}
-              disabled={provisioning}
-              style={{ paddingHorizontal: 12, paddingVertical: 10 }}
-            >
-              <Text className="text-primary text-xs font-medium">
-                {showProvisionPassword ? "Hide" : "Show"}
-              </Text>
-            </TouchableOpacity>
+          <View className="mt-4 gap-1">
+            <Text className="text-xs text-foreground">
+              Provisioning: {controlStatus?.provisioning.ready ? "READY" : "BLOCKED"}
+            </Text>
+            <Text className="text-xs text-muted">
+              Enabled {controlStatus?.provisioning.enabled ? "✓" : "✕"} · Password configured {controlStatus?.provisioning.passwordConfigured ? "✓" : "✕"} · Policy {controlStatus?.provisioning.passwordPolicySatisfied ? "✓" : "✕"} · Zone {controlStatus?.provisioning.zone || "not configured"}
+            </Text>
+            <Text className="text-xs text-muted">
+              Mail: {controlStatus?.mail.configured ? `${controlStatus.mail.mode || "configured"} · ${controlStatus.mail.from || "sender configured"}` : "NOT CONFIGURED"}
+            </Text>
           </View>
-          <Text className="text-[11px] text-muted mt-2 leading-4">
-            Used only to hash the test accounts during this request. Do not reuse your Super Admin password.
-          </Text>
 
           <TouchableOpacity
             onPress={confirmProvision}
-            disabled={provisioning}
+            disabled={provisioning || !controlStatus?.provisioning.ready}
             className="border border-primary rounded-lg py-2.5 items-center mt-4"
-            style={{ opacity: provisioning ? 0.55 : 1 }}
+            style={{ opacity: provisioning || !controlStatus?.provisioning.ready ? 0.45 : 1 }}
           >
             {provisioning ? (
               <ActivityIndicator size="small" color="#0a7ea4" />
             ) : (
-              <Text className="text-primary text-sm font-semibold">Provision / reconcile 29 human + 29 AI</Text>
+              <Text className="text-primary text-sm font-semibold">Reconcile 29 human + 29 AI from server configuration</Text>
             )}
           </TouchableOpacity>
+
+          <View className="border-t border-border mt-4 pt-4">
+            <Text className="text-xs font-semibold text-foreground">Delivery Partner recovery diagnostic</Text>
+            <Text className="text-xs text-muted mt-1 leading-5">
+              Alias: {controlStatus?.deliveryPartner.email || "loading"}\nBase inbox: {controlStatus?.deliveryPartner.baseInbox || "loading"}
+            </Text>
+            <Text className="text-xs text-muted mt-1">
+              Account {controlStatus?.deliveryPartner.exists ? "exists ✓" : "missing ✕"} · Active {controlStatus?.deliveryPartner.active ? "✓" : "✕"} · Password {controlStatus?.deliveryPartner.passwordReady ? "✓" : "✕"} · Email verified {controlStatus?.deliveryPartner.emailVerified ? "✓" : "✕"}
+            </Text>
+            <TouchableOpacity
+              onPress={confirmRecoveryProbe}
+              disabled={diagnosingRecovery || !controlStatus?.mail.configured || !controlStatus?.deliveryPartner.exists}
+              className="border border-primary rounded-lg py-2.5 items-center mt-3"
+              style={{ opacity: diagnosingRecovery || !controlStatus?.mail.configured || !controlStatus?.deliveryPartner.exists ? 0.45 : 1 }}
+            >
+              {diagnosingRecovery ? (
+                <ActivityIndicator size="small" color="#0a7ea4" />
+              ) : (
+                <Text className="text-primary text-sm font-semibold">Send real Delivery Partner recovery code</Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View className="bg-surface border border-border rounded-xl p-3 mb-4">
@@ -591,7 +652,9 @@ export default function PhantomConsoleScreen() {
                   <View className="flex-row items-center justify-between">
                     <View>
                       <Text className="text-sm font-bold text-foreground">CHANNEL {selectedChannel}</Text>
-                      <Text className="text-xs text-muted mt-1">{activePopulation.filter((target) => target.channel === selectedChannel).length} accounts</Text>
+                      <Text className="text-xs text-muted mt-1">
+                        {activePopulation.filter((target) => target.channel === selectedChannel).length} accounts
+                      </Text>
                     </View>
                     <TouchableOpacity onPress={goDirectoryBack}>
                       <Text className="text-primary text-sm font-medium">← Channels</Text>
