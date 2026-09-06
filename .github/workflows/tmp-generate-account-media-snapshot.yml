@@ -10,7 +10,7 @@ on:
       - drizzle.config.ts
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   generate:
@@ -26,15 +26,31 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Generate snapshot probe
+      - name: Generate current schema snapshot
         env:
           DATABASE_URL: mysql://root:root@127.0.0.1:3306/dropi
         run: pnpm exec drizzle-kit generate --name account_media_snapshot_probe
-      - name: Show generated files
+      - name: Materialize 0021 snapshot without duplicate migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_snapshot="drizzle/meta/0022_snapshot.json"
+          probe_sql="drizzle/0022_account_media_snapshot_probe.sql"
+          if [ ! -f "$probe_snapshot" ]; then
+            echo "No probe snapshot generated; schema is already current."
+            exit 0
+          fi
+          cp "$probe_snapshot" drizzle/meta/0021_snapshot.json
+          git restore drizzle/meta/_journal.json
+          rm -f "$probe_snapshot" "$probe_sql"
+          git add drizzle/meta/0021_snapshot.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --cached --quiet; then
+            echo "No snapshot change to commit."
+            exit 0
+          fi
+          git commit -m "P0: materialize Drizzle snapshot through 0021"
+          git push origin HEAD:fix/dropi-owned-account-media-368
+      - name: Show final status
         run: git status --short && ls -la drizzle/meta | tail -20
-      - uses: actions/upload-artifact@v4
-        with:
-          name: account-media-drizzle-probe
-          path: |
-            drizzle/*.sql
-            drizzle/meta/*.json
