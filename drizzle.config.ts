@@ -11,6 +11,7 @@ export default defineConfig({
     "./drizzle/p2p-schema.ts",
     "./drizzle/operational-trace-schema.ts",
     "./drizzle/account-media-schema.ts",
+    "./drizzle/verification-evidence-schema.ts",
   ],
   out: "./drizzle",
   dialect: "mysql",
