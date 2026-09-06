@@ -8,7 +8,6 @@
  * - Subscriber access is checked against order/B2B ownership before a socket joins a tracking stream.
  * - `order:<id>` and `b2b:<id>` are distinct stream keys so equal numeric IDs cannot collide.
  */
-import { Server as HttpServer } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { URL } from "url";
 import { createInAppNotification } from "./create-notification";
@@ -312,8 +311,14 @@ async function handlePilotMessage(
   });
 }
 
-export function initLiveTracking(server: HttpServer): void {
-  const wss = new WebSocketServer({ server, path: "/ws/tracking" });
+/**
+ * Initialize the authenticated tracking WebSocket handler.
+ *
+ * The returned server is `noServer`; the shared HTTP upgrade router mounts it at
+ * `/ws/tracking` so it can coexist with notifications without upgrade collisions.
+ */
+export function initLiveTracking(): WebSocketServer {
+  const wss = new WebSocketServer({ noServer: true });
 
   wss.on("connection", (ws, req) => {
     const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
@@ -441,7 +446,8 @@ export function initLiveTracking(server: HttpServer): void {
     });
   });
 
-  console.log("[ws] Authenticated live tracking initialized at /ws/tracking");
+  console.log("[ws] Authenticated live tracking handler initialized for /ws/tracking");
+  return wss;
 }
 
 export function getTrackingStats() {
