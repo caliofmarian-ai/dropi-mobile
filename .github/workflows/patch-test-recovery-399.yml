@@ -6,6 +6,7 @@ on:
       - fix/test-recovery-identifiable-399
     paths:
       - scripts/patch-test-recovery-399.py
+      - scripts/patch-test-recovery-399-expectations.py
       - .github/workflows/patch-test-recovery-399.yml
 
 permissions:
@@ -28,6 +29,7 @@ jobs:
           node-version: 22.x
           cache: pnpm
       - run: python scripts/patch-test-recovery-399.py
+      - run: python scripts/patch-test-recovery-399-expectations.py
       - run: pnpm install --frozen-lockfile
       - name: Focused recovery tests
         run: >-
