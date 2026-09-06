@@ -42,10 +42,15 @@ on:
       - shared/security-baseline-policy.ts
       - shared/test-role-accounts.ts
       - lib/media-url.ts
+      - lib/profile-photo-crop.ts
+      - components/image-cropper.tsx
+      - components/profile-photo-modal.tsx
       - app/(tabs)/profile.tsx
       - app/admin/approvals.tsx
       - app/admin/phantom-console.tsx
       - tests/dropi-account-media-storage-contract.test.ts
+      - tests/profile-photo-crop-geometry.test.ts
+      - tests/profile-photo-crop-contract.test.ts
       - tests/test-account-provisioning-contract.test.ts
       - tests/test-account-auth-recovery-379-contract.test.ts
       - tests/security-assurance-policy.test.ts
@@ -90,9 +95,11 @@ jobs:
           tests/security-assurance-contract.test.ts
       - name: Security baseline regressions
         run: node --import tsx --test tests/security-baseline-policy.test.ts tests/security-crypto.test.ts tests/outbound-url-policy.test.ts tests/security-baseline-contract.test.ts
-      - name: Auth and operational security regressions
+      - name: Auth, profile and operational security regressions
         run: >-
           pnpm exec vitest run
+          tests/profile-photo-crop-geometry.test.ts
+          tests/profile-photo-crop-contract.test.ts
           tests/test-account-provisioning-contract.test.ts
           tests/test-account-auth-recovery-379-contract.test.ts
           tests/auth.login-normalize.test.ts
