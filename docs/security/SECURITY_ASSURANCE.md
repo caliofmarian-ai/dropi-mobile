@@ -27,6 +27,16 @@ The Security Baseline remains authoritative for its deployment boundary: reposit
 - Proof-backed completion and operational-evidence persistence remain authoritative; a WebSocket `delivery_complete` message cannot complete an order or B2B delivery.
 - Cross-layer regressions preserve C1/C2/C3/ADMIN separation, STOP/fallback/failure distinctions, and audit/privacy boundaries already certified in M2.
 
+## Account Media Integrity and Privacy
+
+- New profile-photo and delivery-partner verification uploads are persisted in the canonical DROPi MySQL database through `dropiAccountMedia`; new writes do not require Manus/Forge storage variables or an ephemeral Railway filesystem.
+- Profile photos and generated assets are public-readable only through opaque DROPi media URLs containing a UUID and SHA-256 digest.
+- Verification documents and generic private media are authentication-gated; only the active owning account or canonical ADMIN authority can read the bytes.
+- Account-media reads verify both the persisted byte length and SHA-256 digest before returning content. Profile/verification uploads also reject JPEG, PNG, WebP or PDF payloads whose file signatures do not match the declared MIME type.
+- Admin verification review retrieves private evidence through an `adminProcedure` and re-checks owner binding, byte length and SHA-256 before preview.
+- Historical `/manus-storage/...` values are retained only as an explicit backward-compatibility surface. They are not silently rewritten, claimed as migrated, or used for new account-media writes; unavailable legacy evidence requires re-upload.
+- Migration `0021_dropi_account_media` is applied by the existing fail-closed Railway startup migration runner before the API starts.
+
 ## Marketplace and Payment Boundary
 
 The current C1 Marketplace order path is a real order/purchase-intent path, not a payment-provider certification:

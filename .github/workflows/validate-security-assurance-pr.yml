@@ -9,9 +9,19 @@ on:
       - .github/workflows/validate-security-assurance-pr.yml
       - docs/security/SECURITY_ASSURANCE.md
       - docs/security/VULNERABILITY_MANAGEMENT.md
+      - drizzle.config.ts
+      - drizzle/account-media-schema.ts
+      - drizzle/0021_dropi_account_media.sql
+      - drizzle/meta/_journal.json
       - server/auth-router.ts
       - server/db.ts
       - server/_core/context.ts
+      - server/_core/index.ts
+      - server/_core/storageProxy.ts
+      - server/storage.ts
+      - server/dropi-media.ts
+      - server/verification-media-router.ts
+      - server/routers.ts
       - server/user-verification-policy.ts
       - server/pilot-operational-verification.ts
       - server/verification-router.ts
@@ -27,6 +37,10 @@ on:
       - server/security-crypto.ts
       - server/security-http.ts
       - shared/security-baseline-policy.ts
+      - lib/media-url.ts
+      - app/(tabs)/profile.tsx
+      - app/admin/approvals.tsx
+      - tests/dropi-account-media-storage-contract.test.ts
       - tests/security-assurance-policy.test.ts
       - tests/pilot-operational-verification-contract.test.ts
       - tests/security-assurance-contract.test.ts
@@ -65,6 +79,7 @@ jobs:
           node --import tsx --test
           tests/security-assurance-policy.test.ts
           tests/pilot-operational-verification-contract.test.ts
+          tests/dropi-account-media-storage-contract.test.ts
           tests/security-assurance-contract.test.ts
       - name: Security baseline regressions
         run: node --import tsx --test tests/security-baseline-policy.test.ts tests/security-crypto.test.ts tests/outbound-url-policy.test.ts tests/security-baseline-contract.test.ts

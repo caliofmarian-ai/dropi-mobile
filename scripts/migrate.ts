@@ -1,8 +1,8 @@
 /**
  * DROPi Production Migration Runner
  *
- * Applies committed Drizzle migrations 0000–0013 using drizzle-orm's
- * programmatic API — does NOT invoke drizzle-kit generate.
+ * Applies every committed Drizzle migration in the repository using
+ * drizzle-orm's programmatic API — it does NOT invoke drizzle-kit generate.
  *
  * Drizzle maintains a `__drizzle_migrations` history table; already-applied
  * migrations are skipped automatically (idempotent).
@@ -38,7 +38,7 @@ async function runMigrations(): Promise<void> {
     connection = await mysql.createConnection(url);
     const db = drizzle(connection);
 
-    console.log("[migrate] Applying committed migrations 0000–0013...");
+    console.log("[migrate] Applying all committed migrations...");
     await migrate(db, { migrationsFolder });
     console.log("[migrate] ✓ All migrations applied successfully");
   } catch (err) {
