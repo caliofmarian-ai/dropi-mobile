@@ -9,6 +9,7 @@ import { registerStorageProxy } from "./storageProxy";
 import { createRestGateway } from "../rest-gateway";
 import { initLiveTracking, getTrackingStats } from "../live-tracking";
 import { initNotificationWS, getNotificationWSStats } from "../ws-notifications";
+import { registerWebSocketUpgradeRouter } from "../ws-upgrade-router";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { startOrchestrator } from "./orchestrator";
@@ -110,11 +111,14 @@ async function startServer() {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
 
-  // Initialize WebSocket live tracking on the HTTP server
-  initLiveTracking(server);
-
-  // Initialize WebSocket notification channel
-  initNotificationWS(server);
+  // Build independent noServer handlers, then route HTTP upgrades once by namespace.
+  // This prevents /ws/tracking and /ws/notifications from cross-closing sockets.
+  const trackingWss = initLiveTracking();
+  const notificationWss = initNotificationWS();
+  registerWebSocketUpgradeRouter(server, [
+    { path: "/ws/tracking", wss: trackingWss },
+    { path: "/ws/notifications", wss: notificationWss },
+  ]);
 
   // Start AI Agent Orchestrator (polls task queue every 8s)
   startOrchestrator();
