@@ -99,7 +99,7 @@ describe("VER-378 governed verification evidence lifecycle", () => {
     expect(lifecycle).toContain('state: "expired"');
     expect(lifecycle).toContain('label: "Pending review"');
     expect(lifecycle).toContain('label: "Rejected"');
-    expect(lifecycle).toContain('label: "Expiring"');
+    expect(lifecycle).toContain("Expiring · expires in");
     expect(lifecycle).toContain('label: "Expired"');
     expect(screen).toContain("{lifecycle.label}");
     expect(screen).toContain("Expiry:");
