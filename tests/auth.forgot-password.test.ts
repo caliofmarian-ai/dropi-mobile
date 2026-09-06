@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi, afterEach } from "vitest";
 import type { TrpcContext } from "../server/_core/context";
 
 const dbMock = vi.hoisted(() => ({
-  getUserByEmail: vi.fn(),
+  getUserByLoginIdentifier: vi.fn(),
   setResetToken: vi.fn(),
   clearResetToken: vi.fn(),
   createAuditLog: vi.fn(),
@@ -43,21 +43,21 @@ describe("dropiAuth.forgotPassword", () => {
   });
 
   it("returns a generic success response when the user does not exist", async () => {
-    dbMock.getUserByEmail.mockResolvedValue(undefined);
+    dbMock.getUserByLoginIdentifier.mockResolvedValue(undefined);
     const caller = dropiAuthRouter.createCaller(createPublicContext());
 
-    const result = await caller.forgotPassword({ email: "missing@example.com" });
+    const result = await caller.forgotPassword({ identifier: "missing@example.com" });
 
     expect(result).toEqual({
       success: true,
-      message: "If this email is registered, a 6-digit code has been sent.",
+      message: "If this account is registered, a 6-digit code has been sent.",
     });
     expect(dbMock.setResetToken).not.toHaveBeenCalled();
     expect(mailMock.sendPlatformEmail).not.toHaveBeenCalled();
   });
 
   it("clears the stored reset token and fails when email delivery fails", async () => {
-    dbMock.getUserByEmail.mockResolvedValue({
+    dbMock.getUserByLoginIdentifier.mockResolvedValue({
       id: 42,
       email: "user@example.com",
       dropiRole: "customer",
@@ -67,7 +67,7 @@ describe("dropiAuth.forgotPassword", () => {
     mailMock.sendPlatformEmail.mockResolvedValue(false);
     const caller = dropiAuthRouter.createCaller(createPublicContext());
 
-    await expect(caller.forgotPassword({ email: "user@example.com" })).rejects.toThrow(
+    await expect(caller.forgotPassword({ identifier: "user@example.com" })).rejects.toThrow(
       "Unable to send reset code right now. Please try again later.",
     );
 
@@ -76,7 +76,7 @@ describe("dropiAuth.forgotPassword", () => {
   });
 
   it("keeps the generic success response when the reset email is sent", async () => {
-    dbMock.getUserByEmail.mockResolvedValue({
+    dbMock.getUserByLoginIdentifier.mockResolvedValue({
       id: 7,
       email: "user@example.com",
       dropiRole: "customer",
@@ -85,11 +85,11 @@ describe("dropiAuth.forgotPassword", () => {
     });
     const caller = dropiAuthRouter.createCaller(createPublicContext());
 
-    const result = await caller.forgotPassword({ email: "user@example.com" });
+    const result = await caller.forgotPassword({ identifier: "user@example.com" });
 
     expect(result).toEqual({
       success: true,
-      message: "If this email is registered, a 6-digit code has been sent.",
+      message: "If this account is registered, a 6-digit code has been sent.",
     });
     expect(dbMock.setResetToken).toHaveBeenCalledTimes(1);
     expect(dbMock.clearResetToken).not.toHaveBeenCalled();
@@ -98,36 +98,66 @@ describe("dropiAuth.forgotPassword", () => {
 
   it("routes canonical TEST HUMAN recovery to the governed base inbox", async () => {
     const alias = "dropi.deliveries+human.delivery_partner@gmail.com";
-    dbMock.getUserByEmail.mockResolvedValue({
+    dbMock.getUserByLoginIdentifier.mockResolvedValue({
       id: 151,
       email: alias,
+      username: "human.delivery_partner",
       dropiRole: "delivery_partner",
       channel: "C1",
       isAIAgent: false,
     });
     const caller = dropiAuthRouter.createCaller(createPublicContext());
 
-    await caller.forgotPassword({ email: alias });
+    await caller.forgotPassword({ identifier: alias });
 
-    expect(dbMock.getUserByEmail).toHaveBeenCalledWith(alias);
+    expect(dbMock.getUserByLoginIdentifier).toHaveBeenCalledWith(alias);
     expect(dbMock.setResetToken).toHaveBeenCalledWith(151, expect.stringMatching(/^\d{6}$/), expect.any(Date));
     expect(mailMock.sendPlatformEmail).toHaveBeenCalledWith(
-      expect.objectContaining({ to: "dropi.deliveries@gmail.com" }),
+      expect.objectContaining({
+        to: "dropi.deliveries@gmail.com",
+        subject: "DROPi - Password Reset Code — human.delivery_partner",
+        html: expect.stringContaining('data-dropi-recovery-account="human.delivery_partner"'),
+      }),
+    );
+  });
+
+  it("accepts a canonical TEST username and routes recovery to the governed base inbox", async () => {
+    const alias = "dropi.deliveries+human.delivery_partner@gmail.com";
+    dbMock.getUserByLoginIdentifier.mockResolvedValue({
+      id: 153,
+      email: alias,
+      username: "human.delivery_partner",
+      dropiRole: "delivery_partner",
+      channel: "C1",
+      isAIAgent: false,
+    });
+    const caller = dropiAuthRouter.createCaller(createPublicContext());
+
+    const result = await caller.forgotPassword({ identifier: "human.delivery_partner" });
+
+    expect(result.success).toBe(true);
+    expect(dbMock.getUserByLoginIdentifier).toHaveBeenCalledWith("human.delivery_partner");
+    expect(mailMock.sendPlatformEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: "dropi.deliveries@gmail.com",
+        subject: "DROPi - Password Reset Code — human.delivery_partner",
+      }),
     );
   });
 
   it("routes canonical TEST AI recovery to the governed base inbox", async () => {
     const alias = "dropi.deliveries+ai.delivery_partner@gmail.com";
-    dbMock.getUserByEmail.mockResolvedValue({
+    dbMock.getUserByLoginIdentifier.mockResolvedValue({
       id: 152,
       email: alias,
+      username: "ai.delivery_partner",
       dropiRole: "delivery_partner",
       channel: "C1",
       isAIAgent: true,
     });
     const caller = dropiAuthRouter.createCaller(createPublicContext());
 
-    await caller.forgotPassword({ email: alias });
+    await caller.forgotPassword({ identifier: alias });
 
     expect(mailMock.sendPlatformEmail).toHaveBeenCalledWith(
       expect.objectContaining({ to: "dropi.deliveries@gmail.com" }),
@@ -135,7 +165,7 @@ describe("dropiAuth.forgotPassword", () => {
   });
 
   it("keeps a normal user's own address as the recovery delivery target", async () => {
-    dbMock.getUserByEmail.mockResolvedValue({
+    dbMock.getUserByLoginIdentifier.mockResolvedValue({
       id: 9,
       email: "normal.user@example.org",
       dropiRole: "customer",
@@ -144,7 +174,7 @@ describe("dropiAuth.forgotPassword", () => {
     });
     const caller = dropiAuthRouter.createCaller(createPublicContext());
 
-    await caller.forgotPassword({ email: "normal.user@example.org" });
+    await caller.forgotPassword({ identifier: "normal.user@example.org" });
 
     expect(mailMock.sendPlatformEmail).toHaveBeenCalledWith(
       expect.objectContaining({ to: "normal.user@example.org" }),
@@ -156,7 +186,7 @@ describe("dropiAuth.forgotPassword", () => {
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    dbMock.getUserByEmail.mockResolvedValue({
+    dbMock.getUserByLoginIdentifier.mockResolvedValue({
       id: 5,
       email: "user@example.com",
       dropiRole: "customer",
@@ -166,7 +196,7 @@ describe("dropiAuth.forgotPassword", () => {
     mailMock.sendPlatformEmail.mockResolvedValue(true);
 
     const caller = dropiAuthRouter.createCaller(createPublicContext());
-    await caller.forgotPassword({ email: "user@example.com" });
+    await caller.forgotPassword({ identifier: "user@example.com" });
 
     // Capture the actual 6-digit code that was stored in the DB
     const setResetCall = dbMock.setResetToken.mock.calls[0];

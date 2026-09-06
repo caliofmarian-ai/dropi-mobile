@@ -22,14 +22,16 @@ describe("AUTH-384 username login contract", () => {
     expect(provisioning).toContain("username: identity.aiUsername");
   });
 
-  it("uses normalized email-or-username lookup while recovery stays email-only", () => {
+  it("uses normalized email-or-username lookup for login and recovery", () => {
     const auth = source("server/auth-router.ts");
     const db = source("server/db.ts");
     expect(auth).toContain("identifier: z.string().trim().min(3).max(320)");
     expect(auth).toContain("db.getUserByLoginIdentifier(normalizedIdentifier)");
     expect(db).toContain("or(eq(users.email, normalized), eq(users.username, normalized))");
     expect(auth).toContain("forgotPassword: publicProcedure.input(forgotPasswordSchema)");
-    expect(auth).toContain("const forgotPasswordSchema = z.object({\n  email: z.string().email()");
+    expect(auth).toContain("const forgotPasswordSchema = z.union([");
+    expect(auth).toContain("z.object({ identifier: z.string().trim().min(3).max(320) })");
+    expect(auth).toContain("Always return generic success to prevent account enumeration");
     expect(auth).not.toContain("getUserById(Number(input.identifier))");
   });
 
