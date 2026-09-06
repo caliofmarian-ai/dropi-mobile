@@ -16,12 +16,13 @@ on:
       - "shared/operational-trace-policy.ts"
       - "app/pilot/complete-order.tsx"
       - "app/pilot/complete-mission.tsx"
-      - "app/order/[id].tsx"
-      - "app/mission/[id].tsx"
+      - "app/order/*.tsx"
+      - "app/mission/*.tsx"
       - "app/(tabs)/index.tsx"
       - "tests/operational-trace-policy.test.ts"
       - "tests/operational-trace-contract.test.ts"
       - "tests/operational-mission-safety-contract.test.ts"
+      - "tests/mission-runtime-truthfulness-contract.test.ts"
       - ".github/workflows/validate-operational-trace-pr.yml"
 
 jobs:
@@ -46,6 +47,7 @@ jobs:
           tests/operational-trace-policy.test.ts
           tests/operational-trace-contract.test.ts
           tests/operational-mission-safety-contract.test.ts
+          tests/mission-runtime-truthfulness-contract.test.ts
           tests/audit-capture-attribution.test.ts
       - name: Delivery, tracking and safety regressions
         run: >-
