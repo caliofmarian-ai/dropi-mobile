@@ -281,6 +281,14 @@ export async function transitionMarketplaceOrder(input: {
   if (!order) throw new Error("Order not found.");
 
   const previousStatus = order.status as OrderStatus;
+  const ownerQaFixture = readOwnerQaMissionMetadata(order.items);
+  if (
+    ownerQaFixture &&
+    input.actor.dropiRole === "delivery_partner" &&
+    ownerQaFixture.targetPilotId !== input.actor.id
+  ) {
+    throw new Error("Owner QA mission is reserved for its governed TEST HUMAN Delivery Partner.");
+  }
   const authorization = assertOrderTransitionAuthorized(
     {
       customerId: order.customerId,

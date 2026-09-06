@@ -106,6 +106,8 @@ const TEST_HUMAN_EMAILS = new Set(
 const TEST_AI_EMAILS = new Set(
   TEST_ROLE_IDENTITIES.map((identity) => identity.aiEmail.trim().toLowerCase()),
 );
+const DELIVERY_PARTNER_TEST_USERNAME =
+  TEST_ROLE_IDENTITIES.find((identity) => identity.role === "delivery_partner")?.humanUsername || "unavailable";
 
 function normalizedEmail(email: string | null): string {
   return email?.trim().toLowerCase() || "";
@@ -448,7 +450,7 @@ export default function PhantomConsoleScreen() {
               setOwnerQaError("");
               Alert.alert(
                 "Owner QA missions ready",
-                `Mission Radar now has ${result.fixtureCount} governed QA missions in ${result.zone}. Log out and use human.delivery_partner for the physical Android test.`,
+                `Mission Radar now has ${result.fixtureCount} governed QA missions in ${result.zone}. Log out and use ${DELIVERY_PARTNER_TEST_USERNAME} for the physical Android test.`,
               );
             } catch (err: any) {
               setOwnerQaError(err.message || "Unable to reconcile owner QA missions");
@@ -677,7 +679,7 @@ export default function PhantomConsoleScreen() {
             <View className="flex-1">
               <Text className="text-sm font-semibold text-foreground">Owner Android Mission Acceptance · #380</Text>
               <Text className="text-xs text-muted mt-1 leading-5">
-                Governed C1 fixtures are visible only to TEST HUMAN Delivery Partner. Direct login username: human.delivery_partner
+                Governed C1 fixtures are visible only to TEST HUMAN Delivery Partner. Direct login username: {DELIVERY_PARTNER_TEST_USERNAME}
               </Text>
             </View>
             <Text className={`text-xs font-bold ${ownerQaStatus?.readyForRadar ? "text-success" : "text-warning"}`}>
