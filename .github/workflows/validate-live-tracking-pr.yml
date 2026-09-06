@@ -7,6 +7,9 @@ on:
     paths:
       - server/live-tracking.ts
       - server/live-tracking-access.ts
+      - server/ws-notifications.ts
+      - server/ws-upgrade-router.ts
+      - server/_core/index.ts
       - server/operations-router.ts
       - hooks/use-live-tracking.ts
       - hooks/use-pilot-broadcasting.ts
@@ -17,6 +20,7 @@ on:
       - app/(tabs)/index.tsx
       - tests/live-tracking-security.test.ts
       - tests/live-tracking-client-contract.test.ts
+      - tests/ws-upgrade-router.test.ts
       - tests/mission-runtime-truthfulness-contract.test.ts
       - .github/workflows/validate-live-tracking-pr.yml
   workflow_dispatch:
@@ -50,7 +54,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run live-tracking security regressions
-        run: pnpm exec vitest run tests/live-tracking-security.test.ts tests/live-tracking-client-contract.test.ts tests/operational-safety-certification.test.ts
+        run: pnpm exec vitest run tests/live-tracking-security.test.ts tests/live-tracking-client-contract.test.ts tests/ws-upgrade-router.test.ts tests/operational-safety-certification.test.ts
 
       - name: Run mission runtime truthfulness contract
         run: node --import tsx --test tests/mission-runtime-truthfulness-contract.test.ts
