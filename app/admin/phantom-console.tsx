@@ -20,6 +20,7 @@ interface PhantomTarget {
   id: number;
   name: string | null;
   email: string | null;
+  username: string | null;
   dropiRole: string;
   channel: string;
   zone: string | null;
@@ -66,6 +67,31 @@ interface RecoveryProbeResult {
   alias: string;
   baseInbox: string;
   message: string;
+}
+
+interface OwnerQaMissionFixtureStatus {
+  enabled: boolean;
+  issue: number;
+  zone: string;
+  deliveryPartner: {
+    id: number;
+    email: string;
+    active: boolean;
+    operationallyVerified: boolean;
+  };
+  fixtureCount: number;
+  readyForRadar: boolean;
+  fixtures: Array<{
+    kind: "drone" | "terrestrial";
+    orderUid: string;
+    exists: boolean;
+    orderId: number | null;
+    status: string | null;
+    targetPilotMatches: boolean;
+    deliveryMode: string | null;
+    vehicleType: string | null;
+    vehicleId: string | null;
+  }>;
 }
 
 type InventoryView = "root" | "test" | "normal" | "all-ai";
@@ -158,17 +184,49 @@ async function sendRecoveryProbe(token: string): Promise<RecoveryProbeResult> {
   return unwrapResponse(response, "Unable to send Delivery Partner recovery probe");
 }
 
+async function loadOwnerQaMissionFixtureStatus(token: string): Promise<OwnerQaMissionFixtureStatus> {
+  const input = encodeURIComponent(JSON.stringify({ json: null }));
+  const response = await fetch(`${getApiTrpcUrl()}/phantomConsole.ownerQaMissionFixtureStatus?input=${input}`, {
+    headers: authHeaders(token),
+    credentials: "include",
+  });
+  return unwrapResponse(response, "Unable to load owner QA mission fixture status");
+}
+
+async function reconcileOwnerQaMissions(token: string): Promise<OwnerQaMissionFixtureStatus> {
+  const response = await fetch(`${getApiTrpcUrl()}/phantomConsole.reconcileOwnerQaMissionFixtures`, {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify({ json: {} }),
+    credentials: "include",
+  });
+  return unwrapResponse(response, "Unable to reconcile owner QA mission fixtures");
+}
+
+async function resetOwnerQaMissions(token: string): Promise<{ success: boolean; deleted: number }> {
+  const response = await fetch(`${getApiTrpcUrl()}/phantomConsole.resetOwnerQaMissionFixtures`, {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify({ json: {} }),
+    credentials: "include",
+  });
+  return unwrapResponse(response, "Unable to reset owner QA mission fixtures");
+}
+
 export default function PhantomConsoleScreen() {
   const router = useRouter();
   const { user, token, isDemo, isPhantom, enterPhantomSession } = useDropiAuth();
   const [targets, setTargets] = useState<PhantomTarget[]>([]);
   const [controlStatus, setControlStatus] = useState<TestAccountControlStatus | null>(null);
+  const [ownerQaStatus, setOwnerQaStatus] = useState<OwnerQaMissionFixtureStatus | null>(null);
+  const [ownerQaError, setOwnerQaError] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [enteringId, setEnteringId] = useState<number | null>(null);
   const [provisioning, setProvisioning] = useState(false);
   const [diagnosingRecovery, setDiagnosingRecovery] = useState(false);
+  const [ownerQaWorking, setOwnerQaWorking] = useState<"reconcile" | "reset" | null>(null);
   const [inventoryView, setInventoryView] = useState<InventoryView>("root");
   const [testAccountKind, setTestAccountKind] = useState<TestAccountKind>(null);
   const [selectedChannel, setSelectedChannel] = useState<GovernedChannel | null>(null);
@@ -196,6 +254,19 @@ export default function PhantomConsoleScreen() {
       ]);
       setTargets(targetResult.targets || []);
       setControlStatus(statusResult);
+      if (statusResult.provisioning.ready) {
+        try {
+          const qaStatus = await loadOwnerQaMissionFixtureStatus(token);
+          setOwnerQaStatus(qaStatus);
+          setOwnerQaError("");
+        } catch (qaErr: any) {
+          setOwnerQaStatus(null);
+          setOwnerQaError(qaErr.message || "Owner QA fixtures need reconciliation");
+        }
+      } else {
+        setOwnerQaStatus(null);
+        setOwnerQaError("Canonical test-account provisioning is not ready on the server.");
+      }
     } catch (err: any) {
       setError(err.message || "Unable to load phantom console");
     } finally {
@@ -250,7 +321,7 @@ export default function PhantomConsoleScreen() {
     const inChannel = activePopulation.filter((target) => target.channel === selectedChannel);
     if (!needle) return inChannel;
     return inChannel.filter((target) =>
-      [target.name, target.email, target.dropiRole, target.channel]
+      [target.name, target.email, target.username, target.dropiRole, target.channel]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(needle)),
     );
@@ -360,6 +431,65 @@ export default function PhantomConsoleScreen() {
     );
   }, [controlStatus, diagnosingRecovery, token]);
 
+  const confirmOwnerQaReconcile = useCallback(() => {
+    if (!token || ownerQaWorking) return;
+    Alert.alert(
+      "Reconcile owner QA missions?",
+      "DROPi will reset only the governed #380 test fixtures and create one READY DRONE mission plus one READY TERRESTRIAL/VAN mission for the canonical TEST HUMAN Delivery Partner. Production users are not targeted.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reconcile",
+          onPress: async () => {
+            setOwnerQaWorking("reconcile");
+            try {
+              const result = await reconcileOwnerQaMissions(token);
+              setOwnerQaStatus(result);
+              setOwnerQaError("");
+              Alert.alert(
+                "Owner QA missions ready",
+                `Mission Radar now has ${result.fixtureCount} governed QA missions in ${result.zone}. Log out and use human.delivery_partner for the physical Android test.`,
+              );
+            } catch (err: any) {
+              setOwnerQaError(err.message || "Unable to reconcile owner QA missions");
+              Alert.alert("Owner QA reconciliation blocked", err.message || "Unable to reconcile owner QA missions");
+            } finally {
+              setOwnerQaWorking(null);
+            }
+          },
+        },
+      ],
+    );
+  }, [ownerQaWorking, token]);
+
+  const confirmOwnerQaReset = useCallback(() => {
+    if (!token || ownerQaWorking) return;
+    Alert.alert(
+      "Reset owner QA missions?",
+      "This removes only the two #380 runtime fixtures and their QA runtime evidence. Permanent audit history is retained.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            setOwnerQaWorking("reset");
+            try {
+              const result = await resetOwnerQaMissions(token);
+              setOwnerQaStatus(null);
+              setOwnerQaError(`Fixtures reset (${result.deleted} removed). Reconcile when you want to test again.`);
+              Alert.alert("Owner QA missions reset", `${result.deleted} fixture orders removed. Audit history was retained.`);
+            } catch (err: any) {
+              Alert.alert("Owner QA reset blocked", err.message || "Unable to reset owner QA missions");
+            } finally {
+              setOwnerQaWorking(null);
+            }
+          },
+        },
+      ],
+    );
+  }, [ownerQaWorking, token]);
+
   const confirmEnter = useCallback((target: PhantomTarget) => {
     if (!target.isActive || target.id === user?.id) return;
     Alert.alert(
@@ -403,6 +533,7 @@ export default function PhantomConsoleScreen() {
               {!target.isActive ? <Text className="text-xs text-error font-semibold">INACTIVE</Text> : null}
             </View>
             <Text className="text-xs text-muted mt-1">{target.email || "No email"}</Text>
+            {target.username ? <Text className="text-xs text-primary mt-1">Username: {target.username}</Text> : null}
             <Text className="text-xs text-muted mt-1">
               {target.dropiRole} · {target.channel}{target.zone ? ` · ${target.zone}` : ""}
             </Text>
@@ -536,6 +667,57 @@ export default function PhantomConsoleScreen() {
                 <ActivityIndicator size="small" color="#0a7ea4" />
               ) : (
                 <Text className="text-primary text-sm font-semibold">Send real Delivery Partner recovery code</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View className="bg-surface border border-border rounded-xl p-4 mb-4">
+          <View className="flex-row items-start justify-between gap-3">
+            <View className="flex-1">
+              <Text className="text-sm font-semibold text-foreground">Owner Android Mission Acceptance · #380</Text>
+              <Text className="text-xs text-muted mt-1 leading-5">
+                Governed C1 fixtures are visible only to TEST HUMAN Delivery Partner. Direct login username: human.delivery_partner
+              </Text>
+            </View>
+            <Text className={`text-xs font-bold ${ownerQaStatus?.readyForRadar ? "text-success" : "text-warning"}`}>
+              {ownerQaStatus?.readyForRadar ? "READY" : "NOT READY"}
+            </Text>
+          </View>
+
+          <View className="mt-3 gap-1">
+            <Text className="text-xs text-muted">Zone: {ownerQaStatus?.zone || controlStatus?.provisioning.zone || "not resolved"}</Text>
+            {ownerQaStatus?.fixtures.map((fixture) => (
+              <Text key={fixture.kind} className="text-xs text-foreground">
+                {fixture.kind === "drone" ? "🚁 DRONE" : "🚐 TERRESTRIAL"} · {fixture.orderUid} · {fixture.exists ? String(fixture.status || "materialized").toUpperCase() : "MISSING"}
+              </Text>
+            ))}
+            {ownerQaError ? <Text className="text-xs text-warning mt-1">{ownerQaError}</Text> : null}
+          </View>
+
+          <View className="flex-row gap-2 mt-4">
+            <TouchableOpacity
+              onPress={confirmOwnerQaReconcile}
+              disabled={ownerQaWorking !== null || !controlStatus?.provisioning.ready}
+              className="flex-1 border border-primary rounded-lg py-2.5 items-center"
+              style={{ opacity: ownerQaWorking !== null || !controlStatus?.provisioning.ready ? 0.45 : 1 }}
+            >
+              {ownerQaWorking === "reconcile" ? (
+                <ActivityIndicator size="small" color="#0a7ea4" />
+              ) : (
+                <Text className="text-primary text-xs font-semibold">Reconcile QA Missions</Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={confirmOwnerQaReset}
+              disabled={ownerQaWorking !== null}
+              className="flex-1 border border-error rounded-lg py-2.5 items-center"
+              style={{ opacity: ownerQaWorking !== null ? 0.45 : 1 }}
+            >
+              {ownerQaWorking === "reset" ? (
+                <ActivityIndicator size="small" color="#DC2626" />
+              ) : (
+                <Text className="text-error text-xs font-semibold">Reset QA Missions</Text>
               )}
             </TouchableOpacity>
           </View>

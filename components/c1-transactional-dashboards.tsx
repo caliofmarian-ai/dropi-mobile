@@ -204,7 +204,12 @@ function DeliveryPartnerDashboard() {
                       <View className="flex-1">
                         <Text className="text-sm font-semibold text-foreground">{item.merchantName}</Text>
                         <Text className="text-xs text-muted mt-1">{item.orderUid}</Text>
-                        <Text className="text-xs text-muted mt-1">{item.status.replace(/_/g, " ").toUpperCase()}</Text>
+                        {(item as any).isOwnerQaFixture ? (
+                          <Text className="text-xs text-primary font-bold mt-1">{(item as any).ownerQaLabel}</Text>
+                        ) : null}
+                        <Text className="text-xs text-muted mt-1">
+                          {VEHICLE_ICONS[(item as any).vehicleType || "auto"]} {(item as any).vehicleType || "auto"} · {item.status.replace(/_/g, " ").toUpperCase()}
+                        </Text>
                       </View>
                       {(item.status === "accepted" || item.status === "in_execution") && (
                         <TouchableOpacity
@@ -241,8 +246,25 @@ function DeliveryPartnerDashboard() {
         }
         renderItem={({ item }) => (
           <View className="bg-surface border border-border rounded-xl p-3 mb-2">
-            <Text className="text-sm font-semibold text-foreground">{item.merchantName}</Text>
-            <Text className="text-xs text-muted mt-1">{item.orderUid}</Text>
+            <View className="flex-row items-start justify-between gap-2">
+              <View className="flex-1">
+                <Text className="text-sm font-semibold text-foreground">{item.merchantName}</Text>
+                <Text className="text-xs text-muted mt-1">{item.orderUid}</Text>
+              </View>
+              {(item as any).isOwnerQaFixture ? (
+                <View className="bg-primary/10 border border-primary rounded-lg px-2 py-1">
+                  <Text className="text-primary text-xs font-bold">OWNER QA</Text>
+                </View>
+              ) : null}
+            </View>
+            {(item as any).isOwnerQaFixture ? (
+              <Text className="text-xs text-primary font-bold mt-2">{(item as any).ownerQaLabel}</Text>
+            ) : null}
+            <Text className="text-xs text-muted mt-1">
+              {VEHICLE_ICONS[(item as any).vehicleType || "auto"]} {(item as any).vehicleType || "auto"}
+              {(item as any).vehicleId ? ` · ${(item as any).vehicleId}` : ""}
+              {` · ${item.packageWeight} kg · ETA ${item.estimatedTime} min`}
+            </Text>
             <Text className="text-xs text-muted mt-1">{item.pickupZone} → {item.deliveryZone}</Text>
             <TouchableOpacity
               className="bg-success rounded-lg py-2 items-center mt-3"
@@ -254,7 +276,7 @@ function DeliveryPartnerDashboard() {
             </TouchableOpacity>
           </View>
         )}
-        ListEmptyComponent={<View className="items-center py-12"><Text className="text-muted text-base">No Marketplace missions available</Text></View>}
+        ListEmptyComponent={<View className="items-center py-12"><Text className="text-muted text-base">No Marketplace missions available</Text><Text className="text-muted text-xs mt-2 text-center">For owner QA, reconcile #380 fixtures from the real Super Admin Phantom Console.</Text></View>}
       />
     </ScreenContainer>
   );
