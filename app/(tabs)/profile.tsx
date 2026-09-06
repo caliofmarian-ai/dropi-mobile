@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Text, View, TouchableOpacity, ScrollView, Alert, Image } from "react-native";
+import { ActivityIndicator, Text, View, TouchableOpacity, ScrollView, Alert, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useDropiAuth } from "@/lib/auth-context";
@@ -13,6 +13,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [photoModalVisible, setPhotoModalVisible] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoLoading, setPhotoLoading] = useState(false);
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to sign out?", [
@@ -41,10 +42,8 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         <Text className="text-2xl font-bold text-foreground mb-6">Profile</Text>
 
-        {/* User Card */}
         <View className="bg-surface border border-border rounded-2xl p-5 mb-4">
           <View className="flex-row items-center mb-4">
-            {/* Tappable avatar */}
             <TouchableOpacity
               onPress={() => setPhotoModalVisible(true)}
               activeOpacity={0.7}
@@ -63,13 +62,28 @@ export default function ProfileScreen() {
                   source={{ uri: currentPhotoUri }}
                   style={{ width: 56, height: 56 }}
                   resizeMode="cover"
+                  onLoadStart={() => setPhotoLoading(true)}
+                  onLoadEnd={() => setPhotoLoading(false)}
+                  onError={() => setPhotoLoading(false)}
                 />
               ) : (
                 <Text style={{ color: roleColor, fontSize: 20, fontWeight: "700" }}>
                   {user.name?.charAt(0)?.toUpperCase() || "U"}
                 </Text>
               )}
-              {/* Camera badge */}
+              {photoLoading && currentPhotoUri ? (
+                <View
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "rgba(255,255,255,0.65)",
+                  }}
+                >
+                  <ActivityIndicator size="small" color={roleColor} />
+                </View>
+              ) : null}
               <View
                 style={{
                   position: "absolute",
@@ -115,10 +129,8 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* Profile Completion */}
         <ProfileCompletionBar user={{ ...user, profilePhotoUrl: currentPhoto }} />
 
-        {/* Permissions */}
         {roleConfig && (
           <View className="bg-surface border border-border rounded-xl p-4 mb-4">
             <Text className="text-sm font-semibold text-foreground mb-2">Permissions</Text>
@@ -132,9 +144,7 @@ export default function ProfileScreen() {
           </View>
         )}
 
-        {/* Actions */}
         <View className="bg-surface border border-border rounded-xl overflow-hidden mb-4">
-          {/* Change Profile Photo */}
           <TouchableOpacity
             className="px-4 py-3.5 border-b border-border flex-row justify-between items-center"
             onPress={() => setPhotoModalVisible(true)}
@@ -169,7 +179,6 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* Settings */}
         <View className="bg-surface border border-border rounded-xl overflow-hidden mb-4">
           <TouchableOpacity
             className="px-4 py-3.5 border-b border-border flex-row justify-between items-center"
@@ -192,7 +201,6 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Audit Info */}
         <View className="bg-surface border border-border rounded-xl p-4 mb-6">
           <Text className="text-xs font-medium text-muted mb-1">Audit Info</Text>
           <Text className="text-xs text-muted">All actions are logged and auditable per DROPi Canonical Policy.</Text>
@@ -200,7 +208,6 @@ export default function ProfileScreen() {
           <Text className="text-xs text-muted mt-0.5">Role: {user.dropiRole}</Text>
         </View>
 
-        {/* Logout */}
         <TouchableOpacity
           className="bg-error/10 border border-error/30 rounded-xl py-3.5 items-center"
           activeOpacity={0.8}
@@ -210,11 +217,13 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Profile Photo Modal */}
       <ProfilePhotoModal
         visible={photoModalVisible}
         onClose={() => setPhotoModalVisible(false)}
-        onPhotoUploaded={(url) => setPhotoUrl(url || null)}
+        onPhotoUploaded={(url) => {
+          setPhotoLoading(Boolean(url));
+          setPhotoUrl(url || null);
+        }}
         currentPhotoUrl={currentPhotoUri}
       />
     </ScreenContainer>
