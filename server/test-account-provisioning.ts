@@ -9,6 +9,7 @@ import {
 } from "../shared/test-role-accounts";
 import type { Channel, DropiRole } from "../shared/types";
 import { getDb } from "./db";
+import { syncOperationalPilotVerification } from "./pilot-operational-verification";
 
 const ENABLE_FLAG = "enabled";
 type ProvisioningEnv = Readonly<Record<string, string | undefined>>;
@@ -93,6 +94,14 @@ function zoneFor(channel: Channel, configuredZone: string): string | null {
   return channel === "ADMIN" ? null : configuredZone;
 }
 
+function verificationDuringReconciliation(role: DropiRole): boolean {
+  // Delivery Partner mission authority is evidence-derived. Provisioning may
+  // materialize credentials/role/channel/zone, but it must never manufacture a
+  // verified pilot. After the transaction commits, the canonical evidence sync
+  // is the only code allowed to re-enable operational verification.
+  return role !== "delivery_partner";
+}
+
 async function clearStaleDeviceAccess(tx: DbTransaction, userId: number) {
   // Reconciliation may rotate the shared test password. Revoke every previous
   // server session and push registration for the test identity in the same
@@ -146,7 +155,7 @@ async function reconcileIdentity(
     channel: input.channel,
     zone: input.zone,
     isActive: true,
-    isVerified: true,
+    isVerified: verificationDuringReconciliation(input.role),
     passwordHash: input.passwordHash,
     isAIAgent: input.kind === "ai",
     agentMode: input.kind === "ai" ? ("autonomous" as const) : null,
@@ -183,6 +192,8 @@ async function reconcileIdentity(
  *
  * Server environment values are the only credential/zone authority. Neither the
  * mobile Phantom Console nor another request may provide a competing password.
+ * Delivery Partner verification remains governed by reviewed qualifying evidence;
+ * provisioning itself never grants pilot mission authority.
  */
 export async function provisionTestRoleAccounts() {
   const { password, zone } = requireServerProvisioningConfig();
@@ -223,6 +234,17 @@ export async function provisionTestRoleAccounts() {
       pairs.push({ role: identity.role, humanId, aiId });
     }
   });
+
+  // Reconciliation deliberately wrote every Delivery Partner as unverified.
+  // Only current approved driving/drone license evidence may re-enable the
+  // materialized flag. Running this after the transaction is fail-closed: if
+  // evidence is absent/expired/rejected (or the sync cannot establish it), the
+  // account remains unverified and unavailable for missions.
+  for (const pair of pairs) {
+    if (pair.role !== "delivery_partner") continue;
+    await syncOperationalPilotVerification(pair.humanId);
+    await syncOperationalPilotVerification(pair.aiId);
+  }
 
   return {
     baseSuperAdmin: DROPI_TEST_BASE_INBOX,
