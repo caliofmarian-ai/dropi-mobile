@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, gt, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
-import { p2pCommunityListings, p2pParcelRequests } from "../drizzle/p2p-schema";
+import { p2pCommunityListings, p2pListingMedia, p2pParcelRequests } from "../drizzle/p2p-schema";
 import {
   MARKETPLACE_LISTING_POLICY_VERSION,
   MARKETPLACE_MAX_IMAGE_BYTES,
@@ -21,7 +21,7 @@ import {
   assertPrivateParcel,
   normalizeP2pCommunityOffer,
 } from "./p2p-policy";
-import { storagePut } from "./storage";
+import { p2pMediaPath } from "./p2p-media";
 
 const listingImageSchema = z.object({
   fileBase64: z.string().min(1),
@@ -43,6 +43,13 @@ const foodSafetySchema = z.object({
   storageInstructions: z.string().trim().min(2).max(2000),
   useByDate: z.string().trim().max(40).optional(),
 });
+
+type PreparedListingImage = {
+  mediaUid: string;
+  contentType: "image/jpeg" | "image/png" | "image/webp";
+  byteLength: number;
+  dataBase64: string;
+};
 
 function actorFromContext(user: any) {
   return {
@@ -79,20 +86,19 @@ async function audit(input: {
   });
 }
 
-async function uploadListingImages(ownerId: number, images: z.infer<typeof listingImageSchema>[]): Promise<string[]> {
-  const urls: string[] = [];
-  for (let index = 0; index < images.length; index += 1) {
-    const image = images[index];
+function prepareListingImages(images: z.infer<typeof listingImageSchema>[]): PreparedListingImage[] {
+  return images.map((image) => {
     const buffer = Buffer.from(image.fileBase64, "base64");
     if (buffer.length <= 0 || buffer.length > MARKETPLACE_MAX_IMAGE_BYTES) {
       throw new TRPCError({ code: "BAD_REQUEST", message: "Each listing image must be between 1 byte and 2 MB." });
     }
-    const ext = image.contentType === "image/png" ? "png" : image.contentType === "image/webp" ? "webp" : "jpg";
-    const key = `p2p-listings/user_${ownerId}/${Date.now()}_${randomUUID()}_${index}.${ext}`;
-    const { url } = await storagePut(key, buffer, image.contentType);
-    urls.push(url);
-  }
-  return urls;
+    return {
+      mediaUid: randomUUID(),
+      contentType: image.contentType,
+      byteLength: buffer.length,
+      dataBase64: buffer.toString("base64"),
+    };
+  });
 }
 
 function assertListingReadyForApproval(listing: typeof p2pCommunityListings.$inferSelect): void {
@@ -159,29 +165,45 @@ export const p2pRouter = router({
         currency: input.currency,
         expiresAt: input.expiresAt,
       });
-      const imageUrls = await uploadListingImages(actor.id, input.images);
+      const preparedImages = prepareListingImages(input.images);
+      const imageUrls = preparedImages.map((image) => p2pMediaPath(image.mediaUid));
       const attestedAt = new Date();
 
-      const inserted = await db.insert(p2pCommunityListings).values({
-        ownerId: actor.id,
-        title: input.title,
-        description: input.description || null,
-        offerType: input.offerType,
-        fixedPrice: normalized.fixedPrice,
-        currency: normalized.currency,
-        zone,
-        category,
-        itemCondition: input.itemCondition,
-        imageUrls,
-        foodSafety: isFoodMarketplaceCategory(category) ? input.foodSafety! : null,
-        attestationData: input.attestation,
-        policyVersion: MARKETPLACE_LISTING_POLICY_VERSION,
-        attestedAt,
-        status: "pending_review",
-        expiresAt: normalized.expiresAt,
-      }).$returningId();
-      const listingId = inserted[0]?.id;
-      if (!listingId) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Offer could not be created" });
+      const listingId = await db.transaction(async (tx) => {
+        const inserted = await tx.insert(p2pCommunityListings).values({
+          ownerId: actor.id,
+          title: input.title,
+          description: input.description || null,
+          offerType: input.offerType,
+          fixedPrice: normalized.fixedPrice,
+          currency: normalized.currency,
+          zone,
+          category,
+          itemCondition: input.itemCondition,
+          imageUrls,
+          foodSafety: isFoodMarketplaceCategory(category) ? input.foodSafety! : null,
+          attestationData: input.attestation,
+          policyVersion: MARKETPLACE_LISTING_POLICY_VERSION,
+          attestedAt,
+          status: "pending_review",
+          expiresAt: normalized.expiresAt,
+        }).$returningId();
+        const createdListingId = inserted[0]?.id;
+        if (!createdListingId) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Offer could not be created" });
+        }
+
+        await tx.insert(p2pListingMedia).values(preparedImages.map((image) => ({
+          mediaUid: image.mediaUid,
+          listingId: createdListingId,
+          ownerId: actor.id,
+          contentType: image.contentType,
+          byteLength: image.byteLength,
+          dataBase64: image.dataBase64,
+        })));
+
+        return createdListingId;
+      });
 
       await audit({
         user: ctx.user,
@@ -195,6 +217,7 @@ export const p2pRouter = router({
           category,
           itemCondition: input.itemCondition,
           imageCount: imageUrls.length,
+          mediaStorage: "dropi_db",
           policyVersion: MARKETPLACE_LISTING_POLICY_VERSION,
           attestedAt: attestedAt.toISOString(),
           expiresAt: input.expiresAt.toISOString(),

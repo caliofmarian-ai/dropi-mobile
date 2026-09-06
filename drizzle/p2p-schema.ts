@@ -1,4 +1,4 @@
-import { decimal, int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { decimal, int, json, longtext, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * C1 occasional community offers for non-commercial users.
@@ -37,6 +37,26 @@ export const p2pCommunityListings = mysqlTable("p2pCommunityListings", {
 
 export type P2pCommunityListing = typeof p2pCommunityListings.$inferSelect;
 export type InsertP2pCommunityListing = typeof p2pCommunityListings.$inferInsert;
+
+/**
+ * P2P listing media persisted inside the canonical DROPi database for the
+ * current pre-production runtime. The opaque media UID is the only identifier
+ * exposed to clients; pending/rejected media remains access-controlled by the
+ * API route and never becomes public merely because a URL exists.
+ */
+export const p2pListingMedia = mysqlTable("p2pListingMedia", {
+  id: int("id").autoincrement().primaryKey(),
+  mediaUid: varchar("mediaUid", { length: 36 }).notNull().unique(),
+  listingId: int("listingId").notNull(),
+  ownerId: int("ownerId").notNull(),
+  contentType: varchar("contentType", { length: 40 }).notNull(),
+  byteLength: int("byteLength").notNull(),
+  dataBase64: longtext("dataBase64").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type P2pListingMedia = typeof p2pListingMedia.$inferSelect;
+export type InsertP2pListingMedia = typeof p2pListingMedia.$inferInsert;
 
 /**
  * Private non-commercial parcel initiation.
