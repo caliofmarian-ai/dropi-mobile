@@ -20,7 +20,7 @@ export default function LoginScreen() {
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
 
   const handleLogin = useCallback(async () => {
-    if (!email.trim() || !password.trim()) {
+    if (!email.trim() || !password) {
       setError("Please enter email or username and password");
       return;
     }
@@ -170,6 +170,11 @@ export default function LoginScreen() {
                   value={password}
                   onChangeText={(t) => { setPassword(t); setError(""); }}
                   secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  spellCheck={false}
+                  autoComplete="current-password"
+                  textContentType="password"
                   returnKeyType="done"
                   onSubmitEditing={handleLogin}
                 />
