@@ -64,8 +64,12 @@ export default function ForgotPasswordScreen() {
   }, [code, identifier, verifyResetCode]);
 
   const handleResetPassword = useCallback(async () => {
-    if (!newPassword.trim()) {
+    if (!newPassword) {
       setError("Please enter a new password");
+      return;
+    }
+    if (newPassword !== newPassword.trim()) {
+      setError("Password cannot start or end with spaces. Remove the invisible space and try again.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -90,7 +94,7 @@ export default function ForgotPasswordScreen() {
     const result = await resetPassword(identifier, code, newPassword);
     setLoading(false);
     if (result.success) {
-      setSuccess("Password reset successfully. Existing sessions were signed out. Redirecting to login...");
+      setSuccess("Password saved and verified. Existing sessions were signed out. Redirecting to login...");
       setTimeout(() => router.replace("/login" as any), 2000);
     } else {
       setSuccess("");
@@ -123,7 +127,7 @@ export default function ForgotPasswordScreen() {
                   ? "Enter your email address or username and we'll send a 6-digit verification code to the account email."
                   : step === "code"
                   ? "Enter the newest 6-digit code sent to the account email. DROPi will verify it before you can change the password."
-                  : "Choose a new password for your account."}
+                  : "Choose a new password for your account. Leading or trailing spaces are not allowed."}
               </Text>
             </View>
 
@@ -229,6 +233,11 @@ export default function ForgotPasswordScreen() {
                       value={newPassword}
                       onChangeText={(t) => { setNewPassword(t); setError(""); }}
                       secureTextEntry={!showPassword}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      spellCheck={false}
+                      autoComplete="new-password"
+                      textContentType="newPassword"
                     />
                     <TouchableOpacity
                       onPress={() => setShowPassword(!showPassword)}
@@ -248,6 +257,11 @@ export default function ForgotPasswordScreen() {
                     value={confirmPassword}
                     onChangeText={(t) => { setConfirmPassword(t); setError(""); }}
                     secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    spellCheck={false}
+                    autoComplete="new-password"
+                    textContentType="newPassword"
                     returnKeyType="done"
                     onSubmitEditing={handleResetPassword}
                   />
