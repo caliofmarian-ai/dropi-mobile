@@ -8,6 +8,7 @@ process.env.JWT_SECRET = "auth-401-test-secret";
 
 const dbMock = vi.hoisted(() => ({
   getUserByLoginIdentifier: vi.fn(),
+  getUserById: vi.fn(),
   clearResetToken: vi.fn(),
   updateUserPassword: vi.fn(),
   createAuditLog: vi.fn(),
@@ -26,6 +27,7 @@ function userWithCode(code: string, overrides: Record<string, unknown> = {}) {
     dropiRole: "delivery_partner",
     channel: "C1",
     isAIAgent: false,
+    passwordHash: null,
     resetToken: hashOneTimeCode("password-reset", code),
     resetTokenExpiry: new Date(Date.now() + 10 * 60 * 1000),
     ...overrides,
@@ -66,8 +68,11 @@ describe("AUTH-401 addressed password recovery", () => {
     expect(dbMock.updateUserPassword).not.toHaveBeenCalled();
   });
 
-  it("revalidates the same addressed account and code at the password-changing boundary", async () => {
+  it("revalidates the same account and proves the persisted hash before reporting reset success", async () => {
     dbMock.getUserByLoginIdentifier.mockResolvedValue(userWithCode("234567"));
+    dbMock.updateUserPassword.mockImplementation(async (_userId: number, passwordHash: string) => {
+      dbMock.getUserById.mockResolvedValue(userWithCode("234567", { passwordHash }));
+    });
     const caller = passwordRecoveryRouter.createCaller(context("127.0.0.12"));
 
     await expect(caller.resetPassword({
@@ -81,6 +86,7 @@ describe("AUTH-401 addressed password recovery", () => {
     expect(userId).toBe(151);
     expect(passwordHash).not.toBe("DeliveryPartner2026");
     await expect(bcrypt.compare("DeliveryPartner2026", passwordHash)).resolves.toBe(true);
+    expect(dbMock.getUserById).toHaveBeenCalledWith(151);
     expect(dbMock.clearResetToken).toHaveBeenCalledWith(151);
     expect(dbMock.createAuditLog).toHaveBeenCalledWith(expect.objectContaining({
       action: "auth.reset_password",
@@ -88,8 +94,42 @@ describe("AUTH-401 addressed password recovery", () => {
         sessionsRevoked: true,
         addressedRecovery: true,
         recoveryIdentifierType: "username",
+        persistenceVerified: true,
       }),
     }));
+  });
+
+  it("fails closed and keeps the recovery credential when persisted hash verification fails", async () => {
+    const oldHash = await bcrypt.hash("OldPassword2026", 12);
+    dbMock.getUserByLoginIdentifier.mockResolvedValue(userWithCode("245678"));
+    dbMock.getUserById.mockResolvedValue(userWithCode("245678", { passwordHash: oldHash }));
+    const caller = passwordRecoveryRouter.createCaller(context("127.0.0.17"));
+
+    await expect(caller.resetPassword({
+      identifier: "human.delivery_partner",
+      token: "245678",
+      newPassword: "DeliveryPartner2026",
+    })).rejects.toMatchObject({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Password could not be verified after saving. Please try the reset again.",
+    });
+
+    expect(dbMock.updateUserPassword).toHaveBeenCalledTimes(1);
+    expect(dbMock.clearResetToken).not.toHaveBeenCalled();
+    expect(dbMock.createAuditLog).not.toHaveBeenCalled();
+  });
+
+  it("rejects leading or trailing whitespace instead of hashing an invisible password variant", async () => {
+    const caller = passwordRecoveryRouter.createCaller(context("127.0.0.18"));
+
+    await expect(caller.resetPassword({
+      identifier: "human.delivery_partner",
+      token: "123456",
+      newPassword: "DeliveryPartner2026 ",
+    })).rejects.toMatchObject({ code: "BAD_REQUEST" });
+
+    expect(dbMock.getUserByLoginIdentifier).not.toHaveBeenCalled();
+    expect(dbMock.updateUserPassword).not.toHaveBeenCalled();
   });
 
   it("rejects a stale or wrong code without changing the password", async () => {
@@ -148,14 +188,23 @@ describe("AUTH-401 addressed password recovery", () => {
     );
   });
 
-  it("keeps Android on the server-verified code path and explains newest-code semantics", () => {
-    const screen = readFileSync(resolve(process.cwd(), "app/forgot-password.tsx"), "utf8");
+  it("keeps Android on the server-verified path and hardens password text entry", () => {
+    const resetScreen = readFileSync(resolve(process.cwd(), "app/forgot-password.tsx"), "utf8");
+    const loginScreen = readFileSync(resolve(process.cwd(), "app/login.tsx"), "utf8");
     const authContext = readFileSync(resolve(process.cwd(), "lib/auth-context.tsx"), "utf8");
     const routers = readFileSync(resolve(process.cwd(), "server/routers.ts"), "utf8");
+    const recoveryRouter = readFileSync(resolve(process.cwd(), "server/password-recovery-router.ts"), "utf8");
 
-    expect(screen).toContain("await verifyResetCode(identifier, code)");
-    expect(screen).toContain("Only the newest code is valid after a resend.");
-    expect(screen).not.toContain("Code format accepted. DROPi will verify it securely when you reset your password.");
+    expect(resetScreen).toContain("await verifyResetCode(identifier, code)");
+    expect(resetScreen).toContain("Only the newest code is valid after a resend.");
+    expect(resetScreen).toContain("Password cannot start or end with spaces");
+    expect(resetScreen).toContain('autoComplete="new-password"');
+    expect(resetScreen).toContain('autoCapitalize="none"');
+    expect(loginScreen).toContain('autoComplete="current-password"');
+    expect(loginScreen).toContain('spellCheck={false}');
+    expect(recoveryRouter).toContain("persistence_verification_failed");
+    expect(recoveryRouter).toContain("persistence_verified=true");
+    expect(resetScreen).not.toContain("Code format accepted. DROPi will verify it securely when you reset your password.");
     expect(authContext).toContain('apiCall("passwordRecovery.verifyResetCode"');
     expect(authContext).toContain('apiCall("passwordRecovery.resetPassword"');
     expect(routers).toContain("passwordRecovery: passwordRecoveryRouter");
