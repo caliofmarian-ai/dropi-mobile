@@ -9,7 +9,10 @@ const identifierSchema = z.string().trim().min(3).max(320);
 const resetCodeSchema = z.string().regex(/^\d{6}$/, "Please enter the 6-digit code from your email");
 const newPasswordSchema = z.string().min(8)
   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-  .regex(/[0-9]/, "Password must contain at least one number");
+  .regex(/[0-9]/, "Password must contain at least one number")
+  .refine((value) => value === value.trim(), {
+    message: "Password cannot start or end with spaces",
+  });
 
 const verifyResetCodeSchema = z.object({
   identifier: identifierSchema,
@@ -133,6 +136,25 @@ export const passwordRecoveryRouter = router({
 
     // This persistence boundary atomically revokes every existing user session.
     await db.updateUserPassword(user.id, passwordHash);
+
+    // A reset must never report success merely because the UPDATE call returned.
+    // Read the credential back from the authoritative user row and verify it with
+    // the exact password submitted in this request. No password or hash is logged.
+    const persistedUser = await db.getUserById(user.id);
+    const persistenceVerified = Boolean(
+      persistedUser?.passwordHash
+      && await bcrypt.compare(input.newPassword, persistedUser.passwordHash),
+    );
+    if (!persistenceVerified) {
+      console.error(`[PASSWORD RECOVERY] outcome=persistence_verification_failed userId=${user.id} identifier_type=${type}`);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Password could not be verified after saving. Please try the reset again.",
+      });
+    }
+
+    // Clear the one-time credential only after the persisted replacement proves
+    // it can authenticate the exact submitted password.
     await db.clearResetToken(user.id);
 
     await db.createAuditLog({
@@ -151,10 +173,11 @@ export const passwordRecoveryRouter = router({
         sessionsRevoked: true,
         recoveryIdentifierType: type,
         addressedRecovery: true,
+        persistenceVerified: true,
       },
     });
 
-    console.info(`[PASSWORD RECOVERY] outcome=password_reset userId=${user.id} identifier_type=${type}`);
+    console.info(`[PASSWORD RECOVERY] outcome=password_reset persistence_verified=true userId=${user.id} identifier_type=${type}`);
     return { success: true };
   }),
 });
