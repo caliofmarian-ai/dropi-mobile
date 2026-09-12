@@ -5,6 +5,24 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    # Expo and React Native native modules are compatibility-coupled to the
+    # current Expo SDK line. Patch updates remain eligible, while SDK-generation
+    # jumps are handled as one reviewed migration with Android validation.
+    ignore:
+      - dependency-name: "expo"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "expo-*"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "react-native-safe-area-context"
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-major"
+      - dependency-name: "react-native-svg"
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-major"
 
   - package-ecosystem: "github-actions"
     directory: "/"
