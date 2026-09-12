@@ -9,11 +9,11 @@ export default function ActiveMissionScreen() {
     return (
       <ScreenContainer className="items-center justify-center px-6">
         <View className="w-16 h-16 rounded-full bg-surface border border-border items-center justify-center mb-4">
-          <Text className="text-2xl">🛸</Text>
+          <Text className="text-2xl">📦</Text>
         </View>
-        <Text className="text-lg font-semibold text-foreground mb-1">No Active Mission</Text>
+        <Text className="text-lg font-semibold text-foreground mb-1">No Active Delivery</Text>
         <Text className="text-sm text-muted text-center">
-          Accept a mission from the Mission Radar to begin a delivery flight.
+          Accept a mission from the Mission Radar to begin an active delivery.
         </Text>
       </ScreenContainer>
     );
@@ -22,16 +22,16 @@ export default function ActiveMissionScreen() {
   return (
     <ScreenContainer>
       <View className="flex-1">
-        {/* Flight Map Area */}
+        {/* Active transport leg area. Current sample state is explicitly a drone leg. */}
         <View className="flex-1 bg-surface items-center justify-center mx-4 mt-4 rounded-2xl border border-primary/30">
-          <Text className="text-primary font-semibold text-lg">In-Flight</Text>
-          <Text className="text-muted text-sm mt-1">DRN-007 Active</Text>
+          <Text className="text-primary font-semibold text-lg">Active Delivery</Text>
+          <Text className="text-muted text-sm mt-1">Current leg: Drone • DRN-007</Text>
           <View className="mt-4 bg-primary/10 rounded-lg px-4 py-2">
             <Text className="text-primary text-sm">Alt: 45m | Speed: 32 km/h | Bat: 74%</Text>
           </View>
         </View>
 
-        {/* Controls */}
+        {/* Controls remain specific to the currently represented drone leg. */}
         <View className="px-4 py-6 gap-3">
           <TouchableOpacity
             className="bg-error rounded-2xl py-5 items-center"
