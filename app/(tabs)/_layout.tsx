@@ -9,7 +9,7 @@ import { useDropiAuth } from "@/lib/auth-context";
 import type { Channel, DropiRole } from "@/shared/types";
 
 function getHomeTitle(role: DropiRole, channel: Channel): string {
-  if (role === "customer") return "Ordersle Mele";
+  if (role === "customer") return "Comenzile mele";
   if (role === "merchant") return "Store";
   if (role === "delivery_partner") return "Missions";
   switch (channel) {
@@ -52,7 +52,7 @@ const FLEET_ROLES: DropiRole[] = [
   "resource_allocator",
 ];
 
-// Roles that should see the DronePort tab
+// Roles that should see the Logistics Network tab
 const DRONEPORT_ROLES: DropiRole[] = [
   "fleet_manager", "operations_manager", "logistics_coordinator",
   "delivery_partner", "resource_allocator",
@@ -160,11 +160,11 @@ export default function TabLayout() {
         }}
       />
 
-      {/* DronePort - visible to fleet, ops, pilot, resource, admin roles */}
+      {/* Logistics Network - visible to fleet, ops, pilot, resource, admin roles */}
       <Tabs.Screen
         name="droneport"
         options={{
-          title: "DronePort",
+          title: "Logistics",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="location.fill" color={color} />,
           href: DRONEPORT_ROLES.includes(role) ? "/droneport" : null,
         }}

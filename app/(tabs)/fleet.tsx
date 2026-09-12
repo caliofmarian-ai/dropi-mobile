@@ -10,6 +10,9 @@ interface DroneStatus {
   currentMission: string | null;
 }
 
+// Prototype-only UI data. The authoritative multimodal fleet registry is owned by
+// roadmap issues #258/#259 and must replace this array before any fleet value is
+// treated as live operational evidence.
 const MOCK_FLEET: DroneStatus[] = [
   { id: "1", name: "DRN-007", status: "active", battery: 74, pilot: "Carlos R.", currentMission: "DEL-2026-001" },
   { id: "2", name: "DRN-012", status: "returning", battery: 8, pilot: "Miguel T.", currentMission: null },
@@ -32,7 +35,16 @@ export default function FleetScreen() {
   return (
     <ScreenContainer className="px-4 pt-4">
       <Text className="text-2xl font-bold text-foreground mb-1">Fleet Status</Text>
-      <Text className="text-sm text-muted mb-4">{activeCount}/{MOCK_FLEET.length} drones active</Text>
+      <Text className="text-sm text-muted mb-3">Prototype drone-fleet presentation</Text>
+
+      <View className="bg-warning/10 border border-warning/30 rounded-xl p-3 mb-4">
+        <Text className="text-warning text-xs font-bold mb-1">PROTOTYPE DATA — NOT LIVE OPERATIONS</Text>
+        <Text className="text-xs text-muted leading-5">
+          The assets, pilots, battery values and mission IDs below are local UI samples. DROPi must use the authoritative multimodal fleet registry from #258/#259 before this screen represents real fleet state.
+        </Text>
+      </View>
+
+      <Text className="text-sm text-muted mb-4">Sample state: {activeCount}/{MOCK_FLEET.length} drones active</Text>
       <FlatList
         data={MOCK_FLEET}
         keyExtractor={(item) => item.id}
