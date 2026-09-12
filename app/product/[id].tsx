@@ -105,12 +105,21 @@ export default function ProductDetailScreen() {
           <Text style={{ fontSize: 22, fontWeight: "800", color: colors.foreground }}>{product.name}</Text>
           {product.description ? <Text style={{ fontSize: 14, color: colors.muted, marginTop: 6 }}>{product.description}</Text> : null}
 
-          <View style={{ marginTop: 12, backgroundColor: colors.surface, borderRadius: 12, padding: 12 }}>
-            <Text style={{ fontSize: 14, fontWeight: "700", color: colors.foreground }}>{store?.name || "Marketplace merchant"}</Text>
-            <Text style={{ fontSize: 11, color: colors.muted, marginTop: 3 }}>
-              {store ? `Trust score ${store.trustScore} • ${store.totalOrders} orders` : "Verified store information loading…"}
-            </Text>
-          </View>
+          <TouchableOpacity
+            onPress={() => router.push(`/store/${product.storeId}` as any)}
+            activeOpacity={0.7}
+            style={{ marginTop: 12, backgroundColor: colors.surface, borderRadius: 12, padding: 12, borderWidth: 0.5, borderColor: colors.border }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: "700", color: colors.foreground }}>{store?.name || "Marketplace merchant"}</Text>
+                <Text style={{ fontSize: 11, color: colors.muted, marginTop: 3 }}>
+                  {store ? `Trust score ${store.trustScore} • ${store.totalOrders} orders` : "Verified store information loading…"}
+                </Text>
+              </View>
+              <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "700", marginLeft: 12 }}>View store →</Text>
+            </View>
+          </TouchableOpacity>
 
           <View style={{ flexDirection: "row", marginTop: 16, gap: 8 }}>
             <View style={{ flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 12, alignItems: "center" }}>
