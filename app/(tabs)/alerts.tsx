@@ -9,6 +9,9 @@ interface AlertItem {
   time: string;
 }
 
+// Prototype-only UI examples. Real safety/energy alerts are owned by the
+// authoritative operational alerting roadmap (including #241) and must replace
+// this array before the feed is presented as live operational evidence.
 const MOCK_ALERTS: AlertItem[] = [
   {
     id: "1",
@@ -57,7 +60,15 @@ export default function AlertsScreen() {
   return (
     <ScreenContainer className="px-4 pt-4">
       <Text className="text-2xl font-bold text-foreground mb-1">Alerts</Text>
-      <Text className="text-sm text-muted mb-4">Real-time zone notifications</Text>
+      <Text className="text-sm text-muted mb-3">Prototype alert-feed presentation</Text>
+
+      <View className="bg-warning/10 border border-warning/30 rounded-xl p-3 mb-4">
+        <Text className="text-warning text-xs font-bold mb-1">PROTOTYPE DATA — NOT LIVE ALERTS</Text>
+        <Text className="text-xs text-muted leading-5">
+          The alerts, assets, locations, timestamps and incident values below are local UI samples. Real operational alerts must come from server-authoritative event and audit contracts before this feed is treated as live.
+        </Text>
+      </View>
+
       <FlatList
         data={MOCK_ALERTS}
         keyExtractor={(item) => item.id}
@@ -74,7 +85,7 @@ export default function AlertsScreen() {
                 <View className="flex-1">
                   <Text className="text-sm font-medium text-foreground">{item.title}</Text>
                   <Text className="text-xs text-muted mt-1">{item.description}</Text>
-                  <Text className="text-xs text-muted mt-1.5">{item.time}</Text>
+                  <Text className="text-xs text-muted mt-1.5">Sample time: {item.time}</Text>
                 </View>
               </View>
             </TouchableOpacity>
