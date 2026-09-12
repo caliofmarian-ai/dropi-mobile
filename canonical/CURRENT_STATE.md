@@ -104,6 +104,8 @@ Key state:
 - #468 — Logistics Network prototype/live truthfulness boundary.
 - #258 / #259 — real multimodal fleet registry and availability/assignment/location.
 - #461 — controlled future Express 5 migration; Express major is not routine dependency maintenance.
+- #475 — repository/public metadata still uses obsolete drone-only / `not a marketplace` identity and must be reconciled to current multimodal canon without rewriting historical archives.
+- #476 — `main` is currently unprotected; define and enforce a stable PR/required-check gate without deadlocking path-specific workflows.
 - #165 — source/live test-role infrastructure exists; owner Android/Phantom acceptance remains explicit.
 
 ## 7. Current truthfulness rules
@@ -113,6 +115,7 @@ Key state:
 3. Static station/fleet/alert fixtures must not be presented as live operations.
 4. Historical drone-only product wording is historical/reference material, not current product identity.
 5. Owner/device acceptance is not inferred from source or CI when an issue explicitly requires it.
+6. Repository metadata/public claims must follow current multimodal canon and must not overstate future C2/C3/Payments/Physical capabilities.
 
 ## 8. Audit status
 
@@ -124,24 +127,32 @@ The prior 2026-09-06 report is superseded because its base and several defect co
 
 No replacement product-completion percentage is canonical yet; use phase/capability status until the owner approves a weighting method.
 
-## 9. Dependency maintenance state
+## 9. Repository governance state
+
+- `main` was observed as unprotected during the audit; #476 owns branch/ruleset enforcement.
+- The repository description still reflects obsolete drone-only / `not a marketplace` wording; #475 owns current public repository identity.
+- Historical recovered packages may retain their original wording for provenance; they are not current product truth.
+- Issue/PR status must not substitute for source evidence when the two have drifted; reconcile explicitly (as done for Marketplace #71).
+
+## 10. Dependency maintenance state
 
 A broad dependency cleanup was completed before the canonical audit, including compatible Expo SDK 54 patch maintenance and several server/tooling/security-compatible updates.
 
 Npm Dependabot version-update PR generation is **temporarily frozen during audit/reorganization** to keep `main` stable. This does not change the security-update responsibility. Re-enable routine version updates in a controlled maintenance window with grouping and major-migration guards.
 
-## 10. Next execution order
+## 11. Next execution order
 
 After #371 is merged and audit verification is closed/re-baselined:
 
 1. finish Priority-A M1 truthfulness/product gaps (#362, #364, #425, #396/#426, #468);
-2. reconcile/complete remaining M1 Order/Admin/Realtime batches;
-3. implement C2/C3 and Payments with real backend authority, not UI-only scaffolding;
-4. progress M3 eligibility/routing and AI operational embedding;
-5. progress M4/M5 real fleet/DronePort/physical/operational stack;
-6. rebuild/promote current Public Front only from evidence-backed capabilities.
+2. fix repository governance/identity drift (#475, #476) in parallel where it does not block product work;
+3. reconcile/complete remaining M1 Order/Admin/Realtime batches;
+4. implement C2/C3 and Payments with real backend authority, not UI-only scaffolding;
+5. progress M3 eligibility/routing and AI operational embedding;
+6. progress M4/M5 real fleet/DronePort/physical/operational stack;
+7. rebuild/promote current Public Front only from evidence-backed capabilities.
 
-## 11. Session close rule
+## 12. Session close rule
 
 At the end of substantial future work:
 
