@@ -54,6 +54,16 @@ describe("live-tracking client wiring", () => {
     expect(text).not.toContain("pilotId, vehicleType");
   });
 
+  it("live tracking does not invent drone identity or label stale telemetry as live", () => {
+    const text = source("app/pilot/live-tracking.tsx");
+    expect(text).toContain("Active Delivery Position");
+    expect(text).toContain("Last Known Delivery Position");
+    expect(text).toContain("not live telemetry");
+    expect(text).toContain('position.vehicleType || "Unavailable"');
+    expect(text).not.toContain("Pilot in Flight");
+    expect(text).not.toContain('position.vehicleType || "Drone"');
+  });
+
   it("delivery-partner dashboard no longer contains debug tracking IDs", () => {
     const text = source("components/c1-transactional-dashboards.tsx");
     expect(text).not.toContain("deliveryId: '1', pilotId: '1'");
