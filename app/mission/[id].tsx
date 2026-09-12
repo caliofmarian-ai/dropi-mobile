@@ -36,12 +36,18 @@ const TERRESTRIAL_PREFLIGHT: CheckItem[] = [
   { id: "fuel", label: "Fuel/Battery sufficient", checked: false },
 ];
 
-const VEHICLE_INFO: Record<string, { icon: string; label: string; launchText: string; inTransitLabel: string; stopLabel: string; fallbackLabel: string }> = {
+const VEHICLE_INFO = {
   drone: { icon: "🚁", label: "Drone", launchText: "Launch Drone", inTransitLabel: "Flight Supervision", stopLabel: "⛔ STOP — Emergency Stop", fallbackLabel: "↩ FALLBACK — Return to DronePort" },
   auto: { icon: "🚗", label: "Car", launchText: "Start Delivery", inTransitLabel: "In Transit — Car", stopLabel: "⛔ STOP — Immediate Stop", fallbackLabel: "↩ RETURN — Back to Depot" },
   van: { icon: "🚐", label: "Van", launchText: "Start Delivery", inTransitLabel: "In Transit — Van", stopLabel: "⛔ STOP — Immediate Stop", fallbackLabel: "↩ RETURN — Back to Depot" },
   ebike: { icon: "🚲", label: "E-Bike", launchText: "Start Delivery", inTransitLabel: "In Transit — E-Bike", stopLabel: "⛔ STOP — Immediate Stop", fallbackLabel: "↩ RETURN — Back to Pickup Point" },
-};
+} as const;
+
+type SupportedVehicleType = keyof typeof VEHICLE_INFO;
+
+function isSupportedVehicleType(value: string | null | undefined): value is SupportedVehicleType {
+  return Boolean(value && Object.prototype.hasOwnProperty.call(VEHICLE_INFO, value));
+}
 
 export default function MissionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -80,14 +86,19 @@ export default function MissionDetailScreen() {
     enabled: phase === "inflight" && Number.isSafeInteger(liveDeliveryId) && liveDeliveryId > 0,
   });
 
-  const vehicleType = mission?.vehicleType || "drone";
+  const vehicleType: SupportedVehicleType | null = isSupportedVehicleType(mission?.vehicleType)
+    ? mission.vehicleType
+    : null;
   const isDrone = vehicleType === "drone";
 
   useEffect(() => {
-    if (!mission?.vehicleType) return;
-    const template = mission.vehicleType === "drone" ? DRONE_PREFLIGHT : TERRESTRIAL_PREFLIGHT;
+    if (!vehicleType) {
+      setChecks([]);
+      return;
+    }
+    const template = vehicleType === "drone" ? DRONE_PREFLIGHT : TERRESTRIAL_PREFLIGHT;
     setChecks(template.map((check) => ({ ...check, checked: false })));
-  }, [missionId, mission?.vehicleType]);
+  }, [missionId, vehicleType]);
 
   if (missionQuery.isLoading) {
     return (
@@ -125,8 +136,31 @@ export default function MissionDetailScreen() {
     );
   }
 
-  const vehicleInfo = VEHICLE_INFO[vehicleType];
+  const vehicleInfo = vehicleType ? VEHICLE_INFO[vehicleType] : null;
   const modeInfo = DELIVERY_MODE_INFO[mission.deliveryMode];
+
+  if (!vehicleType || !vehicleInfo) {
+    return (
+      <ScreenContainer edges={["top", "bottom", "left", "right"]} className="items-center justify-center px-6">
+        <View className="w-16 h-16 rounded-full bg-warning/10 border border-warning/30 items-center justify-center mb-4">
+          <Text className="text-2xl">⚠️</Text>
+        </View>
+        <Text className="text-lg font-semibold text-foreground text-center mb-2">Vehicle assignment unavailable</Text>
+        <Text className="text-sm text-muted text-center mb-2">
+          This mission cannot be accepted until DROPi provides a supported vehicle type from the server.
+        </Text>
+        <Text className="text-xs text-muted text-center mb-6">Supported types: drone, auto, van, e-bike.</Text>
+        <TouchableOpacity
+          className="bg-primary rounded-xl px-6 py-3"
+          activeOpacity={0.8}
+          onPress={() => void missionQuery.refetch()}
+        >
+          <Text className="text-white font-semibold">Retry Mission Data</Text>
+        </TouchableOpacity>
+      </ScreenContainer>
+    );
+  }
+
   const allChecked = checks.length > 0 && checks.every((c) => c.checked);
 
   const toggleCheck = (checkId: string) => {
@@ -475,7 +509,7 @@ export default function MissionDetailScreen() {
               <TouchableOpacity
                 style={{ flex: 1, backgroundColor: colors.primary + '15', borderRadius: 12, paddingVertical: 12, alignItems: 'center' }}
                 activeOpacity={0.8}
-                onPress={() => router.push({ pathname: '/pilot/broadcast', params: { deliveryId: String(mission.orderId), target: 'b2b', vehicleType: mission.vehicleType || 'drone' } } as any)}
+                onPress={() => router.push({ pathname: '/pilot/broadcast', params: { deliveryId: String(mission.orderId), target: 'b2b', vehicleType } } as any)}
               >
                 <Text style={{ color: colors.primary, fontWeight: '700' }}>📶 Broadcast Position</Text>
               </TouchableOpacity>

@@ -37,10 +37,23 @@ test("mission hooks remain stable across loading and resolved renders", () => {
 test("preflight checklist resets from the resolved mission vehicle", () => {
   const mission = missionSource();
 
-  assert.match(mission, /if \(!mission\?\.vehicleType\) return/);
-  assert.match(mission, /mission\.vehicleType === "drone" \? DRONE_PREFLIGHT : TERRESTRIAL_PREFLIGHT/);
+  assert.match(mission, /if \(!vehicleType\) \{/);
+  assert.match(mission, /setChecks\(\[\]\)/);
+  assert.match(mission, /vehicleType === "drone" \? DRONE_PREFLIGHT : TERRESTRIAL_PREFLIGHT/);
   assert.match(mission, /setChecks\(template\.map/);
   assert.match(mission, /checks\.length > 0 && checks\.every/);
+});
+
+test("mission never invents drone authority when vehicle type is missing or unsupported", () => {
+  const mission = missionSource();
+
+  assert.match(mission, /isSupportedVehicleType\(mission\?\.vehicleType\)/);
+  assert.match(mission, /Vehicle assignment unavailable/);
+  assert.match(mission, /supported vehicle type from the server/);
+  assert.doesNotMatch(mission, /mission\?\.vehicleType\s*\|\|\s*["']drone["']/);
+  assert.doesNotMatch(mission, /mission\.vehicleType\s*\|\|\s*["']drone["']/);
+  assert.doesNotMatch(mission, /vehicleType:\s*mission\.vehicleType\s*\|\|/);
+  assert.match(mission, /vehicleType \} \} as any/);
 });
 
 test("mission state transitions fail closed without a persisted B2B delivery id", () => {
