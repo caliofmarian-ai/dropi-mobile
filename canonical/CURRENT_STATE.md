@@ -26,13 +26,15 @@ Repository code/contracts remain the implementation source of truth. Canon remai
 
 ## 3. Canonical main checkpoint
 
-Audit base after dependency cleanup:
+Canonical post-audit main:
 
-`0b8f61093b48d6237013676f080cbcf0aeffad2b`
+`3eba39af8e3d6e8ab5cd052782a5bd3943eabdaa`
 
-This SHA includes the coordinated dependency-maintenance wave through Expo SDK 54.0.37.
+This SHA contains the merged 2026-09-12 canonical coverage/reconciliation audit after the coordinated dependency-maintenance wave through Expo SDK 54.0.37.
 
-The audit branch/PR may advance after this checkpoint with documentation-only reconciliation; always re-read current `main` before new implementation work.
+Audit implementation base before documentation reconciliation was `0b8f61093b48d6237013676f080cbcf0aeffad2b`.
+
+Always re-read current `main` before new implementation work; this checkpoint records the audit boundary, not permission to ignore later commits.
 
 ## 4. Product identity
 
@@ -119,11 +121,17 @@ Key state:
 
 ## 8. Audit status
 
-PR #371 is being rebuilt as the 2026-09-12 canonical coverage/reconciliation audit.
+**MERGED / VERIFIED.**
 
-The prior 2026-09-06 report is superseded because its base and several defect conclusions became stale and it contained out-of-scope sibling-project material.
+PR #371 — `AUDIT-001: canonical coverage audit and roadmap reconciliation` — merged on 2026-09-12 at `3eba39af8e3d6e8ab5cd052782a5bd3943eabdaa` with Privacy, operational regression, TypeScript and whitespace validation green.
 
-`AUDIT_TRACKING.md` is a June historical snapshot. Its `96.2%` figure must not be used as current canonical product completion.
+#286 (`AUDIT-001` Sprint 1–2 QA validation) is completed.
+
+#287 (`VERIFY-001` complete implementation coverage verification) is completed as a **coverage verification task**. Its closure means the roadmap was audited end-to-end and incomplete capabilities are traceable; it does not mean the product itself is fully implemented.
+
+The prior 2026-09-06 audit report is superseded because its base and several defect conclusions became stale and it contained out-of-scope sibling-project material.
+
+`AUDIT_TRACKING.md` remains a June historical snapshot. Its `96.2%` figure must not be used as current canonical product completion.
 
 No replacement product-completion percentage is canonical yet; use phase/capability status until the owner approves a weighting method.
 
@@ -138,11 +146,11 @@ No replacement product-completion percentage is canonical yet; use phase/capabil
 
 A broad dependency cleanup was completed before the canonical audit, including compatible Expo SDK 54 patch maintenance and several server/tooling/security-compatible updates.
 
-Npm Dependabot version-update PR generation is **temporarily frozen during audit/reorganization** to keep `main` stable. This does not change the security-update responsibility. Re-enable routine version updates in a controlled maintenance window with grouping and major-migration guards.
+Npm Dependabot version-update PR generation is **temporarily frozen after the audit boundary** to preserve a stable execution/reorganization window. This does not change the security-update responsibility. Re-enable routine version updates in a controlled maintenance window with grouping and major-migration guards after the first post-audit priority wave is established.
 
 ## 11. Next execution order
 
-After #371 is merged and audit verification is closed/re-baselined:
+Audit/reorganization is complete. Execute from fresh current-main branches in this order:
 
 1. finish Priority-A M1 truthfulness/product gaps (#362, #364, #425, #396/#426, #468);
 2. fix repository governance/identity drift (#475, #476) in parallel where it does not block product work;
