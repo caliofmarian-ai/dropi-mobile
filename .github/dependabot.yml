@@ -4,7 +4,12 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    # TEMPORARY AUDIT FREEZE — 2026-09-12
+    # Version-update PR generation is paused while the canonical coverage audit
+    # (#371 / #287) is rebuilt on a stable main. Security updates remain governed
+    # by GitHub's security-update path. Restore grouped version updates when the
+    # audit/reorganization pass is merged.
+    open-pull-requests-limit: 0
     # Expo, React and React Native runtime/native modules/tooling are
     # compatibility-coupled to the current Expo SDK line. Patch updates remain
     # eligible where appropriate, while runtime/SDK-generation jumps are
