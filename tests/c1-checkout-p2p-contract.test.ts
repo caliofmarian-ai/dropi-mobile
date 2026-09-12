@@ -15,6 +15,18 @@ test("Marketplace discovery uses live APIs and contains no product or merchant m
   assert.doesNotMatch(file, /Manila-Central/);
 });
 
+test("store detail uses the governed zone-scoped store and product APIs", () => {
+  const file = source("app/store/[id].tsx");
+  assert.match(file, /trpc\.store\.getById\.useQuery/);
+  assert.match(file, /trpc\.product\.listActive\.useQuery/);
+  assert.match(file, /storeId:/);
+  assert.match(file, /Operating zone required/);
+  assert.match(file, /Possible delivery modes/);
+  assert.doesNotMatch(file, /MOCK_PRODUCTS|MOCK_MERCHANTS/);
+  assert.doesNotMatch(file, /merchant\.rating|merchant\.isOpen|trustBadgeLabel/);
+  assert.doesNotMatch(file, /Manila-Central/);
+});
+
 test("product detail reads the governed public product and store endpoints", () => {
   const file = source("app/product/[id].tsx");
   assert.match(file, /trpc\.product\.getById\.useQuery/);
