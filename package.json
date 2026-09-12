@@ -65,7 +65,7 @@
     "express": "^4.22.1",
     "jose": "6.1.0",
     "mysql2": "^3.24.4",
-    "nativewind": "^4.2.1",
+    "nativewind": "^4.2.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
