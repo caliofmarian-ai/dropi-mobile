@@ -6,9 +6,11 @@ on:
       - main
     paths:
       - app/(tabs)/marketplace.tsx
+      - app/(tabs)/active.tsx
       - app/cart.tsx
       - app/p2p.tsx
       - app/product/[id].tsx
+      - app/store/[id].tsx
       - app/register.tsx
       - drizzle.config.ts
       - drizzle/0014_c1_p2p.sql
