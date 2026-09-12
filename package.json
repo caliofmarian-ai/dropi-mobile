@@ -39,7 +39,7 @@
     "cookie": "^2.0.1",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
-    "expo": "~54.0.29",
+    "expo": "~54.0.37",
     "expo-audio": "~1.1.1",
     "expo-build-properties": "^1.0.10",
     "expo-constants": "~18.0.14",
