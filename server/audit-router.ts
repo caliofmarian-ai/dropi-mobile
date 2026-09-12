@@ -8,7 +8,11 @@ import { getDb } from "./db";
 const auditChannelSchema = z.enum(["C1", "C2", "C3", "ADMIN"]);
 const severitySchema = z.enum(["info", "warning", "critical"]);
 
-const auditFiltersSchema = z.object({
+// Keep the composable object schema separate from the cross-field date-range
+// refinement. Zod 4.6 intentionally rejects .pick() on refined object schemas,
+// while getStats only needs the channel/from/to shape. Full list/export inputs
+// still retain the authoritative from <= to validation below.
+const auditFiltersBaseSchema = z.object({
   channel: auditChannelSchema,
   userId: z.number().int().positive().optional(),
   action: z.string().trim().min(1).max(255).optional(),
@@ -18,10 +22,22 @@ const auditFiltersSchema = z.object({
   resourceId: z.string().trim().min(1).max(100).optional(),
   from: z.coerce.date().optional(),
   to: z.coerce.date().optional(),
-}).refine((value) => !value.from || !value.to || value.from <= value.to, {
-  message: "Audit start date must not be after end date.",
-  path: ["from"],
 });
+
+const auditFiltersSchema = auditFiltersBaseSchema.refine(
+  (value) => !value.from || !value.to || value.from <= value.to,
+  {
+    message: "Audit start date must not be after end date.",
+    path: ["from"],
+  },
+);
+
+const auditStatsSchema = auditFiltersBaseSchema
+  .pick({ channel: true, from: true, to: true })
+  .refine((value) => !value.from || !value.to || value.from <= value.to, {
+    message: "Audit start date must not be after end date.",
+    path: ["from"],
+  });
 
 type AuditFilters = z.infer<typeof auditFiltersSchema>;
 type AuditRow = typeof auditLogs.$inferSelect;
@@ -163,7 +179,7 @@ export const auditRouter = router({
     }),
 
   getStats: auditInvestigatorProcedure
-    .input(auditFiltersSchema.pick({ channel: true, from: true, to: true }))
+    .input(auditStatsSchema)
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) return { total: 0, warningCount: 0, criticalCount: 0 };
