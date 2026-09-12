@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useDropiAuth } from "@/lib/auth-context";
+import { DELIVERY_MODE_INFO } from "@/lib/marketplace-data";
 import { trpc } from "@/lib/trpc";
 import { MARKETPLACE_CATEGORY_POLICIES } from "@/shared/marketplace-policy";
 
@@ -41,12 +42,23 @@ function ProductCard({ product, onPress }: { product: MarketplaceProduct; onPres
         </View>
       </View>
       {modes.length > 0 && (
-        <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8 }}>
-          {modes.map((mode) => (
-            <View key={mode} style={{ backgroundColor: colors.background, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4, marginRight: 6, marginTop: 4 }}>
-              <Text style={{ fontSize: 10, color: colors.muted }}>{mode}</Text>
-            </View>
-          ))}
+        <View style={{ marginTop: 10 }}>
+          <Text style={{ fontSize: 10, color: colors.muted, fontWeight: "600" }}>Possible delivery modes</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 4 }}>
+            {modes.map((mode) => {
+              const modeInfo = DELIVERY_MODE_INFO[mode as keyof typeof DELIVERY_MODE_INFO];
+              return (
+                <View key={mode} style={{ backgroundColor: colors.background, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4, marginRight: 6, marginTop: 4 }}>
+                  <Text style={{ fontSize: 10, color: colors.muted }}>
+                    {modeInfo ? `${modeInfo.icon} ${modeInfo.label}` : mode}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+          <Text style={{ fontSize: 9, color: colors.muted, marginTop: 6 }}>
+            Final delivery method is confirmed only after DROPi validates operational eligibility.
+          </Text>
         </View>
       )}
     </TouchableOpacity>
