@@ -17,6 +17,7 @@ if (Platform.OS !== "web") {
 }
 
 export type PilotTrackingTarget = "order" | "b2b";
+export type PilotBroadcastVehicleType = "drone" | "auto" | "van" | "ebike";
 
 export interface BroadcastState {
   isBroadcasting: boolean;
@@ -30,7 +31,7 @@ export interface BroadcastState {
 interface UsePilotBroadcastingOptions {
   deliveryId: number;
   target?: PilotTrackingTarget;
-  vehicleType?: string;
+  vehicleType: PilotBroadcastVehicleType | null;
   dropoffLat?: number;
   dropoffLng?: number;
 }
@@ -40,7 +41,7 @@ const TOKEN_KEY = "@dropi_token";
 export function usePilotBroadcasting({
   deliveryId,
   target = "b2b",
-  vehicleType = "drone",
+  vehicleType,
   dropoffLat,
   dropoffLng,
 }: UsePilotBroadcastingOptions) {
@@ -67,6 +68,10 @@ export function usePilotBroadcasting({
   const startBroadcasting = useCallback(async () => {
     if (!Number.isSafeInteger(deliveryId) || deliveryId <= 0) {
       setState((s) => ({ ...s, error: "A valid assigned delivery is required for broadcasting." }));
+      return;
+    }
+    if (!vehicleType) {
+      setState((s) => ({ ...s, error: "An authoritative vehicle assignment is required for broadcasting." }));
       return;
     }
     if (Platform.OS === "web") {
