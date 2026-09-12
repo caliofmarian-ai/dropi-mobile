@@ -27,11 +27,13 @@ test("store detail uses the governed zone-scoped store and product APIs", () => 
   assert.doesNotMatch(file, /Manila-Central/);
 });
 
-test("product detail reads the governed public product and store endpoints", () => {
+test("product detail reads governed APIs and links to the live store route", () => {
   const file = source("app/product/[id].tsx");
   assert.match(file, /trpc\.product\.getById\.useQuery/);
   assert.match(file, /trpc\.store\.getById\.useQuery/);
   assert.match(file, /addMarketplaceCartItem/);
+  assert.match(file, /router\.push\(`\/store\/\$\{product\.storeId\}`/);
+  assert.match(file, /View store/);
   assert.doesNotMatch(file, /MOCK_PRODUCTS|MOCK_MERCHANTS|estimatedCost|estimatedTime/);
 });
 
