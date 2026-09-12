@@ -1,3 +1,17 @@
+# HISTORICAL SNAPSHOT — superseded as active UI authority
+
+> This file is preserved for provenance. It reflects an earlier drone/pilot-centric interface design and must **not** be used as the active product-level UI authority.
+>
+> Current product/UI authority:
+> - `canonical/DELIVERY_MULTIMODAL.md`
+> - root `design.md`
+> - `canonical/AUTHORIZED_TOOLING.md`
+> - Figma `DROPi Multimodal Delivery — UI/UX System` (`lfrk6LCDrRNdQZhICIs3R0`)
+>
+> Mission Radar, pre-flight and in-flight concepts remain valid only for the relevant delivery-partner/drone leg where current runtime contracts support them. They do not define the whole DROPi product.
+
+---
+
 # DROPi Mobile App — Interface Design
 
 ## Brand Colors
