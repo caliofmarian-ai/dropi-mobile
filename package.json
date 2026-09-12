@@ -40,7 +40,7 @@
     "dotenv": "^16.6.1",
     "drizzle-orm": "^0.45.2",
     "expo": "~54.0.29",
-    "expo-audio": "~1.1.0",
+    "expo-audio": "~1.1.1",
     "expo-build-properties": "^1.0.10",
     "expo-constants": "~18.0.12",
     "expo-dev-client": "~6.0.21",
