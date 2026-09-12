@@ -16,11 +16,15 @@ Registru central pentru deciziile de proiect, cu trimitere la sursele canonice.
 8. Canva este companion pentru prezentări, review, store/static marketing și comunicare vizuală; nu poate fabrica product/release claims.
 9. Runway este autorizat, dar rămâne `HOLD` până în faza finală de producție: **NO RUNWAY CREDIT CONSUMPTION BEFORE THE FINAL PRODUCTION PHASE**, exceptând o nouă instrucțiune explicită a Project Owner-ului.
 10. Tooling/design pentru `dropi-mobile` nu importă automat source truth, PR/issue state sau UI din produse sibling precum `DROPi-Tycoon`.
+11. Modelul de produs DROPi este **livrare multimodală**, nu drone-only și nu generic courier: dronă + auto + van + e-bike + livrare multimodală/staged, cu DronePort / vehicle depot / transfer hub, handoff și fallback conform `canonical/DELIVERY_MULTIMODAL.md`.
+12. Companionul Figma activ pentru produs este `DROPi Multimodal Delivery — UI/UX System` (`lfrk6LCDrRNdQZhICIs3R0`). Direcția Figma inițială generică `DROPi Mobile — UI/UX Design System` este SUPERSEDED ca autoritate de design activă și nu trebuie folosită fără reconciliere cu canonul multimodal.
+13. UI/UX nu poate prezenta badge-urile de mod de livrare drept garanție, Marketplace drept autoritate de validare/start livrare, clientul drept selector al pilotului sau Mission Radar drept reprezentarea completă a produsului.
 
 ## Surse ale deciziilor
 
 - `canonical/SESSION_HANDOVER.md` (secțiunea „Decizii Importante Luate”)
 - `canonical/AI_DEVELOPMENT_HANDOVER_CANON.md`
+- `canonical/DELIVERY_MULTIMODAL.md`
 - `canonical/AUTHORIZED_TOOLING.md`
 
 ## Reguli de actualizare
