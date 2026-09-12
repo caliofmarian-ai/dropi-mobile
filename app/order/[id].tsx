@@ -31,6 +31,21 @@ const RECEPTION_LABELS: Record<string, string> = {
   droneport: "🏗️ DronePort Pickup",
 };
 
+function getActiveDeliveryMessage(vehicleType: string | null | undefined): string {
+  switch (vehicleType) {
+    case "drone":
+      return "Drone leg in progress";
+    case "auto":
+      return "Car leg in progress";
+    case "van":
+      return "Van leg in progress";
+    case "ebike":
+      return "E-bike leg in progress";
+    default:
+      return "Delivery in progress";
+  }
+}
+
 export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -91,8 +106,7 @@ export default function OrderDetailScreen() {
       [
         { text: "Keep Order", style: "cancel" },
         {
-          text: "Cancel Order",
-          style: "destructive",
+          text: "Cancel Order", style: "destructive",
           onPress: async () => {
             try {
               await transitionOrder.mutateAsync({
@@ -137,10 +151,7 @@ export default function OrderDetailScreen() {
                 Live — ETA {order.estimatedTime} min
               </Text>
               <Text className="text-primary/70 text-xs mt-0.5">
-                {order.vehicleType === "drone" ? "Drone flying to your location" :
-                 order.vehicleType === "auto" ? "Car on its way to you" :
-                 order.vehicleType === "van" ? "Van on its way to you" :
-                 "E-bike courier on the way"}
+                {getActiveDeliveryMessage(order.vehicleType)}
               </Text>
             </View>
           )}
@@ -149,7 +160,7 @@ export default function OrderDetailScreen() {
           <Text className="text-sm text-muted mt-1">Ridicare de la: {order.pickupAddress}</Text>
         </View>
 
-        {/* Delivery Mode Card */}
+        {/* Delivery Route Card */}
         <View className="mx-4 mb-4">
           <View
             style={{
@@ -161,8 +172,13 @@ export default function OrderDetailScreen() {
             }}
           >
             <Text style={{ fontSize: 14, fontWeight: "700", color: colors.foreground, marginBottom: 10 }}>
-              Delivery Mode
+              Delivery Route
             </Text>
+
+            <View style={{ alignSelf: "flex-start", backgroundColor: modeInfo.color + "18", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginBottom: 8 }}>
+              <Text style={{ fontSize: 10, color: modeInfo.color, fontWeight: "700" }}>PRIMARY</Text>
+            </View>
+
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Text style={{ fontSize: 28 }}>{modeInfo.icon}</Text>
               <View style={{ marginLeft: 12, flex: 1 }}>
@@ -173,10 +189,19 @@ export default function OrderDetailScreen() {
               </View>
             </View>
 
+            {order.deliveryMode === "multimodal" && (
+              <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: colors.border }}>
+                <Text style={{ fontSize: 11, color: modeInfo.color, fontWeight: "700" }}>MULTIMODAL / STAGED</Text>
+                <Text style={{ fontSize: 11, color: colors.muted, marginTop: 4, lineHeight: 16 }}>
+                  This delivery may use a DronePort or transfer hub between transport legs. Actual operational legs appear only when persisted evidence exists.
+                </Text>
+              </View>
+            )}
+
             {/* Vehicle info */}
             {order.vehicleId && (
               <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: colors.border }}>
-                <Text style={{ fontSize: 16 }}>{VEHICLE_ICONS[order.vehicleType || "drone"]}</Text>
+                <Text style={{ fontSize: 16 }}>{VEHICLE_ICONS[order.vehicleType || ""] || "🚚"}</Text>
                 <Text style={{ fontSize: 12, color: colors.foreground, fontWeight: "600", marginLeft: 8 }}>
                   Vehicle: {order.vehicleId}
                 </Text>
@@ -191,8 +216,8 @@ export default function OrderDetailScreen() {
             {/* Fallback mode */}
             {fallbackInfo && (
               <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: colors.border }}>
-                <Text style={{ fontSize: 11, color: colors.muted, fontWeight: "600" }}>
-                  FALLBACK (if primary method fails):
+                <Text style={{ fontSize: 11, color: colors.muted, fontWeight: "700" }}>
+                  FALLBACK
                 </Text>
                 <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
                   <Text style={{ fontSize: 14 }}>{fallbackInfo.icon}</Text>
@@ -200,6 +225,9 @@ export default function OrderDetailScreen() {
                     {fallbackInfo.label}
                   </Text>
                 </View>
+                <Text style={{ fontSize: 10, color: colors.muted, marginTop: 4 }}>
+                  Used only if platform orchestration switches from the primary method.
+                </Text>
               </View>
             )}
 
