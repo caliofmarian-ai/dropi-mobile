@@ -14,7 +14,7 @@
 
 **Sursă audit:** [`DROPI_STATUS_REPORT_2026-06-30.md`](./DROPI_STATUS_REPORT_2026-06-30.md)  
 **Data audit:** 30 Iunie 2026  
-**Stadiu la data auditului:** 252/262 task-uri completate (96.2%) — **valoare istorică**  
+**Stadiu la data auditului:** 252/262 task-uri completate (96.2%) — **valoare istorică**
 **Ultima actualizare tracking istoric:** 2 Iulie 2026
 
 ---
@@ -62,7 +62,7 @@ Bifează `[x]` numai când reconciliezi în mod explicit un item istoric cu issu
 
 - [ ] **Real-time WebSocket** — live data pe toate ecranele relevante (parțial implementat)  
   _Fișiere relevante: WebSocket/tracking hooks_
-- [ ] **Biometric authentication** — Face ID / Fingerprint  
+- [ ] **Biometric authentication** — Face ID / Fingerprint
   _Status actual trebuie citit din owner decision/roadmap, nu din acest snapshot._
 - [ ] **Offline mode** — data sync cu AsyncStorage + request queue  
   _Status actual trebuie citit din #280 / roadmap._
