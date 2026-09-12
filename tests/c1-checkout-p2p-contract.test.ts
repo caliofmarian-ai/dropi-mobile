@@ -37,6 +37,18 @@ test("product detail reads governed APIs and links to the live store route", () 
   assert.doesNotMatch(file, /MOCK_PRODUCTS|MOCK_MERCHANTS|estimatedCost|estimatedTime/);
 });
 
+test("Active tab derives delivery work from governed C1 and B2B queries", () => {
+  const file = source("app/(tabs)/active.tsx");
+  assert.match(file, /trpc\.operations\.myMarketplacePilotOrders\.useQuery/);
+  assert.match(file, /trpc\.operations\.myPilotMissions\.useQuery/);
+  assert.match(file, /mission\.status !== "available"/);
+  assert.match(file, /router\.push\(`\/order\/\$\{item\.id\}`/);
+  assert.match(file, /router\.push\(`\/mission\/\$\{mission\.id\}`/);
+  assert.match(file, /pathname: "\/pilot\/live-tracking"/);
+  assert.doesNotMatch(file, /hasActiveMission|DRN-007|Alt: 45m|Speed: 32 km\/h|Bat: 74%/);
+  assert.doesNotMatch(file, /Alert\.alert\(/);
+});
+
 test("cart reuses canonical operations.placeOrder and has no simulated checkout", () => {
   const file = source("app/cart.tsx");
   assert.match(file, /trpc\.operations\.placeOrder\.useMutation/);
