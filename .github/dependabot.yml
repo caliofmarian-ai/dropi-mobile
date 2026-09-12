@@ -5,14 +5,18 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-    # Expo and React Native native modules are compatibility-coupled to the
-    # current Expo SDK line. Patch updates remain eligible, while SDK-generation
-    # jumps are handled as one reviewed migration with Android validation.
+    # Expo and React Native native modules/tooling are compatibility-coupled to
+    # the current Expo SDK line. Patch updates remain eligible, while
+    # SDK-generation jumps are handled as one reviewed migration with Android
+    # build/runtime validation.
     ignore:
       - dependency-name: "expo"
         update-types:
           - "version-update:semver-major"
       - dependency-name: "expo-*"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "eslint-config-expo"
         update-types:
           - "version-update:semver-major"
       - dependency-name: "react-native-safe-area-context"
