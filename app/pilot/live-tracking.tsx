@@ -1,14 +1,12 @@
 /**
  * Live Delivery Tracking Screen — Sprint 7
  *
- * Shows a real-time map with the pilot's position during an active delivery.
- * Connects to /ws/tracking as a subscriber and displays:
- * - Pilot marker on map (updates in real-time) — native only
- * - Speed, heading, altitude info panel
- * - Delivery status indicators
- * - Connection status
+ * Current runtime presents authenticated delivery telemetry in a web-safe
+ * diagnostic view. Issue #396 tracks the map-first operational experience that
+ * will add persisted mission points and governed fallback-network context.
  *
- * NOTE: react-native-maps is native-only. On web, we show a text-based position display.
+ * This screen never substitutes a transport type, position, route, or live
+ * state when the tracking source does not provide it.
  */
 import { useState, useEffect } from "react";
 import { Text, View, Pressable, Platform, StyleSheet } from "react-native";
@@ -89,12 +87,19 @@ export default function LiveTrackingScreen() {
         </View>
       </View>
 
-      {/* Position Display (web-safe — no react-native-maps) */}
+      {/* Current telemetry display. #396 replaces this with the map-first operational view. */}
       <View style={{ flex: 1, backgroundColor: colors.surface, justifyContent: "center", alignItems: "center", padding: 20 }}>
         {position ? (
           <View style={{ alignItems: "center", gap: 16 }}>
-            <Text style={{ fontSize: 56 }}>🛸</Text>
-            <Text className="text-lg font-bold text-foreground">Pilot in Flight</Text>
+            <Text style={{ fontSize: 56 }}>📍</Text>
+            <Text className="text-lg font-bold text-foreground">
+              {connected ? "Active Delivery Position" : "Last Known Delivery Position"}
+            </Text>
+            {!connected && (
+              <Text style={{ fontSize: 11, color: colors.error, textAlign: "center" }}>
+                Offline — this is the last received position, not live telemetry.
+              </Text>
+            )}
 
             {/* Position card */}
             <View style={{ backgroundColor: colors.background, borderRadius: 16, padding: 16, width: "100%", maxWidth: 320, borderWidth: 1, borderColor: colors.border }}>
@@ -127,7 +132,7 @@ export default function LiveTrackingScreen() {
               <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                 <View>
                   <Text style={{ fontSize: 10, color: colors.muted }}>VEHICLE</Text>
-                  <Text style={{ fontSize: 12, fontWeight: "600", color: colors.foreground }}>{position.vehicleType || "Drone"}</Text>
+                  <Text style={{ fontSize: 12, fontWeight: "600", color: colors.foreground }}>{position.vehicleType || "Unavailable"}</Text>
                 </View>
                 <View style={{ alignItems: "flex-end" }}>
                   <Text style={{ fontSize: 10, color: colors.muted }}>LAST UPDATE</Text>
@@ -136,9 +141,9 @@ export default function LiveTrackingScreen() {
               </View>
             </View>
 
-            {/* Trail info */}
+            {/* Tracking sample count is diagnostic only. */}
             <Text style={{ fontSize: 11, color: colors.muted }}>
-              {trail.length} position updates received • Map view on native device
+              {trail.length} position updates received
             </Text>
           </View>
         ) : (
