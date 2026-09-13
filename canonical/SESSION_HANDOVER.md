@@ -446,7 +446,7 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 ## 2. Starea Curentă a Proiectului
 
 ### ✅ Funcții terminate
-- Planificarea canonică Passenger Mobility pentru România și Filipine, corpusul juridic versionat, matricea de trasabilitate, registrul de blocaje, specificația UX și backlogul #460/#453–#459 — documentație only, runtime not live ✅
+- Planificarea canonică Passenger Mobility pentru România și Filipine, corpusul juridic versionat, matricea de trasabilitate, registrul de blocaje, specificația UX și backlogul #460/#453–#459 — documentație only, runtime not live, publicată pentru review în PR #478 ✅
 - Implementare sistem AI Agent Orchestrator
 - Configurare EAS Build pentru Android APK + iOS (`eas.json`) — **fixat**
 - Documente canonice de bază: `AI_DEVELOPMENT_HANDOVER_CANON.md`, `AI_AGENT_SYSTEM.md`, `DELIVERY_MULTIMODAL.md`
@@ -462,7 +462,7 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 - **Admin Provisioning Script** — `scripts/provision-admin.ts`, PR curent (necesită merge + execuție Railway one-time)
 
 ### 🔄 În progres
-- Branch curent: `planning/passenger-mobility-c1` — documentația Passenger Mobility și corpusul juridic sunt validate local și urmează review/PR; implementarea și autorizările reale rămân blocate separat.
+- Branch curent: `planning/passenger-mobility-c1` — documentația Passenger Mobility și corpusul juridic sunt validate și publicate în PR #478; review-ul, implementarea și autorizările reale rămân blocate separat.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -485,7 +485,7 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 
 **Pasul imediat următor:**
 
-1. Review și PR pentru branch-ul `planning/passenger-mobility-c1`; nu trata corpusul local drept aprobare juridică.
+1. Review și aprobare pentru [PR #478](https://github.com/caliofmarian-ai/dropi-mobile/pull/478), branch `planning/passenger-mobility-c1`; nu trata corpusul versionat drept aprobare juridică.
 2. Un responsabil Legal/Compliance și consilieri locali verifică fiecare sursă, obțin versiunile primare lipsă și închid P0-urile din `docs/legal/LEGAL_GAPS_AND_BLOCKERS.md` pentru primul scope ales.
 3. Project Owner alege orașul/municipiul exact pentru Zone 0 Filipine și modelul de entitate: DROPi/local Zone Operator/TNC.
 4. Pornește [PM-001 #453](https://github.com/caliofmarian-ai/dropi-mobile/issues/453) și, pentru triciclete, [PM-002 #454](https://github.com/caliofmarian-ai/dropi-mobile/issues/454); obține confirmările scrise de la consilier juridic/regulator/asigurător.
@@ -550,7 +550,7 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
-| `planning/passenger-mobility-c1` | Canon, legal research, UX și backlog pentru Passenger Mobility România/Filipine | Activ, documentație gata pentru PR |
+| `planning/passenger-mobility-c1` | Canon, legal research, UX și backlog pentru Passenger Mobility România/Filipine | Activ, PR #478 deschis; necesită review |
 | `copilot/read-only-verification` | Fix login crypto + Gmail SMTP_USER + conflict resolution pentru PR #32 | Activ, necesită merge |
 | `copilot/copilotdatabase-migration-audit` | Fix OAUTH_SERVER_URL opțional (PR #31) | Merged în `main` |
 | `copilot/real-device-tests-auth-issues` | RCA auth/reset real-device + fix minim email/reset backend | Merged în `main` (PR #28) |
