@@ -1,7 +1,7 @@
 # DROPi — Current Canonical Operational State
 
 > **STATUS: CANONIC CURRENT CHECKPOINT**
-> Updated: 2026-09-12
+> Updated: 2026-09-13
 > Repository: `caliofmarian-ai/dropi-mobile`
 >
 > This file is the compact current operational checkpoint. It does not erase historical handover material. When an older handover/status note conflicts with current repository state, current `main`, active canon and this checkpoint take precedence for continuation until the historical handover is compacted/reconciled.
@@ -26,13 +26,13 @@ Repository code/contracts remain the implementation source of truth. Canon remai
 
 ## 3. Canonical main checkpoint
 
-Canonical post-audit main:
+Cooperative Hub owner-approval checkpoint:
 
-`3eba39af8e3d6e8ab5cd052782a5bd3943eabdaa`
+`f086f3dfad735c1d4cc146a39ec72ae1c95ce7b6`
 
-This SHA contains the merged 2026-09-12 canonical coverage/reconciliation audit after the coordinated dependency-maintenance wave through Expo SDK 54.0.37.
+This SHA contains merged PR #479, through which the Product Owner accepted DROPi Cooperative Hub as a canonical product direction for small producers in C1 Marketplace. The service remains planning-only and implementation-gated.
 
-Audit implementation base before documentation reconciliation was `0b8f61093b48d6237013676f080cbcf0aeffad2b`.
+The prior 2026-09-12 canonical audit boundary was `3eba39af8e3d6e8ab5cd052782a5bd3943eabdaa`. Audit implementation base before documentation reconciliation was `0b8f61093b48d6237013676f080cbcf0aeffad2b`.
 
 Always re-read current `main` before new implementation work; this checkpoint records the audit boundary, not permission to ignore later commits.
 
@@ -71,6 +71,7 @@ Key state:
 - Data Persistence & Sync — partial; offline strategy and some persisted preferences/addresses remain open;
 - Order Management — partial/in-progress;
 - Marketplace C1 — **reconciled on 2026-09-12 from `completed` back to `in-progress`** because #362/#364 and current source prove remaining canonical gaps;
+- Cooperative Hub (C1 extension) — **CANONICAL PRODUCT DIRECTION / PLANNING ONLY / NOT IMPLEMENTED**; owner-approved through PR #479, with legal, accounting, PSP, seller-of-record, product-category and organization/RBAC gates still required before implementation;
 - COS/C2 — ready/planned; user-facing governed-unavailable scaffolding is not operational completion;
 - EOC/C3 — ready/planned; user-facing governed-unavailable scaffolding is not operational completion;
 - Admin Operations — partial/in-progress;
@@ -118,6 +119,7 @@ Key state:
 4. Historical drone-only product wording is historical/reference material, not current product identity.
 5. Owner/device acceptance is not inferred from source or CI when an issue explicitly requires it.
 6. Repository metadata/public claims must follow current multimodal canon and must not overstate future C2/C3/Payments/Physical capabilities.
+7. DROPi Cooperative Hub is an approved product direction, not a currently implemented formation, payment, B2B or export service; its capabilities must remain `PLANNING ONLY / NOT IMPLEMENTED` until the gates in `canonical/DROPI_COOPERATIVE_HUB.md` are satisfied.
 
 ## 8. Audit status
 
@@ -159,6 +161,8 @@ Audit/reorganization is complete. Execute from fresh current-main branches in th
 5. progress M3 eligibility/routing and AI operational embedding;
 6. progress M4/M5 real fleet/DronePort/physical/operational stack;
 7. rebuild/promote current Public Front only from evidence-backed capabilities.
+
+DROPi Cooperative Hub may now be decomposed into research, validation and planning issues. It does not enter implementation execution until its remaining professional, commercial, payment, category and architecture gates are satisfied and the Product Owner schedules the implementation slice.
 
 ## 12. Session close rule
 
