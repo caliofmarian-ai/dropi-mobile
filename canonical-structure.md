@@ -1,5 +1,18 @@
 # DROPi Canonical App Structure Reference
 
+**Version:** 1.1.0
+**Updated:** 2026-09-12
+
+## Channels versus services
+
+Channels describe the operating context and governance model. Services describe what is transported. A new service does not automatically create a new channel.
+
+- `parcel_delivery` remains available according to the existing channel rules.
+- `passenger_mobility` is planned as a distinct service vertical inside C1.
+- C2 Passenger Mobility is reserved and disabled pending a separate contracted-operations decision.
+- C3 Passenger Mobility is prohibited; emergency, ambulance, patient, and evacuation transport require a separate legal and product system.
+- No C4/taxi channel is created.
+
 ## 4 Operational Channels
 
 ### C1: MARKETPLACE (9 agents)
@@ -12,6 +25,13 @@
 7. Fraud Detection - anomaly detection, flagging
 8. Performance Monitor - KPIs, SLA tracking
 9. Incident Responder - issue resolution
+
+#### C1 service verticals
+
+1. **Parcel Delivery** — existing multimodal cargo domain.
+2. **Passenger Mobility** — planned point-to-point passenger rides for approved jurisdictions, zones, partners, operators, and vehicles.
+
+The 9 C1 roles remain unchanged. Any eligible human C1 participant may use the personal passenger view; Delivery Partners may also apply for service-specific ride-provider capabilities. Passenger participation is not another role, and a ride-provider capability never follows automatically from delivery verification.
 
 ### C2: COS - Contracted Operations System (8 agents)
 1. Operations Manager - oversee operations, approve contracts

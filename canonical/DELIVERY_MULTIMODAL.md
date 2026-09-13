@@ -1,5 +1,15 @@
 # DROPi Canonical Reference: Multimodal Delivery & Badge System
 
+**Version:** 1.1.0
+**Status:** ACTIVE CANON
+**Updated:** 2026-09-12
+
+## Scope Boundary
+
+This document governs **parcel/cargo delivery only**. It does not authorize transport of people, and a delivery badge, driving licence, vehicle record, pilot profile, or global verification state MUST NOT be interpreted as passenger-service eligibility.
+
+Passenger transport uses the separate C1 Passenger Mobility domain and service-specific authorization defined in `canonical/PASSENGER_MOBILITY.md`. Delivery and Passenger Mobility may share an account and platform primitives, but they retain separate capabilities, lifecycle records, pricing, safety controls, and legal evidence.
+
 ## Delivery Modes (NOT drone-only)
 - 🚁 Dronă (aerial)
 - 🚗 Auto (car)
