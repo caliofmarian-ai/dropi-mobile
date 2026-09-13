@@ -1,6 +1,6 @@
 # DROPi Canonical Reference: Passenger Mobility
 
-**Version:** 1.0.0
+**Version:** 1.0.1
 **Status:** PLANNING CANON — NOT LIVE
 **Decision date:** 2026-09-12
 **Initial jurisdictions:** Philippines (Zone 0) and Romania
@@ -22,7 +22,7 @@ Passenger Mobility is a **service vertical inside C1**, not a new operational ch
 
 | Context | Canonical status | Rule |
 |---|---|---|
-| C1 Marketplace | Planned, launch scope | A dedicated “Request a ride” surface may be enabled per jurisdiction and zone. |
+| C1 Marketplace | Planned, persistent catalog presence, staged activation | A dedicated “Request a ride” surface is visible as locked before authorization and becomes operational only per approved jurisdiction, zone, vehicle class, operator, and cohort. |
 | C2 Contracted Operations | Reserved, disabled | Contracted passenger transport requires its own future business and legal decision; C1 authorization does not carry over. |
 | C3 Emergency Operations | Prohibited for this service | Passenger Mobility must not be presented as ambulance, patient transport, evacuation, or emergency response. |
 | Admin | Required control plane | Compliance, audit, incident, pricing, jurisdiction, and capability controls live here. |
@@ -31,12 +31,32 @@ No C4/taxi channel is created. Channels describe operating contexts; `delivery` 
 
 ### 2.2 Product surfaces
 
-The same DROPi human account and application shell are reused. The customer-facing C1 service selector exposes two explicit entry points:
+The same DROPi human account and application shell are reused. Once the Passenger Mobility shell is implemented, the customer-facing C1 service selector exposes two explicit entry points:
 
 1. **Send a package** — existing delivery domain.
-2. **Request a ride** — Passenger Mobility domain, shown only where the jurisdiction and zone are enabled.
+2. **Request a ride** — Passenger Mobility domain, shown with its truthful availability state even before the jurisdiction and zone are enabled.
+
+Passenger Mobility MUST NOT disappear merely because authorization is incomplete. In an unauthorized market or stage, the entry point opens a read-only status surface such as **“Authorization in progress — rides cannot be requested yet”**. It MUST NOT collect pickup, destination, live location, passenger details, or payment information and MUST NOT quote, match, dispatch, or imply a launch date.
 
 Any eligible, non-suspended human C1 participant—including a Customer, Merchant, or Delivery Partner using the personal passenger view—may request a ride. Passenger participation is a service context, not another mutually exclusive `dropiRole`. Merchant or partner status does not change passenger rights, price, safety treatment, or driver eligibility. A Delivery Partner may apply to provide Passenger Mobility and may separately request a personal ride without creating a second human account.
+
+### 2.3 Staged exposure and activation
+
+Catalog presence and operational authority are independent. The canonical exposure states are:
+
+`catalog_locked → onboarding_open → pilot_only → public_live`
+
+Any operational state may move to `temporarily_suspended`; recovery returns only to a still-authorized earlier state. State is scoped independently by jurisdiction, zone, vehicle class, platform/operator, and partner cohort.
+
+| Exposure state | Customer surface | Partner surface | Permitted operation |
+|---|---|---|---|
+| `catalog_locked` | Ride card visible; authorization/inavailability explanation | Ride capability visible; application closed or informational | No document intake, quote, request, offer, match, or ride |
+| `onboarding_open` | Ride card remains locked | Approved applicant groups may prepare and submit required evidence | No customer booking or live ride |
+| `pilot_only` | Locked for the general public; invited pilot users see explicit pilot terms | Only approved pilot partners can enter Rides mode | Controlled rides inside the approved pack/zone/cohort |
+| `public_live` | Quote and booking enabled in approved scope | Eligible partners may receive ride offers | Public operation inside the approved scope |
+| `temporarily_suspended` | Card remains visible with truthful suspension copy | No new online/accept/start action; support remains available | In-progress safety/support handling only |
+
+The application may be built and released through these stages without omitting the service and without prematurely enabling regulated activity. A local legal requirement may force suppression of promotional copy, but it does not permit hidden operational enablement.
 
 ## 3. Non-negotiable separation from delivery
 
@@ -250,7 +270,7 @@ Existing identity, session, notification, payment-provider integration, secure s
 
 ## 14. Launch gates
 
-Passenger Mobility remains hidden and cannot accept real rides until all applicable gates are approved:
+Passenger Mobility remains discoverable but operationally locked and cannot accept real rides until all applicable gates are approved. Shipping a catalog card or read-only authorization-status screen is not a launch and grants no operational authority:
 
 1. exact legal entities and contracting model approved by local counsel;
 2. exact launch geography selected, including the Zone 0 LGU;

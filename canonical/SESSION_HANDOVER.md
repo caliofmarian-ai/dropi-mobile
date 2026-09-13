@@ -36,6 +36,8 @@
 **Decizii produse:**
 
 - Passenger Mobility este un serviciu distinct în C1, nu un canal nou și nu o extensie a comenzilor/livrărilor de colete.
+- După implementarea shell-ului, Passenger Mobility rămâne vizibil ca ramură C1 chiar înainte de autorizare; starea implicită este `catalog_locked`, cu mesaj explicit „autorizare în curs” și fără colectare de locație, traseu, pasager sau plată.
+- Activarea este etapizată: `catalog_locked → onboarding_open → pilot_only → public_live`; onboardingul, cererile, ofertele și pornirea cursei au porți independente și fail-closed.
 - Același cont păstrează rolurile existente; autorizarea pentru `parcel_ground`, `parcel_drone`, `passenger_car` și `passenger_tricycle` este separată și scoped la persoană, operator, vehicul, jurisdiction pack, zonă și timp.
 - `users.isVerified` și un permis de conducere aprobat nu pot conferi dreptul de a transporta persoane.
 - C2 Passenger Mobility este rezervat/dezactivat. C3 exclude taxi, ride-hailing, transport medical/pacient și urgență.
@@ -509,6 +511,7 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 | 2026-09-12 | Passenger Mobility este serviciu separat în C1; nu se creează C4, nu se reutilizează comenzile/livrările de colete și nu se extinde automat în C2/C3 | Canalele sunt contexte operaționale, iar transportul de persoane are lifecycle, risc, autorizare și audit distinct | Project Owner + Codex |
 | 2026-09-12 | Un singur cont poate avea capabilități de delivery și rides, dar fiecare capabilitate este autorizată separat per persoană/operator/vehicul/pack/zonă/timp; `isVerified` nu este autoritate pentru pasageri | Previne extinderea nejustificată a unei licențe/document sau a verificării globale la o activitate reglementată diferit | Project Owner + Codex |
 | 2026-09-12 | România și Filipine sunt planificate prin pack-uri juridice independente; tricicletele din Zone 0 rămân blocate până la alegerea LGU și confirmare scrisă | TNVS auto este reglementat național, iar transportul cu tricicleta depinde de franciza și regulile LGU | Project Owner + Codex |
+| 2026-09-12 | Passenger Mobility rămâne vizibil ca ramură blocată în C1 și se activează etapizat prin `catalog_locked`, `onboarding_open`, `pilot_only`, `public_live` | Produsul nu trebuie omis până la autorizare, dar simpla vizibilitate nu trebuie să permită colectare de date, booking sau operare reglementată | Project Owner + Codex |
 
 ---
 
@@ -585,9 +588,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.23.0**
+Acest document: **v1.23.1**
 Data creării: 2026-07-07
 Ultima actualizare: 2026-09-12
-Actualizat de: Codex — C1 Passenger Mobility canon, cercetare juridică România/Filipine, UX, plan tehnic și backlog #460/#453–#459; versiune incrementată la v1.23.0.
+Actualizat de: Codex — Passenger Mobility păstrat vizibil și blocat în C1, cu activare etapizată independentă pentru onboarding, pilot și public; versiune incrementată la v1.23.1.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.

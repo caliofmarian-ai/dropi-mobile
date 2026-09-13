@@ -25,6 +25,8 @@ DROPi este o platformă multi-canal pentru livrare multimodală și, în C1 unde
 
 Cele două domenii reutilizează identitatea, autentificarea și infrastructura comună, dar nu reutilizează permisiunea operațională sau sistemul de evidență. Passenger Mobility este plasat în C1; nu creează un canal nou.
 
+Prezența în catalog și dreptul de operare sunt stări independente: ramura Passenger Mobility rămâne vizibilă în C1 ca serviciu blocat, iar onboardingul, pilotul controlat și operarea publică se activează separat numai după porțile canonice de autorizare.
+
 ## 3. Straturi canonice
 
 Arhitectura urmează modelul pe straturi definit în documentația canonică (L2→L6→L4→L3→L5) și principiul:

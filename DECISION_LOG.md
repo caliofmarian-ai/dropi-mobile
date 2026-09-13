@@ -24,6 +24,7 @@ Registru central pentru deciziile de proiect, cu trimitere la sursele canonice.
 16. Prima planificare acoperă C1 Passenger Mobility în România și Filipine. C2 este rezervat și dezactivat până la o decizie separată; C3 exclude transportul alternativ, medical, de pacient sau de urgență.
 17. Orice piață funcționează printr-un `jurisdiction pack` versionat și fail-closed. Pentru triciclete în Filipine, serviciul rămâne blocat până la alegerea LGU-ului exact din Zone 0 și confirmarea scrisă a francizei, rutelor/zonei, capacității, asigurării și acceptării dispecerizării prin aplicație.
 18. Modelul juridic este hibrid per jurisdicție: DROPi Core păstrează produsul și guvernanța, iar entitatea platformei/Zone Operatorul și operatorii de transport dețin autorizațiile și contractele cerute local, validate de consilier juridic înainte de lansare.
+19. Passenger Mobility figurează permanent ca ramură distinctă în C1 după livrarea shell-ului de produs, chiar înainte de autorizare. Starea implicită este vizibilă și blocată; onboardingul, pilotul și operarea publică se deblochează etapizat și independent. Vizibilitatea nu permite colectarea datelor de cursă și nu conferă autoritate operațională.
 
 ## Surse ale deciziilor
 

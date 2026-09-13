@@ -26,14 +26,26 @@ Passenger Mobility is a service inside **C1 Marketplace**. It is not a fourth ch
 
 ### 2.1 Personal passenger navigation
 
-When Passenger Mobility is enabled for the current zone, the C1 home surface shows two equal, explicit service cards:
+Once the Passenger Mobility shell ships, the C1 home surface always shows two explicit service cards. Availability changes the action, not the existence of the Passenger Mobility branch:
 
-| Entry point | Primary action | Domain |
-|---|---|---|
-| Send a package | Create a parcel request | Existing delivery |
-| Request a ride | Create a passenger ride | Passenger Mobility |
+| Entry point | Available state | Locked state | Domain |
+|---|---|---|---|
+| Send a package | Create a parcel request | Existing delivery rules apply | Existing delivery |
+| Request a ride | Create a passenger ride | Open read-only authorization/availability status | Passenger Mobility |
 
-If the service is not enabled, the app must not imply that a ride can be ordered. A market-approved informational card may say “Rides are not available in this area” without collecting a destination or payment.
+If the service is not enabled, the card remains visible and must not imply that a ride can be ordered. It opens an informational state such as “Authorization in progress — rides cannot be requested yet” or “Available only in approved areas”. The locked flow must not request location permission or collect pickup, destination, passenger, payment, or waitlist data. It must not promise a launch date unless an approved public commitment exists.
+
+### 2.1.1 Exposure states
+
+| Internal state | Customer label | Customer action | Partner consequence |
+|---|---|---|---|
+| `catalog_locked` | Authorization in progress | View status only | Application closed or information only |
+| `onboarding_open` | Rides are being prepared | View status only | Approved groups may submit evidence |
+| `pilot_only` | Limited pilot | Invited users only | Approved pilot cohort may use Rides mode |
+| `public_live` | Rides available | Quote and request | Eligible partners may receive offers |
+| `temporarily_suspended` | Temporarily unavailable | View status/support | No new ride work; support remains reachable |
+
+Visibility state is not inferred from supply and is not an authorization flag. The server returns it from the governed jurisdiction/zone configuration.
 
 Customer, Merchant, and Delivery Partner accounts can enter this personal passenger view without changing their canonical role or creating a second account. Merchant or partner status must not change passenger terms, safety controls, pricing disclosure, or service priority. AI mirror accounts, phantom-mode sessions, and unattended agents cannot request a real ride.
 
@@ -68,9 +80,10 @@ Passenger Mobility adds restricted Admin areas for:
 ### 3.1 Entry and availability
 
 1. User selects **Request a ride**.
-2. The app checks country, jurisdiction pack, operating zone, service hours, platform status, and rough supply availability.
-3. Location permission is requested only with a clear purpose. Manual pickup entry remains available unless a local safety rule requires otherwise.
-4. If unavailable, the screen gives the specific safe reason category—outside area, service closed, no eligible class, or temporary suspension—without exposing internal compliance details.
+2. The app first checks the governed exposure state. A locked state opens only the read-only status surface and ends the transactional flow.
+3. In an operationally enabled state, the app checks country, jurisdiction pack, operating zone, service hours, platform status, and rough supply availability.
+4. Location permission is requested only with a clear purpose. Manual pickup entry remains available unless a local safety rule requires otherwise.
+5. If unavailable, the screen gives the specific safe reason category—authorization in progress, outside area, service closed, no eligible class, or temporary suspension—without exposing internal compliance details.
 
 Required copy principle: never promise “taxi anywhere”. Prefer “Rides in approved areas”.
 
@@ -171,8 +184,9 @@ The center shows each service separately:
 | Service card | Example state | Meaning |
 |---|---|---|
 | Deliveries | Active | Partner may perform eligible parcel missions |
-| Rides — car | Documents required | Passenger capability is not active |
-| Rides — tricycle | Not available in this zone | Legal/zone gate blocks application |
+| Rides — car | Authorization in progress | Service exists but ride work and, until permitted, document intake are locked |
+| Rides — car | Documents required | Onboarding is open, but passenger capability is not active |
+| Rides — tricycle | Pending local authorization | LGU legal/zone gate blocks application and ride work |
 
 An active delivery status must never produce “You are approved for rides.”
 
@@ -337,6 +351,7 @@ A kill switch must show estimated impact, require a reason, record the actor, an
 
 The design set must include:
 
+- persistent C1 ride card in `catalog_locked`, `onboarding_open`, `pilot_only`, and `temporarily_suspended` states;
 - rides not launched in this market;
 - outside approved service area;
 - service temporarily suspended;
@@ -397,14 +412,14 @@ Component inventory:
 - kill-switch confirmation;
 - restricted-data marker.
 
-All Passenger Mobility frames remain labeled **PLANNING — NOT LIVE** until the product owner authorizes design implementation and the relevant legal pack is approved.
+Operational Passenger Mobility frames remain labeled **PLANNING — NOT LIVE** until the product owner authorizes design implementation and the relevant legal pack is approved. The locked catalog/status surface is the first implementation stage and must still say clearly that booking is unavailable.
 
 ## 12. UX acceptance criteria
 
 The design is ready for implementation planning only when:
 
 1. ride and delivery entry points cannot be confused;
-2. unavailable jurisdictions fail closed without a bookable flow;
+2. Passenger Mobility remains visible in C1 while unavailable jurisdictions fail closed without a bookable flow or premature data collection;
 3. passenger count is validated at setup, match, and trip start;
 4. driver and vehicle identity are visible before boarding;
 5. safety actions are reachable from matching through aftercare;
@@ -419,7 +434,8 @@ The design is ready for implementation planning only when:
 14. restricted data never appears in general analytics or notifications;
 15. Romanian, Philippine English, long-text, screen-reader, and reduced-motion variants pass review;
 16. a full prototype covers quote-to-receipt and application-to-first-ride journeys;
-17. design review includes Product, Engineering, Compliance, Safety, Privacy, Support, Payments, and local operations.
+17. design review includes Product, Engineering, Compliance, Safety, Privacy, Support, Payments, and local operations;
+18. catalog visibility, partner onboarding, controlled pilot, and public launch can be activated independently.
 
 ## 13. Out of scope
 

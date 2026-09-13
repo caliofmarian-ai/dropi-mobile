@@ -307,12 +307,17 @@ Do not enable a payment method until its legal/fiscal path is approved:
 
 Payment success must not substitute for ride-state success. Use provider webhooks plus an outbox/reconciliation job and expose uncertain states honestly.
 
-## 11. Feature flags and kill switches
+## 11. Staged visibility, feature flags, and kill switches
 
-Start disabled at all levels:
+Separate product discovery from regulated actions. When the Passenger Mobility shell ships, `passenger_mobility_catalog` may expose the durable locked C1 card and read-only status page; it MUST NOT grant or imply authorization.
 
-- `passenger_mobility_ui`;
+Start all transactional and operational controls disabled:
+
 - `passenger_mobility_requests`;
+- `passenger_mobility_partner_onboarding`;
+- `passenger_mobility_partner_online`;
+- `passenger_mobility_offers`;
+- `passenger_mobility_ride_start`;
 - country/jurisdiction pack;
 - zone;
 - vehicle class;
@@ -321,7 +326,11 @@ Start disabled at all levels:
 - partner cohort;
 - safety-dependent functions.
 
-Enabling order is platform → approved pack → zone → operator/cohort → vehicle class → customer surface. A kill switch can stop new quotes, new requests, offers, or starts independently while preserving in-progress trip support and records.
+Persist a governed `serviceExposureState` per jurisdiction/zone/vehicle-class scope:
+
+`catalog_locked → onboarding_open → pilot_only → public_live`, with `temporarily_suspended` available from every operational state.
+
+Enabling order is locked catalog → legally permitted evidence intake → platform approval → approved pack → zone → operator/cohort → vehicle class → controlled pilot → public requests. A kill switch can stop new quotes, new requests, offers, or starts independently while preserving the visible service status, in-progress trip support, and records.
 
 No environment variable alone may bypass the persisted approved pack and capability decision.
 
@@ -340,6 +349,7 @@ No environment variable alone may bypass the persisted approved pack and capabil
 ### Phase 1 — Capability and jurisdiction foundation
 
 - schema, secure evidence, entity graph, pack versioning, requirements, capability evaluator;
+- persistent C1 Passenger Mobility card and read-only authorization-status surface, with no location, trip, passenger, payment, or waitlist collection while locked;
 - delivery `isVerified` inventory and compatibility plan;
 - Admin pack controls, two-person approval, expiry/reverification, audit events;
 - shadow evaluation and migration reporting.
@@ -462,6 +472,7 @@ Alerts must distinguish service degradation from compliance shutdown and avoid s
 A phase is not done until:
 
 - canonical and UX behavior are implemented without collapsing rides into deliveries;
+- the C1 Passenger Mobility branch remains truthfully visible while each transactional gate is independently locked or enabled;
 - authorization is server-side, capability-specific, and fail-closed;
 - migration, rollback, and data-reconciliation procedures are tested;
 - unit, integration, E2E, security, privacy, accessibility, and operational tests pass;
