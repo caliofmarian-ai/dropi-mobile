@@ -1,9 +1,205 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-09-12T00:00:00Z",
+  "generatedAt": "2026-09-13T00:00:00Z",
   "governingCanon": "canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md",
   "notice": "Repository snapshots are research evidence, not proof of current applicability or authorization. Only an approved traced requirement may inform law-dependent design, and no registry entry directly enables operations.",
   "sources": [
+    {
+      "id": "EU-REG-910-2014-CONSOLIDATED-2024-10-18",
+      "jurisdiction": "EU",
+      "serviceDomains": ["cooperative_hub"],
+      "authority": "European Union",
+      "citation": "Regulation (EU) No 910/2014, consolidated 2024-10-18",
+      "title": "Electronic identification and trust services for electronic transactions",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/eli/reg/2014/910/2024-10-18/eng",
+      "language": "en",
+      "retrievedAt": "2026-09-13",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/electronic-trust/EU-REG-910-2014-CONSOLIDATED-2024-10-18.pdf",
+        "sha256": "1fded3274b202801de22c820bed859bf27b50529faf72fdeabd0a29c32f73604",
+        "bytes": 735403,
+        "immutable": true,
+        "qualifier": "Consolidated text dated 2024-10-18; later amendments and Romanian sector-specific form rules must be checked before reliance."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_cooperative_electronic_governance_design",
+        "notes": "Electronic-effect and evidence baseline only; it does not establish that a cooperative meeting, vote, notice or resolution satisfies the selected route and statute."
+      }
+    },
+    {
+      "id": "RO-LAW-566-2004-CURRENT-PENDING",
+      "jurisdiction": "RO",
+      "serviceDomains": ["cooperative_hub"],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 566/2004 on agricultural cooperation",
+      "title": "Current consolidated agricultural-cooperation law",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocumentAfis/58004",
+      "language": "ro",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_upstream_access",
+        "immutable": true,
+        "qualifier": "The official portal returned an upstream error during the 2026-09-13 research session; indexed extracts and older copies are not a controlled current consolidation."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_agricultural_cooperative_design",
+        "notes": "Blocks approval of founder/member eligibility, degree, activities, capital/share, governance, exit and filing-field requirements."
+      }
+    },
+    {
+      "id": "RO-LAW-1-2005-CURRENT-PENDING",
+      "jurisdiction": "RO",
+      "serviceDomains": ["cooperative_hub"],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 1/2005 on the organization and functioning of cooperation",
+      "title": "Current consolidated general cooperation law",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/202368",
+      "language": "ro",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_upstream_access",
+        "immutable": true,
+        "qualifier": "The official portal returned an upstream error during the 2026-09-13 research session; indexed extracts and older copies are not a controlled current consolidation."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_society_cooperative_design",
+        "notes": "Blocks approval of cooperative category, founder/member eligibility, activities, capital/share, governance, exit and filing-field requirements."
+      }
+    },
+    {
+      "id": "RO-LAW-214-2024-CURRENT-PENDING",
+      "jurisdiction": "RO",
+      "serviceDomains": ["cooperative_hub"],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 214/2024 on electronic signatures, time stamps and trust services",
+      "title": "Current Romanian electronic-signature framework",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/FormaPrintabila/00000G39DPGSXSU0BYZ0T3MOH95IY574",
+      "language": "ro",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_upstream_access",
+        "immutable": true,
+        "qualifier": "The official printable text was indexed but returned an upstream error when retrieved; current amendments and special cooperative form rules remain unverified."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_cooperative_electronic_governance_design",
+        "notes": "Blocks approval of signature types, electronic notices, remote voting evidence and document-form rules."
+      }
+    },
+    {
+      "id": "RO-LAW-265-2022-CURRENT-PENDING",
+      "jurisdiction": "RO",
+      "serviceDomains": ["cooperative_hub"],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 265/2022 on the trade register",
+      "title": "Current consolidated trade-register law",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocumentAfis/257835",
+      "language": "ro",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_upstream_access",
+        "immutable": true,
+        "qualifier": "The official portal returned an upstream error; current ONRC filing guidance is captured separately but does not replace the consolidated statute."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_onrc_workflow_design",
+        "notes": "Blocks legal approval of filing deadlines, completion/rejection handling, applicant powers and document-form requirements."
+      }
+    },
+    {
+      "id": "RO-LAW-239-2025",
+      "jurisdiction": "RO",
+      "serviceDomains": ["cooperative_hub"],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 239/2025",
+      "title": "Fiscal and financial measures affecting agricultural-cooperative facilities",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://static.anaf.ro/static/10/Anaf/legislatie/L_239_2025.pdf",
+      "language": "ro",
+      "retrievedAt": "2026-09-13",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/cooperative-hub/RO-LAW-239-2025.pdf",
+        "sha256": "376bcec34439ffc37f2e74a83d12f828eab1ba6471e772ec6ce12dc2981ccd08",
+        "bytes": 622994,
+        "immutable": true,
+        "qualifier": "Official ANAF-hosted act; current consolidation and case-specific fiscal eligibility still require accountant and counsel review."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_any_cooperative_tax_claim_or_design",
+        "notes": "Confirms repeal from 2026-01-01 of specified Law No. 566/2004 Article 76(1) facilities; it does not support a generic tax-benefit claim."
+      }
+    },
+    {
+      "id": "RO-ONRC-AGRICULTURAL-COOPERATIVE-2026-09-13",
+      "jurisdiction": "RO",
+      "serviceDomains": ["cooperative_hub"],
+      "authority": "National Trade Register Office",
+      "citation": "ONRC registration checklist retrieved 2026-09-13",
+      "title": "Agricultural cooperative, grades I, II and III — registration evidence",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.onrc.ro/index.php/ro/inmatriculari/persoane-juridice/coo-agricole-de-gradul-i-si-gradul-ii?print=1&tmpl=component",
+      "language": "ro",
+      "retrievedAt": "2026-09-13",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/cooperative-hub/RO-ONRC-AGRICULTURAL-COOPERATIVE-2026-09-13.html",
+        "sha256": "ca3304e072c29717f6ffd479210e986c97f88b438184c982da88f49193ee50b1",
+        "bytes": 16351,
+        "immutable": true,
+        "qualifier": "Time-stamped filing checklist; the registrar may request further evidence and registration is never guaranteed."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "at_professional_review_and_before_filing",
+        "notes": "Supports a provisional evidence sequence, including lawyer-attested constitutive act and separate statute; controlling law and case facts prevail."
+      }
+    },
+    {
+      "id": "RO-ONRC-SOCIETY-COOPERATIVE-2026-09-13",
+      "jurisdiction": "RO",
+      "serviceDomains": ["cooperative_hub"],
+      "authority": "National Trade Register Office",
+      "citation": "ONRC registration checklist retrieved 2026-09-13",
+      "title": "Society cooperative, grades I and II — registration evidence",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.onrc.ro/index.php/ro/inmatriculari/persoane-juridice/soc-cooperative-de-gradul-i-si-gradul-ii?print=1&tmpl=component",
+      "language": "ro",
+      "retrievedAt": "2026-09-13",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/cooperative-hub/RO-ONRC-SOCIETY-COOPERATIVE-2026-09-13.html",
+        "sha256": "f588051cf408bfd3b1032560e3be57319901c1017cace480413351f6f90a46b7",
+        "bytes": 17745,
+        "immutable": true,
+        "qualifier": "Time-stamped filing checklist; the registrar may request further evidence and registration is never guaranteed."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "at_professional_review_and_before_filing",
+        "notes": "Supports a provisional evidence sequence for society cooperatives; controlling law and case facts prevail."
+      }
+    },
     {
       "id": "EU-REG-2019-945-ORIGINAL",
       "jurisdiction": "EU",
