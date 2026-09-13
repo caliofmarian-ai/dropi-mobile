@@ -24,10 +24,61 @@
 
 | Câmp | Valoare |
 |------|---------|
-| **Platformă** | GitHub Copilot Agent |
-| **Data** | 2026-07-16 |
-| **Branch activ** | `copilot/create-dropi-canonical-reference` |
-| **Agent** | GitHub Copilot Coding Agent |
+| **Platformă** | ChatGPT Work / Codex |
+| **Data** | 2026-09-12 |
+| **Branch activ** | `planning/passenger-mobility-c1` |
+| **Agent** | Codex |
+
+### Sesiune curentă (C1 Passenger Mobility + corpus juridic canonic) — 2026-09-12
+
+**Scop acceptat de Project Owner:** planificare pentru România și Filipine, cu model juridic hibrid per jurisdicție; documentație canonică + UX + plan tehnic/backlog, fără implementare runtime. Legile, ordonanțele, regulamentele, procedurile și sursele oficiale folosite pentru produs trebuie păstrate, versionate și trasate în repository, iar lipsurile trebuie să blocheze explicit designul dependent de lege și operarea.
+
+**Decizii produse:**
+
+- Passenger Mobility este un serviciu distinct în C1, nu un canal nou și nu o extensie a comenzilor/livrărilor de colete.
+- După implementarea shell-ului, Passenger Mobility rămâne vizibil ca ramură C1 chiar înainte de autorizare; starea implicită este `catalog_locked`, cu mesaj explicit „autorizare în curs” și fără colectare de locație, traseu, pasager sau plată.
+- Activarea este etapizată: `catalog_locked → onboarding_open → pilot_only → public_live`; onboardingul, cererile, ofertele și pornirea cursei au porți independente și fail-closed.
+- Același cont păstrează rolurile existente; autorizarea pentru `parcel_ground`, `parcel_drone`, `passenger_car` și `passenger_tricycle` este separată și scoped la persoană, operator, vehicul, jurisdiction pack, zonă și timp.
+- `users.isVerified` și un permis de conducere aprobat nu pot conferi dreptul de a transporta persoane.
+- C2 Passenger Mobility este rezervat/dezactivat. C3 exclude taxi, ride-hailing, transport medical/pacient și urgență.
+- România folosește un pack separat pentru transport alternativ cu autoturism; platforma, operatorul de transport, șoferul și mașina sunt actori juridici distincți.
+- Filipine folosește pack separat TNC/TNVS pentru autoturism. Tricicletele rămân `disabled_legal_gate` până la selectarea LGU-ului exact din Zone 0 și confirmarea scrisă a regulilor locale.
+- Capacitatea de pasageri este minimul dovedit de înmatriculare, autorizație/franciză, asigurare, regulă locală și plafon de siguranță; aplicația nu presupune automat 1–2 locuri la tricicletă.
+- În prima versiune, un partener/vehicul nu poate avea simultan o cursă DROPi și o misiune DROPi de colet activă.
+- Legea în vigoare și autoritatea competentă rămân autoritatea externă; repository-ul este evidența canonică DROPi a sursei/versionării, interpretării, aprobării, implementării și revalidării.
+- Regula obligatorie este „no source → no approved requirement → no law-dependent design/enablement”; sursele lipsă, vechi, contradictorii sau marcate doar pentru cercetare sunt fail-closed.
+- Autorizarea companiei/pieței/serviciului și autorizarea partenerului/persoanei/operatorului/vehiculului sunt două porți independente. Compania se poate autoriza și lansa etapizat per țară, entitate, serviciu, vehicul și zonă; nu există „autorizat pentru toate”.
+- Cerințele de stat sunt etichetate separat de politicile DROPi/asigurătorului. Nu există în corpusul curent dovada unui atestat de stat universal pentru curierul pe bicicletă obișnuită; instruirea și asigurarea pot fi totuși reguli interne/contractuale.
+- Pagina ARR capturată are o contradicție: secțiunea română indică CAEN 4933, iar cea engleză încă 4939. Niciun cod nu va fi hardcodat fără confirmare scrisă ONRC/ARR și analiza rolului juridic exact.
+
+**Documente create/actualizate:**
+
+- `canonical/PASSENGER_MOBILITY.md` — canon v1.0.0, planning/not live;
+- `docs/research/PASSENGER_MOBILITY_LEGAL_BASELINE_RO_PH.md` — cercetare juridică cu surse oficiale și alerte de revalidare;
+- `docs/ux/PASSENGER_MOBILITY_UX_SPEC.md` — fluxuri Customer/Merchant, Delivery Partner și Admin;
+- `docs/implementation/PASSENGER_MOBILITY_IMPLEMENTATION_PLAN.md` — date, API, state machine, securitate, testare, rollout și DoD;
+- `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md` — politica de autoritate a surselor, lifecycle de cerință, porți duble, autorizare etapizată și fail-closed;
+- `docs/legal/legal-source-register.json` — 35 înregistrări cu proveniență, status, hash și stare de utilizare;
+- `docs/legal/sources/` — 22 snapshot-uri oficiale imuabile (UE, România, Filipine) verificate prin SHA-256 și byte length;
+- `docs/legal/LEGAL_REQUIREMENTS_TRACEABILITY.md` — mapare sursă → cerință → poartă companie/partener/produs pentru delivery rutier, drone și Passenger Mobility;
+- `docs/legal/LEGAL_GAPS_AND_BLOCKERS.md` și `docs/legal/source-notes/PH-TNC-TNVS-SOURCE-STATUS.md` — lipsuri P0/P1 și starea surselor LTFRB;
+- `scripts/validate-legal-sources.mjs` + `pnpm legal:sources:validate` — control pentru registru, fișiere, SHA-256, dimensiune, dubluri și surse neregistrate;
+- reconciliate `canonical/README.md`, `canonical/DELIVERY_MULTIMODAL.md`, `canonical/PASSENGER_MOBILITY.md`, `canonical-structure.md`, `ARCHITECTURE.md`, UX, planul tehnic, cercetarea juridică și `DECISION_LOG.md`.
+
+**Backlog GitHub creat:** epic [#460](https://github.com/caliofmarian-ai/dropi-mobile/issues/460), cu PM-001–PM-007 în [#453](https://github.com/caliofmarian-ai/dropi-mobile/issues/453), [#454](https://github.com/caliofmarian-ai/dropi-mobile/issues/454), [#455](https://github.com/caliofmarian-ai/dropi-mobile/issues/455), [#456](https://github.com/caliofmarian-ai/dropi-mobile/issues/456), [#459](https://github.com/caliofmarian-ai/dropi-mobile/issues/459), [#457](https://github.com/caliofmarian-ai/dropi-mobile/issues/457) și [#458](https://github.com/caliofmarian-ai/dropi-mobile/issues/458).
+
+**Validări pentru schimbarea de documentație:**
+
+- `git diff --cached --check` ✅ — fără whitespace errors;
+- `node scripts/validate-legal-sources.mjs` ✅ — 35 surse înregistrate, 22 fișiere imuabile, toate hash-urile și dimensiunile corespund;
+- `git diff --check` ✅ — fără whitespace errors pentru schimbarea corpusului juridic;
+- validare JSON și unicitate ID/path pentru registrul juridic ✅;
+- inventar și legături canonice verificate ✅;
+- `pnpm test` / `pnpm lint` nu au pornit prin wrapper-ul local deoarece pnpm a blocat scripturile de build neaprobate pentru `esbuild` și `unrs-resolver`; nu s-a modificat politica de încredere a dependențelor;
+- rulare directă Vitest: 318 teste trecute, 4 eșecuri runtime preexistente (`mail-config` ×3, `native-trpc-transport-contract` ×1), 1 skipped; încă 33 fișiere bazate pe `node:test` sunt raportate de Vitest ca „No test suite found”; niciun fișier afectat nu este parte din această schimbare documentară;
+- rulare directă ESLint: 10 erori și 133 warnings preexistente exclusiv în fișiere runtime nemodificate; documentele Passenger Mobility nu introduc erori lint.
+
+**Stare runtime:** nicio tabelă, migrație, rută API, interfață mobilă, autorizare, plată sau cursă live nu a fost adăugată. Toate suprafețele Passenger Mobility rămân fail-closed.
 
 ### Ce s-a făcut în sesiunile anterioare (context auth/reset + database-migration-audit + oauth-optional):
 - Rezumat complet în PR #28, PR #29, PR #30 și PR #31 (merged). Detalii în versiunile anterioare ale acestui document.
@@ -395,6 +446,7 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 ## 2. Starea Curentă a Proiectului
 
 ### ✅ Funcții terminate
+- Planificarea canonică Passenger Mobility pentru România și Filipine, corpusul juridic versionat, matricea de trasabilitate, registrul de blocaje, specificația UX și backlogul #460/#453–#459 — documentație only, runtime not live, publicată pentru review în PR #478 ✅
 - Implementare sistem AI Agent Orchestrator
 - Configurare EAS Build pentru Android APK + iOS (`eas.json`) — **fixat**
 - Documente canonice de bază: `AI_DEVELOPMENT_HANDOVER_CANON.md`, `AI_AGENT_SYSTEM.md`, `DELIVERY_MULTIMODAL.md`
@@ -410,7 +462,7 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 - **Admin Provisioning Script** — `scripts/provision-admin.ts`, PR curent (necesită merge + execuție Railway one-time)
 
 ### 🔄 În progres
-- Branch curent: `copilot/create-reference-package` — **DROPi Canonical Reference Package** gata pentru review și PR dedicat.
+- Branch curent: `planning/passenger-mobility-c1` — documentația Passenger Mobility și corpusul juridic sunt validate și publicate în PR #478; review-ul, implementarea și autorizările reale rămân blocate separat.
 
 ### ✅ Setup cloud complet (2026-07-07)
 - `EAS_PROJECT_ID` adăugat ca GitHub Actions Variable ✅
@@ -419,6 +471,11 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 - Backend activ pe Railway ✅
 
 ### 🔴 Blocate
+- **Romania delivery role** — clasificarea DROPi ca furnizor poștal/intermediar/terț contractat și setul curent OUG 13/2013 trebuie confirmate cu ANCOM/consilier juridic.
+- **Romania CAEN** — contradicția publică ARR 4933/4939 și clasele exacte per entitate/rol necesită confirmare scrisă.
+- **Romania/Philippines road modes** — sursele complete curente pentru bicicletă/e-bike/scuter/auto/van, asigurare și model contractual nu sunt încă aprobate.
+- **Drone delivery** — AACR/CAAP și CONOPS-ul concret trebuie confirmate; paginile CAAP pentru PCAR/ROC sunt marcate în mentenanță.
+- **Philippines TNVS/tricycle** — lipsesc copia oficială MC 2026-049, Citizen's Charter curent și LGU/ordonanța exactă Zone 0.
 - **SMTP_USER lipsă în Railway** — fără această variabilă, emailul de recuperare nu funcționează. Setare manuală obligatorie (detalii la Pasul Următor).
 - `pnpm check` rămâne blocat de erori TypeScript preexistente, nelegate de aceste fix-uri, în `app/order/[id].tsx` și `server/operations-router.ts`.
 
@@ -427,16 +484,13 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 ## 3. Pasul Următor Concret
 
 **Pasul imediat următor:**
-1. Review PR-ul dedicat branch-ului `copilot/create-dropi-canonical-reference`.
-2. Verificați artefactele create:
-   - `DROPi_Canonical_Reference/` (217 fișiere, v2.0.0)
-   - `DROPi_Canonical_Reference.zip` (2.6MB, validat)
-   - `DROPi_Canonical_Reference/CANONICAL_MANIFEST.md`
-   - `DROPi_Canonical_Reference/CANONICAL_KNOWLEDGE_INDEX.md`
-   - `DROPi_Canonical_Reference/README_FOR_DROPi_TYCOON.md`
-   - `DROPi_Canonical_Reference/AI_CANONICAL_REFERENCE_AUDIT_REPORT.md`
-3. După aprobare, folosiți ZIP-ul ca referință read-only pentru repository-ul DROPi Tycoon.
-4. Orice deviație gameplay față de documentele din pachet trebuie documentată explicit în Tycoon.
+
+1. Review și aprobare pentru [PR #478](https://github.com/caliofmarian-ai/dropi-mobile/pull/478), branch `planning/passenger-mobility-c1`; nu trata corpusul versionat drept aprobare juridică.
+2. Un responsabil Legal/Compliance și consilieri locali verifică fiecare sursă, obțin versiunile primare lipsă și închid P0-urile din `docs/legal/LEGAL_GAPS_AND_BLOCKERS.md` pentru primul scope ales.
+3. Project Owner alege orașul/municipiul exact pentru Zone 0 Filipine și modelul de entitate: DROPi/local Zone Operator/TNC.
+4. Pornește [PM-001 #453](https://github.com/caliofmarian-ai/dropi-mobile/issues/453) și, pentru triciclete, [PM-002 #454](https://github.com/caliofmarian-ai/dropi-mobile/issues/454); obține confirmările scrise de la consilier juridic/regulator/asigurător.
+5. După aprobarea surselor, cerințelor și primului jurisdiction pack, implementează în ordine [PM-003 #455](https://github.com/caliofmarian-ai/dropi-mobile/issues/455), apoi [PM-004 #456](https://github.com/caliofmarian-ai/dropi-mobile/issues/456) și [PM-005 #459](https://github.com/caliofmarian-ai/dropi-mobile/issues/459).
+6. Nu activa nicio cursă publică înainte de [PM-006 #457](https://github.com/caliofmarian-ai/dropi-mobile/issues/457) și pilotul controlat [PM-007 #458](https://github.com/caliofmarian-ai/dropi-mobile/issues/458).
 
 ---
 
@@ -474,6 +528,13 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 | 2026-07-13 | `verifySession` cere doar `openId` non-empty; `appId`/`name` sunt opționale ca string gol | `VITE_APP_ID` nu este un env Railway → `appId = ""` → toate sesiunile JWT respinse; HMAC face claims suplimentare redundante pentru securitate | Copilot Agent |
 | 2026-07-13 | Teste de invarianți securitate JWT (wrong secret, expired, malformed) sunt obligatorii lângă orice schimbare a verifySession | Dovedesc că HMAC rămâne singura frontieră de securitate, indiferent de claims payload | Copilot Agent |
 | 2026-07-15 | `resendVerificationCode` trebuie să arunce TRPCError când livrarea emailului eșuează; succes returnat NUMAI după confirmare proveder | UI-ul arăta "Code Sent" chiar și când emailul nu era livrat (silent failure în backend) | Copilot Agent |
+| 2026-09-12 | Passenger Mobility este serviciu separat în C1; nu se creează C4, nu se reutilizează comenzile/livrările de colete și nu se extinde automat în C2/C3 | Canalele sunt contexte operaționale, iar transportul de persoane are lifecycle, risc, autorizare și audit distinct | Project Owner + Codex |
+| 2026-09-12 | Un singur cont poate avea capabilități de delivery și rides, dar fiecare capabilitate este autorizată separat per persoană/operator/vehicul/pack/zonă/timp; `isVerified` nu este autoritate pentru pasageri | Previne extinderea nejustificată a unei licențe/document sau a verificării globale la o activitate reglementată diferit | Project Owner + Codex |
+| 2026-09-12 | România și Filipine sunt planificate prin pack-uri juridice independente; tricicletele din Zone 0 rămân blocate până la alegerea LGU și confirmare scrisă | TNVS auto este reglementat național, iar transportul cu tricicleta depinde de franciza și regulile LGU | Project Owner + Codex |
+| 2026-09-12 | Passenger Mobility rămâne vizibil ca ramură blocată în C1 și se activează etapizat prin `catalog_locked`, `onboarding_open`, `pilot_only`, `public_live` | Produsul nu trebuie omis până la autorizare, dar simpla vizibilitate nu trebuie să permită colectare de date, booking sau operare reglementată | Project Owner + Codex |
+| 2026-09-12 | Sursele juridice oficiale se păstrează versionat și verificabil în repository; nicio cerință dependentă de lege nu intră în design/operare fără sursă, interpretare, aprobare și trasabilitate | Previne construirea pe presupuneri, pagini vechi, traduceri inconsistente sau articole secundare | Project Owner + Codex |
+| 2026-09-12 | Compania/piața/serviciul și partenerul/persoana/operatorul/vehiculul au porți independente; autorizarea și lansarea sunt etapizate per scope, fără status universal | O licență sau o formă juridică nu se transferă automat între servicii, vehicule, zone ori țări | Project Owner + Codex |
+| 2026-09-12 | Cerințele legale și politicile DROPi/asigurătorului sunt etichetate separat | Instruirea sau asigurarea suplimentară poate crește siguranța fără a fi prezentată fals ca atestat emis de stat | Project Owner + Codex |
 
 ---
 
@@ -489,6 +550,7 @@ Dacă userul a introdus emailul exact lowercase (`dropi.deliveries@gmail.com`), 
 ### Branch-uri active
 | Branch | Scop | Status |
 |--------|------|--------|
+| `planning/passenger-mobility-c1` | Canon, legal research, UX și backlog pentru Passenger Mobility România/Filipine | Activ, PR #478 deschis; necesită review |
 | `copilot/read-only-verification` | Fix login crypto + Gmail SMTP_USER + conflict resolution pentru PR #32 | Activ, necesită merge |
 | `copilot/copilotdatabase-migration-audit` | Fix OAUTH_SERVER_URL opțional (PR #31) | Merged în `main` |
 | `copilot/real-device-tests-auth-issues` | RCA auth/reset real-device + fix minim email/reset backend | Merged în `main` (PR #28) |
@@ -549,9 +611,9 @@ de la Pasul Următor Concret.
 
 ## 8. Versioning
 
-Acest document: **v1.22.0**
+Acest document: **v1.24.0**
 Data creării: 2026-07-07
-Ultima actualizare: 2026-07-13
-Actualizat de: GitHub Copilot Coding Agent — RCA + fix SMTP IPv6 ENETUNREACH (Railway) + JWT empty-appId auth (`Please login 10001`); versiune incrementată la v1.22.0.
+Ultima actualizare: 2026-09-12
+Actualizat de: Codex — corpus juridic canonic versionat, trasabilitate sursă–cerință–control, porți independente companie/partener și registru explicit de blocaje; versiune incrementată la v1.24.0.
 
 > **REAMINTIRE:** Orice agent care lucrează pe DROPi TREBUIE să actualizeze acest fișier la sfârșitul sesiunii. Fără actualizare = next agent pornește orb.
