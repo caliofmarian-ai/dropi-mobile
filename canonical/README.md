@@ -14,6 +14,7 @@
 | `DELIVERY_MULTIMODAL.md` | Referință livrare multimodală (dronă/terestru/mixt) + badge-uri eligibilitate | v1.0.0 |
 | `AI_DEVELOPMENT_HANDOVER_CANON.md` | Viziune strategică AI organization, reguli de cooperare, proces de decizie și roadmap de integrare | v1.0.0 |
 | `AUTHORIZED_TOOLING.md` | Autorizația Project Owner pentru Figma/Canva și regula Runway HOLD/final-only, cu limitele source-of-truth | v1.0.0 |
+| `DROPI_COOPERATIVE_HUB.md` | Propunere canonică pentru formarea și operarea cooperativelor de mici producători în C1 Marketplace, cu gate-uri C2/export | v0.1.0 (propusă) |
 
 ---
 
