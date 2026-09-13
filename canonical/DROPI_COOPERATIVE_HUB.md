@@ -1,15 +1,16 @@
-# DROPi Cooperative Hub — Canonical Product Proposal
+# DROPi Cooperative Hub — Canonical Product Direction
 
-> **STATUS: PROPOSED CANONICAL — OWNER REVIEW REQUIRED**
-> **Version:** 0.1.0
+> **STATUS: CANONICAL PRODUCT DIRECTION — IMPLEMENTATION GATED**
+> **Version:** 1.0.0
+> **Owner approval:** 2026-09-13 — PR #479
 > **Research checkpoint:** 2026-09-13
 > **Primary scope:** C1 controlled Marketplace for small local producers
 > **Later integration gate:** C2 contractual B2B and cross-border trade
 > **Delivery type:** research and product-governance only; no implementation is authorized by this document
 
-## 1. Decision requested
+## 1. Canonical decision
 
-Create **DROPi Cooperative Hub** as a separate, bounded service inside the DROPi ecosystem for small local producers who want to:
+The canonical decision is to establish **DROPi Cooperative Hub** as a separate, bounded service inside the DROPi ecosystem for small local producers who want to:
 
 - understand whether a cooperative fits their needs;
 - find compatible founding members;
@@ -369,7 +370,7 @@ DROPi may produce a readiness checklist and coordinate specialists. It must not 
 
 ## 17. Service modules
 
-The proposed service contains eight modules:
+The service contains eight modules:
 
 1. **Learn** — simple education, modern-vs-communist distinction, examples and readiness questionnaire.
 2. **Form a group** — opt-in producer matching by region, product, volume and objectives.
@@ -480,7 +481,7 @@ Registration count alone is not a success metric. A legally created but inactive
 
 No schema, API, UI, payment or Marketplace implementation should begin until all of the following are approved:
 
-1. Product Owner accepts this canonical proposal or an amended version.
+1. **SATISFIED 2026-09-13:** The Product Owner accepted this product direction through merge of PR #479.
 2. A Romanian cooperative-law professional validates the route model and membership/formation workflows.
 3. An accountant validates invoicing, VAT, stock ownership and member settlement.
 4. A PSP or payment-law review approves the exact fund flow.
@@ -491,13 +492,13 @@ No schema, API, UI, payment or Marketplace implementation should begin until all
 
 ## 23. Canon reconciliation notes
 
-This proposal extends, but does not silently rewrite, existing authority:
+This document extends, but does not silently rewrite, existing authority:
 
 - `canonical/DELIVERY_MULTIMODAL.md` remains authoritative for delivery modes and non-guarantee badge rules.
 - `docs/planning/C1_MARKETPLACE_POSITIONING_RESOLUTION.md` remains authoritative for separation between the public C1 surface and Operational Core.
 - Existing P2P/community limits are unchanged.
 - The frozen historical `Marketplace_Financial_Flow.md` remains provenance, but its statement that DROPi retains funds requires licensed-PSP/legal reconciliation before implementation.
-- Existing `stores.ownerId` implementation remains current code truth; this proposal records why it is insufficient for cooperative organization ownership.
+- Existing `stores.ownerId` implementation remains current code truth; this document records why it is insufficient for cooperative organization ownership.
 - C2 large-retailer rules remain unchanged. A small-producer cooperative reaches C2 only through a later contractual readiness gate.
 
 ## 24. Source register
@@ -530,6 +531,6 @@ This is product research, not legal advice. Romanian consolidated law, implement
 
 - Gail Kligman and Katherine Verdery, [*Peasants under Siege: The Collectivization of Romanian Agriculture, 1949–1962*](https://academic.oup.com/princeton-scholarship-online/book/21037).
 
-## 25. Approval effect
+## 25. Canonical effect
 
-If approved and merged as canonical v1.0.0, this document authorizes **planning decomposition only**. It does not authorize production claims, legal services, automated filings, fund custody, export status or implementation without the preconditions in Section 22.
+The Product Owner accepted this document through merge of PR #479 on 2026-09-13. Canonical v1.0.0 authorizes **planning decomposition only**. It does not authorize production claims, legal services, automated filings, fund custody, export status or implementation without the remaining preconditions in Section 22.
