@@ -11,8 +11,9 @@
 | Document | Descriere | Versiune |
 |----------|-----------|----------|
 | `AI_AGENT_SYSTEM.md` | Sistemul dual Cont Uman + Agent AI — arhitectura fundamentală a platformei | v1.0.0 |
-| `DELIVERY_MULTIMODAL.md` | Referință livrare multimodală de colete (dronă/terestru/mixt) + badge-uri eligibilitate | v1.1.0 |
-| `PASSENGER_MOBILITY.md` | Serviciul C1 de transport persoane, autorizare distinctă, curse, siguranță și jurisdicții România/Filipine | v1.0.0 |
+| `DELIVERY_MULTIMODAL.md` | Referință livrare multimodală de colete (dronă/terestru/mixt) + badge-uri și porți juridice per mod | v1.2.0 |
+| `PASSENGER_MOBILITY.md` | Serviciul C1 de transport persoane, autorizare distinctă a companiei și partenerului, curse, siguranță și jurisdicții România/Filipine | v1.1.0 |
+| `LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md` | Politica obligatorie pentru surse juridice, trasabilitate, aprobări și blocarea funcțiilor reglementate | v1.0.0 |
 | `AI_DEVELOPMENT_HANDOVER_CANON.md` | Viziune strategică AI organization, reguli de cooperare, proces de decizie și roadmap de integrare | v1.0.0 |
 | `AUTHORIZED_TOOLING.md` | Autorizația Project Owner pentru Figma/Canva și regula Runway HOLD/final-only, cu limitele source-of-truth | v1.0.0 |
 

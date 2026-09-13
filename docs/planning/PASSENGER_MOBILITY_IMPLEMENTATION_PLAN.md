@@ -1,10 +1,12 @@
 # C1 Passenger Mobility — Technical Implementation Plan
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Status:** PLANNING — NOT IMPLEMENTED
 **Date:** 2026-09-12
 **Canonical source:** `canonical/PASSENGER_MOBILITY.md`
 **UX source:** `docs/ux/PASSENGER_MOBILITY_UX_SPEC.md`
+**Legal source policy:** `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md`
+**Legal evidence registry:** `docs/legal/legal-source-register.json`
 
 ## 1. Outcome and boundary
 
@@ -83,7 +85,8 @@ Use a new migration generated through the repository’s Drizzle workflow, inclu
 | `jurisdictions` | ISO country, subdivision/locality/LGU, timezone, currency, status |
 | `operatingZones` | jurisdiction, polygon/route rules, service hours, status, version |
 | `jurisdictionPacks` | service, vehicle class, version, state, source/effective/review dates, approved-by pair, content hash |
-| `capabilityRequirements` | pack, subject type, evidence/contract type, mandatory rule, validity/reverification, conditional expression |
+| `legalRequirements` | stable requirement ID, registered source IDs and provisions, interpretation, legal-vs-policy label, review/approval state, scope/effective/review dates, implementation/test references |
+| `capabilityRequirements` | pack, legal requirement ID, subject type, evidence/contract type, mandatory rule, validity/reverification, conditional expression |
 | `legalEntities` | entity type, jurisdiction, identifiers, registered address, status; sensitive fields separately protected |
 | `entityRelationships` | platform/Zone Operator/transport operator/driver relationship, scope and effective period |
 | `transportOperators` | legal entity or sole-person reference, regulator authorization status, tax/operating metadata |
@@ -338,13 +341,15 @@ No environment variable alone may bypass the persisted approved pack and capabil
 
 ### Phase 0 — Legal and operating decisions
 
+- validate the legal source registry and close every P0 blocker affecting the selected launch scope;
+- trace every law-dependent field, rule, disclosure, retention period and gate to an approved requirement and source version;
 - name the exact Zone 0 LGU;
 - select Romanian and Philippine legal entities/partners;
 - obtain written CAEN/PSIC, platform, operator, driver, vehicle, insurance, payment, tax, retention, and employment/contract positions;
 - obtain official current LTFRB circular/Citizen’s Charter and local tricycle ordinance;
 - approve service terms, support, safety, and regulator processes.
 
-**Exit:** signed launch-decision record and regulator-confirmed draft pack for one country/vehicle/zone.
+**Exit:** complete current primary-source set, signed interpretations, no open P0 blocker for the selected scope, signed launch-decision record, and regulator-confirmed draft pack for one country/vehicle/zone.
 
 ### Phase 1 — Capability and jurisdiction foundation
 
@@ -479,6 +484,7 @@ A phase is not done until:
 - API/schema/runbook/retention/incident/support documentation is current;
 - no real ride is possible outside an approved pack/zone/cohort;
 - legal/compliance and relevant functional owners sign the release evidence;
+- every law-dependent behavior remains linked to a current registered source and approved requirement; `pnpm legal:sources:validate` passes;
 - release and rollback are auditable.
 
 ## 16. Explicit non-deliverables of this planning change

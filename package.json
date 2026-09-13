@@ -21,7 +21,8 @@
     "db:provision-test-accounts": "node dist/seed-accounts.mjs",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "qr": "node scripts/generate_qr.mjs"
+    "qr": "node scripts/generate_qr.mjs",
+    "legal:sources:validate": "node scripts/validate-legal-sources.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

@@ -1,6 +1,6 @@
 # DROPi Canonical Reference: Passenger Mobility
 
-**Version:** 1.0.1
+**Version:** 1.1.0
 **Status:** PLANNING CANON — NOT LIVE
 **Decision date:** 2026-09-12
 **Initial jurisdictions:** Philippines (Zone 0) and Romania
@@ -98,7 +98,9 @@ An `active` capability MUST be bound to:
 
 Eligibility is the conjunction below, never a single boolean:
 
-`person eligible ∧ operator eligible ∧ vehicle eligible ∧ platform enabled ∧ zone enabled ∧ documents current ∧ contracts current ∧ no safety suspension`
+`company/service authorized ∧ person eligible ∧ operator eligible ∧ vehicle eligible ∧ platform enabled ∧ zone enabled ∧ legal requirements current ∧ documents current ∧ contracts current ∧ no safety suspension`
+
+The company/market/service gate and the partner/person/operator/vehicle gate are independent. Neither may inherit, imply, or override the other.
 
 ## 5. Jurisdiction packs
 
@@ -109,6 +111,8 @@ Pack states:
 `draft → counsel_review → regulator_confirmed → approved → enabled → suspended | retired`
 
 The application MUST fail closed when a pack is absent, expired, suspended, or not approved. Country selection alone is insufficient; local authority rules may differ by city or municipality.
+
+A pack cannot enter `counsel_review`, `approved`, or `enabled` unless every material rule cites registered source IDs from `docs/legal/legal-source-register.json`, the underlying source status is acceptable for that review stage, conflicts and gaps are recorded, and the interpretation follows `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md`. A source snapshot or research paragraph alone cannot approve a pack.
 
 ### 5.1 Romania baseline
 
@@ -122,7 +126,7 @@ The production model must distinguish:
 
 Required evidence is defined in the Romania jurisdiction pack and must, at minimum, cover the platform endorsement, affiliation contract, operator authorization, compliant copy per car, badges, professional certificate, driving licence, criminal record conditions, medical/psychological fitness, registration/ownership or lawful use, technical inspection, civil liability, passenger/baggage insurance, and fiscal/receipt configuration as applicable.
 
-The pack MUST preserve the legal distinction between DROPi’s platform activity and each partner’s transport activity. Current CAEN Rev. 3 classifications and the legacy classification still referenced in transport procedures MUST be confirmed with ONRC/ARR before filing or production copy is finalized.
+The pack MUST preserve the legal distinction between DROPi’s platform activity and each partner’s transport activity. The Romanian section of ARR's page captured on 2026-09-12 names CAEN 4933 while its English section still names 4939. Current CAEN Rev. 3 mapping for each platform/operator/delivery role MUST therefore be confirmed in writing with ONRC/ARR and qualified advisers before filing or production copy is finalized.
 
 ### 5.2 Philippines / Zone 0 baseline
 
@@ -163,6 +167,12 @@ The legal-entity mapping is hybrid by jurisdiction and MUST be approved before l
 | Transport operator | Holds passenger-transport authority and eligible vehicles; signs affiliation/operating agreements |
 | Driver | Holds personal qualifications; accepts conduct, safety, data, and service terms |
 | Passenger | Accepts passenger terms, pricing, privacy, safety, and cancellation conditions |
+
+Company authorization is staged independently per entity, jurisdiction, service, vehicle class, and zone:
+
+`researched → legal_model_pending → application_preparation → filed → authority_granted → pilot_approved → public_enabled → suspended | expired | retired`
+
+DROPi may pursue multiple authorizations in parallel, but no global “company authorized” state exists. A platform technical endorsement does not replace a transport operator's authority; a transport operator's authority does not replace a driver's or car's evidence; authorization for parcel delivery, drones, another vehicle class, or another country does not unlock rides.
 
 Required agreement families:
 
@@ -256,7 +266,7 @@ Exact retention periods are jurisdiction-pack policy, not hardcoded application 
 
 Implementation should introduce dedicated, normalized aggregates rather than extending the present global verification flag:
 
-- `jurisdictionPacks` and `capabilityRequirements`;
+- `jurisdictionPacks`, approved `legalRequirements`, and `capabilityRequirements` that cite them;
 - `legalEntities` and `transportOperators`;
 - `serviceCapabilities` and `partnerCapabilities`;
 - `mobilityVehicles` and `vehicleCapabilities`;
@@ -272,16 +282,17 @@ Existing identity, session, notification, payment-provider integration, secure s
 
 Passenger Mobility remains discoverable but operationally locked and cannot accept real rides until all applicable gates are approved. Shipping a catalog card or read-only authorization-status screen is not a launch and grants no operational authority:
 
-1. exact legal entities and contracting model approved by local counsel;
-2. exact launch geography selected, including the Zone 0 LGU;
-3. platform approval/accreditation or technical endorsement obtained;
-4. transport-operator, driver, vehicle, inspection, insurance, tax, and affiliation evidence validated;
-5. jurisdiction pack regulator-confirmed and enabled;
-6. privacy impact assessment, security review, retention schedule, and regulator-access procedure approved;
-7. safety operations, 24/7 obligations where applicable, incident runbooks, and insurance claims process tested;
-8. pricing, payment, receipt/invoice, cancellation, refund, and payout rules approved;
-9. customer, driver, admin, and degraded-connectivity UX tested in the local languages;
-10. controlled pilot authorization signed, with kill switch and rollback exercised.
+1. current primary sources captured and registered, every material requirement traced to those sources, conflicts/gaps closed, and scoped interpretations approved under the legal compliance canon;
+2. exact legal entities and contracting model approved by local counsel;
+3. exact launch geography selected, including the Zone 0 LGU;
+4. platform approval/accreditation or technical endorsement obtained;
+5. transport-operator, driver, vehicle, inspection, insurance, tax, and affiliation evidence validated;
+6. jurisdiction pack regulator-confirmed and enabled;
+7. privacy impact assessment, security review, retention schedule, and regulator-access procedure approved;
+8. safety operations, 24/7 obligations where applicable, incident runbooks, and insurance claims process tested;
+9. pricing, payment, receipt/invoice, cancellation, refund, and payout rules approved;
+10. customer, driver, admin, and degraded-connectivity UX tested in the local languages;
+11. controlled pilot authorization signed, with kill switch and rollback exercised.
 
 No feature flag, admin override, pilot demand, or business deadline may bypass a missing legal or safety gate.
 
@@ -300,6 +311,10 @@ No feature flag, admin override, pilot demand, or business deadline may bypass a
 
 ## 16. Supporting specifications
 
+- Legal source-of-truth policy: `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md`
+- Legal source registry: `docs/legal/legal-source-register.json`
+- Legal requirement traceability: `docs/legal/LEGAL_REQUIREMENTS_TRACEABILITY.md`
+- Legal blockers: `docs/legal/LEGAL_GAPS_AND_BLOCKERS.md`
 - Legal baseline: `docs/research/PASSENGER_MOBILITY_LEGAL_BASELINE_RO_PH.md`
 - UX specification: `docs/ux/PASSENGER_MOBILITY_UX_SPEC.md`
 - Technical and delivery plan: `docs/planning/PASSENGER_MOBILITY_IMPLEMENTATION_PLAN.md`

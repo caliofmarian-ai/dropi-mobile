@@ -1,10 +1,11 @@
 # C1 Passenger Mobility — UX Specification
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Status:** PLANNING — NO LIVE RIDES
 **Date:** 2026-09-12
 **Markets considered:** Romania and Philippines Zone 0
 **Canonical source:** `canonical/PASSENGER_MOBILITY.md`
+**Legal source policy:** `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md`
 
 ## 1. Product intent
 
@@ -16,7 +17,7 @@ The experience must make the service boundary unmistakable:
 - a delivery transports a parcel and retains the current delivery lifecycle;
 - delivery verification never implies passenger authority;
 - a partner chooses an explicit work mode and never receives work for an inactive or unauthorized capability;
-- availability is controlled by jurisdiction, zone, vehicle class, time, evidence, contracts, and safety state.
+- availability is controlled independently by company/market/service authority and partner/person/operator/vehicle eligibility, then by jurisdiction, zone, time, evidence, contracts, and safety state.
 
 This specification describes the intended UX and handoff. It does not authorize implementation or production launch.
 
@@ -202,7 +203,7 @@ The ride application is resumable and organized around legal subjects rather tha
 6. **Agreements** — current operator, driver, data, safety, payment, and platform terms.
 7. **Review** — completeness, declarations, submission, expected review path.
 
-Requirements come only from the selected jurisdiction-pack version. Optional and not-applicable items must be distinguishable from missing mandatory evidence.
+Requirements come only from the selected jurisdiction-pack version and must cite approved requirement/source IDs from the legal corpus. Optional and not-applicable items must be distinguishable from missing mandatory evidence. A source marked pending, conflicting, stale, or research-only cannot silently generate a partner document request.
 
 ### 4.3 Document interaction
 
@@ -292,13 +293,15 @@ If data connectivity is lost:
 Only authorized compliance/configuration roles may create or change a pack. The UI must display:
 
 - country, regulator, locality/LGU, operating polygon/route, service and vehicle class;
-- source link, instrument identifier, effective date, counsel/regulator decision reference;
+- company/market/service authorization state separately from partner capability state;
+- registered source IDs, official origin, snapshot/version, retrieval and effective dates, reliance status, exact provision, counsel/regulator decision reference, and next review date;
+- unresolved source conflicts and blockers, including which design/onboarding/operation actions they disable;
 - required document/contract matrix and expiry rules;
 - capacity, pricing, payment, receipt, retention, safety, and support rules;
 - pack state and approval history;
 - affected capabilities and rides before an update is enabled.
 
-Publication requires four-eyes approval. `draft`, `counsel_review`, or expired packs cannot enable production.
+Publication requires four-eyes approval. `draft`, `counsel_review`, expired packs, packs with unresolved applicable P0 gaps, or packs whose requirements lack approved source traceability cannot enable production.
 
 ### 6.2 Entity and evidence review
 

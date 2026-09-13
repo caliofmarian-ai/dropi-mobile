@@ -1,6 +1,6 @@
 # DROPi Canonical Reference: Multimodal Delivery & Badge System
 
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Status:** ACTIVE CANON
 **Updated:** 2026-09-12
 
@@ -16,6 +16,21 @@ Passenger transport uses the separate C1 Passenger Mobility domain and service-s
 - 🚐 Van
 - 🚲 Bicicletă electrică (e-bike)
 - 🔄 Multimodal (ex: merchant → DronePort → client)
+
+These are product modes, not universal legal vehicle classes. Each technical vehicle and use case must be classified under the applicable current law before regulated onboarding or operation is designed.
+
+## Legal Source and Authorization Gates
+
+All delivery modes follow `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md`, the registered evidence in `docs/legal/legal-source-register.json`, and the requirements/blockers under `docs/legal/`.
+
+Every operational action requires two independent approvals:
+
+1. the responsible company/market/service is authorized for the actual postal/courier, road-transport, aviation, platform, tax, data, insurance, and local role; and
+2. the particular partner/person/operator/vehicle/aircraft/zone is eligible for that mission.
+
+Authorization may be obtained and activated in stages for pedal bicycle, compliant e-bike, scooter/motorcycle, parcel car, van, drone, and later modes. No global `authorizedForDelivery` or “authorized for everything” state exists. A mode may be represented in planning/catalog configuration while its law-dependent onboarding, dispatch, acceptance, or start actions remain blocked.
+
+A missing, stale, conflicting, or unapproved primary source blocks the affected law-dependent design and operation. Product convention and competitor practice are not substitutes.
 
 ## Eligibility Criteria
 System evaluates per product:
@@ -38,6 +53,8 @@ Badge rules:
 - Do NOT modify legal responsibility
 - ARE used internally for logistics selection
 - ARE used for drone eligibility determination
+
+A badge is not a government licence, company authorization, professional certificate, vehicle permission, insurance decision, or right to operate.
 
 ## Marketplace Structure
 - CONTROLLED marketplace (not open like OLX/eBay)
@@ -68,10 +85,12 @@ App:
 - Audits
 
 ## Pilots
-- Self-employed (NOT DROPi employees)
+- Planned independent-partner model; a person may be treated as self-employed only where the country-specific legal, tax, contractual, and operational analysis supports that status
 - Selected by system (NOT first-come-first-served)
 - Based on: technical eligibility, positioning, rating, history, rotation
 - Client CANNOT see or choose the pilot
+
+No captured source currently establishes a universal state-issued attestation for an ordinary pedal-bicycle parcel courier in Romania or the Philippines. DROPi/insurer safety training, protective equipment, competency checks, medical or personal-accident cover may still be mandatory policy, but MUST NOT be labeled as government authorization without a traced, approved source.
 
 ## Drone Delivery Special Rules
 - Client must choose "drone" preference
@@ -82,6 +101,8 @@ App:
 - Drone does NOT negotiate reception
 - Drone does NOT repeat delivery
 - Failed reception triggers fallback
+
+Remote-pilot/controller competence is only one aviation gate. The responsible operator/company, aircraft, registration, operational category or certificate/authorization, airspace, route/zone, payload, insurance, and exact delivery CONOPS must also be approved and current.
 
 ## Terrestrial Delivery Options
 - Personal handover

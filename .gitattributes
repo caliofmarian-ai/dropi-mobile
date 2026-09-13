@@ -1,0 +1,3 @@
+# Legal source snapshots are immutable evidence. Review them through the
+# registered origin, media type, size, and SHA-256 instead of line diffs.
+docs/legal/sources/** binary

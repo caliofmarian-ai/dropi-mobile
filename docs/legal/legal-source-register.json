@@ -1,0 +1,887 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-09-12T00:00:00Z",
+  "governingCanon": "canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md",
+  "notice": "Repository snapshots are research evidence, not proof of current applicability or authorization. Only an approved traced requirement may inform law-dependent design, and no registry entry directly enables operations.",
+  "sources": [
+    {
+      "id": "EU-REG-2019-945-ORIGINAL",
+      "jurisdiction": "EU",
+      "serviceDomains": ["parcel_drone"],
+      "authority": "European Union",
+      "citation": "Commission Delegated Regulation (EU) 2019/945",
+      "title": "Unmanned aircraft systems and third-country operators",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/eli/reg_del/2019/945/oj",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/aviation/EU-REG-2019-945-ORIGINAL.pdf",
+        "sha256": "00a1be1d4a4bd315365de7806a91310a18b3cd5d15df92bb1672ad92c953b5fb",
+        "bytes": 1433701,
+        "immutable": true,
+        "qualifier": "Original act; amendments and current consolidated text must be checked before reliance."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_drone_design",
+        "notes": "Aircraft/product and third-country-operator baseline only."
+      }
+    },
+    {
+      "id": "EU-REG-2019-947-CONSOLIDATED-2025-05-01",
+      "jurisdiction": "EU",
+      "serviceDomains": ["parcel_drone"],
+      "authority": "European Union",
+      "citation": "Commission Implementing Regulation (EU) 2019/947, consolidated 2025-05-01",
+      "title": "Rules and procedures for the operation of unmanned aircraft",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02019R0947-20250501",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/aviation/EU-REG-2019-947-CONSOLIDATED-2025-05-01.pdf",
+        "sha256": "4adc3a6f2db4b0a7175f96457a38ba32437dead583290c342232fca90151c220",
+        "bytes": 628590,
+        "immutable": true,
+        "qualifier": "Consolidated text dated 2025-05-01; verify later amendments and Romanian implementation material."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_drone_design",
+        "notes": "Operation-category and authorization baseline; delivery CONOPS still requires authority analysis."
+      }
+    },
+    {
+      "id": "EU-GDPR-2016-679",
+      "jurisdiction": "EU",
+      "serviceDomains": ["all"],
+      "authority": "European Union",
+      "citation": "Regulation (EU) 2016/679",
+      "title": "General Data Protection Regulation",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/data-protection/EU-GDPR-2016-679.pdf",
+        "sha256": "bd84e63f5b622b739a83389afc3b30d240f792bb88d8eb03a816c9a82b0c2499",
+        "bytes": 982296,
+        "immutable": true,
+        "qualifier": "Original official act; case law, EDPB guidance, and Romanian implementing law remain part of later review."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_personal_data_design",
+        "notes": "Applies to EU personal-data processing; does not by itself complete a DPIA or retention schedule."
+      }
+    },
+    {
+      "id": "EU-DIR-2024-2831",
+      "jurisdiction": "EU",
+      "serviceDomains": ["parcel_delivery", "passenger_mobility"],
+      "authority": "European Union",
+      "citation": "Directive (EU) 2024/2831",
+      "title": "Improving working conditions in platform work",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/eli/dir/2024/2831/oj",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/platform-work/EU-DIR-2024-2831.pdf",
+        "sha256": "cc2878d37f97b6fd69da1d1541472f870cb60e909000932cdfaef22ea38db5c4",
+        "bytes": 1158781,
+        "immutable": true,
+        "qualifier": "Directive; Romanian transposition and effective national obligations must be verified."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_partner_model_design",
+        "notes": "Employment-status and algorithmic-management impact baseline."
+      }
+    },
+    {
+      "id": "EU-REG-168-2013-CONSOLIDATED-2024-11-27",
+      "jurisdiction": "EU",
+      "serviceDomains": ["parcel_delivery"],
+      "authority": "European Union",
+      "citation": "Regulation (EU) No 168/2013, consolidated 2024-11-27",
+      "title": "Approval and market surveillance of two- or three-wheel vehicles and quadricycles",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02013R0168-20241127",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/vehicle-classification/EU-REG-168-2013-CONSOLIDATED-2024-11-27.pdf",
+        "sha256": "9e584336c056d845d0873837f1b57649d89481a69336c2652d4396178f7ee2e0",
+        "bytes": 1211376,
+        "immutable": true,
+        "qualifier": "Classification baseline; national road rules, registration, licence, and insurance analysis remains required."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_e_bike_or_scooter_design",
+        "notes": "Used to avoid treating every powered cycle as a pedal bicycle."
+      }
+    },
+    {
+      "id": "RO-OUG-49-2019",
+      "jurisdiction": "RO",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Government of Romania",
+      "citation": "Emergency Ordinance No. 49/2019",
+      "title": "Alternative transport activities by car and driver",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/215598",
+      "language": "ro",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/passenger-mobility/RO-OUG-49-2019.pdf",
+        "sha256": "535c2163a117223dd57a8f8610b1b35ba5ab92a19ba7b60a9a37e1516f485b86",
+        "bytes": 169781,
+        "immutable": true,
+        "qualifier": "Official ADR-hosted copy; current consolidated text and later amendments must be checked on the legislation portal."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_passenger_design",
+        "notes": "Core platform/operator/driver/car framework."
+      }
+    },
+    {
+      "id": "RO-LAW-204-2019",
+      "jurisdiction": "RO",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 204/2019",
+      "title": "Approval and amendment of Emergency Ordinance No. 49/2019",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://www.adr.gov.ro/platforme-digitale-pentru-transport-alternativ",
+      "language": "ro",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/passenger-mobility/RO-LAW-204-2019.pdf",
+        "sha256": "f73e46d615309aa8fe4e79c64ef2a838d676359fcd59708fc68146bc6d24614f",
+        "bytes": 67408,
+        "immutable": true,
+        "qualifier": "Official ADR-hosted copy; read together with the current consolidated ordinance."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_passenger_design",
+        "notes": "Amending act; not a standalone checklist."
+      }
+    },
+    {
+      "id": "RO-ADR-DECISION-572-2020-NORMS",
+      "jurisdiction": "RO",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Authority for the Digitalization of Romania",
+      "citation": "ADR Decision No. 572/2020, procedural norms",
+      "title": "Procedure for granting and withdrawing the technical endorsement",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://www.adr.gov.ro/platforme-digitale-pentru-transport-alternativ",
+      "language": "ro",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/passenger-mobility/RO-ADR-DECISION-572-2020-NORMS.docx",
+        "sha256": "8d173499ab3460a040d8775e5e7f6740076b270886a5cca5bdd0d24f408bb9f9",
+        "bytes": 30897,
+        "immutable": true,
+        "qualifier": "Official ADR-hosted DOCX; confirm whether later procedural amendments exist."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_adr_filing_design",
+        "notes": "Technical endorsement procedure and evidence baseline."
+      }
+    },
+    {
+      "id": "RO-ADR-PLATFORM-PROCEDURE-2026-09-12",
+      "jurisdiction": "RO",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Authority for the Digitalization of Romania",
+      "citation": "ADR service page retrieved 2026-09-12",
+      "title": "Digital platforms for alternative transport",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.adr.gov.ro/platforme-digitale-pentru-transport-alternativ",
+      "language": "ro",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/passenger-mobility/RO-ADR-PLATFORM-PROCEDURE-2026-09-12.html",
+        "sha256": "6dc7fc4fb9eea429ac01a16712200a8119d3c42b1962b1bcaee163b030f29f1f",
+        "bytes": 42090,
+        "immutable": true,
+        "qualifier": "Time-stamped operational checklist; reconcile with controlling law and norms at filing."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_adr_filing",
+        "notes": "Shows current document list, audit recency, security, continuity, archiving, and branch evidence."
+      }
+    },
+    {
+      "id": "RO-ARR-AUTHORIZATION-CHECKLIST-2026-09-12",
+      "jurisdiction": "RO",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Romanian Road Authority",
+      "citation": "ARR authorization instructions retrieved 2026-09-12",
+      "title": "Alternative transport authorization and vehicle-document instructions",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.arr.ro/instructiuni-eliberare-documente_doc_738_autorizare_pg_0.htm",
+      "language": "ro/en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/passenger-mobility/RO-ARR-AUTHORIZATION-CHECKLIST-2026-09-12.html",
+        "sha256": "2affc5be273332cf33cef72ecdbe9427acc9498f78e1a9a2bd29c0eafc20ec9a",
+        "bytes": 101793,
+        "immutable": true,
+        "qualifier": "Romanian section names CAEN 4933 while the English section on the same retrieved page still names 4939; written ARR/ONRC confirmation is required."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_entity_filing",
+        "notes": "Useful checklist, but multilingual inconsistency blocks hardcoded business-classification rules."
+      }
+    },
+    {
+      "id": "RO-OUG-13-2013-ANCOM-CONSOLIDATION-2019",
+      "jurisdiction": "RO",
+      "serviceDomains": ["parcel_delivery"],
+      "authority": "National Authority for Management and Regulation in Communications",
+      "citation": "Emergency Ordinance No. 13/2013, unofficial consolidation through 2019-09-02",
+      "title": "Postal services",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.ancom.ro/category/autorizare-ro/autorizare-generala-servicii-postale/",
+      "language": "ro",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/postal-delivery/RO-OUG-13-2013-ANCOM-UNOFFICIAL-CONSOLIDATION-2019.pdf",
+        "sha256": "9ef549a1d0a38cecefff88b84a3b2fe48b25222e2da63efc6adb95481edb50e0",
+        "bytes": 971124,
+        "immutable": true,
+        "qualifier": "Official ANCOM website copy explicitly marked unofficial and consolidated only through 2019-09-02; never rely on it as current law alone."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_delivery_role_design",
+        "notes": "Current consolidated legislation must be obtained and compared."
+      }
+    },
+    {
+      "id": "RO-ANCOM-DECISION-925-2023",
+      "jurisdiction": "RO",
+      "serviceDomains": ["parcel_delivery"],
+      "authority": "National Authority for Management and Regulation in Communications",
+      "citation": "ANCOM Decision No. 925/2023",
+      "title": "General authorization regime for providing postal services",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/277699",
+      "language": "ro",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/postal-delivery/RO-ANCOM-DECISION-925-2023.pdf",
+        "sha256": "9e681b3cdd0b4a7f3f7c8d9ce91c2132e8749132169e5f7c9f5f2c479bca48a8",
+        "bytes": 234369,
+        "immutable": true,
+        "qualifier": "Official act snapshot; amendments and applicability to DROPi's exact delivery role require review."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_delivery_role_design",
+        "notes": "General-authorization and notification baseline."
+      }
+    },
+    {
+      "id": "RO-ANCOM-GENERAL-AUTHORIZATION-2026-09-12",
+      "jurisdiction": "RO",
+      "serviceDomains": ["parcel_delivery"],
+      "authority": "National Authority for Management and Regulation in Communications",
+      "citation": "ANCOM postal general-authorization page retrieved 2026-09-12",
+      "title": "General authorization for postal services",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.ancom.ro/category/autorizare-ro/autorizare-generala-servicii-postale/",
+      "language": "ro",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/postal-delivery/RO-ANCOM-GENERAL-AUTHORIZATION-2026-09-12.html",
+        "sha256": "a5a6262883abf7297b289dc7b3b89023be16a5c0f3ed6caa6d33a60549322dd3",
+        "bytes": 177124,
+        "immutable": true,
+        "qualifier": "Time-stamped regulator guidance; current forms and DROPi role classification must be rechecked before filing."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_delivery_role_design",
+        "notes": "Indicates notification and responsibility rules for postal providers and contracted third parties."
+      }
+    },
+    {
+      "id": "RO-INSSE-CAEN-REV3",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "parcel_delivery",
+        "passenger_mobility",
+        "platform_intermediation"
+      ],
+      "authority": "National Institute of Statistics",
+      "citation": "CAEN Revision 3",
+      "title": "Complete CAEN Rev. 3 structure",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://insse.ro/cms/files/CAEN/CAEN-Rev.3_structura-completa.pdf",
+      "language": "ro",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_upstream_access",
+        "immutable": true,
+        "qualifier": "Official file retrieval failed; obtain an immutable official copy before entity/activity design approval."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_entity_filing",
+        "notes": "ARR/ONRC written mapping remains mandatory despite candidate codes in research."
+      }
+    },
+    {
+      "id": "RO-AACR-DRONE-GUIDANCE-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": ["parcel_drone"],
+      "authority": "Romanian Civil Aeronautical Authority",
+      "citation": "AACR drone regulatory and service material",
+      "title": "Romanian unmanned-aircraft requirements",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.caa.ro/ro/activitati-aeronautice/drone/",
+      "language": "ro",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_upstream_access",
+        "immutable": true,
+        "qualifier": "Current official content was not archived; retrieve with authority assistance and identify all applicable national instruments."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_drone_design",
+        "notes": "EU rules alone are insufficient for a Romanian parcel-delivery CONOPS."
+      }
+    },
+    {
+      "id": "PH-RA-4136",
+      "jurisdiction": "PH",
+      "serviceDomains": ["parcel_delivery", "passenger_mobility"],
+      "authority": "Congress of the Philippines",
+      "citation": "Republic Act No. 4136",
+      "title": "Land Transportation and Traffic Code",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://lawphil.net/statutes/repacts/ra1964/ra_4136_1964.html",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ph/road-transport/PH-RA-4136.html",
+        "sha256": "b075cde45fae2189e3ee46af4c4df4308713ad735e2adbdeaadf6130e55df6ac",
+        "bytes": 93097,
+        "immutable": true,
+        "qualifier": "Historic base act; current amendments, LTO rules, and vehicle-specific requirements must be consolidated."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ph_road_design",
+        "notes": "Defines foundational vehicle and professional-driver concepts but is not a current launch checklist."
+      }
+    },
+    {
+      "id": "PH-RA-7160",
+      "jurisdiction": "PH",
+      "serviceDomains": ["passenger_tricycle"],
+      "authority": "Congress of the Philippines",
+      "citation": "Republic Act No. 7160",
+      "title": "Local Government Code of 1991",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://lawphil.net/statutes/repacts/ra1991/ra_7160_1991.html",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ph/passenger-mobility/PH-RA-7160.html",
+        "sha256": "6aa4f0cc149336c38b729c4edea17444097d3d75fa469137cbf0979542275a3e",
+        "bytes": 693096,
+        "immutable": true,
+        "qualifier": "National allocation of local authority; the exact Zone 0 ordinance and franchise rules remain mandatory."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ph_tricycle_design",
+        "notes": "Supports LGU gate; does not authorize a particular tricycle, route, or application."
+      }
+    },
+    {
+      "id": "PH-RA-7354",
+      "jurisdiction": "PH",
+      "serviceDomains": ["parcel_delivery"],
+      "authority": "Congress of the Philippines",
+      "citation": "Republic Act No. 7354",
+      "title": "Postal Service Act of 1992",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://lawphil.net/statutes/repacts/ra1992/ra_7354_1992.html",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ph/postal-delivery/PH-RA-7354.html",
+        "sha256": "95ffdccb86019bbfd1fe7571cb900822b13cda536db20668fc73a36ef94958ad",
+        "bytes": 39938,
+        "immutable": true,
+        "qualifier": "Historic base act; current regulator, implementing rules, amendments, and DROPi role must be confirmed."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ph_delivery_role_design",
+        "notes": "Section 27 identifies registration/prequalification for parcel/messengerial-type activity, but current procedure is unresolved."
+      }
+    },
+    {
+      "id": "PH-RA-10173",
+      "jurisdiction": "PH",
+      "serviceDomains": ["all"],
+      "authority": "Congress of the Philippines",
+      "citation": "Republic Act No. 10173",
+      "title": "Data Privacy Act of 2012",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://lawphil.net/statutes/repacts/ra2012/ra_10173_2012.html",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ph/data-protection/PH-RA-10173.html",
+        "sha256": "d9f00c3e74239247ad7896bf20ae76e4835b2ffed975f143296b9591b767d20f",
+        "bytes": 56745,
+        "immutable": true,
+        "qualifier": "Base act; current implementing rules and National Privacy Commission issuances remain required."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ph_personal_data_design",
+        "notes": "Privacy baseline only; does not complete registration, DPO, security, or retention analysis."
+      }
+    },
+    {
+      "id": "PH-SC-GR-242860-2019",
+      "jurisdiction": "PH",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Supreme Court of the Philippines",
+      "citation": "LTFRB v. Valenzuela, G.R. No. 242860, 2019-03-05",
+      "title": "Judgment concerning TNC/TNVS regulation",
+      "authorityClass": "primary_judgment",
+      "normative": true,
+      "officialUrl": "https://lawphil.net/judjuris/juri2019/mar2019/gr_242860_2019.html",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ph/passenger-mobility/PH-SC-GR-242860-2019.html",
+        "sha256": "ed0e338ed4427ee976bf0f459793061852d88036b79d02b93d0f0639606ba610",
+        "bytes": 41177,
+        "immutable": true,
+        "qualifier": "Official judgment archive; use with the operative current LTFRB/DOTr instruments."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ph_tnvs_design",
+        "notes": "Confirms regulated framework and references historical amendments; does not provide current application rules."
+      }
+    },
+    {
+      "id": "PH-DOTR-DO-2015-011",
+      "jurisdiction": "PH",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Department of Transportation and Communications",
+      "citation": "Department Order No. 2015-011",
+      "title": "New classification for public transport conveyances and TNC/TNVS framework",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/10/70341",
+      "language": "en",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_upstream_access",
+        "immutable": true,
+        "qualifier": "Official Supreme Court E-Library copy identified but not archived because the upstream endpoint was unavailable to the retriever."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ph_tnvs_design",
+        "notes": "Historical foundation only; obtain current operative instruments as well."
+      }
+    },
+    {
+      "id": "PH-DOTR-DO-2018-013",
+      "jurisdiction": "PH",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Department of Transportation",
+      "citation": "Department Order No. 2018-013",
+      "title": "TNC and TNVS regulation",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/10/91261",
+      "language": "en",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_upstream_access",
+        "immutable": true,
+        "qualifier": "Official Supreme Court E-Library copy identified but not archived because the upstream endpoint was unavailable to the retriever."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ph_tnvs_design",
+        "notes": "Must be reconciled with current LTFRB circulars."
+      }
+    },
+    {
+      "id": "PH-LTFRB-MC-2015-015",
+      "jurisdiction": "PH",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Land Transportation Franchising and Regulatory Board",
+      "citation": "Memorandum Circular No. 2015-015",
+      "title": "TNC accreditation terms and conditions",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/10/70877",
+      "language": "en",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_upstream_access",
+        "immutable": true,
+        "qualifier": "Official Supreme Court E-Library copy identified but not archived because the upstream endpoint was unavailable to the retriever."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ph_tnc_entity_design",
+        "notes": "Historical instrument; amendments and current accreditation rules control."
+      }
+    },
+    {
+      "id": "PH-LTFRB-MC-2015-017",
+      "jurisdiction": "PH",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Land Transportation Franchising and Regulatory Board",
+      "citation": "Memorandum Circular No. 2015-017",
+      "title": "TNVS CPC application framework",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/10/70883",
+      "language": "en",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_upstream_access",
+        "immutable": true,
+        "qualifier": "Official Supreme Court E-Library copy identified but not archived because the upstream endpoint was unavailable to the retriever."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ph_tnvs_onboarding_design",
+        "notes": "Do not copy old document labels or validity into the application."
+      }
+    },
+    {
+      "id": "PH-LTFRB-MC-2015-018",
+      "jurisdiction": "PH",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Land Transportation Franchising and Regulatory Board",
+      "citation": "Memorandum Circular No. 2015-018",
+      "title": "TNVS operating terms and conditions",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/10/70886",
+      "language": "en",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_upstream_access",
+        "immutable": true,
+        "qualifier": "Official Supreme Court E-Library copy identified but not archived because the upstream endpoint was unavailable to the retriever."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ph_tnvs_operations_design",
+        "notes": "Historical terms and later amendments require counsel reconciliation."
+      }
+    },
+    {
+      "id": "PH-LTO-MC-94-199",
+      "jurisdiction": "PH",
+      "serviceDomains": ["passenger_tricycle"],
+      "authority": "Land Transportation Office",
+      "citation": "Memorandum Circular No. 94-199",
+      "title": "Devolution of tricycle-for-hire franchising to local government units",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/11/47970",
+      "language": "en",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_upstream_access",
+        "immutable": true,
+        "qualifier": "Official Supreme Court E-Library copy identified but not archived because the upstream endpoint was unavailable to the retriever."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ph_tricycle_design",
+        "notes": "The selected LGU ordinance and current national rules are also mandatory."
+      }
+    },
+    {
+      "id": "PH-LTFRB-MC-2026-049-PENDING",
+      "jurisdiction": "PH",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Land Transportation Franchising and Regulatory Board",
+      "citation": "Memorandum Circular No. 2026-049 (reported; official copy pending)",
+      "title": "Reported TNVS authority transition to ATOC",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://ltfrb.gov.ph/",
+      "language": "en",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "No official circular copy was located. Title, scope, effect, eligibility, terminology, and dates must be verified directly with LTFRB."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ph_tnvs_document_model",
+        "notes": "Blocks CPC/PA/ATOC labels, expiry rules, onboarding, and launch."
+      }
+    },
+    {
+      "id": "PH-LTFRB-CITIZENS-CHARTER-CURRENT",
+      "jurisdiction": "PH",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Land Transportation Franchising and Regulatory Board",
+      "citation": "Current Citizen's Charter and TNC/TNVS service checklists",
+      "title": "Current LTFRB filing and service requirements",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://ltfrb.gov.ph/",
+      "language": "en",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Current authoritative checklist was not archived; obtain directly from LTFRB before onboarding design."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ph_tnvs_onboarding_design",
+        "notes": "Blocks document schema, fees, validity, service area, and filing workflow."
+      }
+    },
+    {
+      "id": "PH-CAAP-PCAR-PART-11-2026-09-12",
+      "jurisdiction": "PH",
+      "serviceDomains": ["parcel_drone"],
+      "authority": "Civil Aviation Authority of the Philippines",
+      "citation": "Philippine Civil Aviation Regulations Part 11 page retrieved 2026-09-12",
+      "title": "Remotely Piloted Aircraft Systems",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.caap.gov.ph/pcar-part-11/",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ph/aviation/PH-CAAP-PCAR-PART-11-2026-09-12.html",
+        "sha256": "1d7fa77d8c4f0786ed48b7c3e648873b127a0f56ff449fbf6981817b74a1c462",
+        "bytes": 124204,
+        "immutable": true,
+        "qualifier": "Official page itself says it is undergoing updates/maintenance; obtain the controlled current regulation from CAAP."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ph_drone_design",
+        "notes": "Page states commercial-controller, aircraft-registration, and operator-certificate requirements but cannot alone authorize delivery operations."
+      }
+    },
+    {
+      "id": "PH-CAAP-RPA-CONTROLLER-2026-09-12",
+      "jurisdiction": "PH",
+      "serviceDomains": ["parcel_drone"],
+      "authority": "Civil Aviation Authority of the Philippines",
+      "citation": "CAAP RPA Controller Certificate page retrieved 2026-09-12",
+      "title": "RPA Controller Certificate",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.caap.gov.ph/rpa-controller-certificate/",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ph/aviation/PH-CAAP-RPA-CONTROLLER-2026-09-12.html",
+        "sha256": "a6fe5cae0ab939cd924152b08fb8b0d0e7c3355ff01e94da2c22b6611e9f6ac7",
+        "bytes": 98427,
+        "immutable": true,
+        "qualifier": "Time-stamped service guidance; verify forms, training, medical, exam, validity, and scope with CAAP."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ph_drone_onboarding_design",
+        "notes": "Controller credential evidence does not replace operator or operation authorization."
+      }
+    },
+    {
+      "id": "PH-CAAP-RPA-REGISTRATION-2026-09-12",
+      "jurisdiction": "PH",
+      "serviceDomains": ["parcel_drone"],
+      "authority": "Civil Aviation Authority of the Philippines",
+      "citation": "CAAP RPA Registration page retrieved 2026-09-12",
+      "title": "RPA registration",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.caap.gov.ph/rpa-registration-2/",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ph/aviation/PH-CAAP-RPA-REGISTRATION-2026-09-12.html",
+        "sha256": "1ffaa1f41f4c6f9b02b1c668e435576824af5b79ea711b2182bbd54474e16f42",
+        "bytes": 93954,
+        "immutable": true,
+        "qualifier": "Time-stamped service guidance; commercial aircraft registration is only one element of authority."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ph_drone_vehicle_design",
+        "notes": "Records commercial-registration rule; current process and operation approval remain separate."
+      }
+    },
+    {
+      "id": "PH-CAAP-RPAS-OPERATOR-2026-09-12",
+      "jurisdiction": "PH",
+      "serviceDomains": ["parcel_drone"],
+      "authority": "Civil Aviation Authority of the Philippines",
+      "citation": "CAAP RPAS Operator Certificate page retrieved 2026-09-12",
+      "title": "RPAS Operator Certificate",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.caap.gov.ph/rpas-operator-certificate-roc/",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ph/aviation/PH-CAAP-RPAS-OPERATOR-2026-09-12.html",
+        "sha256": "35a2513ea72587ed8b354f9e3e9327279395c958b1d2df50a8e117c88a5a11b3",
+        "bytes": 94128,
+        "immutable": true,
+        "qualifier": "Official page says it is undergoing updates/maintenance and contains commented or potentially stale content; direct CAAP confirmation is mandatory."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ph_drone_company_design",
+        "notes": "Blocks company/operator certificate schema and commercial launch."
+      }
+    },
+    {
+      "id": "PH-PSA-PSIC-REV5-CURRENT",
+      "jurisdiction": "PH",
+      "serviceDomains": [
+        "parcel_delivery",
+        "passenger_mobility",
+        "platform_intermediation"
+      ],
+      "authority": "Philippine Statistics Authority",
+      "citation": "Philippine Standard Industrial Classification Revision 5",
+      "title": "PSIC class and subclass browser",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://psa.gov.ph/classification/psic/class",
+      "language": "en",
+      "retrievedAt": null,
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Classification pages were identified but not archived as a controlled complete source."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ph_entity_registration",
+        "notes": "Candidate PSIC codes do not confer transport, franchise, postal, or aviation authority."
+      }
+    },
+    {
+      "id": "PH-LTFRB-MC-2026-049-BUSINESSWORLD-ALERT",
+      "jurisdiction": "PH",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "BusinessWorld",
+      "citation": "News report dated 2026-07-15",
+      "title": "Reported conversion of eligible TNVS CPCs to ATOCs",
+      "authorityClass": "secondary_change_alert",
+      "normative": false,
+      "officialUrl": "https://www.bworldonline.com/corporate/2026/07/15/763411/ltfrb-says-eligible-tnvs-operators-no-longer-need-to-apply-for-cpc-renewal/",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "metadata_only",
+        "immutable": true,
+        "qualifier": "No article copy stored; copyrighted secondary reporting is a discovery pointer only."
+      },
+      "reliance": {
+        "state": "cannot_enable",
+        "reviewBy": "never_as_authority",
+        "notes": "Obtain and analyze the official circular."
+      }
+    },
+    {
+      "id": "PH-LTFRB-MC-2026-049-INQUIRER-ALERT",
+      "jurisdiction": "PH",
+      "serviceDomains": ["passenger_mobility"],
+      "authority": "Philippine Daily Inquirer",
+      "citation": "News report identified 2026-09-12",
+      "title": "Reported automatic TNVS CPC-to-ATOC conversion",
+      "authorityClass": "secondary_change_alert",
+      "normative": false,
+      "officialUrl": "https://newsinfo.inquirer.net/2263563/ltfrb-tnvs-cpcs-to-be-automatically-converted-into-atocs",
+      "language": "en",
+      "retrievedAt": "2026-09-12",
+      "snapshot": {
+        "status": "metadata_only",
+        "immutable": true,
+        "qualifier": "No article copy stored; copyrighted secondary reporting is a discovery pointer only."
+      },
+      "reliance": {
+        "state": "cannot_enable",
+        "reviewBy": "never_as_authority",
+        "notes": "Obtain and analyze the official circular."
+      }
+    }
+  ]
+}

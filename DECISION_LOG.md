@@ -25,6 +25,9 @@ Registru central pentru deciziile de proiect, cu trimitere la sursele canonice.
 17. Orice piață funcționează printr-un `jurisdiction pack` versionat și fail-closed. Pentru triciclete în Filipine, serviciul rămâne blocat până la alegerea LGU-ului exact din Zone 0 și confirmarea scrisă a francizei, rutelor/zonei, capacității, asigurării și acceptării dispecerizării prin aplicație.
 18. Modelul juridic este hibrid per jurisdicție: DROPi Core păstrează produsul și guvernanța, iar entitatea platformei/Zone Operatorul și operatorii de transport dețin autorizațiile și contractele cerute local, validate de consilier juridic înainte de lansare.
 19. Passenger Mobility figurează permanent ca ramură distinctă în C1 după livrarea shell-ului de produs, chiar înainte de autorizare. Starea implicită este vizibilă și blocată; onboardingul, pilotul și operarea publică se deblochează etapizat și independent. Vizibilitatea nu permite colectarea datelor de cursă și nu conferă autoritate operațională.
+20. Sursele juridice oficiale și versiunile efectiv analizate sunt inventariate, păstrate imuabil și verificate în repository; fiecare comportament dependent de lege trebuie trasat la o cerință aprobată. O sursă lipsă, veche, contradictorie sau neaprobată blochează designul dependent de acea concluzie și operarea afectată.
+21. Autorizarea companiei/pieței/serviciului și autorizarea partenerului/persoanei/operatorului/vehiculului sunt două porți independente. DROPi se poate autoriza și lansa etapizat per țară, entitate, serviciu, clasă de vehicul și zonă; nu există un statut universal „autorizat pentru toate”.
+22. Cerințele legale și politicile DROPi/asigurătorului se etichetează separat. Instruirea, echipamentul ori asigurarea suplimentară pot fi obligatorii contractual fără a fi prezentate ca atestat de stat în lipsa unei surse juridice aprobate.
 
 ## Surse ale deciziilor
 
@@ -32,6 +35,10 @@ Registru central pentru deciziile de proiect, cu trimitere la sursele canonice.
 - `canonical/AI_DEVELOPMENT_HANDOVER_CANON.md`
 - `canonical/DELIVERY_MULTIMODAL.md`
 - `canonical/PASSENGER_MOBILITY.md`
+- `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md`
+- `docs/legal/legal-source-register.json`
+- `docs/legal/LEGAL_REQUIREMENTS_TRACEABILITY.md`
+- `docs/legal/LEGAL_GAPS_AND_BLOCKERS.md`
 - `docs/research/PASSENGER_MOBILITY_LEGAL_BASELINE_RO_PH.md`
 - `docs/ux/PASSENGER_MOBILITY_UX_SPEC.md`
 - `docs/planning/PASSENGER_MOBILITY_IMPLEMENTATION_PLAN.md`

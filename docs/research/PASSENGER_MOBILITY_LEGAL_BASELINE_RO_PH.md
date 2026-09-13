@@ -1,6 +1,7 @@
 # Passenger Mobility Legal Baseline — Romania and Philippines
 
 **Research date:** 2026-09-12
+**Version:** 1.1.0
 **Purpose:** Product, compliance, UX, and implementation planning
 **Status:** Research baseline; counsel and regulator confirmation required
 **Launch scope considered:** C1 Passenger Mobility in Romania and Philippines Zone 0
@@ -38,6 +39,20 @@ Sources were prioritized as follows:
 | C | reputable reporting on very recent changes | Change alert only; never used alone to enable production |
 
 “Confirmed” below means supported by a Tier A/B source reviewed on the research date. “Revalidate” means the rule is time-sensitive, the currently published operational checklist may lag a classification change, the exact local rule is unknown, or an official copy of a recent instrument was not available in the reviewed sources.
+
+### 2.1 Canonical evidence and limitation
+
+The source inventory, official URLs, immutable local snapshots, SHA-256 hashes, retrieval dates, qualifiers, and missing-primary-source states are maintained in `docs/legal/legal-source-register.json`. Source handling is governed by `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md`; provisional source-to-gate mappings are in `docs/legal/LEGAL_REQUIREMENTS_TRACEABILITY.md`, and unresolved matters are in `docs/legal/LEGAL_GAPS_AND_BLOCKERS.md`.
+
+The identifiers in backticks below refer to that register. An archived file proves what was reviewed, not that it remains current or authorizes DROPi. Where the current primary source is absent, the registry and blocker list deliberately prevent the product from converting a research statement into an operational rule.
+
+| Research area | Principal registered source IDs | Current evidence condition |
+|---|---|---|
+| Romania Passenger Mobility | `RO-OUG-49-2019`, `RO-LAW-204-2019`, `RO-ADR-DECISION-572-2020-NORMS`, `RO-ADR-PLATFORM-PROCEDURE-2026-09-12`, `RO-ARR-AUTHORIZATION-CHECKLIST-2026-09-12` | Official snapshots captured; current consolidation, CAEN discrepancy, fiscal and filing confirmations remain gated |
+| Romania parcel/postal delivery | `RO-OUG-13-2013-ANCOM-CONSOLIDATION-2019`, `RO-ANCOM-DECISION-925-2023`, `RO-ANCOM-GENERAL-AUTHORIZATION-2026-09-12` | Decision/current guidance captured; archived ordinance copy is unofficial and stale |
+| EU/Romania drone and vehicle classification | `EU-REG-2019-945-ORIGINAL`, `EU-REG-2019-947-CONSOLIDATED-2025-05-01`, `EU-REG-168-2013-CONSOLIDATED-2024-11-27`, `RO-AACR-DRONE-GUIDANCE-CURRENT` | EU texts captured; current AACR/national CONOPS source set incomplete |
+| Philippines TNC/TNVS and tricycle | `PH-RA-7160`, `PH-SC-GR-242860-2019`, historical DOTr/LTFRB IDs, `PH-LTFRB-MC-2026-049-PENDING` | National law/judgment captured; historical primary files, current LTFRB rules and exact LGU ordinance incomplete |
+| Philippines road, delivery and drone | `PH-RA-4136`, `PH-RA-7354`, `PH-CAAP-PCAR-PART-11-2026-09-12`, controller/registration/operator CAAP IDs | Base laws and CAAP pages captured; current delivery authority and controlled CAAP source set incomplete |
 
 ## 3. Romania
 
@@ -137,18 +152,18 @@ During a trip, the product must preserve the legally relevant fare, route, drive
 
 ### 3.7 CAEN — answer to the user’s classification question
 
-This is a live transition issue, not a number to hardcode.
+This is a live transition and multilingual-source consistency issue, not a number to hardcode.
 
-The ARR checklist still displays legacy **CAEN 4939** for transport-operator authorization. In contrast, the official [INSSE CAEN Rev. 3 structure](https://insse.ro/cms/files/CAEN/CAEN-Rev.3_structura-completa.pdf), applicable from 2025, includes:
+The Romanian section of the [ARR authorization page](https://www.arr.ro/instructiuni-eliberare-documente_doc_738_autorizare_pg_0.htm) captured on 2026-09-12 states **CAEN 4933**. The English section of the same captured page still states **4939**. The discrepancy is preserved in `RO-ARR-AUTHORIZATION-CHECKLIST-2026-09-12`. The official INSSE CAEN Rev. 3 source is registered as `RO-INSSE-CAEN-REV3`, but its complete official file could not be archived in this review and therefore remains a blocking source gap.
 
 | Activity | CAEN Rev. 3 planning candidate | Status |
 |---|---:|---|
-| On-demand passenger transport with driver (operator/PFA/SRL) | `4933` | Official classification; confirm ARR/ONRC filing correspondence |
-| Intermediation of passenger transport (platform) | `5232` | Official classification; confirm exact DROPi legal entity activity set |
-| Courier/home-delivery activity | `5320` | Official classification; confirm whether partner/platform is actually the courier provider |
-| Freight-transport intermediation | `5231` | Relevant only if the legal activity matches, not automatically for every delivery app |
+| On-demand passenger transport with driver (operator/PFA/SRL) | `4933` | Candidate shown by current Romanian ARR content; confirm against complete current INSSE/ONRC sources and in writing |
+| Intermediation of passenger transport (platform) | `5232` | Planning candidate only; confirm exact DROPi legal entity activity set |
+| Courier/home-delivery activity | `5320` | Planning candidate only; first determine whether the partner/platform is legally the provider |
+| Freight-transport intermediation | `5231` | Planning candidate only and relevant only if the legal activity actually matches |
 
-Practical conclusion: a PFA or company intending to perform both courier/delivery and passenger transport may need multiple activity classes and two independent regulatory files. The platform entity may need an intermediation class different from the driver/operator’s transport class. Before filing, obtain written confirmation from ONRC/accountant and the territorial ARR agency on the Rev. 3 mapping, because the regulator’s public operational checklist still cites the legacy number.
+Practical conclusion: a PFA or company intending to perform both courier/delivery and passenger transport may need multiple activity classes and two independent regulatory files. The platform entity may need an intermediation class different from the driver/operator’s transport class. Before filing, obtain the complete current INSSE classification and written confirmation from ONRC/accountant/counsel and the territorial ARR agency for every entity/role. Do not resolve the ARR page's Romanian/English inconsistency by silently choosing either number.
 
 ### 3.8 Romania company checklist
 
@@ -314,7 +329,7 @@ Before any live ride, the responsible Zone 0 launch owner should provide evidenc
 | Vehicle document | ARR compliant copy + badges | CPC/PA/ATOC or current successor + LTO OR/CR | LGU franchise/permit + LTO OR/CR |
 | Driver credential | ARR professional certificate + B licence | Professional licence + LTFRB/TNC/current clearances | Professional licence + LGU-specific evidence |
 | Business form | PFA/II/IF or legal person | Eligible sole proprietor/juridical operator | LGU-eligible person/entity/cooperative as ordinance allows |
-| Business classification | likely CAEN 4933 operator; 5232 platform; confirm legacy 4939 issue | PSIC 49325 candidate | PSIC 49322 candidate |
+| Business classification | 4933 operator / 5232 platform are planning candidates only; confirm current sources and ARR multilingual discrepancy | PSIC 49325 candidate | PSIC 49322 candidate |
 | Delivery classification | CAEN 5320 candidate | PSIC 5320 candidate | PSIC 5320 candidate for separate courier activity |
 | Geography | statutory base locality/occasional outward rules | LTFRB-authorized service area | exact LGU zone/route/roads |
 | Capacity | statutory/registered/insured lower bound | designed/LTFRB/insured lower bound | LGU/registration/insured lower bound |
@@ -359,7 +374,7 @@ The audit system must answer, without editing history:
 
 ### Written counsel/regulator confirmations
 
-- Romania CAEN Rev. 3 mapping versus ARR’s legacy 4939 checklist.
+- Romania CAEN Rev. 3 mapping and the 4933/4939 inconsistency between the Romanian and English sections of ARR's current page.
 - Romania employment/contract treatment for drivers under each operator form.
 - Romania fiscal-device/invoice treatment by payment flow.
 - Philippines TNC entity/ownership/residency and local operator structure.
@@ -384,6 +399,8 @@ Use a staged compliance pilot:
 The sequence should be independent per pack. Romania approval does not validate Philippines, car approval does not validate tricycle, and delivery approval does not validate passenger transport.
 
 ## 9. Primary and authoritative sources
+
+The links below are discovery/readability links. The controlled inventory and local evidence status are in `docs/legal/legal-source-register.json`. Missing or pending entries are not silently replaced by this list.
 
 ### Romania
 

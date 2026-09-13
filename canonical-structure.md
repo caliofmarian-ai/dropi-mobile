@@ -1,6 +1,6 @@
 # DROPi Canonical App Structure Reference
 
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Updated:** 2026-09-12
 
 ## Channels versus services
@@ -12,6 +12,8 @@ Channels describe the operating context and governance model. Services describe 
 - C2 Passenger Mobility is reserved and disabled pending a separate contracted-operations decision.
 - C3 Passenger Mobility is prohibited; emergency, ambulance, patient, and evacuation transport require a separate legal and product system.
 - No C4/taxi channel is created.
+
+Every service/vehicle/zone is independently subject to the legal-source and two-gate authorization model in `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md`. Catalog presence never implies company authority or partner/vehicle eligibility.
 
 ## 4 Operational Channels
 
