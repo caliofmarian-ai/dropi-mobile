@@ -41,7 +41,7 @@ Registru central pentru deciziile de proiect, cu trimitere la sursele canonice.
 - `docs/legal/LEGAL_GAPS_AND_BLOCKERS.md`
 - `docs/research/PASSENGER_MOBILITY_LEGAL_BASELINE_RO_PH.md`
 - `docs/ux/PASSENGER_MOBILITY_UX_SPEC.md`
-- `docs/planning/PASSENGER_MOBILITY_IMPLEMENTATION_PLAN.md`
+- `docs/implementation/PASSENGER_MOBILITY_IMPLEMENTATION_PLAN.md`
 - `canonical/AUTHORIZED_TOOLING.md`
 
 ## Reguli de actualizare

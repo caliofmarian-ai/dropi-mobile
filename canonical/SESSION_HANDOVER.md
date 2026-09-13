@@ -56,7 +56,7 @@
 - `canonical/PASSENGER_MOBILITY.md` — canon v1.0.0, planning/not live;
 - `docs/research/PASSENGER_MOBILITY_LEGAL_BASELINE_RO_PH.md` — cercetare juridică cu surse oficiale și alerte de revalidare;
 - `docs/ux/PASSENGER_MOBILITY_UX_SPEC.md` — fluxuri Customer/Merchant, Delivery Partner și Admin;
-- `docs/planning/PASSENGER_MOBILITY_IMPLEMENTATION_PLAN.md` — date, API, state machine, securitate, testare, rollout și DoD;
+- `docs/implementation/PASSENGER_MOBILITY_IMPLEMENTATION_PLAN.md` — date, API, state machine, securitate, testare, rollout și DoD;
 - `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md` — politica de autoritate a surselor, lifecycle de cerință, porți duble, autorizare etapizată și fail-closed;
 - `docs/legal/legal-source-register.json` — 35 înregistrări cu proveniență, status, hash și stare de utilizare;
 - `docs/legal/sources/` — 22 snapshot-uri oficiale imuabile (UE, România, Filipine) verificate prin SHA-256 și byte length;

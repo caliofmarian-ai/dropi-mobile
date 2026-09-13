@@ -7,6 +7,7 @@
 **UX source:** `docs/ux/PASSENGER_MOBILITY_UX_SPEC.md`
 **Legal source policy:** `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md`
 **Legal evidence registry:** `docs/legal/legal-source-register.json`
+**Repository class:** regulated product implementation plan; not a GitHub issue-materialization input
 
 ## 1. Outcome and boundary
 

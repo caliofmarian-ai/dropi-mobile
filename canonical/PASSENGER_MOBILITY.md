@@ -317,5 +317,5 @@ No feature flag, admin override, pilot demand, or business deadline may bypass a
 - Legal blockers: `docs/legal/LEGAL_GAPS_AND_BLOCKERS.md`
 - Legal baseline: `docs/research/PASSENGER_MOBILITY_LEGAL_BASELINE_RO_PH.md`
 - UX specification: `docs/ux/PASSENGER_MOBILITY_UX_SPEC.md`
-- Technical and delivery plan: `docs/planning/PASSENGER_MOBILITY_IMPLEMENTATION_PLAN.md`
+- Technical and delivery plan: `docs/implementation/PASSENGER_MOBILITY_IMPLEMENTATION_PLAN.md`
 - Cargo boundary: `canonical/DELIVERY_MULTIMODAL.md`
