@@ -32,18 +32,22 @@ test("owner Android artifact cannot target a local development API", () => {
   assert.match(workflow, /must use HTTPS/);
 });
 
-test("Expo SDK 54 / React Native 0.81 runtime keeps React on renderer-compatible 19.1.0", () => {
+test("Expo SDK 54 / React Native 0.81 runtime keeps React renderer-compatible", () => {
   const deps = packageJson.dependencies ?? {};
-  assert.equal(deps.expo, "~54.0.37");
-  assert.equal(deps["react-native"], "0.81.5");
+  assert.match(deps.expo ?? "", /^~54\./, "this guard targets the Expo SDK 54 runtime family");
+  assert.match(
+    deps["react-native"] ?? "",
+    /^0\.81\./,
+    "this guard targets the React Native 0.81 runtime family",
+  );
   assert.equal(
     deps.react,
     "19.1.0",
-    "React must exactly match the React Native 0.81 renderer; 19.1.9 causes an incompatible React versions red screen",
+    "React Native 0.81 uses the React 19.1.0 renderer; a different React runtime causes an incompatible React versions red screen",
   );
   assert.equal(
     deps["react-dom"],
-    "19.1.0",
-    "react-dom must stay aligned with React 19.1.0 for this Expo SDK 54 runtime",
+    deps.react,
+    "react-dom must stay aligned with the React runtime version",
   );
 });
