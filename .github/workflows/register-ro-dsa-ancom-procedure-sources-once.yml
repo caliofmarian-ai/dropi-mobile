@@ -1,0 +1,46 @@
+name: Register Romania DSA ANCOM procedure sources once
+
+on:
+  push:
+    branches:
+      - docs/ro-launch-007-legal-corpus
+    paths:
+      - scripts/register-ro-dsa-ancom-procedure-sources.mjs
+      - .github/workflows/register-ro-dsa-ancom-procedure-sources-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/ro-launch-007-legal-corpus
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Register ANCOM DSA procedure sources
+        run: node scripts/register-ro-dsa-ancom-procedure-sources.mjs
+
+      - name: Validate legal source register
+        run: node scripts/validate-legal-sources.mjs
+
+      - name: Reject whitespace errors
+        run: git diff --check
+
+      - name: Commit register update
+        run: |
+          if git diff --quiet -- docs/legal/legal-source-register.json; then
+            echo "No source-register changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/legal/legal-source-register.json
+          git commit -m "docs(dsa): register ANCOM procedure status sources"
+          git push origin HEAD:docs/ro-launch-007-legal-corpus
