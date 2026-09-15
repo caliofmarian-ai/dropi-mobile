@@ -1,14 +1,15 @@
-name: GitHub Build — Android APK (development/debug)
+name: GitHub Build — Android APK (standalone owner test)
 
-# Construiește APK-ul Android debug direct pe GitHub-hosted runner, fără EAS.
-# Se rulează EXCLUSIV manual (workflow_dispatch).
-# APK-ul rezultat este disponibil ca GitHub Actions artifact (7 zile).
+# Builds a standalone Android APK for Project Owner/device acceptance.
+# This artifact MUST launch on a physical phone without Metro, a computer,
+# Expo Dev Client, or any local development server.
+# Runs only when explicitly requested.
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build Android APK (debug)
+    name: Build standalone Android APK
     runs-on: ubuntu-latest
 
     steps:
@@ -18,22 +19,23 @@ jobs:
       - name: Validate EXPO_PUBLIC_API_BASE_URL
         run: |
           if [ -z "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" ]; then
-            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu este setat în GitHub Variables"
-            echo "   → GitHub → Settings → Secrets and variables → Actions → Variables → adaugă EXPO_PUBLIC_API_BASE_URL"
-            echo "   → Valoarea: URL-ul public Railway al backend-ului (ex: https://dropi-xxx.up.railway.app)"
+            echo "ERROR: EXPO_PUBLIC_API_BASE_URL is not configured in GitHub Variables"
             exit 1
           fi
           if echo "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" | grep -qE "(localhost|127\.0\.0\.1)"; then
-            echo "❌ EROARE: EXPO_PUBLIC_API_BASE_URL nu poate fi localhost sau 127.0.0.1 pe mobile"
-            echo "   → Folosește URL-ul public Railway al backend-ului."
+            echo "ERROR: EXPO_PUBLIC_API_BASE_URL cannot target localhost on a standalone phone build"
             exit 1
           fi
-          echo "✅ EXPO_PUBLIC_API_BASE_URL este configurat: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}"
+          if ! echo "${{ vars.EXPO_PUBLIC_API_BASE_URL }}" | grep -qE '^https://'; then
+            echo "ERROR: EXPO_PUBLIC_API_BASE_URL must use HTTPS"
+            exit 1
+          fi
+          echo "Public mobile API configuration is valid"
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 20.x
+          node-version: 22.x
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -44,9 +46,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Expo prebuild (Android)
-        if: ${{ !hashFiles('android/build.gradle') }}
         run: npx expo prebuild --platform android --clean --no-install
         env:
+          NODE_ENV: production
           EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
 
       - name: Setup JDK 17
@@ -55,29 +57,53 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
+      - name: Verify preinstalled Android SDK
+        run: |
+          test -d "$ANDROID_HOME" || { echo "ERROR: ANDROID_HOME is not available on runner"; exit 1; }
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME" >/dev/null
 
-      - name: Build debug APK with Gradle
+      - name: Increase Gradle memory for release compilation
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: |
+          if grep -q '^org.gradle.jvmargs=' gradle.properties; then
+            sed -i 's#^org.gradle.jvmargs=.*#org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=2048m -Dfile.encoding=UTF-8#' gradle.properties
+          else
+            echo 'org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=2048m -Dfile.encoding=UTF-8' >> gradle.properties
+          fi
+          grep '^org.gradle.jvmargs=' gradle.properties
+
+      - name: Build standalone release APK with embedded JS bundle
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon -x lintVitalAnalyzeRelease
         env:
+          NODE_ENV: production
           EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
 
-      - name: Locate APK
+      - name: Locate standalone APK
         id: locate_apk
         run: |
-          APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -1)
+          APK_PATH=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
           if [ -z "$APK_PATH" ]; then
-            echo "❌ EROARE: APK nu a fost găsit după build"
+            echo "ERROR: standalone release APK was not found after build"
             exit 1
           fi
-          echo "✅ APK găsit: $APK_PATH"
+          echo "Standalone APK: $APK_PATH"
           echo "apk_path=$APK_PATH" >> "$GITHUB_OUTPUT"
 
-      - name: Upload APK artifact
+      - name: Verify JavaScript bundle is embedded
+        run: |
+          APK_PATH="${{ steps.locate_apk.outputs.apk_path }}"
+          if ! unzip -l "$APK_PATH" | grep -q "assets/index.android.bundle"; then
+            echo "ERROR: APK does not contain an embedded React Native JS bundle"
+            echo "This artifact would require Metro and must not be delivered to the Project Owner."
+            exit 1
+          fi
+          echo "Embedded JS bundle verified — APK is not Metro-dependent"
+
+      - name: Upload standalone owner APK artifact
         uses: actions/upload-artifact@v7
         with:
-          name: dropi-debug-apk
+          name: dropi-standalone-owner-apk
           path: ${{ steps.locate_apk.outputs.apk_path }}
           retention-days: 7
