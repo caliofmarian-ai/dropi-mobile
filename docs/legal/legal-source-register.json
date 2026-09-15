@@ -1,13 +1,15 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-09-12T00:00:00Z",
+  "generatedAt": "2026-09-15T00:00:00Z",
   "governingCanon": "canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md",
   "notice": "Repository snapshots are research evidence, not proof of current applicability or authorization. Only an approved traced requirement may inform law-dependent design, and no registry entry directly enables operations.",
   "sources": [
     {
       "id": "EU-REG-2019-945-ORIGINAL",
       "jurisdiction": "EU",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "European Union",
       "citation": "Commission Delegated Regulation (EU) 2019/945",
       "title": "Unmanned aircraft systems and third-country operators",
@@ -33,7 +35,9 @@
     {
       "id": "EU-REG-2019-947-CONSOLIDATED-2025-05-01",
       "jurisdiction": "EU",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "European Union",
       "citation": "Commission Implementing Regulation (EU) 2019/947, consolidated 2025-05-01",
       "title": "Rules and procedures for the operation of unmanned aircraft",
@@ -59,7 +63,9 @@
     {
       "id": "EU-GDPR-2016-679",
       "jurisdiction": "EU",
-      "serviceDomains": ["all"],
+      "serviceDomains": [
+        "all"
+      ],
       "authority": "European Union",
       "citation": "Regulation (EU) 2016/679",
       "title": "General Data Protection Regulation",
@@ -85,7 +91,10 @@
     {
       "id": "EU-DIR-2024-2831",
       "jurisdiction": "EU",
-      "serviceDomains": ["parcel_delivery", "passenger_mobility"],
+      "serviceDomains": [
+        "parcel_delivery",
+        "passenger_mobility"
+      ],
       "authority": "European Union",
       "citation": "Directive (EU) 2024/2831",
       "title": "Improving working conditions in platform work",
@@ -111,7 +120,9 @@
     {
       "id": "EU-REG-168-2013-CONSOLIDATED-2024-11-27",
       "jurisdiction": "EU",
-      "serviceDomains": ["parcel_delivery"],
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
       "authority": "European Union",
       "citation": "Regulation (EU) No 168/2013, consolidated 2024-11-27",
       "title": "Approval and market surveillance of two- or three-wheel vehicles and quadricycles",
@@ -137,7 +148,9 @@
     {
       "id": "RO-OUG-49-2019",
       "jurisdiction": "RO",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Government of Romania",
       "citation": "Emergency Ordinance No. 49/2019",
       "title": "Alternative transport activities by car and driver",
@@ -163,7 +176,9 @@
     {
       "id": "RO-LAW-204-2019",
       "jurisdiction": "RO",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Parliament of Romania",
       "citation": "Law No. 204/2019",
       "title": "Approval and amendment of Emergency Ordinance No. 49/2019",
@@ -189,7 +204,9 @@
     {
       "id": "RO-ADR-DECISION-572-2020-NORMS",
       "jurisdiction": "RO",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Authority for the Digitalization of Romania",
       "citation": "ADR Decision No. 572/2020, procedural norms",
       "title": "Procedure for granting and withdrawing the technical endorsement",
@@ -215,7 +232,9 @@
     {
       "id": "RO-ADR-PLATFORM-PROCEDURE-2026-09-12",
       "jurisdiction": "RO",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Authority for the Digitalization of Romania",
       "citation": "ADR service page retrieved 2026-09-12",
       "title": "Digital platforms for alternative transport",
@@ -241,7 +260,9 @@
     {
       "id": "RO-ARR-AUTHORIZATION-CHECKLIST-2026-09-12",
       "jurisdiction": "RO",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Romanian Road Authority",
       "citation": "ARR authorization instructions retrieved 2026-09-12",
       "title": "Alternative transport authorization and vehicle-document instructions",
@@ -267,7 +288,9 @@
     {
       "id": "RO-OUG-13-2013-ANCOM-CONSOLIDATION-2019",
       "jurisdiction": "RO",
-      "serviceDomains": ["parcel_delivery"],
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
       "authority": "National Authority for Management and Regulation in Communications",
       "citation": "Emergency Ordinance No. 13/2013, unofficial consolidation through 2019-09-02",
       "title": "Postal services",
@@ -293,7 +316,9 @@
     {
       "id": "RO-ANCOM-DECISION-925-2023",
       "jurisdiction": "RO",
-      "serviceDomains": ["parcel_delivery"],
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
       "authority": "National Authority for Management and Regulation in Communications",
       "citation": "ANCOM Decision No. 925/2023",
       "title": "General authorization regime for providing postal services",
@@ -319,7 +344,9 @@
     {
       "id": "RO-ANCOM-GENERAL-AUTHORIZATION-2026-09-12",
       "jurisdiction": "RO",
-      "serviceDomains": ["parcel_delivery"],
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
       "authority": "National Authority for Management and Regulation in Communications",
       "citation": "ANCOM postal general-authorization page retrieved 2026-09-12",
       "title": "General authorization for postal services",
@@ -372,7 +399,9 @@
     {
       "id": "RO-AACR-DRONE-GUIDANCE-CURRENT",
       "jurisdiction": "RO",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "Romanian Civil Aeronautical Authority",
       "citation": "AACR drone regulatory and service material",
       "title": "Romanian unmanned-aircraft requirements",
@@ -395,7 +424,10 @@
     {
       "id": "PH-RA-4136",
       "jurisdiction": "PH",
-      "serviceDomains": ["parcel_delivery", "passenger_mobility"],
+      "serviceDomains": [
+        "parcel_delivery",
+        "passenger_mobility"
+      ],
       "authority": "Congress of the Philippines",
       "citation": "Republic Act No. 4136",
       "title": "Land Transportation and Traffic Code",
@@ -421,7 +453,9 @@
     {
       "id": "PH-RA-7160",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_tricycle"],
+      "serviceDomains": [
+        "passenger_tricycle"
+      ],
       "authority": "Congress of the Philippines",
       "citation": "Republic Act No. 7160",
       "title": "Local Government Code of 1991",
@@ -447,7 +481,9 @@
     {
       "id": "PH-RA-7354",
       "jurisdiction": "PH",
-      "serviceDomains": ["parcel_delivery"],
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
       "authority": "Congress of the Philippines",
       "citation": "Republic Act No. 7354",
       "title": "Postal Service Act of 1992",
@@ -473,7 +509,9 @@
     {
       "id": "PH-RA-10173",
       "jurisdiction": "PH",
-      "serviceDomains": ["all"],
+      "serviceDomains": [
+        "all"
+      ],
       "authority": "Congress of the Philippines",
       "citation": "Republic Act No. 10173",
       "title": "Data Privacy Act of 2012",
@@ -499,7 +537,9 @@
     {
       "id": "PH-SC-GR-242860-2019",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Supreme Court of the Philippines",
       "citation": "LTFRB v. Valenzuela, G.R. No. 242860, 2019-03-05",
       "title": "Judgment concerning TNC/TNVS regulation",
@@ -525,7 +565,9 @@
     {
       "id": "PH-DOTR-DO-2015-011",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Department of Transportation and Communications",
       "citation": "Department Order No. 2015-011",
       "title": "New classification for public transport conveyances and TNC/TNVS framework",
@@ -548,7 +590,9 @@
     {
       "id": "PH-DOTR-DO-2018-013",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Department of Transportation",
       "citation": "Department Order No. 2018-013",
       "title": "TNC and TNVS regulation",
@@ -571,7 +615,9 @@
     {
       "id": "PH-LTFRB-MC-2015-015",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Land Transportation Franchising and Regulatory Board",
       "citation": "Memorandum Circular No. 2015-015",
       "title": "TNC accreditation terms and conditions",
@@ -594,7 +640,9 @@
     {
       "id": "PH-LTFRB-MC-2015-017",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Land Transportation Franchising and Regulatory Board",
       "citation": "Memorandum Circular No. 2015-017",
       "title": "TNVS CPC application framework",
@@ -617,7 +665,9 @@
     {
       "id": "PH-LTFRB-MC-2015-018",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Land Transportation Franchising and Regulatory Board",
       "citation": "Memorandum Circular No. 2015-018",
       "title": "TNVS operating terms and conditions",
@@ -640,7 +690,9 @@
     {
       "id": "PH-LTO-MC-94-199",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_tricycle"],
+      "serviceDomains": [
+        "passenger_tricycle"
+      ],
       "authority": "Land Transportation Office",
       "citation": "Memorandum Circular No. 94-199",
       "title": "Devolution of tricycle-for-hire franchising to local government units",
@@ -663,7 +715,9 @@
     {
       "id": "PH-LTFRB-MC-2026-049-PENDING",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Land Transportation Franchising and Regulatory Board",
       "citation": "Memorandum Circular No. 2026-049 (reported; official copy pending)",
       "title": "Reported TNVS authority transition to ATOC",
@@ -686,7 +740,9 @@
     {
       "id": "PH-LTFRB-CITIZENS-CHARTER-CURRENT",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Land Transportation Franchising and Regulatory Board",
       "citation": "Current Citizen's Charter and TNC/TNVS service checklists",
       "title": "Current LTFRB filing and service requirements",
@@ -709,7 +765,9 @@
     {
       "id": "PH-CAAP-PCAR-PART-11-2026-09-12",
       "jurisdiction": "PH",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "Civil Aviation Authority of the Philippines",
       "citation": "Philippine Civil Aviation Regulations Part 11 page retrieved 2026-09-12",
       "title": "Remotely Piloted Aircraft Systems",
@@ -735,7 +793,9 @@
     {
       "id": "PH-CAAP-RPA-CONTROLLER-2026-09-12",
       "jurisdiction": "PH",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "Civil Aviation Authority of the Philippines",
       "citation": "CAAP RPA Controller Certificate page retrieved 2026-09-12",
       "title": "RPA Controller Certificate",
@@ -761,7 +821,9 @@
     {
       "id": "PH-CAAP-RPA-REGISTRATION-2026-09-12",
       "jurisdiction": "PH",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "Civil Aviation Authority of the Philippines",
       "citation": "CAAP RPA Registration page retrieved 2026-09-12",
       "title": "RPA registration",
@@ -787,7 +849,9 @@
     {
       "id": "PH-CAAP-RPAS-OPERATOR-2026-09-12",
       "jurisdiction": "PH",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "Civil Aviation Authority of the Philippines",
       "citation": "CAAP RPAS Operator Certificate page retrieved 2026-09-12",
       "title": "RPAS Operator Certificate",
@@ -840,7 +904,9 @@
     {
       "id": "PH-LTFRB-MC-2026-049-BUSINESSWORLD-ALERT",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "BusinessWorld",
       "citation": "News report dated 2026-07-15",
       "title": "Reported conversion of eligible TNVS CPCs to ATOCs",
@@ -863,7 +929,9 @@
     {
       "id": "PH-LTFRB-MC-2026-049-INQUIRER-ALERT",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Philippine Daily Inquirer",
       "citation": "News report identified 2026-09-12",
       "title": "Reported automatic TNVS CPC-to-ATOC conversion",
@@ -881,6 +949,876 @@
         "state": "cannot_enable",
         "reviewBy": "never_as_authority",
         "notes": "Obtain and analyze the official circular."
+      }
+    },
+    {
+      "id": "RO-OUG-13-2013-PORTAL-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
+      "authority": "Government of Romania / Romanian Legislative Portal",
+      "citation": "Emergency Ordinance No. 13/2013 — official consolidation interface verified 2026-09-15",
+      "title": "Postal services — official Legislative Portal source",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocumentAfis/217438",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint identified. Controlled repository bytes/hash are not yet archived; visible consolidation history must be reconciled with current ANCOM guidance before reliance."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_delivery_role_design",
+        "notes": "Does not replace the stale 2019 ANCOM snapshot until a controlled current primary copy and applicability review exist."
+      }
+    },
+    {
+      "id": "RO-ANCOM-DIGITAL-POSTAL-RESELLERS-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
+      "authority": "National Authority for Management and Regulation in Communications",
+      "citation": "ANCOM guidance for digital platforms reselling postal services, verified 2026-09-15",
+      "title": "Digital platforms reselling postal services",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://infocentru.ancom.ro/platformele-digitale-care-revand-servicii-postale/",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official ANCOM guidance endpoint verified; controlled HTML snapshot/hash remains to be archived."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_postal_resale_design",
+        "notes": "Supports reseller/effective-provider disclosure analysis; controlling law and Decision 925/2023 still govern."
+      }
+    },
+    {
+      "id": "RO-ANCOM-POSTAL-RESELLER-REGISTER-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
+      "authority": "National Authority for Management and Regulation in Communications",
+      "citation": "ANCOM list of postal-service resellers, verified 2026-09-15",
+      "title": "Postal providers reselling postal services",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.ancom.ro/reglementare-ro/servicii-postale/furnizori-servicii-postale/furnizori-servicii-postale-revanzatori/",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "metadata_only",
+        "immutable": true,
+        "qualifier": "Dynamic official register/list endpoint. A controlled verification method and time-stamped evidence are required for provider checks."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_carrier_or_reseller_authority_verification",
+        "notes": "Dynamic list is evidence source, not a permanent authorization assertion."
+      }
+    },
+    {
+      "id": "RO-OUG-34-2014-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "consumer_contracts"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Emergency Ordinance No. 34/2014 — consolidated Legislative Portal form verified 2026-09-15",
+      "title": "Consumer rights in contracts concluded with professionals",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/307805",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official consolidated Portal endpoint verified, including 2026 amendment annotations; controlled repository copy/hash remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_marketplace_design",
+        "notes": "Article 6^1 Marketplace disclosures and Article 11^1 withdrawal flow require exact provision-to-control review."
+      }
+    },
+    {
+      "id": "RO-OUG-18-2026",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "consumer_contracts"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Emergency Ordinance No. 18/2026",
+      "title": "2026 amendments to Romanian consumer distance-contract law",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocumentAfis/308474",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official act endpoint verified; controlled repository copy/hash remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_marketplace_design",
+        "notes": "Application dates include 19 June 2026 for Article II point 13 (online withdrawal function) and 27 September 2026 for specified other amendments."
+      }
+    },
+    {
+      "id": "EU-REG-2022-2065-DSA",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "marketplace",
+        "intermediary_services"
+      ],
+      "authority": "European Union",
+      "citation": "Regulation (EU) 2022/2065",
+      "title": "Digital Services Act",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/eli/reg/2022/2065/oj",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/dsa/EU-REG-2022-2065-DSA-2026-09-15.html",
+        "sha256": "bf08cfd8ecedd66ffe3d12442798504d512579da3f649eb2ce9b8c15dafd45db",
+        "bytes": 265051,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; amendments, applicability, interpretation and later authority/provider changes remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_dsa_design",
+        "notes": "Article 19 and Article 29 micro/small exclusions require enterprise-size and service-scope analysis; they do not remove all DSA duties. Controlled official bytes archived 2026-09-15; no operational approval implied."
+      }
+    },
+    {
+      "id": "RO-LAW-50-2024",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "intermediary_services"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 50/2024",
+      "title": "Romanian measures for application of Regulation (EU) 2022/2065",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/public/DetaliiDocument/280106",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint verified; controlled repository copy/hash remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_dsa_design",
+        "notes": "Romanian DSA implementation/coordination and sanction framework."
+      }
+    },
+    {
+      "id": "EU-REG-2023-988-GPSR-CONSOLIDATED-2026-05-29",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "marketplace",
+        "product_safety"
+      ],
+      "authority": "European Union",
+      "citation": "Regulation (EU) 2023/988, consolidated 2026-05-29",
+      "title": "General Product Safety Regulation",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02023R0988-20260529",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/product-safety/EU-REG-2023-988-GPSR-CONSOLIDATED-2026-05-29-RETRIEVED-2026-09-15.html",
+        "sha256": "a205bcac00499612d80a77cd4317aa3c2c42b118ed9e048a793fcdebb5d8756f",
+        "bytes": 252568,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; amendments, applicability, interpretation and later authority/provider changes remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_marketplace_product_activation",
+        "notes": "Article 22 Marketplace product-safety controls require provision-to-control mapping and category review. Controlled official bytes archived 2026-09-15; no operational approval implied."
+      }
+    },
+    {
+      "id": "RO-LAW-209-2019-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "payments",
+        "marketplace"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 209/2019 — Legislative Portal form verified 2026-09-15",
+      "title": "Payment services",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/219736",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint verified; controlled repository copy/hash remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_live_payments",
+        "notes": "Payment perimeter still requires selected-PSP and exact money-flow review."
+      }
+    },
+    {
+      "id": "RO-LAW-190-2018-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "all"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 190/2018 — Legislative Portal form verified 2026-09-15",
+      "title": "Romanian measures implementing Regulation (EU) 2016/679",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/203151",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint verified; controlled repository copy/hash remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_personal_data_design",
+        "notes": "Use with GDPR and current ANSPDCP/EDPB guidance; does not by itself determine launch retention or DPIA."
+      }
+    },
+    {
+      "id": "RO-ONRC-CAEN-REV3-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "parcel_delivery",
+        "platform_intermediation"
+      ],
+      "authority": "National Trade Register Office",
+      "citation": "CAEN Rev.3 complete structure — official ONRC-hosted copy verified 2026-09-15",
+      "title": "CAEN Rev.3 complete structure",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.onrc.ro/documente/caen/CAEN_Rev.3_structura_completa.pdf",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official ONRC-hosted PDF identified; repository binary/hash remains to be archived."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_entity_filing",
+        "notes": "Confirms classification labels including 4791/4792/5320/5330; classification does not substitute for sector authorization."
+      }
+    },
+    {
+      "id": "RO-ONRC-CAEN-REV2-REV3-CORRESPONDENCE-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "parcel_delivery",
+        "platform_intermediation"
+      ],
+      "authority": "National Trade Register Office",
+      "citation": "CAEN Rev.2 to Rev.3 correspondence — official ONRC-hosted copy verified 2026-09-15",
+      "title": "CAEN Rev.2 / CAEN Rev.3 correspondence",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.onrc.ro/documente/anunturi/Corespondenta-CAEN-Rev.2-CAEN-Rev.3.pdf",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official ONRC-hosted PDF identified; repository binary/hash remains to be archived."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_entity_filing",
+        "notes": "Describes 5330 as intermediation without the intermediary itself providing postal/courier service; factual ANCOM role remains separately classified."
+      }
+    },
+    {
+      "id": "RO-ANCOM-DSA-PROCEDURE-CONSULTATION-2024",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "intermediary_services"
+      ],
+      "authority": "National Authority for Management and Regulation in Communications",
+      "citation": "ANCOM consultation draft — information procedure for intermediary-service providers, 2024",
+      "title": "Draft information procedure for intermediary-service providers",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.ancom.ro/consultare/proiect-de-decizie-privind-procedura-de-informare-pentru-furnizorii-de-servicii-intermediare-o-noua-versiune-a-proiectului-de-decizie/",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official consultation material identified. It is a draft/proposal and must never be treated as the final Article 5 procedure without an adopted current ANCOM act."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_dsa_filing_or_service_start",
+        "notes": "Discovery/legislative-history evidence only; cannot enable or define a production filing form."
+      }
+    },
+    {
+      "id": "RO-ANCOM-ACTION-PLAN-2026",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "intermediary_services"
+      ],
+      "authority": "National Authority for Management and Regulation in Communications",
+      "citation": "ANCOM 2026 action-plan consultation — digital services section",
+      "title": "ANCOM 2026 action-plan material concerning DSA secondary legislation",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.ancom.ro/despre-noi/media/comunicate-de-presa/ancom-consulta-proiectul-planului-de-actiuni-pentru-anul-2026/",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official ANCOM page identified; controlled snapshot still pending. The page states the intermediary-provider information procedure is planned for development in 2026."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_dsa_filing_or_service_start",
+        "notes": "Supports keeping the 2024 consultation draft non-final; recheck ANCOM immediately before any Article 5 filing."
+      }
+    },
+    {
+      "id": "RO-ANCOM-DECISION-333-2024-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "intermediary_services",
+        "parcel_delivery"
+      ],
+      "authority": "National Authority for Management and Regulation in Communications",
+      "citation": "ANCOM Decision No. 333/2024 — current Legislative Portal form",
+      "title": "Communication of documents through My ANCOM",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/285331",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official current Legislative Portal endpoint identified; controlled repository snapshot remains pending. Current form includes Romanian intermediary-service providers among eligible My ANCOM beneficiaries."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_dsa_filing_or_my_ancom_workflow",
+        "notes": "Electronic-communications framework evidence; does not by itself establish the final Law 50/2024 Article 5 information procedure."
+      }
+    },
+    {
+      "id": "RO-ANCOM-DECISION-463-2025",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "intermediary_services",
+        "parcel_delivery"
+      ],
+      "authority": "National Authority for Management and Regulation in Communications",
+      "citation": "ANCOM Decision No. 463/2025",
+      "title": "Amendment of Decision No. 333/2024 concerning My ANCOM",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/301520?isFormaDeBaza=True&rep=True",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint identified; controlled repository snapshot remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_dsa_filing_or_my_ancom_workflow",
+        "notes": "Read with the current consolidated Decision 333/2024; does not substitute for a separately adopted Article 5 information procedure."
+      }
+    },
+    {
+      "id": "RO-LAW-365-2002-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "intermediary_services",
+        "electronic_commerce"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 365/2002 — republicated Electronic Commerce Law",
+      "title": "Electronic commerce",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/37075",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint for the republicated act is verified; controlled repository bytes/hash remain pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_marketplace_or_intermediary_service_design",
+        "notes": "Electronic-commerce / information-society-service baseline. Reconcile with DSA, Law 50/2024, OUG 34/2014 and later amendments; no direct launch permission."
+      }
+    },
+    {
+      "id": "RO-HG-1308-2002-E_COMMERCE-NORMS",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "intermediary_services",
+        "electronic_commerce",
+        "payments"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Government Decision No. 1308/2002",
+      "title": "Methodological norms for application of Law No. 365/2002",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/40350",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint is verified; controlled repository bytes/hash remain pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_marketplace_or_intermediary_service_design",
+        "notes": "Methodological norms are historical and contain payment references that require reconciliation with the current payment-services and DSA framework; never hardcode superseded payment rules."
+      }
+    },
+    {
+      "id": "RO-ANSPDCP-DECISION-174-2018-DPIA",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "all",
+        "marketplace",
+        "parcel_delivery",
+        "privacy"
+      ],
+      "authority": "Romanian National Supervisory Authority for Personal Data Processing",
+      "citation": "ANSPDCP Decision No. 174/2018",
+      "title": "List of processing operations requiring a data protection impact assessment",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/public/detaliidocument/206331",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint verified; controlled repository bytes/hash remain pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_dpia_decision_or_high_risk_processing",
+        "notes": "National DPIA list must be evaluated together with GDPR Article 35 against each factual processing activity; the list is not a universal DROPi-wide DPIA conclusion."
+      }
+    },
+    {
+      "id": "RO-ANSPDCP-DPIA-GUIDANCE-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "all",
+        "marketplace",
+        "parcel_delivery",
+        "privacy"
+      ],
+      "authority": "Romanian National Supervisory Authority for Personal Data Processing",
+      "citation": "ANSPDCP DPIA guidance page rechecked 2026-09-15",
+      "title": "Final DPIA guidance",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.dataprotection.ro/?lang=ro&page=Comunicat_ghid_final_DPIA",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/data-protection/RO-ANSPDCP-DPIA-GUIDANCE-2026-09-15.html",
+        "sha256": "0d349886e7120a00a40664c0f603e965b91e677634339549681db82c5e8dae8c",
+        "bytes": 25988,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; amendments, applicability and DROPi DPIA conclusions remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_dpia_decision_or_high_risk_processing",
+        "notes": "Guidance supports risk-based DPIA assessment and does not substitute for GDPR, Decision 174/2018, or a documented DROPi DPIA decision."
+      }
+    },
+    {
+      "id": "IE-REVENUE-COMPANY-RESIDENCY-2026-09-15",
+      "jurisdiction": "IE",
+      "serviceDomains": [
+        "marketplace",
+        "entity_tax"
+      ],
+      "authority": "Irish Revenue Commissioners",
+      "citation": "Irish Revenue company residency rules rechecked 2026-09-15",
+      "title": "Company residency rules",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.revenue.ie/en/companies-and-charities/corporation-tax-for-companies/corporation-tax/company-residency-rules.aspx",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ie/entity-tax/IE-REVENUE-COMPANY-RESIDENCY-2026-09-15.html",
+        "sha256": "fdec93d354818bc14a8783dd5d5c18307c040c326701cae51d77d814902440e6",
+        "bytes": 72364,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; current factual applicability and professional tax/accounting conclusions remain separately gated."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_entity_tax_design",
+        "notes": "Official Irish Revenue guidance confirms the central-management-and-control rule for foreign-incorporated companies; factual application to DROPi requires professional review."
+      }
+    },
+    {
+      "id": "IE-RO-DTA-SI-427-1999",
+      "jurisdiction": "IE/RO",
+      "serviceDomains": [
+        "marketplace",
+        "entity_tax"
+      ],
+      "authority": "Government of Ireland / Irish Statute Book",
+      "citation": "S.I. No. 427/1999 — Double Taxation Relief (Taxes on Income and Capital Gains) (Romania) Order, 1999",
+      "title": "Ireland-Romania Double Taxation Convention legal order",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://www.irishstatutebook.ie/eli/1999/si/427/made/en/print",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ie/entity-tax/IE-RO-DTA-SI-427-1999.html",
+        "sha256": "90f40e27ede509c4558c09973dcc691f8c16d5b37a157f83ad742939647cbd61",
+        "bytes": 113673,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; current factual applicability and professional tax/accounting conclusions remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_entity_tax_design",
+        "notes": "Original treaty legal order. Must be read together with the MLI and current treaty positions; original Article 4(3) wording is not used alone after MLI modification."
+      }
+    },
+    {
+      "id": "IE-MLI-SI-440-2018",
+      "jurisdiction": "IE",
+      "serviceDomains": [
+        "marketplace",
+        "entity_tax"
+      ],
+      "authority": "Government of Ireland / Irish Statute Book",
+      "citation": "S.I. No. 440/2018 — Multilateral Convention to Implement Tax Treaty Related Measures Order 2018",
+      "title": "Irish MLI implementing order",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://www.irishstatutebook.ie/eli/2018/si/440/made/en/print",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ie/entity-tax/IE-MLI-SI-440-2018.html",
+        "sha256": "39aacb1c87ed939837f4ef2c352e34b80750a1888ee8a0a54518dc044acc8963",
+        "bytes": 536597,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; current factual applicability and professional tax/accounting conclusions remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_entity_tax_design",
+        "notes": "Authentic Irish MLI implementing source. Treaty-specific effect must be reconciled with Romania MLI position and effective dates."
+      }
+    },
+    {
+      "id": "IE-RO-DTA-MLI-SYNTHESISED-2026-09-15",
+      "jurisdiction": "IE/RO",
+      "serviceDomains": [
+        "marketplace",
+        "entity_tax"
+      ],
+      "authority": "Irish Revenue Commissioners",
+      "citation": "Revenue synthesised text of the MLI and Ireland-Romania Double Taxation Convention, rechecked 2026-09-15",
+      "title": "Synthesised MLI and Ireland-Romania convention",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.revenue.ie/en/tax-professionals/documents/double-taxation-treaties/r/synthesised-text-of-the-mli-and-the-ireland-romania-double-taxation-convention.pdf",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ie/entity-tax/IE-RO-DTA-MLI-SYNTHESISED-2026-09-15.pdf",
+        "sha256": "f0316c0fe6d3495e2aeaae2f5e9b85036761862c66a237632ac9503494c6d333",
+        "bytes": 213645,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; current factual applicability and professional tax/accounting conclusions remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_entity_tax_design",
+        "notes": "Official explanatory synthesis, expressly not itself a source of law. Shows MLI Article 4 mutual-agreement rule replacing original treaty Article 4(3) and treaty-specific effective dates."
+      }
+    },
+    {
+      "id": "RO-OUG-120-2021-EFACTURA-CURRENT-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "payments",
+        "entity_tax"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Emergency Ordinance No. 120/2021 — current consolidated RO e-Factura framework rechecked 2026-09-15",
+      "title": "RO e-Factura framework",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/247243",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_invoice_design",
+        "notes": "Current e-Factura baseline must be applied per actual supplier, transaction and VAT/fiscal status; it does not decide seller-of-record or invoice issuer."
+      }
+    },
+    {
+      "id": "RO-LAW-88-2026-EFACTURA",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "payments",
+        "entity_tax"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 88/2026",
+      "title": "2026 amendments affecting RO e-Factura",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/311108",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_invoice_design",
+        "notes": "Amending act for 2026 B2C/register rules; reconcile with current consolidated OUG 120/2021 and exact transaction facts."
+      }
+    },
+    {
+      "id": "RO-ANAF-FOREIGN-LEGAL-RESIDENCE-GUIDE-2025",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "entity_tax"
+      ],
+      "authority": "Romanian National Agency for Fiscal Administration",
+      "citation": "ANAF 2025 guide on tax residence of foreign legal persons",
+      "title": "Guide on establishing tax residence in Romania of foreign legal persons",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/Ghid_rezidenta_PJ.pdf",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/fiscal/RO-ANAF-FOREIGN-LEGAL-RESIDENCE-GUIDE-2025.pdf",
+        "sha256": "2ab859ea7a87d9d7cd4d934db2c44ad8c3a54fd2cc7b5af08240da2cdd9c58fb",
+        "bytes": 629174,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; current factual applicability and professional tax/accounting conclusions remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_cross_border_entity_alternative",
+        "notes": "Official Romanian guidance for foreign legal persons with effective management in Romania; useful for entity alternatives and management-location concepts, not a direct ruling on a Romanian SRL managed from Ireland."
+      }
+    },
+    {
+      "id": "RO-LAW-363-2007-CONSOLIDATED-2026-03-27",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "consumer_contracts"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 363/2007, consolidated 2026-03-27",
+      "title": "Unfair commercial practices and consumer-law harmonisation",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/307803",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_marketplace_design",
+        "notes": "Current consolidated Portal source includes OUG 18/2026 changes with future-effective provisions from 27 September 2026. Controls must be effective-date versioned; source presence does not make future provisions currently applicable."
+      }
+    },
+    {
+      "id": "RO-LAW-193-2000-REPUBLISHED",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "consumer_contracts"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 193/2000, republished",
+      "title": "Unfair terms in contracts between professionals and consumers",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/91502",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_consumer_terms_design",
+        "notes": "Baseline for consumer contract terms. Current amendment/applicability review remains required before final Terms wording."
+      }
+    },
+    {
+      "id": "RO-OG-38-2015-ADR-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "consumer_contracts",
+        "support"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Government Ordinance No. 38/2015",
+      "title": "Alternative dispute resolution between consumers and traders",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/193569",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_support_and_adr_design",
+        "notes": "ADR legal baseline; must be reconciled with 2026 ANPC information-display rules and current EU ODR repeal framework."
+      }
+    },
+    {
+      "id": "RO-ANPC-ORDER-270-2026-ADR",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "consumer_contracts",
+        "support"
+      ],
+      "authority": "Romanian National Authority for Consumer Protection",
+      "citation": "ANPC Order No. 270/2026",
+      "title": "2026 amendment of consumer ADR information measures",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/310590",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_support_and_adr_design",
+        "notes": "Current 2026 ANPC rules for SAL plaque/icon/link. Exact applicability to each DROPi web/app surface must be reviewed before UI enforcement."
+      }
+    },
+    {
+      "id": "RO-ANPC-ONLINE-COMMERCE-GUIDE-2026",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "consumer_contracts",
+        "payments",
+        "product_safety",
+        "support"
+      ],
+      "authority": "Romanian National Authority for Consumer Protection",
+      "citation": "ANPC Good Practices Guide for Online Products and Services Market — 2026 edition",
+      "title": "Online commerce good-practices guide — 2026",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://anpc.ro/wp-content/uploads/2026/07/GHID-comert-online-final-06.07.2026.pdf",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_marketplace_design",
+        "notes": "Official ANPC guidance covering online commerce/platforms, information, withdrawal, dark patterns, payments, complaints and product safety. ANPC expressly states the guide is orientative/informative and does not replace applicable law."
       }
     }
   ]
