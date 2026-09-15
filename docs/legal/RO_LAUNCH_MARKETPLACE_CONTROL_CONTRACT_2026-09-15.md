@@ -5,7 +5,7 @@
 > **Issue:** #494
 > **Parent:** #492
 
-This document translates the current Romanian/EU Marketplace evidence into a technical control contract. It does not certify DROPi's final DSA classification or authorize public commerce.
+This document translates the current Romanian/EU Marketplace evidence into a technical control contract. It does not certify DROPi's final DSA classification, validate final consumer wording, or authorize public commerce.
 
 ## 1. Core rule
 
@@ -19,6 +19,23 @@ order.legal = true
 ```
 
 Instead the application must be able to explain the applicable legal pack, evidence, effective dates, actor responsibilities and unresolved gates for every binding transaction.
+
+The current consumer source family must be evaluated together, not as isolated checkbox laws:
+
+```text
+OUG 34/2014          // distance/off-premises consumer contracts + Marketplace disclosures
+OUG 18/2026          // 2026 amendments with multiple effective-date boundaries
+Law 363/2007         // unfair commercial practices / online-marketplace consumer rules
+Law 193/2000         // unfair terms in professional-consumer contracts
+Law 365/2002         // electronic-commerce / information-society-service baseline
+HG 1308/2002         // historical methodological norms; current payment rules require reconciliation
+OG 38/2015           // alternative dispute resolution baseline
+ANPC Order 270/2026  // current SAL information/display changes
+DSA + Law 50/2024    // intermediary/platform obligations where factually applicable
+GPSR                 // product-safety / Marketplace obligations
+```
+
+A source being registered does not mean every provision applies to DROPi or is already effective on the transaction date.
 
 ## 2. Romanian online-Marketplace pre-contract information
 
@@ -72,7 +89,84 @@ ResponsibilityAllocationVersion {
 
 No checkout may rely on hidden prose assembled ad hoc by the mobile UI.
 
-## 3. Binding checkout contract snapshot
+## 3. Unfair-commercial-practice / presentation integrity gate
+
+The current Legislative Portal consolidation of Law 363/2007 dated 27 March 2026 is now registered in the controlled source inventory. It is part of the Marketplace consumer pack and must be reviewed together with OUG 18/2026 and OUG 34/2014.
+
+The application therefore needs a versioned presentation-integrity control rather than treating marketing/UI copy as outside compliance.
+
+Candidate model:
+
+```text
+ConsumerPresentationProfile {
+  surfaceId
+  legalPackVersion
+  offerIdentityRef
+  pricePresentationRef
+  rankingDisclosureRef?
+  sponsoredPlacementDisclosureRef?
+  reviewProvenancePolicyRef?
+  scarcityUrgencyClaimEvidenceRef?
+  environmentalDurabilityClaimEvidenceRef?
+  comparisonClaimEvidenceRef?
+  darkPatternReviewRef?
+  locale
+  effectiveFrom
+  effectiveTo?
+  approvalState
+}
+```
+
+Fail-closed rule:
+
+```text
+UNVERIFIED MATERIAL CONSUMER CLAIM
+OR MISLEADING/AMBIGUOUS PRICE OR RESPONSIBILITY PRESENTATION
+OR REQUIRED DISCLOSURE MISSING
+=> BINDING/PROMOTED SURFACE NOT APPROVED
+```
+
+This does not mean every field above is legally mandatory for every listing. It means DROPi has a place to preserve the evidence and applicability decision when a claim/feature exists.
+
+The official ANPC 2026 online-commerce guide is useful as a design-QA checklist for Marketplace information, interface practices, payments, complaints and product safety, but ANPC expressly presents the guide as orientative/informative. It is not promoted to normative authority and cannot override the underlying law.
+
+## 4. Consumer Terms / unfair-terms gate
+
+Law 193/2000 is now registered as the Romanian unfair-terms baseline for contracts between professionals and consumers.
+
+DROPi must not assume that acceptance of a click-wrap Terms document makes every clause enforceable. Final customer/merchant responsibility wording must therefore pass a dedicated legal review before public checkout.
+
+Required contract metadata:
+
+```text
+ConsumerTermsVersion {
+  id
+  supplierActorId
+  platformActorId?
+  locale
+  termsDocumentRef
+  responsibilityAllocationRef
+  withdrawalInformationRef
+  complaintAdrInformationRef
+  legalPackVersion
+  effectiveFrom
+  effectiveTo?
+  unfairTermsReviewState
+  qualifiedReviewerRef?
+  approvalState
+}
+```
+
+Hard rules:
+
+- consumer Terms must not be generated dynamically from unreviewed merchant/platform fragments;
+- contractual wording cannot waive mandatory consumer rights merely because the consumer clicked `Accept`;
+- responsibility allocation shown by DROPi cannot be used to erase liability imposed by law on the relevant actor;
+- a new material Terms version requires version/effective-date evidence and a decision on whether renewed acceptance/notice is required.
+
+Current state for final public Terms: `HOLD_QUALIFIED_REVIEW`.
+
+## 5. Binding checkout contract snapshot
 
 Every binding order requires an immutable `ContractSnapshot` capturing what the customer was shown/accepted at that transaction moment.
 
@@ -95,9 +189,11 @@ ContractSnapshot {
   effectiveProviderId?
   rankingDisclosureVersion
   responsibilityAllocationVersion
+  consumerPresentationProfileRef
   customerTermsVersion
   merchantTermsVersion
   withdrawalInformationVersion
+  complaintAdrInformationVersion
   legalPackVersion
   locale
   createdAt
@@ -107,7 +203,7 @@ ContractSnapshot {
 
 The snapshot does not replace fiscal invoices, PSP evidence or separate safety/legal records.
 
-## 4. Immediate-before-order controls
+## 6. Immediate-before-order controls
 
 OUG 34/2014 Article 8 requires certain information to be brought clearly and very visibly to the consumer immediately before an electronically concluded order that creates an obligation to pay, and the order action must unambiguously communicate the payment obligation.
 
@@ -122,16 +218,19 @@ bindingCheckoutGate =
   AND required_precontract_information_renderable
   AND ranking_disclosure_current
   AND responsibility_allocation_current
+  AND consumer_presentation_profile_approved
   AND price_currency_components_frozen
   AND fulfilment_role_approved
   AND payment_flow_approved
   AND customer_terms_current
+  AND unfair_terms_review_approved
   AND withdrawal_information_current
+  AND complaint_adr_information_current
 ```
 
 Any `UNKNOWN`, expired or missing required component denies binding checkout with a reason-coded state.
 
-## 5. Online withdrawal function — already effective in 2026
+## 7. Online withdrawal function — already effective in 2026
 
 Current OUG 34/2014 Article 11^1, inserted by OUG 18/2026, applies from **19 June 2026** for covered distance contracts concluded via an online interface.
 
@@ -176,11 +275,11 @@ WithdrawalAcknowledgement {
 
 The withdrawal right cannot be replaced with `contact support`.
 
-## 6. 27 September 2026 legal-pack switch
+## 8. Effective-date legal-pack switching — 27 September 2026 boundary
 
-The current consolidated OUG 34/2014 contains several OUG 18/2026 amendments marked as applicable from **27 September 2026**, including defined durability/repairability concepts and additional pre-contract information fields in relevant cases.
+OUG 18/2026 creates multiple 2026 effective-date boundaries. The current consolidated OUG 34/2014 and Law 363/2007 source families contain provisions/amendments that are marked as applying from **27 September 2026**.
 
-Therefore the Marketplace must not freeze a September-2026 launch schema from an older ruleset.
+On 15 September 2026 those future-effective rules must not be represented as already active merely because they appear in a consolidated Portal page.
 
 Required control:
 
@@ -191,15 +290,54 @@ LegalPack {
   effectiveFrom
   effectiveTo?
   consumerInformationSchemaVersion
+  unfairPracticesSchemaVersion
   withdrawalSchemaVersion
+  adrInformationSchemaVersion
   categorySchemaVersion
+  sourceRefs[]
+  applicabilityDecisionRefs[]
   reviewState
 }
 ```
 
-If a release date crosses an effective-date boundary, checkout must use the pack effective for the transaction date.
+If a release/transaction date crosses an effective-date boundary, checkout and consumer-facing surfaces must select the pack effective for that date.
 
-## 7. DSA applicability profile — no global exemption switch
+Tests must cover at least:
+
+```text
+2026-09-26 transaction -> pre-27-Sept pack
+2026-09-27 transaction -> post-boundary pack, if the cited provision is legally effective then
+```
+
+The exact fields changing at the boundary remain tied to the provision-to-control matrix and qualified review; engineering must not infer them from a date alone.
+
+## 9. Consumer ADR / SAL support contract
+
+OG 38/2015 is now registered as the Romanian alternative-dispute-resolution baseline, and ANPC Order 270/2026 is registered as the current 2026 source changing SAL information/display measures, including the current ANPC SAL destination referenced by the order.
+
+DROPi must model ADR information as a versioned consumer-information capability rather than hardcoding a footer link copied from an old website.
+
+```text
+ConsumerAdrInformationVersion {
+  id
+  actorId
+  channel        // WEB | ANDROID | IOS | EMAIL | CONTRACT | OTHER
+  salApplicabilityState
+  requiredTextRef?
+  requiredIconOrPlaqueRef?
+  destinationUrlRef?
+  legalPackVersion
+  effectiveFrom
+  effectiveTo?
+  reviewState
+}
+```
+
+The exact duty to display a plaque/icon/link on each DROPi surface must be determined from the current source pack and factual role before enforcement. A generic support page is not evidence that required ADR information has been provided.
+
+Dedicated consumer-rights workflows may link to general support, but general support does not replace withdrawal, conformity, ADR, safety or privacy rights.
+
+## 10. DSA applicability profile — no global exemption switch
 
 Regulation (EU) 2022/2065 Article 29 excludes **Section 4** additional rules for online platforms allowing consumers to conclude distance contracts with traders when the provider qualifies as a micro or small enterprise, subject to the Regulation's conditions, 12-month transition after loss of status and VLOP exception.
 
@@ -234,13 +372,13 @@ DsaApplicabilityProfile {
 
 `section4Applicable = false` does not imply `DSA does not apply`.
 
-## 8. Romanian DSA implementation / ANCOM evidence
+## 11. Romanian DSA implementation / ANCOM evidence
 
 Law 50/2024 designates ANCOM as Romania's Digital Services Coordinator.
 
 Article 5 requires a Romanian provider of intermediary services, if the factual service falls within that classification, to inform ANCOM within at most 45 days from beginning the services, with identification/contact information in the required procedure; changes to submitted data also have a statutory notification path.
 
-The current repository has identified ANCOM consultation/procedure material, but the exact final secondary procedure/current controlled copy must remain part of the source-capture/applicability review before filing.
+The repository has current evidence that ANCOM's secondary procedure remains a separate current-source/applicability checkpoint. A consultation draft is not production filing authority.
 
 Product evidence must support:
 
@@ -262,7 +400,7 @@ DsaAuthorityEvidence {
 
 No credential or secret is stored in the legal corpus.
 
-## 9. Merchant compliance profile
+## 12. Merchant compliance profile
 
 The first pilot deliberately admits professionals only.
 
@@ -291,11 +429,11 @@ MerchantComplianceProfile {
 
 A merchant may be authenticated without being allowed to publish/sell. Account identity and Marketplace selling capability are separate.
 
-## 10. Product safety and GPSR integration
+## 13. Product safety and GPSR integration
 
 `docs/legal/RO_LAUNCH_PRODUCT_ALLOWLIST_GPSR_CONTRACT_2026-09-15.md` owns the first-product allowlist and listing safety fields.
 
-GPSR Article 19 sets distance-sale offer information for economic operators. Article 22 sets specific Marketplace obligations including Safety Gate/contact points, internal processes, three-working-day handling for relevant product-safety notices and interface design enabling required safety/traceability information.
+GPSR Article 19 sets distance-sale offer information for economic operators. Article 22 sets specific Marketplace obligations including Safety Gate/contact points, internal processes, handling of relevant product-safety notices and interface design enabling required safety/traceability information.
 
 Required Marketplace references:
 
@@ -313,7 +451,7 @@ ListingComplianceProfile {
 
 Product safety is evaluated per listing/product/category, not inherited from a globally verified merchant.
 
-## 11. DSA notice/action and product-safety cases
+## 14. DSA notice/action and product-safety cases
 
 The application must keep different legal workflows separate.
 
@@ -351,7 +489,7 @@ ProductSafetyCase {
 
 A product-safety case is not just a generic content-moderation ticket.
 
-## 12. Merchant/listing/checkout states
+## 15. Merchant/listing/checkout states
 
 ### Merchant
 
@@ -377,6 +515,7 @@ DRAFT
 
 ```text
 DISCOVERY
+-> CONSUMER_PRESENTATION_GATE
 -> PRECONTRACT_GATE
 -> BINDING_CHECKOUT_GATE
 -> CONTRACT_SNAPSHOT_COMMITTED
@@ -386,7 +525,7 @@ DISCOVERY
 
 No transition skips a missing legal/evidence gate.
 
-## 13. What engineering can safely implement before final legal approval
+## 16. What engineering can safely implement before final legal approval
 
 Safe `FOUNDATION` work:
 
@@ -395,19 +534,51 @@ Safe `FOUNDATION` work:
 - immutable contract-snapshot/event mechanics;
 - provenance labels distinguishing legal/policy/provider requirements;
 - effective-date legal-pack selection;
+- consumer-presentation evidence/versioning;
+- Terms/unfair-terms review state;
+- ADR/SAL information versioning by channel;
 - inaccessible states for non-approved seller/category/zone paths;
 - tests proving UNKNOWN/expired evidence fails closed.
 
-Law-dependent wording, exact responsibility allocation, DSA classification, final retention, final refund semantics and public enablement remain blocked until the corresponding review is approved.
+Law-dependent wording, exact responsibility allocation, DSA classification, final Terms approval, final ADR surface requirements, final retention, final refund semantics and public enablement remain blocked until the corresponding review is approved.
 
-## 14. Official sources rechecked 2026-09-15
+## 17. Official sources rechecked / registered 2026-09-15
+
+Primary/current source endpoints:
 
 - OUG 34/2014 current consolidated form: `https://legislatie.just.ro/Public/DetaliiDocument/307805`
+- OUG 18/2026: `https://legislatie.just.ro/Public/DetaliiDocumentAfis/308474`
+- Law 363/2007 consolidated 2026-03-27: `https://legislatie.just.ro/Public/DetaliiDocument/307803`
+- Law 193/2000 republished: `https://legislatie.just.ro/Public/DetaliiDocument/91502`
+- Law 365/2002 electronic commerce: registered official Legislative Portal source
+- OG 38/2015 ADR: `https://legislatie.just.ro/Public/DetaliiDocument/193569`
+- ANPC Order 270/2026: `https://legislatie.just.ro/Public/DetaliiDocument/310590`
 - Law 50/2024: `https://legislatie.just.ro/public/DetaliiDocument/280106`
 - DSA: `https://eur-lex.europa.eu/eli/reg/2022/2065/oj`
 - GPSR consolidated: `https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02023R0988-20260529`
-- ANCOM DSA/service-provider material: `https://www.ancom.ro/despre-noi/media/comunicate-de-presa/legea-privind-serviciile-digitale-a-fost-publicata-in-monitorul-oficial/` and current ANCOM digital-services material.
 
-## 15. Current disposition
+Official non-normative guidance:
 
-`CONTROL_CONTRACT_READY_FOR_REVIEW / DSA_CLASSIFICATION_PENDING / LAW-DEPENDENT ENABLEMENT DISABLED`
+- ANPC Good Practices Guide for Online Products and Services Market — 2026: `https://anpc.ro/wp-content/uploads/2026/07/GHID-comert-online-final-06.07.2026.pdf`
+
+Controlled-copy state for the newly registered Law 363/2007, Law 193/2000, OG 38/2015, ANPC Order 270/2026 and ANPC 2026 online-commerce guide remains `pending_primary_copy` because their official endpoints refused automated retrieval from GitHub Actions. No hash or archive path was invented. Their official endpoints and reliance states remain registered for later controlled capture/review.
+
+## 18. Current disposition
+
+The source-discovery gap for the main Romanian Marketplace consumer-law family is materially reduced. The unresolved launch work is now primarily:
+
+```text
+exact provision-to-DROPi-flow matrix
++ effective-date switching validation
++ final seller/platform responsibility allocation
++ Law 193/2000 Terms review
++ Law 363/2007 presentation/marketing/ranking applicability review
++ OG 38/2015 + Order 270/2026 SAL surface applicability
++ DSA classification
++ qualified final checkout/public wording review
++ implementation/runtime evidence
+```
+
+Current state:
+
+`CONTROL_CONTRACT_READY_FOR_REVIEW / SOURCE_COPIES_PARTLY_PENDING / PUBLIC_BINDING_CHECKOUT HOLD`
