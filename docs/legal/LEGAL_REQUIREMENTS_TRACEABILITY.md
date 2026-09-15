@@ -224,4 +224,3 @@ For this section, a row may move toward `approved` only when:
 `registered source + controlled current copy where required + exact provision + scoped DROPi factual flow + qualified interpretation where required + owner operating decision + implementation/test evidence`.
 
 Until then, law-dependent behavior stays configurable and fail-closed. #500 may use these rows to build a **candidate** developer priority map, but it must not treat a pending legal row as permission to enable the corresponding service.
-
