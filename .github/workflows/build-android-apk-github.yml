@@ -3,9 +3,11 @@ name: GitHub Build — Android APK (standalone owner test)
 # Builds a standalone Android APK for Project Owner/device acceptance.
 # This artifact MUST launch on a physical phone without Metro, a computer,
 # Expo Dev Client, or any local development server.
-# Runs only when explicitly requested.
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - fix/android-standalone-owner-apk
 
 jobs:
   build:
