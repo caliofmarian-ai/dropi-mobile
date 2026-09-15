@@ -1,7 +1,7 @@
 # Romania Launch Legal Source Manifest
 
 > **STATUS: PRE-COUNSEL / FAIL-CLOSED**
-> **Version:** 0.8.0
+> **Version:** 0.9.0
 > **As of:** 2026-09-15
 > **Issue:** #499
 > **Parent:** #492
@@ -9,7 +9,7 @@
 
 This manifest is the launch-focused entry point into the controlled legal corpus for the proposed Romanian MVP. It does not authorize implementation or launch. Source status, provenance, hashes and controlled-copy state remain governed by `docs/legal/legal-source-register.json`.
 
-Current validator baseline: `62 records / 30 immutable files`.
+Current validator baseline: `67 records / 30 immutable files`.
 
 ## Launch corpus documents
 
@@ -25,7 +25,7 @@ Current validator baseline: `62 records / 30 immutable files`.
 ### Consolidated decision/control layer
 
 - `docs/legal/RO_LAUNCH_DECISION_REGISTER_2026-09-15.md` — consolidated #493–#499 launch decisions, candidate operating boundaries and unresolved evidence.
-- `docs/legal/RO_LAUNCH_MARKETPLACE_CONTROL_CONTRACT_2026-09-15.md` — merchant capability, OUG 34/2014 disclosures, binding checkout, contract snapshot, withdrawal, DSA applicability and safety/moderation case model.
+- `docs/legal/RO_LAUNCH_MARKETPLACE_CONTROL_CONTRACT_2026-09-15.md` — merchant capability, consumer presentation, OUG 34/2014 disclosures, Law 363/2007 unfair-practice controls, Law 193/2000 Terms review, SAL/ADR information, binding checkout, withdrawal, DSA applicability and safety/moderation case model.
 - `docs/legal/RO_LAUNCH_PRODUCT_ALLOWLIST_GPSR_CONTRACT_2026-09-15.md` — deny-by-default first-family allowlist, exclusions and GPSR listing/safety gate.
 - `docs/research/RO_LAUNCH_003_PSP_CANDIDATE_MATRIX_2026-09-15.md` — provider-owned evidence and written questionnaire for PayU/NETOPIA/Stripe/Adyen/Mollie candidates; no provider selected.
 - `docs/legal/RO_LAUNCH_POSTAL_ROLE_DECISION_CONTRACT_2026-09-15.md` — separate Model A merchant fulfilment, Model B intermediation, Model C postal resale and Model D postal provision contracts.
@@ -63,7 +63,7 @@ The entity/tax source chain now includes controlled copies of:
 
 The previous shorthand that the Ireland–Romania treaty always resolves dual residence solely by `place of effective management` is superseded. Under the post-MLI treaty position reflected in Revenue's official synthesis, a dual-resident non-individual is subject to a competent-authority mutual-agreement determination having regard to place of effective management, place of incorporation/constitution and other relevant factors. Actual DROPi management facts therefore require professional cross-border tax analysis; Romanian incorporation alone does not settle the issue, and `place of effective management` is not an automatic post-MLI tie-breaker by itself.
 
-The Romanian invoicing source chain now additionally registers:
+The Romanian invoicing source chain additionally registers:
 
 - `RO-OUG-120-2021-EFACTURA-CURRENT-2026-09-15` — current consolidated RO e-Factura framework;
 - `RO-LAW-88-2026-EFACTURA` — 2026 amendments affecting B2C/register rules.
@@ -76,29 +76,42 @@ Current disposition: `SOURCE FAMILY MATERIALLY IMPROVED / ACTUAL MANAGEMENT FACT
 
 ### Marketplace / consumer / DSA / GPSR
 
-Current official endpoints identified/rechecked include:
+The controlled source family now covers the main identified Romanian consumer/Marketplace layers:
 
-- Law 365/2002, republicated, on electronic commerce, now registered as the Romanian electronic-commerce / information-society-service baseline;
-- HG 1308/2002 methodological norms for Law 365/2002, registered separately because historic payment references require reconciliation with the current payment-services framework before any implementation reliance;
 - OUG 34/2014 current consolidated consumer-contract framework;
-- OUG 18/2026 amendments including Article 11^1 online withdrawal effective from 19 June 2026 and relevant later information changes effective from 27 September 2026;
+- OUG 18/2026 amendments, including the already-effective Article 11^1 online withdrawal function from 19 June 2026 and separate provisions with a 27 September 2026 effective boundary;
+- `RO-LAW-363-2007-CONSOLIDATED-2026-03-27` — current unfair-commercial-practices / online-marketplace consumer baseline;
+- `RO-LAW-193-2000-REPUBLISHED` — unfair terms in professional-consumer contracts;
+- Law 365/2002, republicated, electronic-commerce / information-society-service baseline;
+- HG 1308/2002 methodological norms for Law 365/2002, separately gated because historical payment references require reconciliation with the current payment-services framework;
+- `RO-OG-38-2015-ADR-CURRENT` — alternative consumer dispute-resolution baseline;
+- `RO-ANPC-ORDER-270-2026-ADR` — 2026 ANPC SAL information/display changes;
+- `RO-ANPC-ONLINE-COMMERCE-GUIDE-2026` — official ANPC 2026 online-commerce guidance, classified as non-normative `research_only` because ANPC states the guide is orientative/informative and does not replace law;
 - Regulation (EU) 2022/2065 DSA;
 - Law 50/2024 Romanian DSA application framework, including the Article 5 information path for Romanian intermediary-service providers where applicable;
 - Regulation (EU) 2023/988 GPSR, consolidated 2026-05-29.
 
-The Legislative Portal endpoints for Law 365/2002 and HG 1308/2002 are verified and registered, but GitHub Actions could not fetch controlled byte copies from the portal. Their snapshots therefore remain `pending_primary_copy`; no hash or archive file was invented. Both remain `pending_current_validation` for DROPi reliance.
+The five newly registered consumer-commerce sources — Law 363/2007, Law 193/2000, OG 38/2015, ANPC Order 270/2026 and the ANPC 2026 online-commerce guide — all refused automated retrieval from GitHub Actions. Their official endpoints remain registered and their controlled-copy state remains `pending_primary_copy`; no bytes, hashes or archive files were fabricated.
 
-Current disposition: `CONTROL CONTRACTS DEFINED / APPLICABILITY AND FINAL WORDING REVIEW PENDING`.
+This source expansion changes the remaining problem from broad discovery to an exact implementation/applicability exercise:
+
+```text
+provision -> actor -> surface -> transaction state -> effective date -> technical control -> evidence -> qualified approval
+```
+
+In particular, future-effective provisions visible in a consolidated source must not be enabled before their legal effective date. Law 193/2000 requires a final Terms/unfair-terms review; Law 363/2007 requires a presentation/marketing/ranking applicability review; OG 38/2015 + ANPC Order 270/2026 require a channel/surface SAL applicability decision. None of those reviews is replaced by the ANPC guidance document.
+
+Current disposition: `MAIN SOURCE DISCOVERY MATERIALLY IMPROVED / EXACT PROVISION-TO-FLOW + TERMS + SAL + DSA REVIEW PENDING / PUBLIC CHECKOUT DISABLED`.
 
 ### Payments
 
-Current official Romanian baseline includes Law 209/2019. Provider-owned evidence now identifies a real Marketplace shortlist (PayU, NETOPIA, Stripe Connect, Adyen for Platforms and Mollie/Connect), but exact provider, money flow, supplier, settlement, refund, chargeback, negative balance and invoicing treatment remain unresolved.
+Current official Romanian baseline includes Law 209/2019. Provider-owned evidence identifies a real Marketplace shortlist (PayU, NETOPIA, Stripe Connect, Adyen for Platforms and Mollie/Connect), but exact provider, money flow, supplier, settlement, refund, chargeback, negative balance and invoicing treatment remain unresolved.
 
 Current disposition: `PSP SHORTLIST IDENTIFIED / PROVIDER NOT SELECTED / PAYMENT PERIMETER REVIEW REQUIRED`.
 
 ### Postal / ANCOM
 
-The postal corpus now distinguishes historical evidence from the current source chain:
+The postal corpus distinguishes historical evidence from the current source chain:
 
 - the archived ANCOM copy of OUG 13/2013 consolidated only through 2019 remains historical evidence and is explicitly non-authoritative for current-law reliance by itself;
 - `RO-OUG-13-2013-PORTAL-2026-09-15` registers the official Romanian Legislative Portal source as `primary_normative`, with controlled bytes/hash still `pending_primary_copy` and DROPi applicability still `pending_current_validation`;
@@ -112,21 +125,21 @@ Current disposition: `MODEL A MERCHANT FULFILMENT FIRST; MODEL B HOLD-CLASSIFICA
 
 ### Product family / zone
 
-A deny-by-default candidate allowlist now exists for simple paper stationery/art-print products. The candidate zone remains `BUCHAREST_ILFOV_CONTROLLED_PILOT`, but neither the family nor zone is treated as the final Product Owner decision merely because it leads the research comparison.
+A deny-by-default candidate allowlist exists for simple paper stationery/art-print products. The candidate zone remains `BUCHAREST_ILFOV_CONTROLLED_PILOT`, but neither the family nor zone is treated as the final Product Owner decision merely because it leads the research comparison.
 
 Current disposition: `OWNER DECISION REQUIRED / PRODUCT ACTIVATION DISABLED`.
 
 ### Privacy
 
-The privacy source chain now includes:
+The privacy source chain includes:
 
 - archived GDPR authority in the controlled corpus;
 - Romanian Law 190/2018 official Legislative Portal endpoint, still pending controlled-copy completion;
 - `RO-ANSPDCP-DECISION-174-2018-DPIA`, the official Romanian supervisory-authority DPIA list, registered as primary normative authority with its controlled byte copy still `pending_primary_copy` and activity-specific applicability still `pending_current_validation`;
-- `RO-ANSPDCP-DPIA-GUIDANCE-2026-09-15`, official ANSPDCP DPIA guidance now archived as a controlled snapshot;
+- `RO-ANSPDCP-DPIA-GUIDANCE-2026-09-15`, official ANSPDCP DPIA guidance archived as a controlled snapshot;
 - EDPB Guidelines 07/2020 supporting factual, flow-by-flow controller/processor classification.
 
-The national DPIA source-discovery gap is therefore reduced, but the actual DROPi DPIA outcome remains `TBD`. Each processing activity must be checked against GDPR Article 35 and ANSPDCP Decision 174/2018; exclusion of later high-risk features does not by itself prove that the first pilot does not require a DPIA.
+The national DPIA source-discovery gap is reduced, but the actual DROPi DPIA outcome remains `TBD`. Each processing activity must be checked against GDPR Article 35 and ANSPDCP Decision 174/2018; exclusion of later high-risk features does not by itself prove that the first pilot does not require a DPIA.
 
 Exact controller/processor roles, legal bases, retention periods, DPIA determination, vendor transfer arrangements and support responsibilities remain unresolved.
 
