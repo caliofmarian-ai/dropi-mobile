@@ -1427,6 +1427,65 @@
         "reviewBy": "before_ro_marketplace_or_intermediary_service_design",
         "notes": "Methodological norms are historical and contain payment references that require reconciliation with the current payment-services and DSA framework; never hardcode superseded payment rules."
       }
+    },
+    {
+      "id": "RO-ANSPDCP-DECISION-174-2018-DPIA",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "all",
+        "marketplace",
+        "parcel_delivery",
+        "privacy"
+      ],
+      "authority": "Romanian National Supervisory Authority for Personal Data Processing",
+      "citation": "ANSPDCP Decision No. 174/2018",
+      "title": "List of processing operations requiring a data protection impact assessment",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/public/detaliidocument/206331",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint verified; controlled repository bytes/hash remain pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_dpia_decision_or_high_risk_processing",
+        "notes": "National DPIA list must be evaluated together with GDPR Article 35 against each factual processing activity; the list is not a universal DROPi-wide DPIA conclusion."
+      }
+    },
+    {
+      "id": "RO-ANSPDCP-DPIA-GUIDANCE-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "all",
+        "marketplace",
+        "parcel_delivery",
+        "privacy"
+      ],
+      "authority": "Romanian National Supervisory Authority for Personal Data Processing",
+      "citation": "ANSPDCP DPIA guidance page rechecked 2026-09-15",
+      "title": "Final DPIA guidance",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.dataprotection.ro/?lang=ro&page=Comunicat_ghid_final_DPIA",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/data-protection/RO-ANSPDCP-DPIA-GUIDANCE-2026-09-15.html",
+        "sha256": "0d349886e7120a00a40664c0f603e965b91e677634339549681db82c5e8dae8c",
+        "bytes": 25988,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; amendments, applicability and DROPi DPIA conclusions remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_dpia_decision_or_high_risk_processing",
+        "notes": "Guidance supports risk-based DPIA assessment and does not substitute for GDPR, Decision 174/2018, or a documented DROPi DPIA decision."
+      }
     }
   ]
 }
