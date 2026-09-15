@@ -1372,6 +1372,61 @@
         "reviewBy": "before_ro_dsa_filing_or_my_ancom_workflow",
         "notes": "Read with the current consolidated Decision 333/2024; does not substitute for a separately adopted Article 5 information procedure."
       }
+    },
+    {
+      "id": "RO-LAW-365-2002-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "intermediary_services",
+        "electronic_commerce"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 365/2002 — republicated Electronic Commerce Law",
+      "title": "Electronic commerce",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/37075",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint for the republicated act is verified; controlled repository bytes/hash remain pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_marketplace_or_intermediary_service_design",
+        "notes": "Electronic-commerce / information-society-service baseline. Reconcile with DSA, Law 50/2024, OUG 34/2014 and later amendments; no direct launch permission."
+      }
+    },
+    {
+      "id": "RO-HG-1308-2002-E_COMMERCE-NORMS",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "intermediary_services",
+        "electronic_commerce",
+        "payments"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Government Decision No. 1308/2002",
+      "title": "Methodological norms for application of Law No. 365/2002",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/40350",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint is verified; controlled repository bytes/hash remain pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_marketplace_or_intermediary_service_design",
+        "notes": "Methodological norms are historical and contain payment references that require reconciliation with the current payment-services and DSA framework; never hardcode superseded payment rules."
+      }
     }
   ]
 }
