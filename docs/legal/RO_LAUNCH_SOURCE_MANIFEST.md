@@ -1,7 +1,7 @@
 # Romania Launch Legal Source Manifest
 
 > **STATUS: PRE-COUNSEL / FAIL-CLOSED**
-> **Version:** 0.4.0
+> **Version:** 0.5.0
 > **As of:** 2026-09-15
 > **Issue:** #499
 > **Parent:** #492
@@ -59,11 +59,15 @@ Current disposition: `WRITTEN TAX/ACCOUNTING CONFIRMATION REQUIRED`.
 
 Current official endpoints identified/rechecked include:
 
+- Law 365/2002, republicated, on electronic commerce, now registered as the Romanian electronic-commerce / information-society-service baseline;
+- HG 1308/2002 methodological norms for Law 365/2002, registered separately because historic payment references require reconciliation with the current payment-services framework before any implementation reliance;
 - OUG 34/2014 current consolidated consumer-contract framework;
 - OUG 18/2026 amendments including Article 11^1 online withdrawal effective from 19 June 2026 and relevant later information changes effective from 27 September 2026;
 - Regulation (EU) 2022/2065 DSA;
 - Law 50/2024 Romanian DSA application framework, including the Article 5 information path for Romanian intermediary-service providers where applicable;
 - Regulation (EU) 2023/988 GPSR, consolidated 2026-05-29.
+
+The Legislative Portal endpoints for Law 365/2002 and HG 1308/2002 are verified and registered, but GitHub Actions could not fetch controlled byte copies from the portal. Their snapshots therefore remain `pending_primary_copy`; no hash or archive file was invented. Both remain `pending_current_validation` for DROPi reliance.
 
 Current disposition: `CONTROL CONTRACTS DEFINED / APPLICABILITY AND FINAL WORDING REVIEW PENDING`.
 
