@@ -1,0 +1,110 @@
+name: Register Romania consumer-commerce sources once
+
+on:
+  push:
+    branches:
+      - docs/ro-launch-007-legal-corpus
+    paths:
+      - .github/workflows/register-ro-consumer-commerce-sources-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/ro-launch-007-legal-corpus
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - name: Register and archive official consumer-commerce sources when reachable
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { readFileSync, writeFileSync, mkdirSync } = require('node:fs');
+          const { dirname } = require('node:path');
+          const { createHash } = require('node:crypto');
+          const registerPath = 'docs/legal/legal-source-register.json';
+          const register = JSON.parse(readFileSync(registerPath, 'utf8'));
+          const byId = new Map(register.sources.map((s) => [s.id, s]));
+          const specs = [
+            {
+              id:'RO-LAW-363-2007-CONSOLIDATED-2026-03-27', jurisdiction:'RO', serviceDomains:['marketplace','consumer_contracts'],
+              authority:'Parliament of Romania', citation:'Law No. 363/2007, consolidated 2026-03-27',
+              title:'Unfair commercial practices and consumer-law harmonisation', authorityClass:'primary_normative', normative:true,
+              officialUrl:'https://legislatie.just.ro/Public/DetaliiDocument/307803', language:'ro', retrievedAt:'2026-09-15',
+              archivePath:'docs/legal/sources/ro/consumer/RO-LAW-363-2007-CONSOLIDATED-2026-03-27.html',
+              patterns:[/LEGE\s+(?:nr\.\s*)?363/i,/27\.03\.2026|27-03-2026/i,/piață online|piata online/i],
+              reliance:{state:'pending_current_validation',reviewBy:'before_ro_marketplace_design',notes:'Current consolidated Portal source includes OUG 18/2026 changes with future-effective provisions from 27 September 2026. Controls must be effective-date versioned; source presence does not make future provisions currently applicable.'}
+            },
+            {
+              id:'RO-LAW-193-2000-REPUBLISHED', jurisdiction:'RO', serviceDomains:['marketplace','consumer_contracts'],
+              authority:'Parliament of Romania', citation:'Law No. 193/2000, republished',
+              title:'Unfair terms in contracts between professionals and consumers', authorityClass:'primary_normative', normative:true,
+              officialUrl:'https://legislatie.just.ro/Public/DetaliiDocument/91502', language:'ro', retrievedAt:'2026-09-15',
+              archivePath:'docs/legal/sources/ro/consumer/RO-LAW-193-2000-REPUBLISHED-2026-09-15.html',
+              patterns:[/LEGE\s+(?:nr\.\s*)?193/i,/clauzel[e]? abuzive/i],
+              reliance:{state:'pending_current_validation',reviewBy:'before_ro_consumer_terms_design',notes:'Baseline for consumer contract terms. Current amendment/applicability review remains required before final Terms wording.'}
+            },
+            {
+              id:'RO-OG-38-2015-ADR-CURRENT', jurisdiction:'RO', serviceDomains:['marketplace','consumer_contracts','support'],
+              authority:'Government of Romania', citation:'Government Ordinance No. 38/2015',
+              title:'Alternative dispute resolution between consumers and traders', authorityClass:'primary_normative', normative:true,
+              officialUrl:'https://legislatie.just.ro/Public/DetaliiDocument/193569', language:'ro', retrievedAt:'2026-09-15',
+              archivePath:'docs/legal/sources/ro/consumer/RO-OG-38-2015-ADR-2026-09-15.html',
+              patterns:[/ORDONANȚĂ\s+(?:nr\.\s*)?38|ORDONANTA\s+(?:nr\.\s*)?38/i,/soluționarea alternativă|solutionarea alternativa/i],
+              reliance:{state:'pending_current_validation',reviewBy:'before_ro_support_and_adr_design',notes:'ADR legal baseline; must be reconciled with 2026 ANPC information-display rules and current EU ODR repeal framework.'}
+            },
+            {
+              id:'RO-ANPC-ORDER-270-2026-ADR', jurisdiction:'RO', serviceDomains:['marketplace','consumer_contracts','support'],
+              authority:'Romanian National Authority for Consumer Protection', citation:'ANPC Order No. 270/2026',
+              title:'2026 amendment of consumer ADR information measures', authorityClass:'primary_normative', normative:true,
+              officialUrl:'https://legislatie.just.ro/Public/DetaliiDocument/310590', language:'ro', retrievedAt:'2026-09-15',
+              archivePath:'docs/legal/sources/ro/consumer/RO-ANPC-ORDER-270-2026-ADR.html',
+              patterns:[/ORDIN\s+(?:nr\.\s*)?270/i,/reclamatiisal\.anpc\.ro/i],
+              reliance:{state:'pending_current_validation',reviewBy:'before_ro_support_and_adr_design',notes:'Current 2026 ANPC rules for SAL plaque/icon/link. Exact applicability to each DROPi web/app surface must be reviewed before UI enforcement.'}
+            },
+            {
+              id:'RO-ANPC-ONLINE-COMMERCE-GUIDE-2026', jurisdiction:'RO', serviceDomains:['marketplace','consumer_contracts','payments','product_safety','support'],
+              authority:'Romanian National Authority for Consumer Protection', citation:'ANPC Good Practices Guide for Online Products and Services Market — 2026 edition',
+              title:'Online commerce good-practices guide — 2026', authorityClass:'primary_official_guidance', normative:false,
+              officialUrl:'https://anpc.ro/wp-content/uploads/2026/07/GHID-comert-online-final-06.07.2026.pdf', language:'ro', retrievedAt:'2026-09-15',
+              archivePath:'docs/legal/sources/ro/consumer/RO-ANPC-ONLINE-COMMERCE-GUIDE-2026.pdf',
+              pdf:true,
+              reliance:{state:'research_only',reviewBy:'before_ro_marketplace_design',notes:'Official ANPC guidance covering online commerce/platforms, information, withdrawal, dark patterns, payments, complaints and product safety. ANPC expressly states the guide is orientative/informative and does not replace applicable law.'}
+            }
+          ];
+          async function capture(spec){
+            let s=byId.get(spec.id);
+            if(!s){s={id:spec.id,jurisdiction:spec.jurisdiction,serviceDomains:spec.serviceDomains,authority:spec.authority,citation:spec.citation,title:spec.title,authorityClass:spec.authorityClass,normative:spec.normative,officialUrl:spec.officialUrl,language:spec.language,retrievedAt:spec.retrievedAt,snapshot:{status:'pending_primary_copy',immutable:true,qualifier:'Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable.'},reliance:spec.reliance};register.sources.push(s);byId.set(spec.id,s);}
+            try{
+              const r=await fetch(spec.officialUrl,{redirect:'follow',headers:{'user-agent':'DROPi-controlled-legal-corpus/1.0'}});
+              if(!r.ok)throw new Error(`HTTP ${r.status}`);
+              const b=Buffer.from(await r.arrayBuffer());
+              if(spec.pdf){if(b.subarray(0,5).toString('ascii')!=='%PDF-')throw new Error('payload is not PDF');}
+              else{const t=b.toString('utf8');for(const p of spec.patterns)if(!p.test(t))throw new Error(`payload validation failed: ${p}`);}
+              mkdirSync(dirname(spec.archivePath),{recursive:true});writeFileSync(spec.archivePath,b);
+              s.snapshot={status:'archived',path:spec.archivePath,sha256:createHash('sha256').update(b).digest('hex'),bytes:b.length,immutable:true,qualifier:'Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; effective date, amendments and DROPi applicability remain separately gated.'};
+              console.log(`Archived ${spec.id}: ${b.length} bytes`);
+            }catch(e){console.log(`Pending ${spec.id}: ${e.message}`);}
+          }
+          (async()=>{for(const s of specs)await capture(s);register.generatedAt='2026-09-15T00:00:00Z';writeFileSync(registerPath,`${JSON.stringify(register,null,2)}\n`);})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Validate legal source register
+        run: node scripts/validate-legal-sources.mjs
+      - name: Reject whitespace errors
+        run: git diff --check
+      - name: Commit controlled source update
+        shell: bash
+        run: |
+          if git diff --quiet; then echo "No source changes required"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/legal/legal-source-register.json
+          if [ -d docs/legal/sources/ro/consumer ]; then git add docs/legal/sources/ro/consumer; fi
+          git commit -m "docs(consumer): register Romania consumer-commerce source family"
+          git push origin HEAD:docs/ro-launch-007-legal-corpus
