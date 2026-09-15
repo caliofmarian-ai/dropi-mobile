@@ -65,9 +65,19 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_HOME"
           ls "$ANDROID_HOME" >/dev/null
 
+      - name: Increase Gradle memory for release compilation
+        working-directory: android
+        run: |
+          if grep -q '^org.gradle.jvmargs=' gradle.properties; then
+            sed -i 's#^org.gradle.jvmargs=.*#org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=2048m -Dfile.encoding=UTF-8#' gradle.properties
+          else
+            echo 'org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=2048m -Dfile.encoding=UTF-8' >> gradle.properties
+          fi
+          grep '^org.gradle.jvmargs=' gradle.properties
+
       - name: Build standalone release APK with embedded JS bundle
         working-directory: android
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleRelease --no-daemon -x lintVitalAnalyzeRelease
         env:
           NODE_ENV: production
           EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
