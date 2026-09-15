@@ -1,0 +1,43 @@
+name: Apply Romania launch pending legal sources
+
+on:
+  push:
+    branches:
+      - docs/ro-launch-007-legal-corpus
+    paths:
+      - scripts/apply-ro-launch-pending-legal-sources.mjs
+      - .github/workflows/apply-ro-launch-pending-legal-sources.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/ro-launch-007-legal-corpus
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Apply pending legal-source records
+        run: node scripts/apply-ro-launch-pending-legal-sources.mjs
+
+      - name: Validate legal source register
+        run: node scripts/validate-legal-sources.mjs
+
+      - name: Commit generated register update
+        run: |
+          if git diff --quiet -- docs/legal/legal-source-register.json; then
+            echo "No legal-source register changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/legal/legal-source-register.json
+          git commit -m "docs(legal): register pending Romania launch sources"
+          git push origin HEAD:docs/ro-launch-007-legal-corpus
