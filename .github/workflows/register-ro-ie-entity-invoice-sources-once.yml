@@ -1,0 +1,184 @@
+name: Register Romania-Ireland entity and invoice sources once
+
+on:
+  push:
+    branches:
+      - docs/ro-launch-007-legal-corpus
+    paths:
+      - .github/workflows/register-ro-ie-entity-invoice-sources-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/ro-launch-007-legal-corpus
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Register and archive official entity and invoicing sources when reachable
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { readFileSync, writeFileSync, mkdirSync } = require('node:fs');
+          const { dirname } = require('node:path');
+          const { createHash } = require('node:crypto');
+
+          const registerPath = 'docs/legal/legal-source-register.json';
+          const register = JSON.parse(readFileSync(registerPath, 'utf8'));
+          const byId = new Map(register.sources.map((s) => [s.id, s]));
+
+          const specs = [
+            {
+              id: 'IE-REVENUE-COMPANY-RESIDENCY-2026-09-15', jurisdiction: 'IE',
+              serviceDomains: ['marketplace','entity_tax'], authority: 'Irish Revenue Commissioners',
+              citation: 'Irish Revenue company residency rules rechecked 2026-09-15',
+              title: 'Company residency rules', authorityClass: 'primary_official_guidance', normative: false,
+              officialUrl: 'https://www.revenue.ie/en/companies-and-charities/corporation-tax-for-companies/corporation-tax/company-residency-rules.aspx',
+              language: 'en', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/ie/entity-tax/IE-REVENUE-COMPANY-RESIDENCY-2026-09-15.html',
+              validate: { type: 'text', patterns: [/centrally managed and controlled/i, /foreign incorporated/i] },
+              reliance: { state: 'pending_current_validation', reviewBy: 'before_ro_entity_tax_design', notes: 'Official Irish Revenue guidance confirms the central-management-and-control rule for foreign-incorporated companies; factual application to DROPi requires professional review.' }
+            },
+            {
+              id: 'IE-RO-DTA-SI-427-1999', jurisdiction: 'IE/RO',
+              serviceDomains: ['marketplace','entity_tax'], authority: 'Government of Ireland / Irish Statute Book',
+              citation: 'S.I. No. 427/1999 — Double Taxation Relief (Taxes on Income and Capital Gains) (Romania) Order, 1999',
+              title: 'Ireland-Romania Double Taxation Convention legal order', authorityClass: 'primary_normative', normative: true,
+              officialUrl: 'https://www.irishstatutebook.ie/eli/1999/si/427/made/en/print',
+              language: 'en', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/ie/entity-tax/IE-RO-DTA-SI-427-1999.html',
+              validate: { type: 'text', patterns: [/Romania/i, /Double Taxation/i] },
+              reliance: { state: 'research_only', reviewBy: 'before_ro_entity_tax_design', notes: 'Original treaty legal order. Must be read together with the MLI and current treaty positions; original Article 4(3) wording is not used alone after MLI modification.' }
+            },
+            {
+              id: 'IE-MLI-SI-440-2018', jurisdiction: 'IE',
+              serviceDomains: ['marketplace','entity_tax'], authority: 'Government of Ireland / Irish Statute Book',
+              citation: 'S.I. No. 440/2018 — Multilateral Convention to Implement Tax Treaty Related Measures Order 2018',
+              title: 'Irish MLI implementing order', authorityClass: 'primary_normative', normative: true,
+              officialUrl: 'https://www.irishstatutebook.ie/eli/2018/si/440/made/en/print',
+              language: 'en', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/ie/entity-tax/IE-MLI-SI-440-2018.html',
+              validate: { type: 'text', patterns: [/Multilateral Convention/i, /Romania/i] },
+              reliance: { state: 'research_only', reviewBy: 'before_ro_entity_tax_design', notes: 'Authentic Irish MLI implementing source. Treaty-specific effect must be reconciled with Romania MLI position and effective dates.' }
+            },
+            {
+              id: 'IE-RO-DTA-MLI-SYNTHESISED-2026-09-15', jurisdiction: 'IE/RO',
+              serviceDomains: ['marketplace','entity_tax'], authority: 'Irish Revenue Commissioners',
+              citation: 'Revenue synthesised text of the MLI and Ireland-Romania Double Taxation Convention, rechecked 2026-09-15',
+              title: 'Synthesised MLI and Ireland-Romania convention', authorityClass: 'primary_official_guidance', normative: false,
+              officialUrl: 'https://www.revenue.ie/en/tax-professionals/documents/double-taxation-treaties/r/synthesised-text-of-the-mli-and-the-ireland-romania-double-taxation-convention.pdf',
+              language: 'en', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/ie/entity-tax/IE-RO-DTA-MLI-SYNTHESISED-2026-09-15.pdf',
+              validate: { type: 'pdf' },
+              reliance: { state: 'research_only', reviewBy: 'before_ro_entity_tax_design', notes: 'Official explanatory synthesis, expressly not itself a source of law. Shows MLI Article 4 mutual-agreement rule replacing original treaty Article 4(3) and treaty-specific effective dates.' }
+            },
+            {
+              id: 'RO-OUG-120-2021-EFACTURA-CURRENT-2026-09-15', jurisdiction: 'RO',
+              serviceDomains: ['marketplace','payments','entity_tax'], authority: 'Government of Romania',
+              citation: 'Emergency Ordinance No. 120/2021 — current consolidated RO e-Factura framework rechecked 2026-09-15',
+              title: 'RO e-Factura framework', authorityClass: 'primary_normative', normative: true,
+              officialUrl: 'https://legislatie.just.ro/Public/DetaliiDocument/247243',
+              language: 'ro', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/ro/fiscal/RO-OUG-120-2021-EFACTURA-CURRENT-2026-09-15.html',
+              validate: { type: 'text', patterns: [/120/i, /e-Factura/i] },
+              reliance: { state: 'pending_current_validation', reviewBy: 'before_ro_invoice_design', notes: 'Current e-Factura baseline must be applied per actual supplier, transaction and VAT/fiscal status; it does not decide seller-of-record or invoice issuer.' }
+            },
+            {
+              id: 'RO-LAW-88-2026-EFACTURA', jurisdiction: 'RO',
+              serviceDomains: ['marketplace','payments','entity_tax'], authority: 'Parliament of Romania',
+              citation: 'Law No. 88/2026', title: '2026 amendments affecting RO e-Factura',
+              authorityClass: 'primary_normative', normative: true,
+              officialUrl: 'https://legislatie.just.ro/Public/DetaliiDocument/311108',
+              language: 'ro', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/ro/fiscal/RO-LAW-88-2026-EFACTURA.html',
+              validate: { type: 'text', patterns: [/LEGE/i, /88/i, /e-Factura/i] },
+              reliance: { state: 'pending_current_validation', reviewBy: 'before_ro_invoice_design', notes: 'Amending act for 2026 B2C/register rules; reconcile with current consolidated OUG 120/2021 and exact transaction facts.' }
+            },
+            {
+              id: 'RO-ANAF-FOREIGN-LEGAL-RESIDENCE-GUIDE-2025', jurisdiction: 'RO',
+              serviceDomains: ['marketplace','entity_tax'], authority: 'Romanian National Agency for Fiscal Administration',
+              citation: 'ANAF 2025 guide on tax residence of foreign legal persons',
+              title: 'Guide on establishing tax residence in Romania of foreign legal persons', authorityClass: 'primary_official_guidance', normative: false,
+              officialUrl: 'https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/Ghid_rezidenta_PJ.pdf',
+              language: 'ro', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/ro/fiscal/RO-ANAF-FOREIGN-LEGAL-RESIDENCE-GUIDE-2025.pdf',
+              validate: { type: 'pdf' },
+              reliance: { state: 'research_only', reviewBy: 'before_cross_border_entity_alternative', notes: 'Official Romanian guidance for foreign legal persons with effective management in Romania; useful for entity alternatives and management-location concepts, not a direct ruling on a Romanian SRL managed from Ireland.' }
+            }
+          ];
+
+          async function capture(spec) {
+            let source = byId.get(spec.id);
+            if (!source) {
+              source = {
+                id: spec.id, jurisdiction: spec.jurisdiction, serviceDomains: spec.serviceDomains,
+                authority: spec.authority, citation: spec.citation, title: spec.title,
+                authorityClass: spec.authorityClass, normative: spec.normative,
+                officialUrl: spec.officialUrl, language: spec.language, retrievedAt: spec.retrievedAt,
+                snapshot: { status: 'pending_primary_copy', immutable: true, qualifier: 'Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable.' },
+                reliance: spec.reliance
+              };
+              register.sources.push(source);
+              byId.set(spec.id, source);
+            }
+
+            try {
+              const response = await fetch(spec.officialUrl, { redirect: 'follow', headers: { 'user-agent': 'DROPi-controlled-legal-corpus/1.0' } });
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+              const bytes = Buffer.from(await response.arrayBuffer());
+              if (spec.validate.type === 'pdf') {
+                if (bytes.subarray(0, 5).toString('ascii') !== '%PDF-') throw new Error('payload is not PDF');
+              } else {
+                const text = bytes.toString('utf8');
+                for (const pattern of spec.validate.patterns) if (!pattern.test(text)) throw new Error(`payload validation failed: ${pattern}`);
+              }
+              mkdirSync(dirname(spec.archivePath), { recursive: true });
+              writeFileSync(spec.archivePath, bytes);
+              source.snapshot = {
+                status: 'archived', path: spec.archivePath,
+                sha256: createHash('sha256').update(bytes).digest('hex'), bytes: bytes.length,
+                immutable: true,
+                qualifier: 'Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; current factual applicability and professional tax/accounting conclusions remain separately gated.'
+              };
+              console.log(`Archived ${spec.id}: ${bytes.length} bytes`);
+            } catch (error) {
+              console.log(`Pending ${spec.id}: ${error.message}`);
+            }
+          }
+
+          (async () => {
+            for (const spec of specs) await capture(spec);
+            register.generatedAt = '2026-09-15T00:00:00Z';
+            writeFileSync(registerPath, `${JSON.stringify(register, null, 2)}\n`);
+          })().catch((error) => { console.error(error); process.exit(1); });
+          NODE
+
+      - name: Validate legal source register
+        run: node scripts/validate-legal-sources.mjs
+
+      - name: Reject whitespace errors
+        run: git diff --check
+
+      - name: Commit controlled source update
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No source changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/legal/legal-source-register.json
+          for d in docs/legal/sources/ie/entity-tax docs/legal/sources/ro/fiscal; do
+            if [ -d "$d" ]; then git add "$d"; fi
+          done
+          git commit -m "docs(tax): register Romania-Ireland entity and invoicing source family"
+          git push origin HEAD:docs/ro-launch-007-legal-corpus
