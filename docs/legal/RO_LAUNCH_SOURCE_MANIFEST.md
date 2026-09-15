@@ -1,8 +1,8 @@
 # DROPi Romania Launch — Legal Source Manifest
 
 > **STATUS: CONTROLLED RESEARCH QUEUE / FAIL-CLOSED**
-> **Version:** 0.1.0
-> **As of:** 2026-09-13
+> **Version:** 0.2.0
+> **As of:** 2026-09-15
 > **Parent:** #492
 > **Workstream:** #499
 > **Governing canon:** `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md`
@@ -37,12 +37,30 @@ An archived snapshot proves only what DROPi reviewed at a point in time. It does
 | Source ID | Domain | Repository state | Launch disposition |
 |---|---|---|---|
 | `EU-GDPR-2016-679` | Privacy | `archived / research_only` | Existing baseline. Romanian implementation, role map, retention and DPIA remain separately required. |
-| `RO-OUG-13-2013-ANCOM-CONSOLIDATION-2019` | Postal | `archived / pending_current_validation` | **STALE FOR LAUNCH RELIANCE.** ANCOM-hosted copy is explicitly unofficial and consolidated only through 2019. Current consolidated primary text remains required. |
+| `RO-OUG-13-2013-ANCOM-CONSOLIDATION-2019` | Postal | `archived / pending_current_validation` | **STALE FOR LAUNCH RELIANCE.** ANCOM-hosted copy is explicitly unofficial and consolidated only through 2019. Current controlled primary text remains required. |
 | `RO-ANCOM-DECISION-925-2023` | Postal | `archived / research_only` | Current core general-authorization/notification baseline; exact DROPi role and later amendments/applicability remain review-gated. |
 | `RO-ANCOM-GENERAL-AUTHORIZATION-2026-09-12` | Postal | `archived / research_only` | Current regulator procedure/guidance checkpoint; recheck before actual filing. |
-| `RO-INSSE-CAEN-REV3` | Entity/activities | `pending_upstream_access / missing_primary_copy` | **BLOCKER.** Exact launch CAEN mapping cannot be approved from research snippets alone. |
+| `RO-INSSE-CAEN-REV3` | Entity/activities | `pending_upstream_access / missing_primary_copy` | Official ONRC-hosted CAEN Rev.3 copies were verified on 2026-09-15, but repository bytes/hash are still missing. Entity/activity mapping remains gated. |
 | `EU-DIR-2024-2831` | Platform work | `archived / research_only` | Relevant to later proprietary delivery-partner model, not first external-carrier MVP. Romanian transposition remains required before own-fleet activation. |
 | `EU-REG-168-2013-CONSOLIDATED-2024-11-27` | Powered road vehicles | `archived / research_only` | Later proprietary e-bike/scooter/vehicle scope only. Not first-launch authority. |
+
+## 2.1 Official endpoints verified on 2026-09-15 but not yet promoted to controlled snapshots
+
+The following official endpoints were independently re-verified and are recorded in `docs/research/RO_LAUNCH_007_OFFICIAL_SOURCE_FINDINGS_2026-09-15.md`. They remain pending controlled archival/registration where required.
+
+| Domain | Official material verified | Research consequence | Controlled-corpus status |
+|---|---|---|---|
+| Postal | ANCOM authorization procedure, current general-authorization page, digital postal-reseller guidance/list; Portal Legislativ OUG 13/2013 interface | Confirms notification covers offering/resale/provision and supports a distinct postal-resale model with reseller responsibility | ANCOM baseline partly archived; current OUG 13 controlled primary snapshot still pending |
+| Consumer Marketplace | OUG 34/2014 current Portal view, Art. 6^1 | Ranking, seller-professional status and responsibility-allocation disclosures are launch controls | primary snapshot/register refresh pending |
+| 2026 consumer amendments | OUG 18/2026 | Art. 11^1 online withdrawal-function requirements applicable from 19 June 2026; other relevant changes include 27 September 2026 application dates | primary snapshot/register entry pending |
+| DSA | Regulation (EU) 2022/2065 | Article 19/29 micro/small exclusions must be modelled accurately; no generic `DSA compliant` flag | primary snapshot/register entry pending |
+| Romanian DSA | Law 50/2024 | Romanian implementation/DSC framework | primary snapshot/register entry pending |
+| Product safety | Regulation (EU) 2023/988, consolidated 2026-05-29 | Article 22 Marketplace safety controls, Safety Gate/contact/process/listing obligations | consolidated primary snapshot/register entry pending |
+| Payments | Law 209/2019 | Supports fail-closed PSP perimeter and external-PSP-first architecture | primary snapshot/register entry pending |
+| Romanian privacy | Law 190/2018 | Required alongside GDPR for Romania launch data design | primary snapshot/register entry pending |
+| CAEN | ONRC CAEN Rev.3 structure, Monitorul Oficial publication and Rev.2/Rev.3 correspondence | Confirms candidate role labels `4791`, `4792`, `5320`, `5330`; does not replace ANCOM classification | official bytes/hash/register refresh pending |
+
+No row in this table is an authorization or professional interpretation.
 
 ## 3. Launch-critical missing or incomplete source set
 
@@ -58,8 +76,8 @@ The following source families must be added to the controlled legal corpus or ex
 | `RO-ANAF-LEGAL-PERSON-RESIDENCE-CURRENT` | current ANAF guidance | place-of-effective-management evidence/questions | `PRIMARY_GUIDANCE_COPY_REQUIRED` |
 | `RO-IRELAND-DTA-CURRENT` | Romania–Ireland double-taxation convention/current protocol text | dual company residence / PE analysis | `PRIMARY_COPY_REQUIRED` |
 | `IE-REVENUE-COMPANY-RESIDENCE-CURRENT` | Irish Revenue | central-management-and-control analysis | `PRIMARY_GUIDANCE_COPY_REQUIRED` |
-| `RO-INSSE-CAEN-REV3` | official CAEN Rev.3 | activity mapping | `EXISTING ENTRY — MISSING_PRIMARY_COPY` |
-| `RO-ONRC-CAEN-REV3-CORRESPONDENCE-CURRENT` | ONRC | Rev.2→Rev.3 mapping / 5330 explanatory mapping | `PRIMARY_GUIDANCE_COPY_REQUIRED` |
+| `RO-INSSE-CAEN-REV3` | official CAEN Rev.3, with ONRC official-hosted copy verified 2026-09-15 | activity mapping | `EXISTING ENTRY — MISSING_PRIMARY_COPY` |
+| `RO-ONRC-CAEN-REV3-CORRESPONDENCE-CURRENT` | ONRC | Rev.2→Rev.3 mapping / 5330 explanatory mapping | `OFFICIAL_ENDPOINT_VERIFIED — PRIMARY_COPY_REQUIRED` |
 | `RO-VAT-395000-2025` | current Romanian fiscal amendment/ANAF guidance | VAT exemption threshold | `PRIMARY_COPY_REQUIRED` |
 | `RO-EFACTURA-CURRENT` | OUG 120/2021 current consolidated + current ANAF guidance | B2C/B2B invoice transmission design | `PRIMARY_COPY_REQUIRED` |
 
@@ -70,14 +88,14 @@ The following source families must be added to the controlled legal corpus or ex
 | Proposed source ID | Source / authority | Needed for | Current state |
 |---|---|---|---|
 | `RO-LAW-365-2002-CURRENT` | Law No. 365/2002, current consolidated text | information-society/e-contract provider duties | `PRIMARY_COPY_REQUIRED` |
-| `RO-OUG-34-2014-CURRENT` | OUG No. 34/2014, current consolidated text | consumer distance-contract and Marketplace duties | `PRIMARY_COPY_REQUIRED` |
-| `RO-OUG-18-2026` | OUG No. 18/2026 | online withdrawal function + 2026 consumer-law amendments | `PRIMARY_COPY_REQUIRED` |
+| `RO-OUG-34-2014-CURRENT` | OUG No. 34/2014, current consolidated text | consumer distance-contract and Marketplace duties | `OFFICIAL_ENDPOINT_VERIFIED — PRIMARY_COPY_REQUIRED` |
+| `RO-OUG-18-2026` | OUG No. 18/2026 | online withdrawal function + 2026 consumer-law amendments | `OFFICIAL_ENDPOINT_VERIFIED — PRIMARY_COPY_REQUIRED` |
 | `RO-OUG-140-2021-CURRENT` | OUG No. 140/2021 | goods conformity / commercial guarantees | `PRIMARY_COPY_REQUIRED` |
 | `RO-LAW-363-2007-CURRENT` | Law No. 363/2007 | unfair commercial practices | `PRIMARY_COPY_REQUIRED` |
-| `EU-REG-2022-2065-DSA` | Regulation (EU) 2022/2065 | intermediary/hosting/platform/marketplace duties | `PRIMARY_COPY_REQUIRED` |
-| `RO-LAW-50-2024` | Law No. 50/2024 | Romanian DSA implementation/ANCOM role | `PRIMARY_COPY_REQUIRED` |
+| `EU-REG-2022-2065-DSA` | Regulation (EU) 2022/2065 | intermediary/hosting/platform/marketplace duties | `OFFICIAL_ENDPOINT_VERIFIED — PRIMARY_COPY_REQUIRED` |
+| `RO-LAW-50-2024` | Law No. 50/2024 | Romanian DSA implementation/ANCOM role | `OFFICIAL_ENDPOINT_VERIFIED — PRIMARY_COPY_REQUIRED` |
 | `RO-ANCOM-DSA-GUIDANCE-CURRENT` | ANCOM current intermediary/DSA procedure | provider/contact/reporting operational requirements | `PRIMARY_GUIDANCE_COPY_REQUIRED` |
-| `EU-REG-2023-988-GPSR` | Regulation (EU) 2023/988 | online marketplace product-safety duties | `PRIMARY_COPY_REQUIRED` |
+| `EU-REG-2023-988-GPSR` | Regulation (EU) 2023/988, consolidated 2026-05-29 endpoint verified | online marketplace product-safety duties | `OFFICIAL_ENDPOINT_VERIFIED — PRIMARY_COPY_REQUIRED` |
 | `EU-SAFETY-GATE-MARKETPLACE-CURRENT` | EU Safety Gate official marketplace guidance | registration/notice/recall operational procedure | `PRIMARY_GUIDANCE_COPY_REQUIRED` |
 
 **Blocks:** #494 approval, merchant onboarding schema, listing compliance, ranking disclosure, binding checkout, online withdrawal, safety/recall controls.
@@ -86,7 +104,7 @@ The following source families must be added to the controlled legal corpus or ex
 
 | Proposed source ID | Source / authority | Needed for | Current state |
 |---|---|---|---|
-| `RO-LAW-209-2019-CURRENT` | Law No. 209/2019 current consolidated official text | payment-service perimeter | `PRIMARY_COPY_REQUIRED` |
+| `RO-LAW-209-2019-CURRENT` | Law No. 209/2019 current consolidated official text | payment-service perimeter | `OFFICIAL_ENDPOINT_VERIFIED — PRIMARY_COPY_REQUIRED` |
 | `EU-PSD2-CURRENT` | Directive (EU) 2015/2366 current applicable text/amendments | payment perimeter / exclusions | `PRIMARY_COPY_REQUIRED` |
 | `EBA-COMMERCIAL-AGENT-ECOMMERCE-QA` | EBA/EC official Q&A | commercial-agent exclusion interpretation evidence | `PRIMARY_GUIDANCE_COPY_REQUIRED` |
 | `PSP-SELECTED-LICENCE-EVIDENCE` | selected PSP's regulator/passport evidence | provider eligibility | `BLOCKED UNTIL PSP SELECTED` |
@@ -98,11 +116,11 @@ The following source families must be added to the controlled legal corpus or ex
 
 | Source ID | Source / authority | Needed for | Current state |
 |---|---|---|---|
-| `RO-OUG-13-2013-CURRENT` | OUG No. 13/2013 current consolidated official text | provider/reseller/intermediary scope | `CURRENT_PRIMARY_COPY_REQUIRED` |
+| `RO-OUG-13-2013-CURRENT` | OUG No. 13/2013 current consolidated official text | provider/reseller/intermediary scope | `OFFICIAL PORTAL ENDPOINT VERIFIED — CURRENT CONTROLLED PRIMARY COPY REQUIRED` |
 | `RO-ANCOM-DECISION-925-2023` | ANCOM Decision No. 925/2023 | notification/general conditions | `EXISTING ARCHIVED` |
 | `RO-ANCOM-GENERAL-AUTHORIZATION-2026-09-12` | ANCOM current page | filing/process checkpoint | `EXISTING ARCHIVED` |
-| `RO-ANCOM-DIGITAL-POSTAL-RESELLERS-2024` | ANCOM digital-platform resale guidance | effective provider disclosure / reseller model | `PRIMARY_GUIDANCE_COPY_REQUIRED` |
-| `RO-ANCOM-POSTAL-REGISTER-CURRENT` | ANCOM provider register/procedure | effective-carrier verification | `PRIMARY_GUIDANCE/DATA METHOD REQUIRED` |
+| `RO-ANCOM-DIGITAL-POSTAL-RESELLERS-CURRENT` | ANCOM digital-platform resale guidance | effective provider disclosure / reseller model | `OFFICIAL_ENDPOINT_VERIFIED — CONTROLLED GUIDANCE COPY REQUIRED` |
+| `RO-ANCOM-POSTAL-REGISTER-CURRENT` | ANCOM provider/reseller register | effective-carrier verification | `OFFICIAL_ENDPOINT_VERIFIED — CONTROLLED DATA METHOD REQUIRED` |
 | `CARRIER-SELECTED-AUTHORITY-EVIDENCE` | selected carrier | partner authority/scope | `BLOCKED UNTIL CARRIER SELECTED` |
 
 **Blocks:** #496 approval, postal terms/notification and integrated DROPi postal option.
@@ -112,7 +130,7 @@ The following source families must be added to the controlled legal corpus or ex
 | Proposed source ID | Source / authority | Needed for | Current state |
 |---|---|---|---|
 | `EU-GDPR-2016-679` | GDPR | general privacy baseline | `EXISTING ARCHIVED` |
-| `RO-LAW-190-2018-CURRENT` | Law No. 190/2018 | Romanian GDPR implementation | `PRIMARY_COPY_REQUIRED` |
+| `RO-LAW-190-2018-CURRENT` | Law No. 190/2018 | Romanian GDPR implementation | `OFFICIAL_ENDPOINT_VERIFIED — PRIMARY_COPY_REQUIRED` |
 | `RO-ANSPDCP-GUIDANCE-CURRENT` | ANSPDCP | rights/breach/controller-processor operational guidance | `PRIMARY_GUIDANCE_COPY_REQUIRED` |
 | `EDPB-CONTROLLER-PROCESSOR-CURRENT` | EDPB guidelines | role mapping | `PRIMARY_GUIDANCE_COPY_REQUIRED` |
 | `VENDOR-SELECTED-DPA-TRANSFER-EVIDENCE` | selected cloud/PSP/carrier/support vendors | Article 28 / transfer / subprocessor decisions | `BLOCKED UNTIL VENDOR SET FIXED` |
@@ -123,7 +141,7 @@ The following source families must be added to the controlled legal corpus or ex
 
 | Proposed source ID | Source / authority | Needed for | Current state |
 |---|---|---|---|
-| `EU-GPSR-2023-988` / final registered ID | GPSR | paper-goods Marketplace baseline | `PRIMARY_COPY_REQUIRED` |
+| `EU-REG-2023-988-GPSR` | GPSR | paper-goods Marketplace baseline | `OFFICIAL_ENDPOINT_VERIFIED — PRIMARY_COPY_REQUIRED` |
 | `CATEGORY-PAPER-GOODS-SPECIFIC-SOURCES` | EU/Romanian sector sources if any selected item triggers them | exact category allowlist | `CATEGORY REVIEW REQUIRED` |
 | `CARRIER-COVERAGE-PILOT-ZONE` | selected carrier official service/coverage rules | zone/price/delivery design | `BLOCKED UNTIL CARRIER SELECTED` |
 | `LOCAL-ZONE-RESTRICTIONS-BUCHAREST-ILFOV` | local authorities if applicable to selected operation | local operational limits | `RESEARCH REQUIRED` |
@@ -132,13 +150,14 @@ The following source families must be added to the controlled legal corpus or ex
 
 ## 4. Source acquisition states
 
-Use only these launch-manifest states:
+Use these launch-manifest states descriptively; only `legal-source-register.json` controls source provenance state:
 
 - `EXISTING_ARCHIVED` — controlled repository snapshot already exists;
 - `EXISTING_PENDING_CURRENT_VALIDATION` — controlled snapshot exists but is stale/incomplete for current launch reliance;
 - `MISSING_PRIMARY_COPY` — official source identified, controlled copy unavailable;
 - `PRIMARY_COPY_REQUIRED` — official source must be captured/registered;
 - `PRIMARY_GUIDANCE_COPY_REQUIRED` — current official operational guidance must be captured/registered;
+- `OFFICIAL_ENDPOINT_VERIFIED` — official endpoint was re-verified but controlled bytes/hash/register promotion is still pending;
 - `BLOCKED_UNTIL_DECISION` — source identity depends on owner/provider/category selection;
 - `PROFESSIONAL_INTERPRETATION_REQUIRED` — source exists but application to DROPi remains unresolved.
 
@@ -176,18 +195,36 @@ Filing/pilot/public enablement require later evidence stages as defined in the l
 
 Acquire/validate in this order because they define the largest architecture decisions:
 
-1. current OUG 13/2013 + ANCOM resale guidance;
-2. current OUG 34/2014 + OUG 18/2026;
+1. controlled current OUG 13/2013 + controlled ANCOM resale guidance;
+2. controlled current OUG 34/2014 + OUG 18/2026;
 3. DSA + Law 50/2024 + current ANCOM DSA procedure;
-4. GPSR + Safety Gate Marketplace guidance;
+4. consolidated GPSR + Safety Gate Marketplace guidance;
 5. current Law 209/2019 + PSD2 official materials;
-6. current CAEN Rev.3 official copy + ONRC correspondence;
+6. official CAEN Rev.3 copy + ONRC correspondence;
 7. current Romanian fiscal/e-Factura sources + Romania–Ireland tax material;
 8. Law 190/2018 + ANSPDCP/EDPB operational privacy sources;
 9. selected PSP/carrier/category/zone evidence after owner selections.
 
-## 8. Status
+## 8. Current architecture implication
+
+Official-source verification on 2026-09-15 does not justify expanding the first pilot. The working legal-MVP hypothesis remains:
+
+```text
+Romania
+  -> verified professional merchants
+  -> controlled Marketplace
+  -> narrow low-complexity non-food allowlist
+  -> external regulated PSP
+  -> merchant fulfilment first
+  -> postal resale only after ANCOM role/notification/contracts
+  -> restricted pilot geography
+  -> own delivery network later, one regulated layer at a time
+```
+
+This is a candidate launch strategy, not an authorization.
+
+## 9. Status
 
 This manifest is **not a legal-source register entry** and therefore requires no immutable source hash itself. It is the controlled acquisition/review queue for #499.
 
-#499 remains open until launch-critical source states and the qualified-review packet satisfy the parent #492 evidence gate.
+#499 remains open until launch-critical source states, traceability/blocker updates and the qualified-review packet satisfy the parent #492 evidence gate.
