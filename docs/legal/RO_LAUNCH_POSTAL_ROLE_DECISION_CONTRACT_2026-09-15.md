@@ -175,12 +175,25 @@ There is no manual `forceEnableDelivery=true` bypass.
 
 ## 8. Official sources rechecked 2026-09-15
 
+- OUG 13/2013 official Romanian Legislative Portal source: `https://legislatie.just.ro/Public/DetaliiDocumentAfis/217438`
 - ANCOM general authorization: `https://www.ancom.ro/category/autorizare-ro/autorizare-generala-servicii-postale/`
 - ANCOM authorization procedure: `https://www.ancom.ro/autorizare-ro/autorizare-generala-servicii-postale/procedura-de-autorizare-a-furnizorilor/`
 - ANCOM digital-platform postal resale guidance: `https://infocentru.ancom.ro/platformele-digitale-care-revand-servicii-postale/`
 - Decision 925/2023 official Legislative Portal: `https://legislatie.just.ro/Public/DetaliiDocument/277699`
 
-The current official OUG 13/2013 controlled-copy/applicability work remains part of #499; the stale 2019 repository consolidation must not be treated as the complete current primary source.
+The source register now contains `RO-OUG-13-2013-PORTAL-2026-09-15` as a primary-normative official Legislative Portal source. Its controlled byte copy/hash remains `pending_primary_copy`, and its DROPi reliance remains `pending_current_validation`; the archived 2019 ANCOM consolidation remains historical evidence only and must not be treated as the complete current primary source.
+
+The current ANCOM pages independently identify OUG 13/2013, as subsequently amended, together with Decision 925/2023 as the principal current postal framework. They also state that offering, reselling or providing postal services requires notification and that the notification must be legally complete before the right to provide postal services exists. These regulator statements narrow the control boundary but do not themselves decide whether a particular DROPi factual flow is Model A, B, C or D.
+
+Therefore the unresolved launch blocker is no longer "find OUG 13/2013". It is:
+
+```text
+controlled_current_primary_copy
++ exact DROPi factual process map
++ postal role classification
++ notification/contract evidence where the classified role requires it
++ qualified/authority disposition before activation
+```
 
 ## 9. Engineering export
 
