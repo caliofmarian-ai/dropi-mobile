@@ -1,7 +1,7 @@
 # Romania Launch Legal Source Manifest
 
 > **STATUS: PRE-COUNSEL / FAIL-CLOSED**
-> **Version:** 0.6.0
+> **Version:** 0.7.0
 > **As of:** 2026-09-15
 > **Issue:** #499
 > **Parent:** #492
@@ -99,7 +99,17 @@ Current disposition: `OWNER DECISION REQUIRED / PRODUCT ACTIVATION DISABLED`.
 
 ### Privacy
 
-GDPR is already archived in the controlled corpus; Romanian Law 190/2018 official endpoint is registered pending controlled-copy completion. EDPB Guidelines 07/2020 support the factual flow-by-flow controller/processor approach. Exact roles, legal bases, retention periods, DPIA outcome and vendor transfer arrangements remain unresolved.
+The privacy source chain now includes:
+
+- archived GDPR authority in the controlled corpus;
+- Romanian Law 190/2018 official Legislative Portal endpoint, still pending controlled-copy completion;
+- `RO-ANSPDCP-DECISION-174-2018-DPIA`, the official Romanian supervisory-authority DPIA list, registered as primary normative authority with its controlled byte copy still `pending_primary_copy` and activity-specific applicability still `pending_current_validation`;
+- `RO-ANSPDCP-DPIA-GUIDANCE-2026-09-15`, official ANSPDCP DPIA guidance now archived as a controlled snapshot;
+- EDPB Guidelines 07/2020 supporting factual, flow-by-flow controller/processor classification.
+
+The national DPIA source-discovery gap is therefore reduced, but the actual DROPi DPIA outcome remains `TBD`. Each processing activity must be checked against GDPR Article 35 and ANSPDCP Decision 174/2018; exclusion of later high-risk features does not by itself prove that the first pilot does not require a DPIA.
+
+Exact controller/processor roles, legal bases, retention periods, DPIA determination, vendor transfer arrangements and support responsibilities remain unresolved.
 
 Current disposition: `DATA ARCHITECTURE DEFINED / RETENTION VALUES TBD / DPIA TBD / PRODUCTION DATA SEMANTICS BLOCKED`.
 
