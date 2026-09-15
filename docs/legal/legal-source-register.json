@@ -1094,14 +1094,17 @@
       "language": "en",
       "retrievedAt": "2026-09-15",
       "snapshot": {
-        "status": "pending_primary_copy",
+        "status": "archived",
+        "path": "docs/legal/sources/eu/dsa/EU-REG-2022-2065-DSA-2026-09-15.html",
+        "sha256": "bf08cfd8ecedd66ffe3d12442798504d512579da3f649eb2ce9b8c15dafd45db",
+        "bytes": 265051,
         "immutable": true,
-        "qualifier": "Official EUR-Lex endpoint verified; controlled repository copy/hash remains pending."
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; amendments, applicability, interpretation and later authority/provider changes remain separately gated."
       },
       "reliance": {
-        "state": "missing_primary_copy",
+        "state": "research_only",
         "reviewBy": "before_ro_dsa_design",
-        "notes": "Article 19 and Article 29 micro/small exclusions require enterprise-size and service-scope analysis; they do not remove all DSA duties."
+        "notes": "Article 19 and Article 29 micro/small exclusions require enterprise-size and service-scope analysis; they do not remove all DSA duties. Controlled official bytes archived 2026-09-15; no operational approval implied."
       }
     },
     {
@@ -1146,14 +1149,17 @@
       "language": "en",
       "retrievedAt": "2026-09-15",
       "snapshot": {
-        "status": "pending_primary_copy",
+        "status": "archived",
+        "path": "docs/legal/sources/eu/product-safety/EU-REG-2023-988-GPSR-CONSOLIDATED-2026-05-29-RETRIEVED-2026-09-15.html",
+        "sha256": "a205bcac00499612d80a77cd4317aa3c2c42b118ed9e048a793fcdebb5d8756f",
+        "bytes": 252568,
         "immutable": true,
-        "qualifier": "Official consolidated EUR-Lex endpoint verified; controlled repository PDF/hash remains pending."
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; amendments, applicability, interpretation and later authority/provider changes remain separately gated."
       },
       "reliance": {
-        "state": "missing_primary_copy",
+        "state": "research_only",
         "reviewBy": "before_ro_marketplace_product_activation",
-        "notes": "Article 22 Marketplace product-safety controls require provision-to-control mapping and category review."
+        "notes": "Article 22 Marketplace product-safety controls require provision-to-control mapping and category review. Controlled official bytes archived 2026-09-15; no operational approval implied."
       }
     },
     {
