@@ -1486,6 +1486,205 @@
         "reviewBy": "before_ro_dpia_decision_or_high_risk_processing",
         "notes": "Guidance supports risk-based DPIA assessment and does not substitute for GDPR, Decision 174/2018, or a documented DROPi DPIA decision."
       }
+    },
+    {
+      "id": "IE-REVENUE-COMPANY-RESIDENCY-2026-09-15",
+      "jurisdiction": "IE",
+      "serviceDomains": [
+        "marketplace",
+        "entity_tax"
+      ],
+      "authority": "Irish Revenue Commissioners",
+      "citation": "Irish Revenue company residency rules rechecked 2026-09-15",
+      "title": "Company residency rules",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.revenue.ie/en/companies-and-charities/corporation-tax-for-companies/corporation-tax/company-residency-rules.aspx",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ie/entity-tax/IE-REVENUE-COMPANY-RESIDENCY-2026-09-15.html",
+        "sha256": "fdec93d354818bc14a8783dd5d5c18307c040c326701cae51d77d814902440e6",
+        "bytes": 72364,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; current factual applicability and professional tax/accounting conclusions remain separately gated."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_entity_tax_design",
+        "notes": "Official Irish Revenue guidance confirms the central-management-and-control rule for foreign-incorporated companies; factual application to DROPi requires professional review."
+      }
+    },
+    {
+      "id": "IE-RO-DTA-SI-427-1999",
+      "jurisdiction": "IE/RO",
+      "serviceDomains": [
+        "marketplace",
+        "entity_tax"
+      ],
+      "authority": "Government of Ireland / Irish Statute Book",
+      "citation": "S.I. No. 427/1999 — Double Taxation Relief (Taxes on Income and Capital Gains) (Romania) Order, 1999",
+      "title": "Ireland-Romania Double Taxation Convention legal order",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://www.irishstatutebook.ie/eli/1999/si/427/made/en/print",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ie/entity-tax/IE-RO-DTA-SI-427-1999.html",
+        "sha256": "90f40e27ede509c4558c09973dcc691f8c16d5b37a157f83ad742939647cbd61",
+        "bytes": 113673,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; current factual applicability and professional tax/accounting conclusions remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_entity_tax_design",
+        "notes": "Original treaty legal order. Must be read together with the MLI and current treaty positions; original Article 4(3) wording is not used alone after MLI modification."
+      }
+    },
+    {
+      "id": "IE-MLI-SI-440-2018",
+      "jurisdiction": "IE",
+      "serviceDomains": [
+        "marketplace",
+        "entity_tax"
+      ],
+      "authority": "Government of Ireland / Irish Statute Book",
+      "citation": "S.I. No. 440/2018 — Multilateral Convention to Implement Tax Treaty Related Measures Order 2018",
+      "title": "Irish MLI implementing order",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://www.irishstatutebook.ie/eli/2018/si/440/made/en/print",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ie/entity-tax/IE-MLI-SI-440-2018.html",
+        "sha256": "39aacb1c87ed939837f4ef2c352e34b80750a1888ee8a0a54518dc044acc8963",
+        "bytes": 536597,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; current factual applicability and professional tax/accounting conclusions remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_entity_tax_design",
+        "notes": "Authentic Irish MLI implementing source. Treaty-specific effect must be reconciled with Romania MLI position and effective dates."
+      }
+    },
+    {
+      "id": "IE-RO-DTA-MLI-SYNTHESISED-2026-09-15",
+      "jurisdiction": "IE/RO",
+      "serviceDomains": [
+        "marketplace",
+        "entity_tax"
+      ],
+      "authority": "Irish Revenue Commissioners",
+      "citation": "Revenue synthesised text of the MLI and Ireland-Romania Double Taxation Convention, rechecked 2026-09-15",
+      "title": "Synthesised MLI and Ireland-Romania convention",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.revenue.ie/en/tax-professionals/documents/double-taxation-treaties/r/synthesised-text-of-the-mli-and-the-ireland-romania-double-taxation-convention.pdf",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ie/entity-tax/IE-RO-DTA-MLI-SYNTHESISED-2026-09-15.pdf",
+        "sha256": "f0316c0fe6d3495e2aeaae2f5e9b85036761862c66a237632ac9503494c6d333",
+        "bytes": 213645,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; current factual applicability and professional tax/accounting conclusions remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_entity_tax_design",
+        "notes": "Official explanatory synthesis, expressly not itself a source of law. Shows MLI Article 4 mutual-agreement rule replacing original treaty Article 4(3) and treaty-specific effective dates."
+      }
+    },
+    {
+      "id": "RO-OUG-120-2021-EFACTURA-CURRENT-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "payments",
+        "entity_tax"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Emergency Ordinance No. 120/2021 — current consolidated RO e-Factura framework rechecked 2026-09-15",
+      "title": "RO e-Factura framework",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/247243",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_invoice_design",
+        "notes": "Current e-Factura baseline must be applied per actual supplier, transaction and VAT/fiscal status; it does not decide seller-of-record or invoice issuer."
+      }
+    },
+    {
+      "id": "RO-LAW-88-2026-EFACTURA",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "payments",
+        "entity_tax"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 88/2026",
+      "title": "2026 amendments affecting RO e-Factura",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/311108",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_invoice_design",
+        "notes": "Amending act for 2026 B2C/register rules; reconcile with current consolidated OUG 120/2021 and exact transaction facts."
+      }
+    },
+    {
+      "id": "RO-ANAF-FOREIGN-LEGAL-RESIDENCE-GUIDE-2025",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "entity_tax"
+      ],
+      "authority": "Romanian National Agency for Fiscal Administration",
+      "citation": "ANAF 2025 guide on tax residence of foreign legal persons",
+      "title": "Guide on establishing tax residence in Romania of foreign legal persons",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/Ghid_rezidenta_PJ.pdf",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/fiscal/RO-ANAF-FOREIGN-LEGAL-RESIDENCE-GUIDE-2025.pdf",
+        "sha256": "2ab859ea7a87d9d7cd4d934db2c44ad8c3a54fd2cc7b5af08240da2cdd9c58fb",
+        "bytes": 629174,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; current factual applicability and professional tax/accounting conclusions remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_cross_border_entity_alternative",
+        "notes": "Official Romanian guidance for foreign legal persons with effective management in Romania; useful for entity alternatives and management-location concepts, not a direct ruling on a Romanian SRL managed from Ireland."
+      }
     }
   ]
 }
