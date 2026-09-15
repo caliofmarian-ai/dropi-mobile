@@ -225,16 +225,37 @@ The system must calculate deadlines from the recorded `awarenessAt` only after t
 
 ## 10. DPIA decision record
 
-GDPR Article 35 requires a DPIA before processing likely to result in high risk, considering nature, scope, context and purposes.
+GDPR Article 35 requires a DPIA before processing likely to result in high risk, considering nature, scope, context and purposes. Romanian ANSPDCP Decision 174/2018 adds the national supervisory-authority list of processing operations for which a DPIA is mandatory. The list is evaluated together with Article 35 against the factual processing activity; it is not a universal `DROPi requires a DPIA` switch.
 
 The first pilot deliberately excludes several high-risk future datasets/operations, but that does not automatically mean `DPIA_NOT_REQUIRED`.
+
+Every Romanian DPIA decision record must therefore perform and preserve both checks:
+
+```text
+GDPR_ARTICLE_35_RISK_CHECK
+AND ANSPDCP_DECISION_174_2018_LIST_CHECK
+```
+
+At minimum the assessment must be able to represent risk factors relevant to present or later DROPi services, including where factually applicable:
+
+- systematic and extensive automated evaluation/profiling producing legal or similarly significant effects;
+- large-scale special-category or criminal-offence data;
+- systematic large-scale monitoring of publicly accessible areas;
+- large-scale/systematic monitoring of vulnerable persons, including minors or employees;
+- large-scale use of innovative/new technologies;
+- large-scale Internet-of-Things/sensor processing;
+- large-scale/systematic traffic or location data where the relevant legal conditions are met.
+
+These are assessment triggers/categories, not a statement that the current first pilot performs every listed operation.
 
 ```text
 DpiaDecision {
   scopeVersion
   processingActivities[]
   riskFactors[]
-  supervisoryAuthorityListCheckRef?
+  gdprArticle35AssessmentRef
+  supervisoryAuthorityListCheckRef      // ANSPDCP Decision 174/2018 check
+  supervisoryAuthorityGuidanceRef?
   outcome          // REQUIRED | NOT_REQUIRED | REQUIRED_BEFORE_EXPANSION | TBD
   rationaleRef
   mitigationRefs[]
@@ -245,7 +266,13 @@ DpiaDecision {
 }
 ```
 
-Review triggers include adding live location monitoring, biometric processing, large-scale sensitive datasets, profiling/significant automated decisions, Passenger Mobility, own-fleet safety/fitness data or materially larger scale.
+Review triggers include adding live location monitoring, biometric processing, large-scale sensitive datasets, profiling/significant automated decisions, Passenger Mobility, own-fleet safety/fitness data, materially larger scale, materially new technology, or any change that causes a previously negative Decision 174/2018 list check to become potentially applicable.
+
+Current first-pilot outcome remains deliberately:
+
+`DPIA_TBD`
+
+No developer or admin switch may promote that state to `NOT_REQUIRED` merely because high-risk future features are excluded from the pilot.
 
 ## 11. Restricted access contract
 
@@ -324,15 +351,17 @@ Provider marketing pages are not a substitute for the signed/current data-proces
 
 - GDPR: `https://eur-lex.europa.eu/eli/reg/2016/679/`
 - Romanian Law 190/2018: official Legislative Portal source registered in the legal-source register pending controlled-copy completion.
+- ANSPDCP Decision 174/2018: official Romanian Legislative Portal source registered as `RO-ANSPDCP-DECISION-174-2018-DPIA`; controlled byte copy remains `pending_primary_copy`, and applicability to each DROPi processing activity remains `pending_current_validation`.
+- ANSPDCP final DPIA guidance: official authority guidance registered as `RO-ANSPDCP-DPIA-GUIDANCE-2026-09-15`; controlled snapshot archived on 2026-09-15. The guidance supports the assessment process but does not substitute for GDPR Article 35, Decision 174/2018, or the documented DROPi decision.
 - EDPB Guidelines 07/2020, final version, controller/processor concepts: `https://www.edpb.europa.eu/documents/guideline/guidelines-072020-on-the-concepts-of-controller-and-processor-in-the-gdpr_en`
 
 The repository's archived GDPR source remains part of the controlled legal corpus.
 
 ## 15. Current disposition
 
-Engineering may implement the **flow registry, policy engine, access/audit mechanics, legal-hold separation, dedicated case types and fail-closed handling** without inventing the unresolved legal values.
+Engineering may implement the **flow registry, policy engine, access/audit mechanics, legal-hold separation, dedicated case types, DPIA decision record and fail-closed handling** without inventing unresolved legal values.
 
-Production activation remains blocked until controller/processor roles, legal bases, exact retention periods, DPIA outcome, vendor arrangements and support responsibility matrix are approved.
+Production activation remains blocked until controller/processor roles, legal bases, exact retention periods, a documented GDPR Article 35 + ANSPDCP Decision 174/2018 DPIA determination, vendor arrangements and support responsibility matrix are approved.
 
 Current state:
 
