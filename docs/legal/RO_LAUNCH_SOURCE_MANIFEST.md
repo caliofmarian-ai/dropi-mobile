@@ -1,7 +1,7 @@
 # Romania Launch Legal Source Manifest
 
 > **STATUS: PRE-COUNSEL / FAIL-CLOSED**
-> **Version:** 0.5.0
+> **Version:** 0.6.0
 > **As of:** 2026-09-15
 > **Issue:** #499
 > **Parent:** #492
@@ -79,9 +79,17 @@ Current disposition: `PSP SHORTLIST IDENTIFIED / PROVIDER NOT SELECTED / PAYMENT
 
 ### Postal / ANCOM
 
-Current controlled material includes Decision 925/2023 and time-stamped ANCOM authorization guidance. Current ANCOM resale guidance has been reconciled into a role contract, but the old controlled OUG 13/2013 consolidation remains stale and current controlled-copy/applicability work is not complete.
+The postal corpus now distinguishes historical evidence from the current source chain:
 
-Current disposition: `MODEL A MERCHANT FULFILMENT FIRST; MODELS B-C HOLD-LEGAL; MODEL D LATER SERVICE`.
+- the archived ANCOM copy of OUG 13/2013 consolidated only through 2019 remains historical evidence and is explicitly non-authoritative for current-law reliance by itself;
+- `RO-OUG-13-2013-PORTAL-2026-09-15` registers the official Romanian Legislative Portal source as `primary_normative`, with controlled bytes/hash still `pending_primary_copy` and DROPi applicability still `pending_current_validation`;
+- Decision 925/2023 is archived as the current general-authorization baseline;
+- time-stamped ANCOM general-authorization guidance and current digital postal-reseller guidance are registered separately;
+- current ANCOM guidance identifies OUG 13/2013, as amended, together with Decision 925/2023 as the principal framework and states that offering, reselling or providing postal services requires a legally complete notification before the right exists.
+
+The unresolved blocker is therefore no longer discovery of OUG 13/2013. It is controlled current-primary evidence plus the exact factual DROPi process map, legal/authority classification of that flow, and notification/contract evidence where the classified role requires it.
+
+Current disposition: `MODEL A MERCHANT FULFILMENT FIRST; MODEL B HOLD-CLASSIFICATION; MODEL C HOLD-LEGAL/NOT-AUTHORIZED; MODEL D LATER SERVICE`.
 
 ### Product family / zone
 
