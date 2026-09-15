@@ -158,6 +158,9 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/legal/legal-source-register.json docs/legal/sources/ro/ecommerce || true
+          git add docs/legal/legal-source-register.json
+          if [ -d docs/legal/sources/ro/ecommerce ]; then
+            git add docs/legal/sources/ro/ecommerce
+          fi
           git commit -m "docs(legal): register Romania e-commerce source family"
           git push origin HEAD:docs/ro-launch-007-legal-corpus
