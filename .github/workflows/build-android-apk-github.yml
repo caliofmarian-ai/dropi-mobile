@@ -59,8 +59,11 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
+      - name: Verify preinstalled Android SDK
+        run: |
+          test -d "$ANDROID_HOME" || { echo "ERROR: ANDROID_HOME is not available on runner"; exit 1; }
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME" >/dev/null
 
       - name: Build standalone release APK with embedded JS bundle
         working-directory: android
