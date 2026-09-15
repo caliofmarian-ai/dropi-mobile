@@ -1,13 +1,15 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-09-12T00:00:00Z",
+  "generatedAt": "2026-09-15T00:00:00Z",
   "governingCanon": "canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md",
   "notice": "Repository snapshots are research evidence, not proof of current applicability or authorization. Only an approved traced requirement may inform law-dependent design, and no registry entry directly enables operations.",
   "sources": [
     {
       "id": "EU-REG-2019-945-ORIGINAL",
       "jurisdiction": "EU",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "European Union",
       "citation": "Commission Delegated Regulation (EU) 2019/945",
       "title": "Unmanned aircraft systems and third-country operators",
@@ -33,7 +35,9 @@
     {
       "id": "EU-REG-2019-947-CONSOLIDATED-2025-05-01",
       "jurisdiction": "EU",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "European Union",
       "citation": "Commission Implementing Regulation (EU) 2019/947, consolidated 2025-05-01",
       "title": "Rules and procedures for the operation of unmanned aircraft",
@@ -59,7 +63,9 @@
     {
       "id": "EU-GDPR-2016-679",
       "jurisdiction": "EU",
-      "serviceDomains": ["all"],
+      "serviceDomains": [
+        "all"
+      ],
       "authority": "European Union",
       "citation": "Regulation (EU) 2016/679",
       "title": "General Data Protection Regulation",
@@ -85,7 +91,10 @@
     {
       "id": "EU-DIR-2024-2831",
       "jurisdiction": "EU",
-      "serviceDomains": ["parcel_delivery", "passenger_mobility"],
+      "serviceDomains": [
+        "parcel_delivery",
+        "passenger_mobility"
+      ],
       "authority": "European Union",
       "citation": "Directive (EU) 2024/2831",
       "title": "Improving working conditions in platform work",
@@ -111,7 +120,9 @@
     {
       "id": "EU-REG-168-2013-CONSOLIDATED-2024-11-27",
       "jurisdiction": "EU",
-      "serviceDomains": ["parcel_delivery"],
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
       "authority": "European Union",
       "citation": "Regulation (EU) No 168/2013, consolidated 2024-11-27",
       "title": "Approval and market surveillance of two- or three-wheel vehicles and quadricycles",
@@ -137,7 +148,9 @@
     {
       "id": "RO-OUG-49-2019",
       "jurisdiction": "RO",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Government of Romania",
       "citation": "Emergency Ordinance No. 49/2019",
       "title": "Alternative transport activities by car and driver",
@@ -163,7 +176,9 @@
     {
       "id": "RO-LAW-204-2019",
       "jurisdiction": "RO",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Parliament of Romania",
       "citation": "Law No. 204/2019",
       "title": "Approval and amendment of Emergency Ordinance No. 49/2019",
@@ -189,7 +204,9 @@
     {
       "id": "RO-ADR-DECISION-572-2020-NORMS",
       "jurisdiction": "RO",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Authority for the Digitalization of Romania",
       "citation": "ADR Decision No. 572/2020, procedural norms",
       "title": "Procedure for granting and withdrawing the technical endorsement",
@@ -215,7 +232,9 @@
     {
       "id": "RO-ADR-PLATFORM-PROCEDURE-2026-09-12",
       "jurisdiction": "RO",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Authority for the Digitalization of Romania",
       "citation": "ADR service page retrieved 2026-09-12",
       "title": "Digital platforms for alternative transport",
@@ -241,7 +260,9 @@
     {
       "id": "RO-ARR-AUTHORIZATION-CHECKLIST-2026-09-12",
       "jurisdiction": "RO",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Romanian Road Authority",
       "citation": "ARR authorization instructions retrieved 2026-09-12",
       "title": "Alternative transport authorization and vehicle-document instructions",
@@ -267,7 +288,9 @@
     {
       "id": "RO-OUG-13-2013-ANCOM-CONSOLIDATION-2019",
       "jurisdiction": "RO",
-      "serviceDomains": ["parcel_delivery"],
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
       "authority": "National Authority for Management and Regulation in Communications",
       "citation": "Emergency Ordinance No. 13/2013, unofficial consolidation through 2019-09-02",
       "title": "Postal services",
@@ -293,7 +316,9 @@
     {
       "id": "RO-ANCOM-DECISION-925-2023",
       "jurisdiction": "RO",
-      "serviceDomains": ["parcel_delivery"],
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
       "authority": "National Authority for Management and Regulation in Communications",
       "citation": "ANCOM Decision No. 925/2023",
       "title": "General authorization regime for providing postal services",
@@ -319,7 +344,9 @@
     {
       "id": "RO-ANCOM-GENERAL-AUTHORIZATION-2026-09-12",
       "jurisdiction": "RO",
-      "serviceDomains": ["parcel_delivery"],
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
       "authority": "National Authority for Management and Regulation in Communications",
       "citation": "ANCOM postal general-authorization page retrieved 2026-09-12",
       "title": "General authorization for postal services",
@@ -372,7 +399,9 @@
     {
       "id": "RO-AACR-DRONE-GUIDANCE-CURRENT",
       "jurisdiction": "RO",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "Romanian Civil Aeronautical Authority",
       "citation": "AACR drone regulatory and service material",
       "title": "Romanian unmanned-aircraft requirements",
@@ -395,7 +424,10 @@
     {
       "id": "PH-RA-4136",
       "jurisdiction": "PH",
-      "serviceDomains": ["parcel_delivery", "passenger_mobility"],
+      "serviceDomains": [
+        "parcel_delivery",
+        "passenger_mobility"
+      ],
       "authority": "Congress of the Philippines",
       "citation": "Republic Act No. 4136",
       "title": "Land Transportation and Traffic Code",
@@ -421,7 +453,9 @@
     {
       "id": "PH-RA-7160",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_tricycle"],
+      "serviceDomains": [
+        "passenger_tricycle"
+      ],
       "authority": "Congress of the Philippines",
       "citation": "Republic Act No. 7160",
       "title": "Local Government Code of 1991",
@@ -447,7 +481,9 @@
     {
       "id": "PH-RA-7354",
       "jurisdiction": "PH",
-      "serviceDomains": ["parcel_delivery"],
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
       "authority": "Congress of the Philippines",
       "citation": "Republic Act No. 7354",
       "title": "Postal Service Act of 1992",
@@ -473,7 +509,9 @@
     {
       "id": "PH-RA-10173",
       "jurisdiction": "PH",
-      "serviceDomains": ["all"],
+      "serviceDomains": [
+        "all"
+      ],
       "authority": "Congress of the Philippines",
       "citation": "Republic Act No. 10173",
       "title": "Data Privacy Act of 2012",
@@ -499,7 +537,9 @@
     {
       "id": "PH-SC-GR-242860-2019",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Supreme Court of the Philippines",
       "citation": "LTFRB v. Valenzuela, G.R. No. 242860, 2019-03-05",
       "title": "Judgment concerning TNC/TNVS regulation",
@@ -525,7 +565,9 @@
     {
       "id": "PH-DOTR-DO-2015-011",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Department of Transportation and Communications",
       "citation": "Department Order No. 2015-011",
       "title": "New classification for public transport conveyances and TNC/TNVS framework",
@@ -548,7 +590,9 @@
     {
       "id": "PH-DOTR-DO-2018-013",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Department of Transportation",
       "citation": "Department Order No. 2018-013",
       "title": "TNC and TNVS regulation",
@@ -571,7 +615,9 @@
     {
       "id": "PH-LTFRB-MC-2015-015",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Land Transportation Franchising and Regulatory Board",
       "citation": "Memorandum Circular No. 2015-015",
       "title": "TNC accreditation terms and conditions",
@@ -594,7 +640,9 @@
     {
       "id": "PH-LTFRB-MC-2015-017",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Land Transportation Franchising and Regulatory Board",
       "citation": "Memorandum Circular No. 2015-017",
       "title": "TNVS CPC application framework",
@@ -617,7 +665,9 @@
     {
       "id": "PH-LTFRB-MC-2015-018",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Land Transportation Franchising and Regulatory Board",
       "citation": "Memorandum Circular No. 2015-018",
       "title": "TNVS operating terms and conditions",
@@ -640,7 +690,9 @@
     {
       "id": "PH-LTO-MC-94-199",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_tricycle"],
+      "serviceDomains": [
+        "passenger_tricycle"
+      ],
       "authority": "Land Transportation Office",
       "citation": "Memorandum Circular No. 94-199",
       "title": "Devolution of tricycle-for-hire franchising to local government units",
@@ -663,7 +715,9 @@
     {
       "id": "PH-LTFRB-MC-2026-049-PENDING",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Land Transportation Franchising and Regulatory Board",
       "citation": "Memorandum Circular No. 2026-049 (reported; official copy pending)",
       "title": "Reported TNVS authority transition to ATOC",
@@ -686,7 +740,9 @@
     {
       "id": "PH-LTFRB-CITIZENS-CHARTER-CURRENT",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Land Transportation Franchising and Regulatory Board",
       "citation": "Current Citizen's Charter and TNC/TNVS service checklists",
       "title": "Current LTFRB filing and service requirements",
@@ -709,7 +765,9 @@
     {
       "id": "PH-CAAP-PCAR-PART-11-2026-09-12",
       "jurisdiction": "PH",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "Civil Aviation Authority of the Philippines",
       "citation": "Philippine Civil Aviation Regulations Part 11 page retrieved 2026-09-12",
       "title": "Remotely Piloted Aircraft Systems",
@@ -735,7 +793,9 @@
     {
       "id": "PH-CAAP-RPA-CONTROLLER-2026-09-12",
       "jurisdiction": "PH",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "Civil Aviation Authority of the Philippines",
       "citation": "CAAP RPA Controller Certificate page retrieved 2026-09-12",
       "title": "RPA Controller Certificate",
@@ -761,7 +821,9 @@
     {
       "id": "PH-CAAP-RPA-REGISTRATION-2026-09-12",
       "jurisdiction": "PH",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "Civil Aviation Authority of the Philippines",
       "citation": "CAAP RPA Registration page retrieved 2026-09-12",
       "title": "RPA registration",
@@ -787,7 +849,9 @@
     {
       "id": "PH-CAAP-RPAS-OPERATOR-2026-09-12",
       "jurisdiction": "PH",
-      "serviceDomains": ["parcel_drone"],
+      "serviceDomains": [
+        "parcel_drone"
+      ],
       "authority": "Civil Aviation Authority of the Philippines",
       "citation": "CAAP RPAS Operator Certificate page retrieved 2026-09-12",
       "title": "RPAS Operator Certificate",
@@ -840,7 +904,9 @@
     {
       "id": "PH-LTFRB-MC-2026-049-BUSINESSWORLD-ALERT",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "BusinessWorld",
       "citation": "News report dated 2026-07-15",
       "title": "Reported conversion of eligible TNVS CPCs to ATOCs",
@@ -863,7 +929,9 @@
     {
       "id": "PH-LTFRB-MC-2026-049-INQUIRER-ALERT",
       "jurisdiction": "PH",
-      "serviceDomains": ["passenger_mobility"],
+      "serviceDomains": [
+        "passenger_mobility"
+      ],
       "authority": "Philippine Daily Inquirer",
       "citation": "News report identified 2026-09-12",
       "title": "Reported automatic TNVS CPC-to-ATOC conversion",
@@ -881,6 +949,316 @@
         "state": "cannot_enable",
         "reviewBy": "never_as_authority",
         "notes": "Obtain and analyze the official circular."
+      }
+    },
+    {
+      "id": "RO-OUG-13-2013-PORTAL-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
+      "authority": "Government of Romania / Romanian Legislative Portal",
+      "citation": "Emergency Ordinance No. 13/2013 — official consolidation interface verified 2026-09-15",
+      "title": "Postal services — official Legislative Portal source",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocumentAfis/217438",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint identified. Controlled repository bytes/hash are not yet archived; visible consolidation history must be reconciled with current ANCOM guidance before reliance."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_delivery_role_design",
+        "notes": "Does not replace the stale 2019 ANCOM snapshot until a controlled current primary copy and applicability review exist."
+      }
+    },
+    {
+      "id": "RO-ANCOM-DIGITAL-POSTAL-RESELLERS-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
+      "authority": "National Authority for Management and Regulation in Communications",
+      "citation": "ANCOM guidance for digital platforms reselling postal services, verified 2026-09-15",
+      "title": "Digital platforms reselling postal services",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://infocentru.ancom.ro/platformele-digitale-care-revand-servicii-postale/",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official ANCOM guidance endpoint verified; controlled HTML snapshot/hash remains to be archived."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_postal_resale_design",
+        "notes": "Supports reseller/effective-provider disclosure analysis; controlling law and Decision 925/2023 still govern."
+      }
+    },
+    {
+      "id": "RO-ANCOM-POSTAL-RESELLER-REGISTER-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "parcel_delivery"
+      ],
+      "authority": "National Authority for Management and Regulation in Communications",
+      "citation": "ANCOM list of postal-service resellers, verified 2026-09-15",
+      "title": "Postal providers reselling postal services",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.ancom.ro/reglementare-ro/servicii-postale/furnizori-servicii-postale/furnizori-servicii-postale-revanzatori/",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "metadata_only",
+        "immutable": true,
+        "qualifier": "Dynamic official register/list endpoint. A controlled verification method and time-stamped evidence are required for provider checks."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_carrier_or_reseller_authority_verification",
+        "notes": "Dynamic list is evidence source, not a permanent authorization assertion."
+      }
+    },
+    {
+      "id": "RO-OUG-34-2014-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "consumer_contracts"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Emergency Ordinance No. 34/2014 — consolidated Legislative Portal form verified 2026-09-15",
+      "title": "Consumer rights in contracts concluded with professionals",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/307805",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official consolidated Portal endpoint verified, including 2026 amendment annotations; controlled repository copy/hash remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_marketplace_design",
+        "notes": "Article 6^1 Marketplace disclosures and Article 11^1 withdrawal flow require exact provision-to-control review."
+      }
+    },
+    {
+      "id": "RO-OUG-18-2026",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "consumer_contracts"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Emergency Ordinance No. 18/2026",
+      "title": "2026 amendments to Romanian consumer distance-contract law",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocumentAfis/308474",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official act endpoint verified; controlled repository copy/hash remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_marketplace_design",
+        "notes": "Application dates include 19 June 2026 for Article II point 13 (online withdrawal function) and 27 September 2026 for specified other amendments."
+      }
+    },
+    {
+      "id": "EU-REG-2022-2065-DSA",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "marketplace",
+        "intermediary_services"
+      ],
+      "authority": "European Union",
+      "citation": "Regulation (EU) 2022/2065",
+      "title": "Digital Services Act",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/eli/reg/2022/2065/oj",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official EUR-Lex endpoint verified; controlled repository copy/hash remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_dsa_design",
+        "notes": "Article 19 and Article 29 micro/small exclusions require enterprise-size and service-scope analysis; they do not remove all DSA duties."
+      }
+    },
+    {
+      "id": "RO-LAW-50-2024",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "intermediary_services"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 50/2024",
+      "title": "Romanian measures for application of Regulation (EU) 2022/2065",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/public/DetaliiDocument/280106",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint verified; controlled repository copy/hash remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_dsa_design",
+        "notes": "Romanian DSA implementation/coordination and sanction framework."
+      }
+    },
+    {
+      "id": "EU-REG-2023-988-GPSR-CONSOLIDATED-2026-05-29",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "marketplace",
+        "product_safety"
+      ],
+      "authority": "European Union",
+      "citation": "Regulation (EU) 2023/988, consolidated 2026-05-29",
+      "title": "General Product Safety Regulation",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02023R0988-20260529",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official consolidated EUR-Lex endpoint verified; controlled repository PDF/hash remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_marketplace_product_activation",
+        "notes": "Article 22 Marketplace product-safety controls require provision-to-control mapping and category review."
+      }
+    },
+    {
+      "id": "RO-LAW-209-2019-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "payments",
+        "marketplace"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 209/2019 — Legislative Portal form verified 2026-09-15",
+      "title": "Payment services",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/219736",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint verified; controlled repository copy/hash remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_live_payments",
+        "notes": "Payment perimeter still requires selected-PSP and exact money-flow review."
+      }
+    },
+    {
+      "id": "RO-LAW-190-2018-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "all"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 190/2018 — Legislative Portal form verified 2026-09-15",
+      "title": "Romanian measures implementing Regulation (EU) 2016/679",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/203151",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official Legislative Portal endpoint verified; controlled repository copy/hash remains pending."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_personal_data_design",
+        "notes": "Use with GDPR and current ANSPDCP/EDPB guidance; does not by itself determine launch retention or DPIA."
+      }
+    },
+    {
+      "id": "RO-ONRC-CAEN-REV3-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "parcel_delivery",
+        "platform_intermediation"
+      ],
+      "authority": "National Trade Register Office",
+      "citation": "CAEN Rev.3 complete structure — official ONRC-hosted copy verified 2026-09-15",
+      "title": "CAEN Rev.3 complete structure",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.onrc.ro/documente/caen/CAEN_Rev.3_structura_completa.pdf",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official ONRC-hosted PDF identified; repository binary/hash remains to be archived."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_entity_filing",
+        "notes": "Confirms classification labels including 4791/4792/5320/5330; classification does not substitute for sector authorization."
+      }
+    },
+    {
+      "id": "RO-ONRC-CAEN-REV2-REV3-CORRESPONDENCE-2026-09-15",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "parcel_delivery",
+        "platform_intermediation"
+      ],
+      "authority": "National Trade Register Office",
+      "citation": "CAEN Rev.2 to Rev.3 correspondence — official ONRC-hosted copy verified 2026-09-15",
+      "title": "CAEN Rev.2 / CAEN Rev.3 correspondence",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.onrc.ro/documente/anunturi/Corespondenta-CAEN-Rev.2-CAEN-Rev.3.pdf",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official ONRC-hosted PDF identified; repository binary/hash remains to be archived."
+      },
+      "reliance": {
+        "state": "missing_primary_copy",
+        "reviewBy": "before_ro_entity_filing",
+        "notes": "Describes 5330 as intermediation without the intermediary itself providing postal/courier service; factual ANCOM role remains separately classified."
       }
     }
   ]
