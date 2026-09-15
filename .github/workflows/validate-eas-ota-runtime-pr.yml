@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/eas-update.yml
       - .github/workflows/eas-build-android.yml
+      - .github/workflows/build-android-apk-github.yml
       - .github/workflows/validate-eas-ota-runtime-pr.yml
       - app.config.ts
       - constants/oauth.ts
@@ -14,6 +15,7 @@ on:
       - package.json
       - pnpm-lock.yaml
       - tests/eas-ota-runtime-contract.test.ts
+      - tests/android-owner-apk-contract.test.ts
 
 permissions:
   contents: read
@@ -36,6 +38,67 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: EAS OTA runtime contract
         run: node --import tsx --test tests/eas-ota-runtime-contract.test.ts
+      - name: Standalone Android owner APK contract
+        run: node --import tsx --test tests/android-owner-apk-contract.test.ts
+      - name: Native dependency changes require appVersion bump
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          node <<'NODE'
+          const { execFileSync } = require("node:child_process");
+
+          const base = process.env.BASE_SHA;
+          const head = process.env.HEAD_SHA;
+          const readAt = (sha, path) => execFileSync(
+            "git",
+            ["show", `${sha}:${path}`],
+            { encoding: "utf8" },
+          );
+          const packageAt = (sha) => JSON.parse(readAt(sha, "package.json"));
+          const versionAt = (sha) => {
+            const text = readAt(sha, "app.config.ts");
+            const match = text.match(/\bversion:\s*["']([^"']+)["']/);
+            if (!match) throw new Error(`Missing app version at ${sha}`);
+            return match[1];
+          };
+          const dependencyMap = (pkg) => ({
+            ...(pkg.dependencies || {}),
+            ...(pkg.devDependencies || {}),
+          });
+          const isNativeRuntimeDependency = (name) =>
+            name === "expo" ||
+            name.startsWith("expo-") ||
+            name.startsWith("@expo/") ||
+            name === "react" ||
+            name === "react-native" ||
+            name.startsWith("react-native-") ||
+            name.startsWith("@react-native/");
+
+          const before = dependencyMap(packageAt(base));
+          const after = dependencyMap(packageAt(head));
+          const names = new Set([...Object.keys(before), ...Object.keys(after)]);
+          const changed = [...names]
+            .filter(isNativeRuntimeDependency)
+            .filter((name) => before[name] !== after[name])
+            .sort();
+
+          if (changed.length === 0) {
+            console.log("No native-runtime dependency changes detected");
+            process.exit(0);
+          }
+
+          const baseVersion = versionAt(base);
+          const headVersion = versionAt(head);
+          console.log(`Native-runtime dependencies changed: ${changed.join(", ")}`);
+          console.log(`appVersion: ${baseVersion} -> ${headVersion}`);
+          if (baseVersion === headVersion) {
+            throw new Error(
+              "Native-runtime dependencies changed without an appVersion bump. " +
+              "A new runtime and binary are required before OTA publication.",
+            );
+          }
+          NODE
       - name: TypeScript
         run: pnpm check
       - name: Whitespace
