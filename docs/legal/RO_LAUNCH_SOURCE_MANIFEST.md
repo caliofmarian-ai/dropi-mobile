@@ -1,13 +1,15 @@
 # Romania Launch Legal Source Manifest
 
 > **STATUS: PRE-COUNSEL / FAIL-CLOSED**
-> **Version:** 0.7.0
+> **Version:** 0.8.0
 > **As of:** 2026-09-15
 > **Issue:** #499
 > **Parent:** #492
 > **Governing canon:** `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md`
 
 This manifest is the launch-focused entry point into the controlled legal corpus for the proposed Romanian MVP. It does not authorize implementation or launch. Source status, provenance, hashes and controlled-copy state remain governed by `docs/legal/legal-source-register.json`.
+
+Current validator baseline: `62 records / 30 immutable files`.
 
 ## Launch corpus documents
 
@@ -51,9 +53,26 @@ Excluded from the first launch: P2P/private sellers, food and deliberately highe
 
 ### Entity / tax / CAEN
 
-Controlled or identified authority includes the Romanian company/fiscal framework, official ONRC CAEN Rev.3 structure/correspondence and the Ireland–Romania tax treaty/Irish Revenue company-residence guidance used to identify cross-border management risk.
+The entity/tax source chain now includes controlled copies of:
 
-Current disposition: `WRITTEN TAX/ACCOUNTING CONFIRMATION REQUIRED`.
+- Irish Revenue company-residency guidance (`IE-REVENUE-COMPANY-RESIDENCY-2026-09-15`);
+- the original Ireland–Romania Double Taxation Convention legal order, S.I. No. 427/1999 (`IE-RO-DTA-SI-427-1999`);
+- Ireland's MLI implementing order, S.I. No. 440/2018 (`IE-MLI-SI-440-2018`);
+- Irish Revenue's synthesised MLI + Ireland–Romania Convention (`IE-RO-DTA-MLI-SYNTHESISED-2026-09-15`), explicitly recorded as official explanatory guidance and not itself a source of law;
+- ANAF's guide on Romanian tax residence of foreign legal persons (`RO-ANAF-FOREIGN-LEGAL-RESIDENCE-GUIDE-2025`).
+
+The previous shorthand that the Ireland–Romania treaty always resolves dual residence solely by `place of effective management` is superseded. Under the post-MLI treaty position reflected in Revenue's official synthesis, a dual-resident non-individual is subject to a competent-authority mutual-agreement determination having regard to place of effective management, place of incorporation/constitution and other relevant factors. Actual DROPi management facts therefore require professional cross-border tax analysis; Romanian incorporation alone does not settle the issue, and `place of effective management` is not an automatic post-MLI tie-breaker by itself.
+
+The Romanian invoicing source chain now additionally registers:
+
+- `RO-OUG-120-2021-EFACTURA-CURRENT-2026-09-15` — current consolidated RO e-Factura framework;
+- `RO-LAW-88-2026-EFACTURA` — 2026 amendments affecting B2C/register rules.
+
+Both Romanian Legislative Portal endpoints were verified but refused the automated controlled-byte fetch, so they remain `pending_primary_copy`; no archive path/hash was fabricated. Their application remains `pending_current_validation` and must be derived per actual supplier, transaction and VAT/fiscal facts. A merchant-product invoice, DROPi platform-fee invoice and any future postal-service invoice are not assumed to be one invoice obligation.
+
+Official ONRC CAEN Rev.3 structure/correspondence remains part of the entity pack, including candidate activity/intermediation classes, but a CAEN code never substitutes for sector authorization or tax/payment/legal classification.
+
+Current disposition: `SOURCE FAMILY MATERIALLY IMPROVED / ACTUAL MANAGEMENT FACTS + SELLER/VAT/E-FACTURA MATRIX + WRITTEN TAX/ACCOUNTING CONFIRMATION REQUIRED`.
 
 ### Marketplace / consumer / DSA / GPSR
 
