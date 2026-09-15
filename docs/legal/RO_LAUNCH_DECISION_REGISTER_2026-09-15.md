@@ -43,18 +43,43 @@ Excluded from first launch: P2P/private sellers, food, cosmetics, toys, electric
 
 Official Irish Revenue guidance states that a foreign-incorporated company centrally managed and controlled in Ireland may be Irish tax resident. Revenue looks to the highest level of control, including where policy, major investment decisions, major contracts, head office and directors are located.
 
-The Ireland–Romania Double Taxation Convention provides that where a non-individual is resident in both states, treaty residence is assigned to the state where its place of effective management is situated. The treaty permanent-establishment article also includes a place of management, branch and office among the examples of fixed places of business.
+The current official Revenue synthesised text of the Ireland–Romania convention, reflecting the Multilateral Instrument (MLI), requires a correction to the earlier project shorthand. The original convention's Article 4(3) rule that assigned a dual-resident non-individual solely by `place of effective management` has been replaced by MLI Article 4(1). Under the synthesised post-MLI wording, the competent authorities are to endeavour to determine treaty residence by mutual agreement, having regard to place of effective management, place of incorporation/constitution and other relevant factors. In the absence of such agreement, treaty relief/exemption is not automatically available except to the extent and in the manner the competent authorities may agree.
+
+The official synthesised text states that relevant MLI provisions have effect in Romania, for taxes other than withholding taxes, for taxable periods beginning on or after 1 January 2024. The synthesised document itself is explanatory and states that the authentic Convention and MLI texts remain the legal texts.
+
+The treaty permanent-establishment article separately includes a place of management, branch and office among examples of fixed places of business.
 
 Therefore:
 
-`ROMANIAN_INCORPORATION != CROSS_BORDER_TAX_RESIDENCE_RESOLVED`
+```text
+ROMANIAN_INCORPORATION != CROSS_BORDER_TAX_RESIDENCE_RESOLVED
+PLACE_OF_EFFECTIVE_MANAGEMENT != AUTOMATIC_POST_MLI_TREATY_TIE_BREAKER
+DUAL_RESIDENCE_REQUIRES_CURRENT_TREATY_MLI_ANALYSIS
+```
 
 No artificial board minutes, nominal management location or fictional local decision-making may be used as evidence. Actual governance facts must be recorded truthfully and reviewed professionally before the entity model is promoted.
 
 Official references rechecked 2026-09-15:
 
 - Irish Revenue — company residency rules: `https://www.revenue.ie/en/companies-and-charities/corporation-tax-for-companies/corporation-tax/company-residency-rules.aspx`
-- Ireland–Romania DTA: `https://www.revenue.ie/en/tax-professionals/documents/double-taxation-treaties/r/romania.pdf`
+- Irish Revenue — Romania treaty index: `https://www.revenue.ie/en/tax-professionals/tax-agreements/double-taxation-treaties/R/romania.aspx`
+- Irish Revenue — synthesised MLI + Ireland–Romania convention: `https://www.revenue.ie/en/tax-professionals/documents/double-taxation-treaties/r/synthesised-text-of-the-mli-and-the-ireland-romania-double-taxation-convention.pdf`
+
+### RO e-Factura / invoice authority — current-source correction
+
+The invoice implementation must be driven by the current Romanian legal pack rather than an old generic `invoiceRequired` flag. Current official sources rechecked on 2026-09-15 include the consolidated OUG 120/2021 and Law 88/2026. The current consolidated OUG 120/2021 reflects, among other things, the 2026 B2C identification rules and a five-working-day transmission deadline in the relevant mandatory e-Factura flow. Law 88/2026 amended the 2026 B2C/register provisions. ANAF also publishes 2026 explanatory material for these changes.
+
+This does **not** decide which party in each DROPi flow is the invoice issuer. The seller-of-record, platform-fee supplier, any postal-service supplier, VAT status and exact transaction type must be fixed first. Engineering must therefore model invoice obligations per supplier/transaction/legal-pack version, not per order globally.
+
+Current invoice invariant:
+
+```text
+invoiceIssuer = derived_from_approved_supplier_role
+vatTreatment = TBD_ACCOUNTING_REVIEW
+roEFacturaTreatment = derived_from_current_legal_pack
+merchantProductInvoice != dropiPlatformFeeInvoice
+postalInvoice = disabled_until_postal_role_approved
+```
 
 ### CAEN Rev.3 candidate mapping
 
@@ -168,7 +193,7 @@ The following anti-shortcut rules are fixed for planning:
 - withdrawal, conformity, product safety, privacy rights, DSA notices and postal claims are dedicated workflows, not generic `contact support` tickets;
 - restricted data access must be scoped and audited.
 
-Exact controller/processor relationships, legal bases, retention durations and DPIA outcome remain professionally unresolved.
+The Romanian DPIA source family now includes ANSPDCP Decision 174/2018 and official ANSPDCP DPIA guidance. Exact controller/processor relationships, legal bases, retention durations and the factual DPIA outcome remain professionally unresolved; the first-pilot state remains `DPIA_TBD`.
 
 Current state: `PRE-DPIA / WRITTEN PRIVACY REVIEW REQUIRED / PRODUCTION DATA SEMANTICS BLOCKED`.
 
@@ -214,9 +239,9 @@ Integrated postal resale is inserted only if #496 is approved and the owner elec
 
 Before #501 can authorize implementation reprioritization, record explicit dispositions for:
 
-1. actual Romanian/Irish management facts and professional cross-border tax conclusion;
+1. actual Romanian/Irish management facts and professional cross-border tax conclusion under the current post-MLI treaty framework;
 2. final Romanian entity and CAEN activity set;
-3. final seller-of-record/title/invoice matrix;
+3. final seller-of-record/title/VAT/e-Factura invoice matrix;
 4. final product allowlist and pilot geography;
 5. selected PSP and approved money-flow/invoice/refund matrix;
 6. merchant fulfilment-only versus first-pilot postal resale decision;
