@@ -92,12 +92,6 @@ Official ONRC CAEN Rev.3 material confirms:
 
 The old assumption `4791 = Internet retail` must not be used as current Rev.3 authority.
 
-Official references rechecked 2026-09-15:
-
-- `https://www.onrc.ro/documente/caen/Monitorul_Oficial_385_CAEN_Rev.3.pdf`
-- `https://www.onrc.ro/documente/anunturi/CAEN-Rev.3_structura-completa.pdf`
-- `https://www.onrc.ro/documente/anunturi/Corespondenta-CAEN-Rev.2-CAEN-Rev.3.pdf`
-
 Hard invariant:
 
 ```text
@@ -115,44 +109,54 @@ Implementation may model roles generically, but must not hard-code the entity ta
 
 ## 3. #494 — Marketplace / consumer / DSA / GPSR
 
-Current research and canonical traceability support the following **candidate controls**, still pending controlled-source completion and qualified interpretation where marked:
-
-- professional-seller status represented before binding checkout;
-- versioned ranking disclosure where legally required;
-- versioned seller/DROPi responsibility allocation;
-- online withdrawal function and durable acknowledgement for covered distance contracts;
-- legal-pack effective dates so the checkout schema changes with applicable law;
-- DSA service classification and enterprise-size applicability record rather than global `dsaCompliant=true`;
-- GPSR Marketplace contact/Safety Gate/process controls;
-- category-aware product-safety listing schema;
-- unsafe-product notice, removal/disable, recall and consumer-notification evidence.
+Current research and canonical traceability support candidate controls for professional-seller status, ranking/responsibility disclosures, binding checkout, immutable contract snapshots, online withdrawal, effective-date legal packs, DSA applicability, GPSR listing/safety controls, unfair-practice/Terms review and SAL/ADR presentation. Exact law-dependent wording/applicability remains gated.
 
 Current state: `PRE-COUNSEL / CURRENT_SOURCE_PENDING / IMPLEMENTATION BLOCKED FOR LAW-DEPENDENT SEMANTICS`.
 
 ## 4. #495 — PSP / settlement / refunds / invoices
 
+The payment source family and technical contract are now materially more complete. `docs/legal/RO_LAUNCH_PAYMENT_SETTLEMENT_CONTROL_CONTRACT_2026-09-15.md` governs the candidate first-pilot architecture.
+
 Candidate MVP boundary:
 
 ```text
-customer -> eligible external PSP -> merchant / DROPi allocations
+customer
+-> regulated external PSP/platform product
+-> merchant/submerchant proceeds
++ separately evidenced DROPi platform/service fee
 ```
 
 DROPi does not intentionally:
 
-- hold/safeguard customer money;
-- issue stored value;
+- hold/safeguard customer or merchant money as a payment service;
+- issue stored monetary value/e-money;
 - operate a customer cash-equivalent wallet;
-- market legal escrow.
+- market legal escrow;
+- rely on cash/COD in the first pilot;
+- rely on the PSD2 commercial-agent exclusion as a design shortcut.
 
-Candidate financial components must be independently identifiable: product amount, platform fee, postal/delivery amount where applicable, PSP fee/reference, refund/reversal and reconciliation evidence.
+The legal corpus now registers the consolidated PSD2 endpoint, SCA RTS endpoint, EBA Q&A 2020_5354 and 2020_5355, OUG 5/2026 amendments affecting Law 209/2019, current Law 210/2019 e-money endpoint and the EBA central payment/e-money register page. The EBA Q&A and central-register page are archived controlled evidence; the central register is expressly treated only as a discovery/cross-check source because EBA states it has no legal significance. The exact PSP contracting entity must have competent-NCA authorization/register and, where applicable, Romania/EEA passporting evidence.
 
-`paid=true` is not an adequate financial authority model.
+The provider shortlist remains PayU Marketplace, NETOPIA Marketplace, Stripe Connect, Adyen for Platforms and Mollie/Connect. No provider is selected. For every candidate, the same evidence must be obtained for contracting entity, NCA authorization, passporting, merchant KYB, SCA, funds path, split/fee model, settlement/payout, refunds, chargebacks, negative balances, reserves, webhook/idempotency, reconciliation, DPA/subprocessors and commercial terms.
 
-Cash remains `HOLD` for the first pilot unless an approved fiscal/payment flow later enables it.
+Candidate financial components are independently identifiable: product amount, DROPi platform fee, future postal amount only if #496 approves it, PSP fee/reference, refund, reversal, chargeback and settlement adjustment.
 
-Provider selection remains open. A provider name in research is not approval.
+Hard invariants:
 
-Current state: `PRE-COUNSEL / PRE-ACCOUNTANT / PSP NOT SELECTED / LIVE CHARGING BLOCKED`.
+```text
+fundsPossessionByDropi = false   // first-pilot boundary
+paymentAuthority != UI success screen
+paid != one boolean
+providerPayout != taxInvoice
+providerSplit != sellerOfRecordDecision
+wallet/storedValue/eMoney = DISABLED
+```
+
+Safe pre-approval engineering is limited to provider abstraction, signed-webhook/idempotency machinery, evidence-backed payment states, component ledger, reconciliation engine and fail-closed activation gates. Live charging requires selected/provider-authorized production configuration plus approved money-flow and tax/invoice matrix.
+
+Current state:
+
+`PRE-COUNSEL / PRE-ACCOUNTANT / PSP NOT SELECTED / AUTHORITY EVIDENCE PER PROVIDER PENDING / MONEY FLOW NOT APPROVED / WALLET DISABLED / LIVE CHARGING BLOCKED`.
 
 ## 5. #496 — postal / ANCOM role
 
@@ -193,21 +197,13 @@ The following anti-shortcut rules are fixed for planning:
 - withdrawal, conformity, product safety, privacy rights, DSA notices and postal claims are dedicated workflows, not generic `contact support` tickets;
 - restricted data access must be scoped and audited.
 
-The Romanian DPIA source family now includes ANSPDCP Decision 174/2018 and official ANSPDCP DPIA guidance. Exact controller/processor relationships, legal bases, retention durations and the factual DPIA outcome remain professionally unresolved; the first-pilot state remains `DPIA_TBD`.
+The Romanian DPIA source family includes ANSPDCP Decision 174/2018 and official ANSPDCP DPIA guidance. Exact controller/processor relationships, legal bases, retention durations and the factual DPIA outcome remain professionally unresolved; the first-pilot state remains `DPIA_TBD`.
 
 Current state: `PRE-DPIA / WRITTEN PRIVACY REVIEW REQUIRED / PRODUCTION DATA SEMANTICS BLOCKED`.
 
 ## 8. #499 — controlled legal corpus
 
-PR #504 is the consolidation point for:
-
-- source provenance and reliance state;
-- canonical source register;
-- legal gaps/blockers;
-- main requirement traceability;
-- official-source findings;
-- professional-review packet;
-- this decision register.
+PR #504 is the consolidation point for source provenance/reliance state, canonical source register, gaps/blockers, requirement traceability, official-source findings, review packet and these decision contracts.
 
 A verified official URL is not automatically an immutable controlled source snapshot. Missing controlled copies remain explicitly pending rather than receiving fabricated hash/path evidence.
 
@@ -243,7 +239,7 @@ Before #501 can authorize implementation reprioritization, record explicit dispo
 2. final Romanian entity and CAEN activity set;
 3. final seller-of-record/title/VAT/e-Factura invoice matrix;
 4. final product allowlist and pilot geography;
-5. selected PSP and approved money-flow/invoice/refund matrix;
+5. selected PSP, exact contracting-entity authority/passport evidence and approved money-flow/invoice/refund/chargeback matrix;
 6. merchant fulfilment-only versus first-pilot postal resale decision;
 7. exact DSA/GPSR/consumer-law applicability/control set;
 8. privacy roles, legal bases, retention and DPIA decision;
