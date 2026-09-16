@@ -5,33 +5,70 @@
 > **Parent:** #500 / #492
 > **Legal evidence:** PR #504
 > **Planning PR:** #505
-> **Depends on:** `docs/legal/RO_LAUNCH_PLATFORM_BUSINESS_TAX_ACCESSIBILITY_PACKAGING_CONTRACT_2026-09-16.md`
+> **Depends on:** `docs/legal/RO_LAUNCH_PLATFORM_BUSINESS_TAX_ACCESSIBILITY_PACKAGING_CONTRACT_2026-09-16.md` v1.1.0
+> **Applicability evidence:** `docs/legal/RO_LAUNCH_CROSSCUTTING_APPLICABILITY_WORKSHEET_2026-09-16.md`
 
-This addendum extends the existing Romania launch candidate queue and P0 decomposition with four cross-cutting domains discovered/materialized after the original 2026-09-15 planning pass:
+This addendum extends the existing Romania launch candidate queue and P0 decomposition with four cross-cutting domains:
 
 1. platform-to-business (P2B) merchant relationship;
 2. DAC7 platform/seller tax reporting;
 3. e-commerce accessibility;
-4. packaging / EPR / fulfilment responsibility.
+4. packaging/EPR plus the distinct PPWR online-platform verification duty.
 
-It does **not** authorize implementation reprioritization, public merchant activation, tax reporting, packaging-role claims or a legal exemption. It defines safe foundation work and the exact fail-closed gates that later implementation must consume if #501 authorizes backlog reprioritization.
+It does **not** authorize implementation reprioritization, public merchant activation, tax reporting, an accessibility exemption, packaging-role claims or PPWR producer activation. It defines safe foundation work and exact fail-closed gates that later implementation may consume only if #501 authorizes backlog reprioritization.
 
-## 1. Why this is an addendum rather than four new product epics
+## 1. Design rule
 
-These domains cut across the already-defined P0 slices. Creating four independent launch epics would encourage duplicated merchant, checkout, privacy and fulfilment state.
-
-The correct relationship is:
+These domains cross-cut existing P0 slices and must not become duplicate epics with conflicting state.
 
 ```text
 existing P0 slice
 + cross-cutting applicability profile
-+ evidence-backed legal/operational values
++ domain-specific evidence
++ versioned legal policy
 + fail-closed activation gate
 ```
 
-No existing slice may treat the absence of a cross-cutting decision as PASS.
+No missing cross-cutting decision is an implicit PASS.
 
-## 2. P2B mapping
+## 2. Shared enterprise-size rule
+
+Engineering must not implement one generic `smallCompany=true` control.
+
+```text
+P2B Article 11/12 small-enterprise candidate test:
+  persons < 50
+  AND (turnover <= EUR 10m OR balance sheet <= EUR 10m)
+
+Accessibility/EAA services microenterprise candidate test:
+  persons < 10
+  AND (turnover <= EUR 2m OR balance sheet <= EUR 2m)
+
+Romanian fiscal microenterprise status:
+  separate #493 tax concept; not a substitute for either row
+```
+
+Use a domain-specific evidence model:
+
+```text
+EnterpriseSizeAssessment {
+  legalEntityId
+  legalDomain             // P2B | ACCESSIBILITY | OTHER
+  definitionSourceRef
+  headcountMethod
+  headcountEvidenceRef
+  turnoverEvidenceRef
+  balanceSheetEvidenceRef
+  partnerLinkedAggregationRef?
+  referencePeriod
+  calculatedState
+  reviewerRef?
+  reviewedAt
+  reviewDueAt
+}
+```
+
+## 3. P2B mapping
 
 Primary existing slice:
 
@@ -43,12 +80,23 @@ Secondary consumers:
 - `RO-IMP-P0-08` — Launch Legal / Contact / Policy Surfaces;
 - `RO-IMP-P0-09` — Controlled Pilot E2E / Release / Rollback Gate.
 
+### Current legal research state
+
+Candidate facts strongly match the Regulation (EU) 2019/1150 online-intermediation-service pattern:
+
+```text
+P2B_SERVICE_CLASSIFICATION = LIKELY_IN_SCOPE / FINAL_APPROVAL_PENDING
+```
+
+This does not remove the final qualified review requirement.
+
 ### Safe foundation requirements
 
-Engineering may implement, before final P2B applicability approval:
+Engineering may implement:
 
 ```text
 P2bApplicabilityProfile
+P2bEnterpriseSizeEvidence
 MerchantTermsVersion
 MerchantPlatformDecision
 ```
@@ -62,48 +110,47 @@ The machinery must support:
 - grounds/evidence references;
 - separate business-user ranking disclosure version;
 - differentiated-treatment disclosure version;
-- data-access/data-use disclosure version;
+- data-access/data-use and post-termination disclosure versions;
 - optional complaint/mediation profiles whose activation depends on approved applicability;
 - immutable audit attribution.
 
 ### P2B fail-closed rule
 
 ```text
-if p2b_applicability_required_component == UNKNOWN
+if required_p2b_component == UNKNOWN
 or required_merchant_terms_version != APPROVED
 or required_notice_or_decision_evidence_missing:
     merchant_binding_capability = DENIED
 ```
 
-`merchantVerified=true` is never a substitute for this gate.
+The `<50 / EUR 10m` size result may affect only the obligations for which the approved legal matrix says the exception applies. It never sets global `p2bApplicable=false`.
 
-### Law-dependent values that remain blocked
-
-Do not hard-code:
-
-- that every P2B obligation applies;
-- that a small-enterprise state is a blanket exemption;
-- final notice periods;
-- final restriction/suspension/termination wording;
-- final complaint/mediation duty;
-- final ranking/data-access/differentiated-treatment text.
-
-Those values come from the approved P2B applicability/merchant-terms matrix.
-
-## 3. DAC7 mapping
+## 4. DAC7 mapping
 
 Primary existing slices:
 
 - `RO-IMP-P0-01` — Professional Merchant Marketplace Capability;
 - `RO-IMP-P0-07` — Production Privacy / Retention / Rights / Support Enforcement.
 
-Payment/reconciliation data may be referenced by:
+Financial evidence may be referenced from:
 
 - `RO-IMP-P0-05` — External PSP Transaction / Settlement / Reconciliation Core.
 
-### Safe foundation requirements
+### Current legal research state
 
-Engineering may add neutral structures:
+The 2026 source chain now includes the consolidated Directive 2011/16/EU as of 2026-01-01 plus Romanian 2025/2026 amendment families.
+
+Candidate Marketplace facts support:
+
+```text
+DAC7_PLATFORM_OPERATOR_CANDIDATE = LIKELY
+DAC7_REPORTING_PLATFORM_OPERATOR = NOT_YET_VALIDATED
+DAC7_REPORTING_JURISDICTION = NOT_YET_VALIDATED
+```
+
+Sale of goods is the relevant candidate activity; final legal entity/nexus determines the reporting operator and Member State procedure.
+
+### Safe foundation requirements
 
 ```text
 Dac7PlatformApplicabilityProfile
@@ -111,20 +158,39 @@ Dac7SellerProfile
 Dac7ReportingPeriod
 ```
 
-Required design properties:
+Required properties:
 
-- platform/operator classification is separate from seller classification;
+- platform/operator classification separate from seller classification;
 - seller `ENTITY` does not imply `EXCLUDED`;
-- relevant-activity classification is versioned;
-- Member State/reporting-jurisdiction decision is explicit;
-- due-diligence evidence references are attributable;
-- consideration/platform-fee/tax figures reference authoritative financial records rather than duplicated manually typed totals;
-- filing schema/version, correction lifecycle and authority receipt are modeled as evidence;
-- DAC7-purpose data is distinguishable from generic merchant-verification data.
+- current source/legal-pack version attached to every decision;
+- Member State/reporting-jurisdiction decision explicit;
+- due-diligence evidence attributable;
+- consideration/platform-fee/tax figures reference authoritative financial records;
+- form/schema/deadline policy versioned;
+- correction lifecycle and authority receipt modeled as evidence;
+- DAC7-purpose data separated from generic merchant verification.
+
+### Sale-of-goods excluded-seller test
+
+The design must support the current conjunctive de-minimis test:
+
+```text
+saleOfGoodsActivityCount < 30
+AND
+totalConsideration <= EUR 2,000
+```
+
+This is one excluded-seller class, not the whole classifier.
+
+### Reporting policy
+
+Current Romanian source research identifies **31 January following the reporting period** as the current statutory reporting deadline. It must be stored as versioned policy, not scattered as a magic constant.
+
+The design must also be able to select current registration/election procedures, including Forms 707/708 where the approved operator/nexus facts make them applicable.
 
 ### Collection gate
 
-Until approved DAC7 applicability exists:
+Until approved applicability exists:
 
 ```text
 dac7_specific_mandatory_collection = DISABLED
@@ -132,24 +198,11 @@ dac7_registration_state = NOT_AUTHORIZED
 dac7_filing_state = NOT_AUTHORIZED
 ```
 
-Fields already lawfully required for another approved purpose may exist, but engineering must not collect extra tax-reporting data “just in case”.
+Existing data required for another lawful approved purpose may exist, but no extra tax dataset is collected merely because future DAC7 fields are modeled.
 
-### Future activation prerequisites
+## 5. Accessibility mapping
 
-Before enabling DAC7-specific collection/reporting:
-
-- approved reporting-platform-operator decision;
-- relevant-activity decision;
-- reportable/excluded seller rules;
-- reporting jurisdiction/registration route;
-- current form/schema/deadline policy;
-- privacy legal basis/notice/retention linkage;
-- role-based access/audit controls;
-- filing/correction/receipt evidence contract.
-
-## 4. Accessibility mapping
-
-Accessibility is cross-cutting across every customer/merchant surface, with first-launch emphasis on:
+Accessibility is cross-cutting across:
 
 - `RO-IMP-P0-01` merchant onboarding/Terms;
 - `RO-IMP-P0-03` listing/pre-contract/checkout;
@@ -157,41 +210,43 @@ Accessibility is cross-cutting across every customer/merchant surface, with firs
 - `RO-IMP-P0-08` legal/contact/policy surfaces;
 - `RO-IMP-P0-09` release acceptance.
 
-### Safe foundation requirements
+### Current legal research state
 
-Accessible foundation work is allowed even while statutory applicability/exemption remains unresolved.
-
-The candidate implementation must support:
-
-- semantic labels and control names;
-- non-text alternatives where required;
-- readable/scalable content and sufficient contrast;
-- logical focus/navigation order;
-- keyboard operability where applicable to the surface;
-- screen-reader-compatible critical controls;
-- accessible form labels, instructions, validation and error recovery;
-- checkout/payment instructions not dependent solely on color, position or sound;
-- accessible authentication/recovery;
-- accessible withdrawal/return/support paths;
-- regression evidence from automated checks plus manual assistive-technology/device verification.
-
-### Provenance rule
-
-Every accessibility acceptance row must identify whether it is:
+The candidate consumer Marketplace fits the Romanian Law 232/2022 e-commerce-service category.
 
 ```text
-LAW_REQUIRED
-DROPI_POLICY
-BOTH
+ACCESSIBILITY_ECOMMERCE_SERVICE_SCOPE = IDENTIFIED
+ACCESSIBILITY_MICROENTERPRISE_EXEMPTION = EVIDENCE_PENDING
 ```
 
-No UI may state `accessibilityNotRequired=true` merely because the company is new or expected to be small.
+The actual `<10 / EUR 2m` entity-size evidence decides the candidate services exemption; being new or fiscally classified as a Romanian microenterprise does not.
 
-### Applicability gate
+### Safe foundation requirements
 
-If a statutory microenterprise exemption is relied on later, store the exact enterprise-size evidence, service classification, source-pack version, approval and review trigger. Loss/change of qualifying status forces re-evaluation.
+The implementation must support:
 
-## 5. Packaging / EPR mapping
+- semantic labels and control names;
+- appropriate non-text alternatives;
+- readable/scalable content and sufficient contrast;
+- logical focus/navigation order;
+- keyboard/assistive-technology operation where applicable;
+- screen-reader-compatible critical controls;
+- accessible form labels, instructions, validation and error recovery;
+- accessible identification/authentication/security functions delivered as part of the service;
+- accessible payment/checkout instructions and controls;
+- accessible withdrawal/return/support paths;
+- product/service accessibility information where required by the approved pack;
+- automated regression evidence plus manual assistive-technology/device verification.
+
+Every row records provenance:
+
+```text
+LAW_REQUIRED | DROPI_POLICY | BOTH
+```
+
+No release may state `accessibilityNotRequired=true` without approved enterprise-size and service-exemption evidence.
+
+## 6. Packaging producer/EPR mapping
 
 Primary existing slices:
 
@@ -200,32 +255,38 @@ Primary existing slices:
 
 Secondary consumers:
 
-- `RO-IMP-P0-01` merchant evidence capability;
-- `RO-IMP-P0-09` release gate.
+- `RO-IMP-P0-01` — merchant evidence;
+- `RO-IMP-P0-09` — release gate.
 
-### Safe foundation requirements
-
-Add a versioned:
+### Producer/EPR responsibility profile
 
 ```text
-PackagingResponsibilityProfile
+PackagingProducerResponsibilityProfile {
+  merchantId
+  productOrSkuId?
+  fulfilmentRole
+  productPackagingActor
+  groupedPackagingActor?
+  transportPackagingActor?
+  shippingPackagingActor
+  producerRoleState
+  importerRoleState
+  distributorRoleState
+  fulfilmentServiceRoleState
+  platformRoleState
+  eprResponsibleActor
+  registrationEvidenceRef?
+  environmentalFundEvidenceRef?
+  packagingMaterialProfileRef?
+  labellingInformationProfileRef?
+  sourcePackVersion
+  reviewedAt
+  reviewDueAt
+  approvalState
+}
 ```
 
-capable of separating:
-
-- product packaging;
-- grouped packaging;
-- transport packaging;
-- shipping/e-commerce packaging;
-- producer/importer/distributor role;
-- packer/fulfilment-service role;
-- platform role;
-- EPR-responsible actor;
-- registration/environmental-fund evidence;
-- required material/labelling/information evidence;
-- legal-pack version and review date.
-
-### Hard rule
+Hard rules:
 
 ```text
 sellerOfRecord != automatic packaging producer
@@ -233,28 +294,52 @@ marketplaceProvider != automatic EPR responsible actor
 merchantFulfilment != automatic no-DROPi-duty conclusion
 ```
 
-The role derives from the actual product/import/packing/fulfilment facts and approved current source pack.
+## 7. PPWR online-platform verification mapping
 
-### First-pilot activation gate
+PPWR applies from 12 August 2026 and introduces a **separate Marketplace question** from producer/EPR responsibility.
 
-A product/listing/merchant may become active only when the mandatory packaging row for the actual flow is resolved:
+Where the approved legal profile establishes the relevant PPWR rule for an online platform within DSA Section 4 that allows consumers to conclude distance contracts with producers, the system must support pre-activation evidence for:
+
+- producer registration information/registration number for the relevant consumer Member State;
+- producer EPR self-certification;
+- required `best efforts` completeness/reliability assessment.
 
 ```text
-packaging_roles_resolved
-AND required_merchant_packaging_evidence_current
-AND shipping_packaging_actor_resolved
-AND applicable_registration_epr_state_resolved
-AND required_information_labelling_resolved
-AND legal_pack_current
+PpwrOnlinePlatformVerificationProfile {
+  marketplaceLegalEntityId
+  dsaSection4ScopeState
+  merchantId
+  producerRoleState
+  consumerMemberState
+  producerRegistrationNumber?
+  producerRegistrationEvidenceRef?
+  eprSelfCertificationVersion?
+  selfCertificationAcceptedAt?
+  completenessAssessmentRef?
+  reliabilityAssessmentRef?
+  verificationState
+  sourcePackVersion
+  reviewedAt
+  reviewDueAt
+  approvalState
+}
 ```
 
-If the first pilot remains merchant-managed fulfilment, the implementation must preserve that factual boundary. If DROPi later supplies packaging, warehouses, packs or fulfils goods, capability activation requires recalculation of the responsibility profile before rollout.
+Fail-closed candidate rule:
 
-## 6. Combined merchant launch capability update
+```text
+if PPWR_PLATFORM_VERIFICATION_APPLIES
+and required_evidence_missing:
+    producer_marketplace_activation = DENIED
+```
 
-`RO-IMP-P0-01` must eventually aggregate the cross-cutting rows without flattening them into one compliance boolean.
+The PPWR/DSA Section 4 interaction remains `NOT_YET_VALIDATED` for the final DROPi entity. The implementation models the gate without pretending the answer is known.
 
-Candidate aggregate:
+If DROPi later supplies shipping packaging, warehouses, packs or fulfils goods, recalculate both the producer/EPR responsibility and platform-verification profiles before rollout.
+
+## 8. Combined merchant launch capability
+
+`RO-IMP-P0-01` eventually aggregates the cross-cutting rows without flattening them into one compliance boolean:
 
 ```text
 MerchantLaunchCapability {
@@ -265,7 +350,8 @@ MerchantLaunchCapability {
   paymentOnboardingState
   allowedCategoryState
   productSafetyState
-  packagingState
+  packagingProducerRoleState
+  ppwrPlatformVerificationState
   fulfilmentState
   privacyNoticeState
   contractVersionRefs[]
@@ -273,36 +359,33 @@ MerchantLaunchCapability {
 }
 ```
 
-For any row designated mandatory by the approved launch pack:
+For every row made mandatory by the approved legal pack:
 
 ```text
 UNKNOWN | MISSING | EXPIRED | SUSPENDED => merchantLaunchCapability = DENIED
 ```
 
-## 7. Checkout / ContractSnapshot consequences
+## 9. Checkout / ContractSnapshot consequences
 
-`RO-IMP-P0-03` must not duplicate tax or merchant-platform documents into consumer checkout, but the transaction snapshot must reference the versions that control the transaction.
+`RO-IMP-P0-03` must reference, not duplicate, the controlling versions for the transaction:
 
-Where applicable, the snapshot/evidence chain must be able to reference:
-
-- merchant capability version;
-- merchant Terms/P2B version relevant to the seller-platform relationship;
+- merchant capability;
+- merchant Terms/P2B version;
 - customer Terms;
 - legal pack;
 - ranking/responsibility disclosures;
-- product safety profile;
-- packaging responsibility/evidence pack version;
-- accessibility release profile/version;
+- product safety;
+- packaging producer/EPR profile;
+- applicable PPWR platform-verification evidence profile;
+- accessibility release profile;
 - payment-flow/provider profile;
 - fulfilment role.
 
-A consumer `ContractSnapshot` is not the DAC7 filing record and is not an EPR filing record; references must preserve domain separation.
+A consumer `ContractSnapshot` is not the DAC7 filing record and not an EPR filing record.
 
-## 8. Privacy consequences
+## 10. Privacy consequences
 
-`RO-IMP-P0-07` must be able to represent DAC7 as a separate purpose only after applicability is approved.
-
-Required pattern:
+`RO-IMP-P0-07` may activate DAC7 as a separate data purpose only after its reporting applicability is approved.
 
 ```text
 DataPurposeProfile {
@@ -318,65 +401,71 @@ DataPurposeProfile {
 }
 ```
 
-P2B decision evidence, DAC7 tax evidence, accessibility feedback and packaging evidence may have different legal bases, access rights and retention rules. No global `merchantDataRetentionDays` value may govern all of them.
+P2B decision evidence, DAC7 tax evidence, accessibility feedback and packaging/PPWR evidence may use different purposes, legal bases, access rules and retention periods. No global `merchantDataRetentionDays` value governs them all.
 
-## 9. Release-gate additions
+## 11. Release-gate additions
 
-`RO-IMP-P0-09` must add release assertions that fail closed when a mandatory cross-cutting row is unresolved.
-
-Candidate assertions:
+`RO-IMP-P0-09` candidate assertions:
 
 ```text
 merchant_p2b_profile_gate
+merchant_p2b_size_exception_evidence_gate
 merchant_tax_reporting_profile_gate
 accessibility_release_evidence_gate
-packaging_responsibility_gate
+accessibility_exemption_evidence_gate
+packaging_producer_responsibility_gate
+ppwr_platform_verification_gate
 crosscutting_policy_version_integrity_gate
 ```
 
-For a row professionally determined non-applicable/exempt, the release evidence must contain the approved reason/source/evidence/review date. `NOT_APPLICABLE` is a reasoned state, not an empty field.
+A professionally determined `NOT_APPLICABLE` or exemption state must contain its source, factual evidence, approval and review date. It is not an empty field.
 
-## 10. Tests to pre-compose
+## 12. Tests to pre-compose
 
-Without enabling blocked behavior, the implementation backlog may pre-compose tests for:
+Safe pre-gate tests include:
 
-- `UNKNOWN P2B applicability -> no merchant binding activation`;
-- missing required merchant Terms version -> deny merchant capability;
-- DAC7-specific collection disabled before approved purpose;
+- `LIKELY_IN_SCOPE` P2B research state does not become legal `APPROVED` automatically;
+- missing merchant Terms version denies binding merchant capability;
+- P2B `<50 / 10m` and accessibility `<10 / 2m` assessments cannot reuse the wrong legal-domain result;
+- DAC7-specific collection remains disabled before approved purpose;
 - entity seller does not auto-map to excluded seller;
-- accessibility exemption absent/unknown -> no exemption claim;
+- DAC7 goods exclusion requires both `<30` and `<= EUR 2,000`;
+- accessibility exemption absent/unknown produces no exemption claim;
 - accessibility critical-flow regression catches unlabeled/unreachable controls;
-- packaging actor unknown -> no listing/merchant activation where packaging gate is mandatory;
+- packaging producer actor unknown denies affected activation where mandatory;
+- PPWR platform rule applicable + missing producer registration/self-certification denies producer activation;
 - seller-of-record change does not silently rewrite EPR actor;
-- fulfilment-role change invalidates/reviews packaging responsibility profile;
-- legal-pack/version change invalidates stale cross-cutting approvals;
+- fulfilment-role change invalidates/reviews packaging responsibility;
+- DSA Section 4 state change invalidates/reviews the PPWR platform profile;
+- legal-pack/version change invalidates stale approvals;
 - release gate rejects expired evidence.
 
-## 11. Existing P0 slice changes — no new owner choice inferred
-
-This addendum changes the **technical completeness** of the candidate slices but does not settle open Product Owner choices.
-
-The existing slices should be interpreted as follows if #501 later authorizes implementation reprioritization:
+## 13. Existing P0 slice mapping
 
 | Existing slice | Cross-cutting addition |
 |---|---|
-| `RO-IMP-P0-01` | P2B applicability/Terms/merchant decisions + DAC7 seller/applicability references + combined merchant capability |
-| `RO-IMP-P0-02` | packaging responsibility/evidence gate alongside category/GPSR |
-| `RO-IMP-P0-03` | accessibility-compatible binding flow + references to applicable merchant/packaging release profiles |
+| `RO-IMP-P0-01` | P2B applicability/Terms/size evidence + DAC7 seller/applicability + PPWR producer evidence + combined merchant capability |
+| `RO-IMP-P0-02` | packaging producer/EPR and PPWR evidence gates alongside category/GPSR |
+| `RO-IMP-P0-03` | accessibility-compatible binding flow + references to applicable cross-cutting profiles |
 | `RO-IMP-P0-04` | accessible withdrawal/return/refund path |
-| `RO-IMP-P0-05` | reusable financial evidence for DAC7 only after approved purpose; no tax-reporting authority inferred from PSP data |
+| `RO-IMP-P0-05` | reusable financial evidence for DAC7 only after approved purpose; no reporting authority inferred from PSP data |
 | `RO-IMP-P0-06` | exact merchant-managed fulfilment facts + shipping-packaging actor profile |
 | `RO-IMP-P0-07` | DAC7 purpose/legal-basis/retention controls if applicable; cross-domain retention separation |
-| `RO-IMP-P0-08` | accessible legal/contact surfaces + approved P2B/business-user surfaces where needed |
-| `RO-IMP-P0-09` | cross-cutting evidence/review/expiry release gates |
+| `RO-IMP-P0-08` | accessible legal/contact surfaces + approved business-user surfaces where applicable |
+| `RO-IMP-P0-09` | P2B/DAC7/accessibility/packaging/PPWR evidence-review-expiry release gates |
 
-## 12. Current state exported to #501
+## 14. Current state exported to #501
 
 ```text
-P2B_APPLICABILITY = NOT_YET_VALIDATED
-DAC7_APPLICABILITY = NOT_YET_VALIDATED
-ACCESSIBILITY_APPLICABILITY = NOT_YET_VALIDATED
-PACKAGING_ROLE_MATRIX = NOT_YET_VALIDATED
+P2B_SERVICE_CLASSIFICATION = LIKELY_IN_SCOPE / FINAL_APPROVAL_PENDING
+P2B_SIZE_EXCEPTION_EVIDENCE = PENDING
+DAC7_PLATFORM_OPERATOR_CANDIDATE = LIKELY
+DAC7_REPORTING_OPERATOR_AND_JURISDICTION = NOT_YET_VALIDATED
+DAC7_MANDATORY_COLLECTION_AND_FILING = DISABLED
+ACCESSIBILITY_ECOMMERCE_SCOPE = IDENTIFIED
+ACCESSIBILITY_MICROENTERPRISE_EXEMPTION = EVIDENCE_PENDING
+PPWR_ONLINE_PLATFORM_VERIFICATION_SCOPE = NOT_YET_VALIDATED
+PACKAGING_EPR_RESPONSIBLE_ACTOR = NOT_YET_VALIDATED
 SAFE_FOUNDATION_WORK = CANDIDATE_IF_OWNER_AUTHORIZES_BACKLOG_REPRIORITIZATION
 PUBLIC_MERCHANT_ACTIVATION = BLOCKED
 ```
