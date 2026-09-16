@@ -1,0 +1,179 @@
+name: Register Romania payment sources once
+
+on:
+  push:
+    branches:
+      - docs/ro-launch-007-legal-corpus
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/ro-launch-007-legal-corpus
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - name: Register and archive payment sources when reachable
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { readFileSync, writeFileSync, mkdirSync } = require('node:fs');
+          const { dirname } = require('node:path');
+          const { createHash } = require('node:crypto');
+
+          const registerPath = 'docs/legal/legal-source-register.json';
+          const register = JSON.parse(readFileSync(registerPath, 'utf8'));
+          const byId = new Map(register.sources.map((s) => [s.id, s]));
+
+          const specs = [
+            {
+              id: 'EU-DIR-2015-2366-PSD2-CONSOLIDATED-2025-01-17', jurisdiction: 'EU',
+              serviceDomains: ['payments','marketplace'], authority: 'European Union',
+              citation: 'Directive (EU) 2015/2366, consolidated 2025-01-17',
+              title: 'Payment Services Directive (PSD2) — current consolidated text',
+              authorityClass: 'primary_normative', normative: true,
+              officialUrl: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L2366-20250117',
+              language: 'en', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/eu/payments/EU-DIR-2015-2366-PSD2-CONSOLIDATED-2025-01-17.html',
+              patterns: [/DIRECTIVE \(EU\) 2015\/2366/i, /17\.01\.2025|17\/01\/2025/i],
+              reliance: { state: 'research_only', reviewBy: 'before_ro_payment_flow_design', notes: 'EU payment-services baseline. Romanian implementation and factual DROPi role remain separately governed by current Law 209/2019 and later amendments.' }
+            },
+            {
+              id: 'EU-REG-2018-389-SCA-CONSOLIDATED-2023-09-12', jurisdiction: 'EU',
+              serviceDomains: ['payments','marketplace'], authority: 'European Union',
+              citation: 'Commission Delegated Regulation (EU) 2018/389, consolidated 2023-09-12',
+              title: 'Strong customer authentication and secure communication RTS',
+              authorityClass: 'primary_normative', normative: true,
+              officialUrl: 'https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX:02018R0389-20230912',
+              language: 'en', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/eu/payments/EU-REG-2018-389-SCA-CONSOLIDATED-2023-09-12.html',
+              patterns: [/2018\/389/i, /strong customer authentication/i],
+              reliance: { state: 'research_only', reviewBy: 'before_checkout_psp_integration', notes: 'SCA/payment-security baseline. PSP owns regulated authentication decisions according to the selected payment model; DROPi must not bypass provider-required authentication.' }
+            },
+            {
+              id: 'EBA-QA-2020-5354-ECOMMERCE-COMMERCIAL-AGENT', jurisdiction: 'EU',
+              serviceDomains: ['payments','marketplace'], authority: 'European Banking Authority',
+              citation: 'EBA Single Rulebook Q&A 2020_5354, final answer 2021-12-03',
+              title: 'Commercial-agent exclusion for e-commerce platforms receiving payments',
+              authorityClass: 'primary_official_guidance', normative: false,
+              officialUrl: 'https://www.eba.europa.eu/single-rule-book-qa/qna/view/publicId/2020_5354',
+              language: 'en', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/eu/payments/EBA-QA-2020-5354-ECOMMERCE-COMMERCIAL-AGENT.html',
+              patterns: [/2020_5354/i, /not to be excluded by default/i],
+              reliance: { state: 'research_only', reviewBy: 'before_ro_payment_perimeter_approval', notes: 'Official supervisory Q&A: settlement of buyer debt through the platform does not by itself exclude an e-commerce platform from PSD2. Not a substitute for Romanian competent-authority/counsel classification.' }
+            },
+            {
+              id: 'EBA-QA-2020-5355-B2C-COMMERCIAL-AGENT', jurisdiction: 'EU',
+              serviceDomains: ['payments','marketplace'], authority: 'European Banking Authority',
+              citation: 'EBA Single Rulebook Q&A 2020_5355, final answer 2021-12-06',
+              title: 'Commercial-agent exclusion for B2C e-commerce platforms',
+              authorityClass: 'primary_official_guidance', normative: false,
+              officialUrl: 'https://www.eba.europa.eu/single-rule-book-qa/qna/view/publicId/2020_5355',
+              language: 'en', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/eu/payments/EBA-QA-2020-5355-B2C-COMMERCIAL-AGENT.html',
+              patterns: [/2020_5355/i, /only acts on behalf of the payee/i],
+              reliance: { state: 'research_only', reviewBy: 'before_ro_payment_perimeter_approval', notes: 'Official supervisory Q&A confirms business-model-specific commercial-agent analysis; DROPi will not design the MVP around this exclusion.' }
+            },
+            {
+              id: 'RO-OUG-5-2026-PAYMENTS-AMENDMENT', jurisdiction: 'RO',
+              serviceDomains: ['payments','marketplace'], authority: 'Government of Romania',
+              citation: 'Emergency Ordinance No. 5/2026',
+              title: '2026 amendments to payment-services framework including Law 209/2019',
+              authorityClass: 'primary_normative', normative: true,
+              officialUrl: 'https://legislatie.just.ro/Public/DetaliiDocument/308068',
+              language: 'ro', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/ro/payments/RO-OUG-5-2026-PAYMENTS-AMENDMENT.html',
+              patterns: [/ORDONANȚĂ DE URGENȚĂ.*5|ORDONANTA DE URGENTA.*5/is, /Legea nr\. 209\/2019/i],
+              reliance: { state: 'pending_current_validation', reviewBy: 'before_ro_payment_flow_design', notes: '2026 amendment family must be reconciled with the current consolidated Law 209/2019 before payment-law reliance.' }
+            },
+            {
+              id: 'RO-LAW-210-2019-EMONEY-CURRENT-2026-03-05', jurisdiction: 'RO',
+              serviceDomains: ['payments','marketplace'], authority: 'Parliament of Romania',
+              citation: 'Law No. 210/2019, consolidated 2026-03-05',
+              title: 'Electronic money issuance framework',
+              authorityClass: 'primary_normative', normative: true,
+              officialUrl: 'https://legislatie.just.ro/Public/DetaliiDocument/219752',
+              language: 'ro', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/ro/payments/RO-LAW-210-2019-EMONEY-CURRENT-2026-03-05.html',
+              patterns: [/LEGE.*210/is, /monedă electronică|moneda electronica/i],
+              reliance: { state: 'pending_current_validation', reviewBy: 'before_any_stored_value_or_wallet_design', notes: 'Current e-money baseline. First launch intentionally excludes DROPi-issued stored monetary value/customer wallet; later wallet/e-money concepts require separate legal approval.' }
+            },
+            {
+              id: 'EBA-PSD2-PAYMENT-EMONEY-REGISTER-2026-09-15', jurisdiction: 'EU/EEA',
+              serviceDomains: ['payments','marketplace'], authority: 'European Banking Authority',
+              citation: 'EBA register of payment and electronic money institutions, rechecked 2026-09-15',
+              title: 'PSD2 payment and electronic money institutions register',
+              authorityClass: 'primary_official_guidance', normative: false,
+              officialUrl: 'https://www.eba.europa.eu/risk-and-data-analysis/data/registers/payment-institutions-register',
+              language: 'en', retrievedAt: '2026-09-15',
+              archivePath: 'docs/legal/sources/eu/payments/EBA-PSD2-PAYMENT-EMONEY-REGISTER-2026-09-15.html',
+              patterns: [/Register of payment and electronic money institutions/i, /no legal significance/i],
+              reliance: { state: 'research_only', reviewBy: 'at_psp_selection_and_before_launch', notes: 'Discovery/cross-check aid only. EBA states the central register itself has no legal significance; final provider authority must be checked against the competent national register/authorisation/passporting evidence.' }
+            }
+          ];
+
+          async function capture(spec) {
+            let source = byId.get(spec.id);
+            if (!source) {
+              source = {
+                id: spec.id, jurisdiction: spec.jurisdiction, serviceDomains: spec.serviceDomains,
+                authority: spec.authority, citation: spec.citation, title: spec.title,
+                authorityClass: spec.authorityClass, normative: spec.normative,
+                officialUrl: spec.officialUrl, language: spec.language, retrievedAt: spec.retrievedAt,
+                snapshot: { status: 'pending_primary_copy', immutable: true, qualifier: 'Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable.' },
+                reliance: spec.reliance
+              };
+              register.sources.push(source);
+              byId.set(spec.id, source);
+            }
+            try {
+              const response = await fetch(spec.officialUrl, { redirect: 'follow', headers: { 'user-agent': 'DROPi-controlled-legal-corpus/1.0' } });
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+              const bytes = Buffer.from(await response.arrayBuffer());
+              const text = bytes.toString('utf8');
+              for (const pattern of spec.patterns) if (!pattern.test(text)) throw new Error(`payload validation failed: ${pattern}`);
+              mkdirSync(dirname(spec.archivePath), { recursive: true });
+              writeFileSync(spec.archivePath, bytes);
+              source.snapshot = {
+                status: 'archived', path: spec.archivePath,
+                sha256: createHash('sha256').update(bytes).digest('hex'), bytes: bytes.length,
+                immutable: true,
+                qualifier: 'Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; amendments, provider-specific authority and DROPi factual applicability remain separately gated.'
+              };
+              console.log(`Archived ${spec.id}: ${bytes.length} bytes`);
+            } catch (error) {
+              console.log(`Pending ${spec.id}: ${error.message}`);
+            }
+          }
+
+          (async () => {
+            for (const spec of specs) await capture(spec);
+            register.generatedAt = '2026-09-15T00:00:00Z';
+            writeFileSync(registerPath, `${JSON.stringify(register, null, 2)}\n`);
+          })().catch((error) => { console.error(error); process.exit(1); });
+          NODE
+      - name: Validate legal source register
+        run: node scripts/validate-legal-sources.mjs
+      - name: Reject whitespace errors
+        run: git diff --check
+      - name: Commit controlled payment source update
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No source changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/legal/legal-source-register.json
+          for d in docs/legal/sources/eu/payments docs/legal/sources/ro/payments; do
+            if [ -d "$d" ]; then git add "$d"; fi
+          done
+          git commit -m "docs(payments): register payment authority source family"
+          git push origin HEAD:docs/ro-launch-007-legal-corpus
