@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-09-15T00:00:00Z",
+  "generatedAt": "2026-09-16T00:00:00Z",
   "governingCanon": "canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md",
   "notice": "Repository snapshots are research evidence, not proof of current applicability or authorization. Only an approved traced requirement may inform law-dependent design, and no registry entry directly enables operations.",
   "sources": [
@@ -2010,6 +2010,323 @@
         "state": "research_only",
         "reviewBy": "at_psp_selection_and_before_launch",
         "notes": "Discovery/cross-check aid only. EBA states the central register itself has no legal significance; final provider authority must be checked against the competent national register/authorisation/passporting evidence."
+      }
+    },
+    {
+      "id": "EU-REG-2019-1150-P2B",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "marketplace",
+        "business_users"
+      ],
+      "authority": "European Union",
+      "citation": "Regulation (EU) 2019/1150",
+      "title": "Fairness and transparency for business users of online intermediation services",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/eli/reg/2019/1150/oj",
+      "language": "en",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_merchant_terms_design",
+        "notes": "Potentially applies to the DROPi professional-merchant Marketplace relationship. Exact service scope, business-user facts and small-enterprise exceptions must be evidenced before law-dependent merchant terms are approved."
+      }
+    },
+    {
+      "id": "RO-OUG-23-2021-P2B-ENFORCEMENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "business_users"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Emergency Ordinance No. 23/2021",
+      "title": "Romanian enforcement measures for Regulation (EU) 2019/1150",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/240385",
+      "language": "ro",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_merchant_terms_design",
+        "notes": "Romanian P2B enforcement baseline; current consolidated amendments and exact DROPi applicability require review. Consiliul Concurentei enforcement evidence must be reconciled before public operation."
+      }
+    },
+    {
+      "id": "EU-DIR-2021-514-DAC7",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "marketplace",
+        "tax_reporting"
+      ],
+      "authority": "European Union",
+      "citation": "Council Directive (EU) 2021/514",
+      "title": "DAC7 platform reporting amendments to Directive 2011/16/EU",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/eli/dir/2021/514/oj",
+      "language": "en",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_dac7_design",
+        "notes": "EU DAC7 baseline. Romanian implementation and the exact DROPi reporting-platform-operator / relevant-activity / reportable-seller analysis control production obligations."
+      }
+    },
+    {
+      "id": "RO-OG-16-2023-DAC7",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "tax_reporting"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Government Ordinance No. 16/2023",
+      "title": "Romanian DAC7 implementation in the Tax Procedure Code",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/264508",
+      "language": "ro",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_dac7_design",
+        "notes": "Romanian DAC7 diligence/reporting baseline. Does not establish that DROPi is a reporting platform operator without the factual applicability analysis."
+      }
+    },
+    {
+      "id": "RO-ANAF-DAC7-GUIDE-2024",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "tax_reporting"
+      ],
+      "authority": "Romanian National Agency for Fiscal Administration",
+      "citation": "ANAF DAC7 Guide 2024",
+      "title": "Guide for DAC7 platform due diligence and reporting",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/AEOI/GhidDAC7.pdf",
+      "language": "ro",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/ro/tax-reporting/RO-ANAF-DAC7-GUIDE-2024.pdf",
+        "sha256": "d5f7ebea786084810cc99eb65e64c984839ce782b21b138c7e6ce6e29e124176",
+        "bytes": 1065987,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-16. Archive proves reviewed bytes only; amendments, effective dates, factual roles and DROPi applicability remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_dac7_design",
+        "notes": "Official ANAF guidance. Useful for platform/operator/relevant-activity concepts and process preparation; does not replace the Tax Procedure Code, OG 16/2023 or current ANAF orders."
+      }
+    },
+    {
+      "id": "RO-ANAF-ORDER-1996-2023-DAC7-F7000",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "tax_reporting"
+      ],
+      "authority": "Romanian National Agency for Fiscal Administration",
+      "citation": "ANAF Order No. 1996/2023",
+      "title": "DAC7 F7000 reporting form and instructions",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/277645",
+      "language": "ro",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_dac7_reporting_activation",
+        "notes": "F7000 schema evidence if DROPi is a Romanian reporting platform operator. Current form/version must be rechecked before filing."
+      }
+    },
+    {
+      "id": "RO-ANAF-ORDER-1946-2023-DAC7-707",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "tax_reporting"
+      ],
+      "authority": "Romanian National Agency for Fiscal Administration",
+      "citation": "ANAF Order No. 1946/2023",
+      "title": "DAC7 registration/mentions procedures and Form 707",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/277014",
+      "language": "ro",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_dac7_registration",
+        "notes": "Romanian DAC7 registration/mentions procedure baseline. Applicability depends on operator classification and jurisdiction facts."
+      }
+    },
+    {
+      "id": "RO-ANAF-ORDER-1226-2023-DAC7-CONTROLS",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "tax_reporting"
+      ],
+      "authority": "Romanian National Agency for Fiscal Administration",
+      "citation": "ANAF Order No. 1226/2023",
+      "title": "DAC7 due-diligence and reporting verification procedures",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/273737",
+      "language": "ro",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_dac7_design",
+        "notes": "Shows ANAF verification of platform due diligence/reporting; reinforces the need for evidence-backed seller classification/data collection if DAC7 applies."
+      }
+    },
+    {
+      "id": "RO-LAW-232-2022-ACCESSIBILITY",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "accessibility"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 232/2022",
+      "title": "Accessibility requirements for products and services including e-commerce services",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/257778",
+      "language": "ro",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_storefront_checkout_design",
+        "notes": "Applies from 28 June 2025 to covered e-commerce services; microenterprise service exemption and actual DROPi enterprise status must be evidenced rather than assumed."
+      }
+    },
+    {
+      "id": "EU-DIR-2019-882-EAA",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "marketplace",
+        "accessibility"
+      ],
+      "authority": "European Union",
+      "citation": "Directive (EU) 2019/882",
+      "title": "European Accessibility Act",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/eli/dir/2019/882/oj",
+      "language": "en",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_accessibility_approval",
+        "notes": "EU accessibility baseline; Romanian Law 232/2022 controls national application, including microenterprise service exemptions."
+      }
+    },
+    {
+      "id": "EU-REG-2025-40-PPWR",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "marketplace",
+        "packaging",
+        "fulfilment"
+      ],
+      "authority": "European Union",
+      "citation": "Regulation (EU) 2025/40",
+      "title": "Packaging and packaging waste regulation (PPWR)",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/eli/reg/2025/40/oj",
+      "language": "en",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_packaging_fulfilment_design",
+        "notes": "Directly applicable from 12 August 2026. Exact producer/economic-operator/platform/fulfilment roles and first-pilot packaging obligations require provision-to-flow review."
+      }
+    },
+    {
+      "id": "RO-LAW-249-2015-PACKAGING-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "packaging",
+        "fulfilment"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 249/2015",
+      "title": "Packaging and packaging waste management",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocumentAfis/202801",
+      "language": "ro",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_packaging_fulfilment_design",
+        "notes": "Romanian packaging baseline; must be reconciled with PPWR and current environmental/EPR implementing rules before seller or DROPi obligations are hard-coded."
       }
     }
   ]
