@@ -2328,6 +2328,207 @@
         "reviewBy": "before_ro_packaging_fulfilment_design",
         "notes": "Romanian packaging baseline; must be reconciled with PPWR and current environmental/EPR implementing rules before seller or DROPi obligations are hard-coded."
       }
+    },
+    {
+      "id": "EU-DIR-2011-16-DAC-CONSOLIDATED-2026-01-01",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "marketplace",
+        "tax",
+        "dac7"
+      ],
+      "authority": "European Union",
+      "citation": "Directive 2011/16/EU, consolidated 2026-01-01",
+      "title": "Administrative cooperation in taxation — current consolidated DAC framework including DAC7",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/eli/dir/2011/16/2026-01-01/eng",
+      "language": "en",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/tax/EU-DIR-2011-16-DAC-CONSOLIDATED-2026-01-01.html",
+        "sha256": "99f056121fd174f00be390d8092e18b4677fab2998d73f0506dba219a977fb31",
+        "bytes": 1305241,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-16. Archive proves reviewed bytes only; later amendments and DROPi factual applicability remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_dac7_applicability_or_reporting_design",
+        "notes": "Current consolidated DAC authority must supersede reliance on the original DAC7 amendment text alone. Platform/operator/seller facts and Romanian implementation remain separately gated."
+      }
+    },
+    {
+      "id": "RO-OUG-71-2025-DAC7-CURRENT-AMENDMENTS",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "tax",
+        "dac7"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Emergency Ordinance No. 71/2025",
+      "title": "2025 amendments to Romanian Tax Procedure Code including Article 291^5 DAC7 fields/register mechanics",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/304846",
+      "language": "ro",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_dac7_applicability_or_reporting_design",
+        "notes": "Article 291^5 was amended for reporting/identification mechanics from 2026. Must be reconciled with the current Code and forms before implementation reliance."
+      }
+    },
+    {
+      "id": "RO-OG-1-2026-TAX-PROCEDURE-DAC-CURRENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "tax",
+        "dac7"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Ordinance No. 1/2026",
+      "title": "2026 amendments to Romanian Tax Procedure Code and automatic exchange framework",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/306795",
+      "language": "ro",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_dac7_applicability_or_reporting_design",
+        "notes": "2026 Tax Procedure Code amendment family affecting automatic-exchange architecture. Exact DAC7 effect must be reconciled against the current consolidated Code."
+      }
+    },
+    {
+      "id": "EU-COM-PPWR-GUIDANCE-C-2026-3702",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "marketplace",
+        "packaging",
+        "epr"
+      ],
+      "authority": "European Commission",
+      "citation": "Commission Notice C(2026) 3702 final",
+      "title": "Commission guidance for Regulation (EU) 2025/40 on packaging and packaging waste",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=intcom:C(2026)3702",
+      "language": "en",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/packaging/EU-COM-PPWR-GUIDANCE-C-2026-3702.html",
+        "sha256": "3dec5532e58b9f0bea7d67c82bb54358e36d9ae52a37c18392c980021b7adbad",
+        "bytes": 370528,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-16. Archive proves reviewed bytes only; later amendments and DROPi factual applicability remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_packaging_epr_marketplace_activation",
+        "notes": "Official non-binding Commission guidance. Useful for PPWR/DSA online-platform interplay, but the Regulation and national implementation remain controlling."
+      }
+    },
+    {
+      "id": "RO-OUG-196-2005-ENVIRONMENT-FUND-CURRENT-2026-09-16",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "packaging",
+        "epr",
+        "environment"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Emergency Ordinance No. 196/2005, current Romanian Legislative Portal endpoint rechecked 2026-09-16",
+      "title": "Environmental Fund framework including packaging-waste contribution categories",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/67529",
+      "language": "ro",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_packaging_epr_actor_approval",
+        "notes": "Romanian environmental-fund/EPR contribution layer. Actor liability depends on actual placing-on-market/import/overpacking/sales-packaging facts and current amendments."
+      }
+    },
+    {
+      "id": "RO-LAW-79-2026-ENVIRONMENT-FUND-AMENDMENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "marketplace",
+        "packaging",
+        "epr",
+        "environment"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 79/2026",
+      "title": "2026 approval of OUG 104/2024 amendments to Environmental Fund framework",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/311011",
+      "language": "ro",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_packaging_epr_actor_approval",
+        "notes": "Current 2026 amendment-family evidence for the Romanian Environmental Fund framework; must be read together with the consolidated underlying instrument."
+      }
+    },
+    {
+      "id": "EU-RECO-2003-361-SME-DEFINITION",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "marketplace",
+        "p2b",
+        "accessibility",
+        "governance"
+      ],
+      "authority": "European Commission",
+      "citation": "Commission Recommendation 2003/361/EC",
+      "title": "EU micro, small and medium-sized enterprise definition",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32003H0361",
+      "language": "en",
+      "retrievedAt": "2026-09-16",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/governance/EU-RECO-2003-361-SME-DEFINITION.html",
+        "sha256": "73d3d1ee7a0d112ea91717d2c4ded3711ef89972dc7975ec56bdeb2980944479",
+        "bytes": 218731,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-16. Archive proves reviewed bytes only; later amendments and DROPi factual applicability remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "when_p2b_or_accessibility_size_exception_is_assessed",
+        "notes": "Referenced by P2B for small-enterprise exceptions. EAA has its own microenterprise definition with the same headline 10-person/2m thresholds; linked/partner enterprise treatment and the exact applicable legal instrument must be evidenced rather than replaced by Romanian fiscal microenterprise status."
+      }
     }
   ]
 }
