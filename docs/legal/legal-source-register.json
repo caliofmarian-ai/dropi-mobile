@@ -1820,6 +1820,197 @@
         "reviewBy": "before_ro_marketplace_design",
         "notes": "Official ANPC guidance covering online commerce/platforms, information, withdrawal, dark patterns, payments, complaints and product safety. ANPC expressly states the guide is orientative/informative and does not replace applicable law."
       }
+    },
+    {
+      "id": "EU-DIR-2015-2366-PSD2-CONSOLIDATED-2025-01-17",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "payments",
+        "marketplace"
+      ],
+      "authority": "European Union",
+      "citation": "Directive (EU) 2015/2366, consolidated 2025-01-17",
+      "title": "Payment Services Directive (PSD2) — current consolidated text",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L2366-20250117",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_payment_flow_design",
+        "notes": "EU payment-services baseline. Romanian implementation and factual DROPi role remain separately governed by current Law 209/2019 and later amendments."
+      }
+    },
+    {
+      "id": "EU-REG-2018-389-SCA-CONSOLIDATED-2023-09-12",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "payments",
+        "marketplace"
+      ],
+      "authority": "European Union",
+      "citation": "Commission Delegated Regulation (EU) 2018/389, consolidated 2023-09-12",
+      "title": "Strong customer authentication and secure communication RTS",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX:02018R0389-20230912",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_checkout_psp_integration",
+        "notes": "SCA/payment-security baseline. PSP owns regulated authentication decisions according to the selected payment model; DROPi must not bypass provider-required authentication."
+      }
+    },
+    {
+      "id": "EBA-QA-2020-5354-ECOMMERCE-COMMERCIAL-AGENT",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "payments",
+        "marketplace"
+      ],
+      "authority": "European Banking Authority",
+      "citation": "EBA Single Rulebook Q&A 2020_5354, final answer 2021-12-03",
+      "title": "Commercial-agent exclusion for e-commerce platforms receiving payments",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.eba.europa.eu/single-rule-book-qa/qna/view/publicId/2020_5354",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/payments/EBA-QA-2020-5354-ECOMMERCE-COMMERCIAL-AGENT.html",
+        "sha256": "4dd2943e544e6eed88ec77a14a185145ae597997e9e207f6b10fff3e0c86cc08",
+        "bytes": 53020,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; amendments, provider-specific authority and DROPi factual applicability remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_payment_perimeter_approval",
+        "notes": "Official supervisory Q&A: settlement of buyer debt through the platform does not by itself exclude an e-commerce platform from PSD2. Not a substitute for Romanian competent-authority/counsel classification."
+      }
+    },
+    {
+      "id": "EBA-QA-2020-5355-B2C-COMMERCIAL-AGENT",
+      "jurisdiction": "EU",
+      "serviceDomains": [
+        "payments",
+        "marketplace"
+      ],
+      "authority": "European Banking Authority",
+      "citation": "EBA Single Rulebook Q&A 2020_5355, final answer 2021-12-06",
+      "title": "Commercial-agent exclusion for B2C e-commerce platforms",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.eba.europa.eu/single-rule-book-qa/qna/view/publicId/2020_5355",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/payments/EBA-QA-2020-5355-B2C-COMMERCIAL-AGENT.html",
+        "sha256": "24300e2e656c8051663036b06dfa4977e2ff38f9876ab66a7d03c3c5619e2726",
+        "bytes": 53856,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; amendments, provider-specific authority and DROPi factual applicability remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "before_ro_payment_perimeter_approval",
+        "notes": "Official supervisory Q&A confirms business-model-specific commercial-agent analysis; DROPi will not design the MVP around this exclusion."
+      }
+    },
+    {
+      "id": "RO-OUG-5-2026-PAYMENTS-AMENDMENT",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "payments",
+        "marketplace"
+      ],
+      "authority": "Government of Romania",
+      "citation": "Emergency Ordinance No. 5/2026",
+      "title": "2026 amendments to payment-services framework including Law 209/2019",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/308068",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_ro_payment_flow_design",
+        "notes": "2026 amendment family must be reconciled with the current consolidated Law 209/2019 before payment-law reliance."
+      }
+    },
+    {
+      "id": "RO-LAW-210-2019-EMONEY-CURRENT-2026-03-05",
+      "jurisdiction": "RO",
+      "serviceDomains": [
+        "payments",
+        "marketplace"
+      ],
+      "authority": "Parliament of Romania",
+      "citation": "Law No. 210/2019, consolidated 2026-03-05",
+      "title": "Electronic money issuance framework",
+      "authorityClass": "primary_normative",
+      "normative": true,
+      "officialUrl": "https://legislatie.just.ro/Public/DetaliiDocument/219752",
+      "language": "ro",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "pending_primary_copy",
+        "immutable": true,
+        "qualifier": "Official endpoint verified; controlled repository copy remains pending if automated retrieval is unavailable."
+      },
+      "reliance": {
+        "state": "pending_current_validation",
+        "reviewBy": "before_any_stored_value_or_wallet_design",
+        "notes": "Current e-money baseline. First launch intentionally excludes DROPi-issued stored monetary value/customer wallet; later wallet/e-money concepts require separate legal approval."
+      }
+    },
+    {
+      "id": "EBA-PSD2-PAYMENT-EMONEY-REGISTER-2026-09-15",
+      "jurisdiction": "EU/EEA",
+      "serviceDomains": [
+        "payments",
+        "marketplace"
+      ],
+      "authority": "European Banking Authority",
+      "citation": "EBA register of payment and electronic money institutions, rechecked 2026-09-15",
+      "title": "PSD2 payment and electronic money institutions register",
+      "authorityClass": "primary_official_guidance",
+      "normative": false,
+      "officialUrl": "https://www.eba.europa.eu/risk-and-data-analysis/data/registers/payment-institutions-register",
+      "language": "en",
+      "retrievedAt": "2026-09-15",
+      "snapshot": {
+        "status": "archived",
+        "path": "docs/legal/sources/eu/payments/EBA-PSD2-PAYMENT-EMONEY-REGISTER-2026-09-15.html",
+        "sha256": "6cbdd99f932ee5adcdb91adb28fac2fa8d1ce9e3bb22bda821a7a7c4216c4ad5",
+        "bytes": 70055,
+        "immutable": true,
+        "qualifier": "Controlled byte snapshot fetched from the registered official URL on 2026-09-15. Archive proves reviewed bytes only; amendments, provider-specific authority and DROPi factual applicability remain separately gated."
+      },
+      "reliance": {
+        "state": "research_only",
+        "reviewBy": "at_psp_selection_and_before_launch",
+        "notes": "Discovery/cross-check aid only. EBA states the central register itself has no legal significance; final provider authority must be checked against the competent national register/authorisation/passporting evidence."
+      }
     }
   ]
 }
