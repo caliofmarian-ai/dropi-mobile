@@ -1,7 +1,7 @@
 # Romania Launch Legal Source Manifest
 
 > **STATUS: PRE-COUNSEL / FAIL-CLOSED**
-> **Version:** 0.11.0
+> **Version:** 0.12.0
 > **As of:** 2026-09-16
 > **Issue:** #499
 > **Parent:** #492
@@ -9,7 +9,7 @@
 
 This manifest is the launch-focused entry point into the controlled legal corpus for the proposed Romanian MVP. It does not authorize implementation or launch. Source status, provenance, hashes and controlled-copy state remain governed by `docs/legal/legal-source-register.json`.
 
-Current validator baseline after the cross-cutting Marketplace source batch: `86 records / 34 immutable files`.
+Current source-register baseline after the 2026-09-16 current-authority batch: `93 records / 37 immutable files`.
 
 ## Launch corpus documents
 
@@ -17,7 +17,7 @@ Current validator baseline after the cross-cutting Marketplace source batch: `86
 
 - `docs/legal/legal-source-register.json` — authoritative source inventory and controlled-copy state.
 - `docs/legal/LEGAL_REQUIREMENTS_TRACEABILITY.md` — canonical provisional requirement/control matrix.
-- `docs/legal/LEGAL_GAPS_AND_BLOCKERS.md` — explicit legal/source blockers.
+- `docs/legal/LEGAL_GAPS_AND_BLOCKERS.md` — explicit legal/source blockers; current cross-cutting revision v1.8.0.
 - `docs/legal/RO_LAUNCH_REQUIREMENTS_TRACEABILITY.md` — launch-focused staging matrix retained as a review aid; canonical rows are also integrated into the main traceability matrix.
 - `docs/research/RO_LAUNCH_007_OFFICIAL_SOURCE_FINDINGS_2026-09-15.md` — time-stamped official-endpoint findings.
 - `docs/research/RO_LAUNCH_007_QUALIFIED_REVIEW_PACKET.md` — bounded questions for Romanian/EU legal, tax/accounting, payment, postal, privacy, product-safety and cross-cutting Marketplace review.
@@ -26,7 +26,8 @@ Current validator baseline after the cross-cutting Marketplace source batch: `86
 
 - `docs/legal/RO_LAUNCH_DECISION_REGISTER_2026-09-15.md` — consolidated #493–#499 launch decisions, candidate operating boundaries and unresolved evidence.
 - `docs/legal/RO_LAUNCH_MARKETPLACE_CONTROL_CONTRACT_2026-09-15.md` — merchant capability, consumer presentation, OUG 34/2014 disclosures, Law 363/2007 unfair-practice controls, Law 193/2000 Terms review, SAL/ADR information, binding checkout, withdrawal, DSA applicability and safety/moderation case model.
-- `docs/legal/RO_LAUNCH_PLATFORM_BUSINESS_TAX_ACCESSIBILITY_PACKAGING_CONTRACT_2026-09-16.md` — fail-closed P2B merchant relationship, DAC7 applicability/reporting, e-commerce accessibility and packaging/EPR responsibility profiles.
+- `docs/legal/RO_LAUNCH_PLATFORM_BUSINESS_TAX_ACCESSIBILITY_PACKAGING_CONTRACT_2026-09-16.md` v1.1.0 — fail-closed P2B merchant relationship, current DAC7 applicability/reporting, e-commerce accessibility and separate packaging-producer/PPWR-platform verification profiles.
+- `docs/legal/RO_LAUNCH_CROSSCUTTING_APPLICABILITY_WORKSHEET_2026-09-16.md` — evidence worksheet distinguishing facts already narrowed from entity/professional determinations still `NOT_YET_VALIDATED`.
 - `docs/legal/RO_LAUNCH_PRODUCT_ALLOWLIST_GPSR_CONTRACT_2026-09-15.md` — deny-by-default first-family allowlist, exclusions and GPSR listing/safety gate.
 - `docs/legal/RO_LAUNCH_PAYMENT_SETTLEMENT_CONTROL_CONTRACT_2026-09-15.md` — no-custody first-pilot money-flow boundary, provider authority evidence, SCA, webhook/idempotency, component ledger, settlement/reconciliation, refund/dispute and wallet/e-money gates.
 - `docs/research/RO_LAUNCH_003_PSP_CANDIDATE_MATRIX_2026-09-15.md` — provider-owned evidence and the same authority/KYB/SCA/funds/refund/chargeback/reconciliation questionnaire across PayU/NETOPIA/Stripe/Adyen/Mollie candidates; no provider selected.
@@ -72,31 +73,79 @@ The controlled source family covers OUG 34/2014, OUG 18/2026, Law 363/2007, Law 
 
 The Romanian Portal/ANPC sources that could not be captured automatically remain honestly `pending_primary_copy`; no bytes/hash/path evidence was invented. The remaining problem is now exact provision-to-actor/surface/transaction/effective-date mapping, final Terms/unfair-practice/SAL/DSA review and tested binding-checkout/withdrawal controls.
 
-Current disposition: `MAIN SOURCE DISCOVERY MATERIALLY IMPROVED / EXACT PROVISION-TO-FLOW + TERMS + SAL + DSA REVIEW PENDING / PUBLIC CHECKOUT DISABLED`.
+The DSA Section 4 classification now also feeds the PPWR Marketplace-platform analysis and therefore cannot be treated as an isolated DSA-only decision.
+
+Current disposition: `MAIN SOURCE DISCOVERY MATERIALLY IMPROVED / EXACT PROVISION-TO-FLOW + TERMS + SAL + DSA SECTION-4 REVIEW PENDING / PUBLIC CHECKOUT DISABLED`.
 
 ### Platform-to-business / DAC7 / accessibility / packaging
 
-The 2026-09-16 cross-cutting batch adds the source families that sit across merchant onboarding, tax reporting, storefront/checkout and fulfilment:
+The source family now goes beyond the first 2026-09-16 discovery pass.
 
-- `EU-REG-2019-1150-P2B` and `RO-OUG-23-2021-P2B-ENFORCEMENT` for the professional-merchant platform relationship;
-- `EU-DIR-2021-514-DAC7`, `RO-OG-16-2023-DAC7`, ANAF DAC7 guidance and ANAF Orders 1996/2023, 1946/2023 and 1226/2023 for operator/seller due diligence, registration/reporting and verification;
-- `EU-DIR-2019-882-EAA` and `RO-LAW-232-2022-ACCESSIBILITY` for e-commerce accessibility and evidence-based microenterprise-service exemption analysis;
-- `EU-REG-2025-40-PPWR` and `RO-LAW-249-2015-PACKAGING-CURRENT` for packaging/waste/EPR role analysis, with PPWR applying from 12 August 2026.
+#### P2B
 
-The ANAF DAC7 guide is archived as a controlled official snapshot. Other source status remains exactly as recorded in `legal-source-register.json`; an official endpoint that was not capturable remains pending rather than receiving invented archive evidence.
+Registered authority includes Regulation (EU) 2019/1150, Romanian OUG 23/2021 and archived Commission Recommendation 2003/361/EC.
 
-These sources do not support shortcut conclusions. The current contract explicitly prohibits:
+Candidate first-pilot facts — online Marketplace, professional merchants, EU consumers, transaction facilitation and a merchant-platform contract — make the service a `LIKELY_IN_SCOPE` P2B candidate. Final classification/current Romanian enforcement review remains pending.
+
+The P2B internal-complaint/mediation small-enterprise exceptions are obligation-specific. The applicable EU SME Recommendation headline small-enterprise test is `<50` persons and `<= EUR 10m` turnover **or** balance-sheet total, with partner/linked-enterprise treatment where required. It is not a blanket P2B exemption and is not the accessibility threshold.
+
+#### DAC7
+
+Current authority chain now includes:
+
+- archived `EU-DIR-2011-16-DAC-CONSOLIDATED-2026-01-01`;
+- the original DAC7 amendment source `EU-DIR-2021-514-DAC7`;
+- Romanian `RO-OG-16-2023-DAC7`;
+- `RO-OUG-71-2025-DAC7-CURRENT-AMENDMENTS` and `RO-OG-1-2026-TAX-PROCEDURE-DAC-CURRENT`, whose official Portal endpoints are registered but controlled primary copies remain pending;
+- registered ANAF DAC7 guidance/forms/order family.
+
+The current candidate flow makes DROPi a `LIKELY` Platform Operator candidate for sale of goods, but Reporting Platform Operator status and reporting Member State/registration route remain `NOT_YET_VALIDATED` because the final legal entity/nexus is not fixed.
+
+Professional/company status is not seller exclusion. The goods de-minimis excluded-seller row requires both `<30` facilitated goods activities and `<= EUR 2,000` total consideration in the reporting period. Current Romanian reporting mechanics identify a 31-January following-year reporting policy, retained as versioned legal policy rather than a magic constant.
+
+DAC7-specific mandatory data collection/registration/filing remains disabled until the operator/jurisdiction/seller/purpose matrix is approved.
+
+#### Accessibility
+
+Romanian Law 232/2022 / EAA source discovery now supports a narrower factual state: the candidate consumer Marketplace matches the e-commerce-service category, while the actual operating entity's services exemption remains evidence-dependent.
+
+The headline accessibility microenterprise test is `<10` persons and `<= EUR 2m` turnover **or** balance-sheet total. It must not be confused with the P2B `<50 / EUR 10m` test or Romanian fiscal microenterprise status.
+
+Accessible foundation work remains safe policy/design work even while the statutory exemption is unapproved.
+
+#### Packaging / EPR / PPWR Marketplace duty
+
+Registered authority now includes:
+
+- `EU-REG-2025-40-PPWR`, applicable from 12 August 2026;
+- archived official Commission Notice `EU-COM-PPWR-GUIDANCE-C-2026-3702` as non-binding guidance;
+- `RO-LAW-249-2015-PACKAGING-CURRENT`;
+- `RO-OUG-196-2005-ENVIRONMENT-FUND-CURRENT-2026-09-16` and `RO-LAW-79-2026-ENVIRONMENT-FUND-AMENDMENT`, both registered with current official endpoints and controlled primary copies pending.
+
+Two different legal questions are now modeled separately:
 
 ```text
-merchantVerified = true  -> P2B complete
-merchantIsCompany = true -> DAC7 excluded
-smallCompany = true      -> accessibility exempt
-marketplace = true       -> DROPi packaging producer
+PackagingProducerResponsibilityProfile
+PpwrOnlinePlatformVerificationProfile
 ```
 
-The launch data model therefore keeps separate `P2bApplicabilityProfile`, `Dac7PlatformApplicabilityProfile`, `Dac7SellerProfile`, `AccessibilityApplicabilityProfile` and `PackagingResponsibilityProfile` evidence. Accessibility-compatible foundation work may proceed as a product quality policy even while legal applicability is unresolved; DAC7-specific collection/filing, P2B law-dependent Terms behavior and packaging/EPR actor claims stay disabled until their exact applicability/role matrices are approved.
+Where the PPWR online-platform rule applies — including the required DSA Section 4 / producer-distance-contract factual scope — DROPi must be able to obtain producer registration information/number and EPR self-certification before producer activation, and support the required `best efforts` completeness/reliability assessment. Merchant-managed fulfilment does not automatically remove this verification question.
 
-Current disposition: `P2B_APPLICABILITY_PENDING / DAC7_APPLICABILITY_PENDING / ACCESSIBILITY_APPLICABILITY_PENDING / PACKAGING_ROLE_MATRIX_PENDING / SAFE_FOUNDATION_DESIGN_ALLOWED / PUBLIC_MERCHANT_ACTIVATION_NOT_YET_APPROVED`.
+That direct platform duty does not automatically make DROPi the packaging producer/EPR-responsible actor. The producer/importer/packing/fulfilment/environmental-fund allocation remains fact-specific.
+
+Hard anti-shortcuts are now:
+
+```text
+merchantVerified = true   != P2B complete
+merchantIsCompany = true  != DAC7 excluded
+smallCompany = true       != accessibility exempt
+marketplace = true        != DROPi packaging producer
+merchantFulfilment = true != no PPWR platform duty
+```
+
+Current disposition:
+
+`P2B LIKELY-IN-SCOPE / P2B FINAL TERMS+SIZE EXCEPTIONS PENDING / DAC7 PLATFORM-OPERATOR CANDIDATE LIKELY / REPORTING OPERATOR+JURISDICTION NOT VALIDATED / ACCESSIBILITY E-COMMERCE SCOPE IDENTIFIED / MICROENTERPRISE EXEMPTION EVIDENCE PENDING / PPWR PLATFORM SCOPE NOT VALIDATED / PACKAGING EPR ACTOR NOT VALIDATED / SAFE FOUNDATION DESIGN ALLOWED / PUBLIC MERCHANT ACTIVATION BLOCKED`.
 
 ### Payments
 
@@ -150,7 +199,7 @@ Current disposition: `OWNER DECISION REQUIRED / PRODUCT ACTIVATION DISABLED`.
 
 The privacy source chain includes archived GDPR authority, Romanian Law 190/2018 endpoint, ANSPDCP Decision 174/2018 DPIA list, archived ANSPDCP DPIA guidance and EDPB controller/processor guidance. The national DPIA source-discovery gap is reduced, but the factual DROPi DPIA outcome remains `TBD`.
 
-Exact controller/processor roles, legal bases, retention periods, vendor transfer arrangements and support responsibilities remain unresolved. The new DAC7 data purpose must be added to this analysis only if/when DAC7 applicability and exact collection duties are approved; no hidden tax-reporting dataset is authorized by source discovery alone.
+Exact controller/processor roles, legal bases, retention periods, vendor transfer arrangements and support responsibilities remain unresolved. DAC7 data must become a distinct approved purpose only if/when the reporting-operator/seller applicability decision requires it; no hidden tax-reporting dataset is authorized by source discovery alone.
 
 Current disposition: `DATA ARCHITECTURE DEFINED / RETENTION VALUES TBD / DPIA TBD / PRODUCTION DATA SEMANTICS BLOCKED`.
 
