@@ -1,6 +1,7 @@
 # Romania Launch Decision Register — 2026-09-15
 
 > **STATUS: PRE-COUNSEL / PRE-ACCOUNTANT / FAIL-CLOSED**
+> **Updated through:** 2026-09-16
 > **Parent:** #492
 > **Workstreams:** #493–#499
 > **Legal evidence PR:** #504
@@ -111,11 +112,13 @@ Implementation may model roles generically, but must not hard-code the entity ta
 
 Current research and canonical traceability support candidate controls for professional-seller status, ranking/responsibility disclosures, binding checkout, immutable contract snapshots, online withdrawal, effective-date legal packs, DSA applicability, GPSR listing/safety controls, unfair-practice/Terms review and SAL/ADR presentation. Exact law-dependent wording/applicability remains gated.
 
+The merchant-side Marketplace relationship now additionally cross-references the dedicated P2B/DAC7/accessibility/packaging contract rather than assuming that consumer-law and DSA controls exhaust the platform's first-launch obligations.
+
 Current state: `PRE-COUNSEL / CURRENT_SOURCE_PENDING / IMPLEMENTATION BLOCKED FOR LAW-DEPENDENT SEMANTICS`.
 
 ## 4. #495 — PSP / settlement / refunds / invoices
 
-The payment source family and technical contract are now materially more complete. `docs/legal/RO_LAUNCH_PAYMENT_SETTLEMENT_CONTROL_CONTRACT_2026-09-15.md` governs the candidate first-pilot architecture.
+The payment source family and technical contract are materially more complete. `docs/legal/RO_LAUNCH_PAYMENT_SETTLEMENT_CONTROL_CONTRACT_2026-09-15.md` governs the candidate first-pilot architecture.
 
 Candidate MVP boundary:
 
@@ -135,7 +138,7 @@ DROPi does not intentionally:
 - rely on cash/COD in the first pilot;
 - rely on the PSD2 commercial-agent exclusion as a design shortcut.
 
-The legal corpus now registers the consolidated PSD2 endpoint, SCA RTS endpoint, EBA Q&A 2020_5354 and 2020_5355, OUG 5/2026 amendments affecting Law 209/2019, current Law 210/2019 e-money endpoint and the EBA central payment/e-money register page. The EBA Q&A and central-register page are archived controlled evidence; the central register is expressly treated only as a discovery/cross-check source because EBA states it has no legal significance. The exact PSP contracting entity must have competent-NCA authorization/register and, where applicable, Romania/EEA passporting evidence.
+The legal corpus registers the consolidated PSD2 endpoint, SCA RTS endpoint, EBA Q&A 2020_5354 and 2020_5355, OUG 5/2026 amendments affecting Law 209/2019, current Law 210/2019 e-money endpoint and the EBA central payment/e-money register page. The EBA Q&A and central-register page are archived controlled evidence; the central register is expressly treated only as a discovery/cross-check source because EBA states it has no legal significance. The exact PSP contracting entity must have competent-NCA authorization/register and, where applicable, Romania/EEA passporting evidence.
 
 The provider shortlist remains PayU Marketplace, NETOPIA Marketplace, Stripe Connect, Adyen for Platforms and Mollie/Connect. No provider is selected. For every candidate, the same evidence must be obtained for contracting entity, NCA authorization, passporting, merchant KYB, SCA, funds path, split/fee model, settlement/payout, refunds, chargebacks, negative balances, reserves, webhook/idempotency, reconciliation, DPA/subprocessors and commercial terms.
 
@@ -144,7 +147,7 @@ Candidate financial components are independently identifiable: product amount, D
 Hard invariants:
 
 ```text
-fundsPossessionByDropi = false   // first-pilot boundary
+fundsPossessionByDropi = false
 paymentAuthority != UI success screen
 paid != one boolean
 providerPayout != taxInvoice
@@ -183,7 +186,9 @@ Research candidate remains:
 
 This is not recorded as final Product Owner selection merely because it is the leading research candidate. Public activation remains disabled until an explicit owner decision is recorded together with the category/GPSR control pack.
 
-Current state: `OWNER DECISION REQUIRED / CATEGORY REVIEW REQUIRED`.
+The first-product gate now also requires the packaging/EPR responsibility profile appropriate to the actual merchant/import/packing/fulfilment facts; a low-complexity paper product is not automatically a packaging-compliance PASS.
+
+Current state: `OWNER DECISION REQUIRED / CATEGORY + PACKAGING ROLE REVIEW REQUIRED`.
 
 ## 7. #498 — contracts / privacy / retention / support
 
@@ -199,15 +204,41 @@ The following anti-shortcut rules are fixed for planning:
 
 The Romanian DPIA source family includes ANSPDCP Decision 174/2018 and official ANSPDCP DPIA guidance. Exact controller/processor relationships, legal bases, retention durations and the factual DPIA outcome remain professionally unresolved; the first-pilot state remains `DPIA_TBD`.
 
+DAC7-specific seller data may be collected as a mandatory tax-reporting purpose only after the platform/operator/activity/seller applicability decision and its legal-basis/retention profile are approved. Source discovery alone does not authorize collecting extra tax data “just in case”.
+
 Current state: `PRE-DPIA / WRITTEN PRIVACY REVIEW REQUIRED / PRODUCTION DATA SEMANTICS BLOCKED`.
 
-## 8. #499 — controlled legal corpus
+## 8. Cross-cutting Marketplace controls — P2B / DAC7 / accessibility / packaging
+
+`docs/legal/RO_LAUNCH_PLATFORM_BUSINESS_TAX_ACCESSIBILITY_PACKAGING_CONTRACT_2026-09-16.md` now owns four first-launch domains that cut across #494, #497 and #498.
+
+### P2B
+
+The professional-merchant relationship must have its own factual applicability profile and versioned business-user terms. Merchant identity verification does not by itself establish compliance with Regulation (EU) 2019/1150. Final merchant Terms, change notices, restriction/suspension/termination grounds, ranking/differentiated-treatment/data-access disclosures and any applicable complaint/mediation duties remain pending qualified review.
+
+### DAC7
+
+The system must distinguish platform/operator status, relevant activity, reporting jurisdiction and reportable/excluded seller status. Professional/company merchant status does not automatically remove DAC7. Until the applicability decision is approved, engineering may model neutral evidence structures but must not enable DAC7-specific mandatory data collection, registration or filing flags.
+
+### Accessibility
+
+Romanian Law 232/2022 / EAA applicability and any microenterprise service exemption require evidence based on the actual entity/service/enterprise-size facts. Engineering may implement accessible components, navigation, forms, authentication, checkout, withdrawal and support as a safe product-quality foundation without claiming that a statutory exemption or compliance result has been established.
+
+### Packaging / EPR
+
+PPWR applies from 12 August 2026 and the Romanian packaging source chain remains relevant. Producer/importer/distributor/packer/fulfilment/platform responsibility depends on the actual product and packaging flows. `sellerOfRecord` and `marketplaceProvider` are not automatic EPR-role selectors.
+
+Current combined state:
+
+`P2B_APPLICABILITY_PENDING / DAC7_APPLICABILITY_PENDING / ACCESSIBILITY_APPLICABILITY_PENDING / PACKAGING_ROLE_MATRIX_PENDING / SAFE_FOUNDATION_DESIGN_ALLOWED / PUBLIC_MERCHANT_ACTIVATION_NOT_YET_APPROVED`.
+
+## 9. #499 — controlled legal corpus
 
 PR #504 is the consolidation point for source provenance/reliance state, canonical source register, gaps/blockers, requirement traceability, official-source findings, review packet and these decision contracts.
 
-A verified official URL is not automatically an immutable controlled source snapshot. Missing controlled copies remain explicitly pending rather than receiving fabricated hash/path evidence.
+The current cross-cutting batch increases the validated corpus to `86 records / 34 immutable files` before this integration/cleanup pass. A verified official URL is not automatically an immutable controlled source snapshot. Missing controlled copies remain explicitly pending rather than receiving fabricated hash/path evidence.
 
-## 9. Engineering consequences exported to #500 / PR #505
+## 10. Engineering consequences exported to #500 / PR #505
 
 Developer work may safely proceed only in two classes before legal promotion:
 
@@ -218,20 +249,20 @@ The candidate launch implementation sequence remains:
 
 ```text
 repository/account safety
--> merchant/seller evidence
--> category/zone activation gate
--> Marketplace legal disclosures + product safety
+-> merchant/seller evidence + versioned merchant relationship controls
+-> category/zone + product-safety + packaging responsibility gate
+-> Marketplace legal disclosures + accessibility-compatible surfaces
 -> external PSP settlement/reconciliation
 -> merchant fulfilment
 -> withdrawal/refund/complaint flows
--> privacy/retention/support controls
+-> privacy/retention/support + approved tax-reporting purpose controls
 -> release/rollback/e2e evidence
 -> owner pilot gate
 ```
 
 Integrated postal resale is inserted only if #496 is approved and the owner elects it for the first pilot.
 
-## 10. Outstanding decisions/evidence that cannot be fabricated
+## 11. Outstanding decisions/evidence that cannot be fabricated
 
 Before #501 can authorize implementation reprioritization, record explicit dispositions for:
 
@@ -242,8 +273,12 @@ Before #501 can authorize implementation reprioritization, record explicit dispo
 5. selected PSP, exact contracting-entity authority/passport evidence and approved money-flow/invoice/refund/chargeback matrix;
 6. merchant fulfilment-only versus first-pilot postal resale decision;
 7. exact DSA/GPSR/consumer-law applicability/control set;
-8. privacy roles, legal bases, retention and DPIA decision;
-9. contract/support responsibility matrix;
-10. implementation/test/runtime evidence.
+8. P2B service/business-user applicability and final merchant Terms/restriction/complaint/mediation matrix;
+9. DAC7 platform/operator/activity/seller/reporting-jurisdiction decision and its privacy/retention consequences;
+10. accessibility applicability/exemption evidence and approved release requirements;
+11. packaging/EPR actor matrix and required registration/evidence/labelling treatment;
+12. privacy roles, legal bases, retention and DPIA decision;
+13. contract/support responsibility matrix;
+14. implementation/test/runtime evidence.
 
 Until those gates are satisfied, the affected capability is `NOT YET VALIDATED`, never silently PASS.
