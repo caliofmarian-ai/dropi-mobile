@@ -1,7 +1,7 @@
 # Legal Requirements Traceability — Romania and Philippines
 
-**Version:** 1.0.0
-**Research cut-off:** 2026-09-12
+**Version:** 1.1.0
+**Research cut-off:** 2026-09-13
 **Status:** PRE-COUNSEL / FAIL-CLOSED
 **Governing canon:** `canonical/LEGAL_COMPLIANCE_SOURCE_OF_TRUTH.md`
 
@@ -80,14 +80,28 @@ EU source capture permits architectural planning only. Missing current AACR/nati
 
 Result: the read-only C1 Passenger Mobility shell may remain `catalog_locked`. Law-dependent Romanian onboarding must wait for approved requirements; live quotes, bookings, matching, dispatch, ride start, and payment remain blocked until both gates pass.
 
-## 5. Philippines — parcel delivery
+## 5. Romania — Cooperative Hub
+
+| Requirement ID | Source IDs | Provisional requirement | Legal-entity/formation gate | Member/governance gate | Product/control implication | State |
+|---|---|---|---|---|---|---|
+| `RO-COOP-ROUTE-001` | `RO-LAW-566-2004-CURRENT-PENDING`, `RO-LAW-1-2005-CURRENT-PENDING`, `RO-ONRC-AGRICULTURAL-COOPERATIVE-2026-09-13`, `RO-ONRC-SOCIETY-COOPERATIVE-2026-09-13` | Agricultural and society cooperatives are separate candidate routes; a factual intake may produce only a `LIKELY_*` result until a qualified Romanian professional approves the case | Route, degree/category, eligible founders, activities and constitutive package approved for the exact scenario | Eligible member classes and admission authority approved for the exact route/statute | Branch before formation; never provide a generic `Create cooperative` legal workflow | `written_confirmation_required` |
+| `RO-COOP-FORM-001` | `RO-ONRC-AGRICULTURAL-COOPERATIVE-2026-09-13`, `RO-ONRC-SOCIETY-COOPERATIVE-2026-09-13`, `RO-LAW-265-2022-CURRENT-PENDING` | Current ONRC guidance supports a route-specific evidence and filing sequence, but an upload or filing receipt is not registration | Professional review, name, route-specific acts, seat, capital, identity/mandate, beneficial-owner and applicable permit evidence; official registration evidence required for `REGISTERED` | Not applicable to legal membership merely because a founder has a platform account | Model completion request, rejection, withdrawal and refiling; do not promise the stated procedural resolution period | `captured_for_research` |
+| `RO-COOP-FORM-002` | `RO-LAW-566-2004-CURRENT-PENDING`, `RO-LAW-1-2005-CURRENT-PENDING`, `RO-INSSE-CAEN-REV3` | Current controlled sources for exact founder/member eligibility, minimum count, capital/social parts, activities and CAEN Rev. 3 mapping are missing | No final form field, validation rule, calculation or automated filing | No eligibility rule derived only from account/business type | Keep all law-dependent schemas and route decisions disabled | `current_source_pending` |
+| `RO-COOP-MEMBER-001` | Current cooperative laws pending; `canonical/DROPI_COOPERATIVE_HUB.md` as policy | A DROPi application/status cannot create legal membership; the competent cooperative body, valid decision and effective conditions control | Organization identity and representative authority remain independent | Store application, decision authority/evidence, conditions, effective date and member-register provenance separately from access | `ACTIVE_MEMBER` cannot be an administrator-created legal fact | `written_confirmation_required` |
+| `RO-COOP-GOV-001` | `RO-LAW-566-2004-CURRENT-PENDING`, `RO-LAW-1-2005-CURRENT-PENDING` | Admission, withdrawal, suspension, exclusion, notice, quorum, voting, mandates, elected terms and conflicts are route/statute/decision-type specific | Governance configuration approved and versioned for the exact legal entity | Every material act proves actor authority, applicable rule, decision evidence and effective time | No generic voting/quorum engine and no platform-created resolution | `written_confirmation_required` |
+| `RO-COOP-ELECTRONIC-001` | `EU-REG-910-2014-CONSOLIDATED-2024-10-18`, `RO-LAW-214-2024-CURRENT-PENDING`, both ONRC checklist sources | EU electronic-effect rules and ONRC qualified-signature filing guidance do not by themselves validate remote meetings, electronic votes, notices, mandates or minutes | Electronic ONRC transmission enabled only with the approved channel, submitter authority and signature level | Remote participation and electronic acts disabled until counsel approves each route/category and act type | Store identity, signature validation, timestamp, delivery, quorum and original/retention evidence only under an approved matrix | `written_confirmation_required` |
+| `RO-COOP-CLAIMS-001` | `RO-LAW-239-2025`; current cooperative laws pending; canonical policy | No registration, timing, grant, tax, membership, sales or export outcome may be guaranteed; old fiscal summaries can be obsolete | Public cooperative label requires verified official registration and current DROPi checks | Membership copy must identify application and cooperative decision rather than instant platform admission | Versioned disclaimers and prohibited-claim lint/content review | `policy_only` |
+
+The detailed pre-counsel decision matrix and required opinion questions are in `docs/research/COOP_P0_01_ROMANIAN_LEGAL_VALIDATION_PACKET.md`. Every affected capability remains implementation-blocked.
+
+## 6. Philippines — parcel delivery
 
 | Requirement ID | Source IDs | Provisional requirement | Gate and implementation consequence | State |
 |---|---|---|---|---|
 | `PH-DEL-COMP-001` | `PH-RA-7354` | The base act refers to registration/prequalification of letter/parcel messengerial, door-to-door, and similar transport-of-property activity | Identify the current competent authority, implementing rules, licence/registration procedure, scope, exemptions, and DROPi/local operator role before designing company authorization | `current_source_pending` |
 | `PH-DEL-CONTRACT-001` | `PH-RA-7354`; current commercial/labor/local sources pending | A local entity, independent operator, or contractor label does not settle regulatory responsibility | Counsel-approved entity, courier/provider, tax, employment/contract and subcontracting model is required per zone/service | `written_confirmation_required` |
 
-### 5.1 Road delivery modes
+### 6.1 Road delivery modes
 
 | Mode | Company gate | Partner/person gate | Vehicle gate | Current design decision | Source status |
 |---|---|---|---|---|---|
@@ -96,7 +110,7 @@ Result: the read-only C1 Passenger Mobility shell may remain `catalog_locked`. L
 | Scooter/motorcycle | Same company gate | Professional/non-professional licence treatment, lawful work relationship and required safety evidence | LTO registration/OR/CR, roadworthiness, class, insurance and local restrictions | Onboarding labels and eligibility remain blocked | `PH-RA-4136` captured; current LTO/LGU instruments pending |
 | Parcel car/van | Same company gate plus exact provider/transport role | Correct licence and lawful work/business relationship | LTO registration/OR/CR, classification, capacity/mass, inspection, insurance and use/route rules | Parcel capability remains separate from TNVS passenger authority | `current_source_pending` |
 
-## 6. Philippines — drone parcel delivery
+## 7. Philippines — drone parcel delivery
 
 | Requirement ID | Source IDs | Provisional requirement | Company/operator gate | Controller/aircraft/operation gate | State |
 |---|---|---|---|---|---|
@@ -105,9 +119,9 @@ Result: the read-only C1 Passenger Mobility shell may remain `catalog_locked`. L
 | `PH-UAS-003` | `PH-CAAP-RPA-REGISTRATION-2026-09-12`, `PH-CAAP-PCAR-PART-11-2026-09-12` | CAAP material states commercial RPAs require registration regardless of weight | Fleet and registration control | Aircraft-specific registration, serial identity, maintenance, payload and operating conditions | `captured_for_research` |
 | `PH-UAS-004` | Same plus current operational approvals pending | Operator/controller/aircraft certificates do not automatically authorize parcel routes, BVLOS, urban flight, dropping/releasing payload, airspace, or each CONOPS | Direct CAAP approval of the delivery CONOPS and zones | Mission-specific conditions pass at dispatch/start | `current_source_pending` |
 
-## 7. Philippines — Passenger Mobility
+## 8. Philippines — Passenger Mobility
 
-### 7.1 Car-based TNC/TNVS
+### 8.1 Car-based TNC/TNVS
 
 | Requirement ID | Source IDs | Provisional requirement | Company/TNC gate | Partner/TNVS/driver/car gate | Product/control implication | State |
 |---|---|---|---|---|---|---|
@@ -115,14 +129,14 @@ Result: the read-only C1 Passenger Mobility shell may remain `catalog_locked`. L
 | `PH-PM-TNVS-001` | `PH-LTFRB-MC-2015-017`, `PH-LTFRB-MC-2015-018`, `PH-LTFRB-MC-2026-049-PENDING`, `PH-LTFRB-CITIZENS-CHARTER-CURRENT` | Each operator/vehicle requires the current LTFRB authority and TNC affiliation/enrollment | TNC verifies only currently admitted classes/service areas | Current operator authority, driver licence/clearances, OR/CR, vehicle eligibility, insurance and capacity | Document types, labels and expiry cannot be finalized until primary current sources are obtained | `current_source_pending` |
 | `PH-PM-ATOC-001` | `PH-LTFRB-MC-2026-049-PENDING` plus two secondary alert IDs | Reports of a CPC-to-ATOC transition are not an implementation fact | Obtain official MC 2026-049 and written scope/effect confirmation | Migrate only eligible records under approved rules | No `ATOC`, five-year validity, or automatic conversion hardcoding | `current_source_pending` |
 
-### 7.2 Motorized tricycle-for-hire
+### 8.2 Motorized tricycle-for-hire
 
 | Requirement ID | Source IDs | Provisional requirement | Company/local-service gate | Driver/operator/tricycle gate | Product/control implication | State |
 |---|---|---|---|---|---|---|
 | `PH-PM-TRI-001` | `PH-RA-7160`, `PH-LTO-MC-94-199` | Tricycle-for-hire franchising/operation depends materially on the competent city or municipality | Exact Zone 0 LGU, local entity/TNC position, ordinance, franchise board and app-dispatch permission are mandatory | Franchise/MTOP or exact local authority, driver licence/permit, OR/CR, inspection, insurance, route/zone and capacity | Capability stays `disabled_legal_gate`; country-level configuration is insufficient | `current_source_pending` |
 | `PH-PM-TRI-002` | Exact LGU ordinance missing | Capacity, fare, streets/routes, boundaries and service hours must come from the local authorization and vehicle/insurance evidence | Pack encodes only written approved local rules | Vehicle capacity is the lowest proved limit | Never assume “one or two passengers” | `current_source_pending` |
 
-## 8. Multiservice combination rule
+## 9. Multiservice combination rule
 
 Delivery and Passenger Mobility can coexist in one application, one identity system, and one partner account. They cannot share authority.
 
@@ -132,7 +146,7 @@ Delivery and Passenger Mobility can coexist in one application, one identity sys
 
 A person authorized for both receives independent capabilities such as `parcel_ground` and `passenger_car`. The first release must prevent simultaneous capacity-consuming DROPi parcel and passenger missions. Any later mixed-use change requires a new legal, insurance, safety, and product decision.
 
-## 9. Current approval result
+## 10. Current approval result
 
 No entry in this matrix is `approved` for public operation. The following are allowed now:
 
